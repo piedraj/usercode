@@ -56,7 +56,7 @@ reco::MET MetProducer::calcMET(edm::Handle<reco::CandidateView> candsH,
   for (reco::CandidateView::const_iterator it=candsH->begin(), ed=candsH->end();
       it!=ed; ++it) {
 
-    if (it->charge() == 0 && it->pt() < minNeuPt && fabs(it->eta()) > maxEta) continue;
+    if (it->charge() == 0 && (it->pt() < minNeuPt || fabs(it->eta()) > maxEta)) continue;
 
     totalP4 += it->p4();
   }
