@@ -147,8 +147,6 @@ void LatinosTreeScript(Float_t luminosity,
 
   // Data-driven methods: Top
   //----------------------------------------------------------------------------
-  TH1F* hMisTagNum                  = new TH1F("hMisTagNum",                  "", 3, 0, 3);
-  TH1F* hMisTagDen                  = new TH1F("hMisTagDen",                  "", 3, 0, 3);
   TH1F* hTopTaggedEvents            = new TH1F("hTopTaggedEvents",            "", 3, 0, 3);
   TH1F* hNTopControlRegion          = new TH1F("hNTopControlRegion",          "", 3, 0, 3);
   TH1F* hNTopTaggedTopControlRegion = new TH1F("hNTopTaggedTopControlRegion", "", 3, 0, 3);
@@ -157,8 +155,6 @@ void LatinosTreeScript(Float_t luminosity,
   TH1F* hbTagDisNTopControlRegion          = new TH1F("hbTagDisNTopControlRegion",          "", 300, -10, 20);
   TH1F* hbTagDisNTopTaggedTopControlRegion = new TH1F("hbTagDisNTopTaggedTopControlRegion", "", 300, -10, 20);
   
-  hMisTagNum                 ->Sumw2();
-  hMisTagDen                 ->Sumw2();
   hTopTaggedEvents           ->Sumw2();
   hNTopControlRegion         ->Sumw2();
   hNTopTaggedTopControlRegion->Sumw2();
@@ -168,7 +164,7 @@ void LatinosTreeScript(Float_t luminosity,
   hbTagDisNTopTaggedTopControlRegion->Sumw2();
 
 
-  // Requested by Maiko
+  // Top checks
   //----------------------------------------------------------------------------
   TH1F* h_softtche = new TH1F("h_softtche", "", 300, -10, 20); 
   TH1F* h_jetpt1   = new TH1F("h_jetpt1",   "", 400,   0, 40); 
@@ -349,17 +345,13 @@ void LatinosTreeScript(Float_t luminosity,
 	(flavorChannel == "OF" && !sameflav) ||
 	(flavorChannel == "SF" &&  sameflav)) {
       
-      Bool_t isData = (theSample.Contains("Data") || theSample.Contains("WJetsFakes")) ? true : false;
-
-      if ((!isData || trigger == 1) && pt2 > 20) {
+      if (trigger == 1 && pt2 > 20) {
             
 	if (theSample.Contains("DYtautau") && mctruth < 1.5) continue;
 	
 	hWTrigger   ->Fill(1, totalW); 
 	hWeffTrigger->Fill(1, efficiencyW);
 	
-	Float_t pMetCut = 20 + 25*sameflav;
-
 	Bool_t commonCuts = (mll > 12 && ptll > 45 && nextra == 0 && (dphiveto || !sameflav));
 
 
@@ -405,12 +397,7 @@ void LatinosTreeScript(Float_t luminosity,
 	// Data-driven methods: Top
 	//
 	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        if (pfmet < 30 && njet == 0 && fabs(mll - ZMASS) < 7.5) {
-	  hMisTagDen->Fill(1, totalW);
-	  if (!bveto) hMisTagNum->Fill(1, totalW); 
-	}
-	
-	if (commonCuts && zveto && pfmet > 20 && mpmet > pMetCut && njet == 1 && nbjet == 1) {
+	if (commonCuts && zveto && pfmet > 20 && mpmet > (20 + 25*sameflav) && njet == 1 && nbjet == 1) {
        
 	  // eff_btag denominator
 	  hNTopControlRegion->Fill(1, totalW);
@@ -424,16 +411,22 @@ void LatinosTreeScript(Float_t luminosity,
 	}
 	
 	// Top-tagged events for ttbar estimation
-	if (commonCuts && zveto && pfmet > 20 && mpmet > pMetCut && njet < 1 && !bveto) {
+	if (commonCuts && zveto && pfmet > 20 && mpmet > (20 + 25*sameflav) && njet < 1 && !bveto) {
 	  
 	  hTopTaggedEvents->Fill(1, totalW);
 	  hbTagDisTopTaggedEvents->Fill(jettche2, totalW);
-
-	  h_softtche->Fill(softtche, totalW);
 	}
 
-	if (commonCuts && zveto && pfmet > 20 && mpmet > pMetCut && njet < 1 && !bveto_ip) {
-	    h_jetpt1->Fill(jetpt1, totalW);
+
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	//
+	// Top checks
+	//
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	if (commonCuts && zveto && pfmet > 20 && mpmet > (20 + 25*sameflav) && njet < 1) {
+	  
+	  if (!bveto)    h_softtche->Fill(softtche, totalW);
+	  if (!bveto_ip) h_jetpt1  ->Fill(jetpt1,   totalW);
 	}
 
 
@@ -457,7 +450,7 @@ void LatinosTreeScript(Float_t luminosity,
 	      hWZVeto->Fill(1, totalW); 
 	      hWeffZVeto->Fill(1, efficiencyW); 
 
-	      if (mpmet > pMetCut){
+	      if (mpmet > (20 + 25*sameflav)){
 		
 		hWpMetCut->Fill(1, totalW);
 		hWeffpMetCut->Fill(1, efficiencyW);

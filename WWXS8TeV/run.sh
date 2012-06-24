@@ -2,7 +2,9 @@ LUMINOSITY=3.54
 
 NJETS=0
 
-CHANNELS=" All SF OF MuMu EE EMu MuE "
+CHANNELS=" All SF OF EE MuMu EMu MuE "
+#CHANNELS=" All SF OF EE MuMu "
+
 
 SAMPLES="          \
 ggWWto2L           \
