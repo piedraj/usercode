@@ -1,10 +1,16 @@
+if [ $# -lt 1 ]; then
+    echo "  "
+    echo "  ./run.sh NJETS"
+    echo "  "
+    exit -1
+fi
+
+
 LUMINOSITY=3.54
 
-NJETS=0
+NJETS=$1
 
 CHANNELS=" All SF OF EE MuMu EMu MuE "
-#CHANNELS=" All SF OF EE MuMu "
-
 
 SAMPLES="          \
 ggWWto2L           \
@@ -22,7 +28,7 @@ DYtautau           \
 "
 
 
-rm -rf rootfiles
+rm -rf rootfiles/${NJETS}jet
 
 
 # Loop

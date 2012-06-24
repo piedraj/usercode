@@ -397,24 +397,35 @@ void LatinosTreeScript(Float_t luminosity,
 	// Data-driven methods: Top
 	//
 	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-	if (commonCuts && zveto && pfmet > 20 && mpmet > (20 + 25*sameflav) && njet == 1 && nbjet == 1) {
+	if (commonCuts && zveto && pfmet > 20 && mpmet > (20 + 25*sameflav)) {
        
-	  // eff_btag denominator
-	  hNTopControlRegion->Fill(1, totalW);
-	  hbTagDisNTopControlRegion->Fill(jettche2, totalW);
+	  // btag_eff denominator
+	  if ((jetChannel == 0 && njet == 1 && nbjet == 1) ||
+	      (jetChannel == 1 && njet == 2 && jettche2 > 2.1)) {
 
-	  // eff_btag numerator
-	  if (bveto_nj30 == 0) {
-	    hNTopTaggedTopControlRegion->Fill(1, totalW);
-	    hbTagDisNTopTaggedTopControlRegion->Fill(jettche2, totalW);
+	    hNTopControlRegion->Fill(1, totalW);
+	    hbTagDisNTopControlRegion->Fill(jettche2, totalW);
+	    
+	    // btag_eff numerator
+	    if ((jetChannel == 0 && !bveto_nj30) ||
+		(jetChannel == 1 && jettche1 > 2.1)) {
+
+	      hNTopTaggedTopControlRegion->Fill(1, totalW);
+	      hbTagDisNTopTaggedTopControlRegion->Fill(jettche2, totalW);
+	    }
 	  }
 	}
 	
 	// Top-tagged events for ttbar estimation
-	if (commonCuts && zveto && pfmet > 20 && mpmet > (20 + 25*sameflav) && njet < 1 && !bveto) {
+	//----------------------------------------------------------------------
+	if (commonCuts && zveto && pfmet > 20 && mpmet > (20 + 25*sameflav)) {
+
+	  if ((jetChannel == 0 && njet == 0 && !bveto) ||
+	      (jetChannel == 1 && njet == 1 && bveto && jettche1 > 2.1)) {
 	  
-	  hTopTaggedEvents->Fill(1, totalW);
-	  hbTagDisTopTaggedEvents->Fill(jettche2, totalW);
+	    hTopTaggedEvents->Fill(1, totalW);
+	    hbTagDisTopTaggedEvents->Fill(jettche2, totalW);
+	  }
 	}
 
 
@@ -456,7 +467,7 @@ void LatinosTreeScript(Float_t luminosity,
 		hWeffpMetCut->Fill(1, efficiencyW);
 
 		if (njet == jetChannel) {
-		  
+
 		  hWJetVeto->Fill(1, totalW);
 		  hWeffJetVeto->Fill(1, efficiencyW);
 
