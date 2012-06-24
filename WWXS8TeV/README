@@ -3,8 +3,12 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ./run.sh 0
 ./run.sh 1
+
 rm -rf rootfiles.3.540fb
-mv rootfiles rootfiles.3.540fb
+mkdir  rootfiles.3.540fb
+mv rootfiles/0jet rootfiles.3.540fb/.
+mv rootfiles/1jet rootfiles.3.540fb/.
+rm -rf rootfiles
 
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
