@@ -220,8 +220,8 @@ void Top(Double_t &yield,
   Double_t erreff2bDataFinal          = ratioError(NnumDataFinal, NdenDataFinal, errNnumDataFinal, errNdenDataFinal);
   Double_t erreff0b                   = 2 * (1 - eff2bTT)        * erreff2bTT;
   Double_t erreff0bDataFinal          = 2 * (1 - eff2bDataFinal) * erreff2bDataFinal;
-  Double_t erreff0b_fraction          = erreff0b;           // To be checked
-  Double_t erreff0bDataFinal_fraction = erreff0bDataFinal;  // To be checked
+  Double_t erreff0b_fraction          = erreff0b;
+  Double_t erreff0bDataFinal_fraction = erreff0bDataFinal;
 
 
   if (printLevel > 1) {
@@ -406,6 +406,17 @@ void Top(Double_t &yield,
     printf("       eff_{0b}_top,data = (%5.2f +- %4.2f (total))%s\n",
 	   1e2*eff0bDataFinal_fraction, 1e2*erreff0bDataFinal_fraction, "%");
   }
+
+
+  //////////////////////////////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////////////////////
+  if (njet == 1) {
+
+    eff0bDataFinal_fraction    = eff2bDataFinal;
+    erreff0bDataFinal_fraction = erreff2bDataFinal;
+  }
+  //////////////////////////////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////////////////////
 
 
   // Final top yield estimation
