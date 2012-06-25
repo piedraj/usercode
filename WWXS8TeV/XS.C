@@ -244,6 +244,10 @@ void XS(Double_t &xsValue,
   NggWW[2] = sqrt(NggWW[2]);  // Relative systematic uncertainty
   NqqWW[2] = sqrt(NqqWW[2]);  // Relative systematic uncertainty
 
+  NWW[2]  = (NggWW[2]*NggWW[0] * NggWW[2]*NggWW[0]);
+  NWW[2] += (NqqWW[2]*NqqWW[0] * NqqWW[2]*NqqWW[0]);
+  NWW[2]  = sqrt(NWW[2]) / NWW[0];  // Relative systematic uncertainty
+
   NWZ[2] = sqrt(NWZ[2]) * NWZ[0] / 1e2;  // Absolute systematic uncertainty
   NZZ[2] = sqrt(NZZ[2]) * NZZ[0] / 1e2;  // Absolute systematic uncertainty
   NWg[2] = sqrt(NWg[2]) * NWg[0] / 1e2;  // Absolute systematic uncertainty
@@ -282,15 +286,14 @@ void XS(Double_t &xsValue,
   //----------------------------------------------------------------------------
   Double_t errxsStats = 1e2 * sqrt(NData[0]) / (NData[0] - Background);
   Double_t errxsBkg   = 1e2 * totalErrorB    / (NData[0] - Background);
-  Double_t errWW      = ggWW_weight*NggWW[2] + qqWW_weight*NqqWW[2];
-  Double_t errxsSyst  = sqrt(errxsBkg*errxsBkg + errWW*errWW);
+  Double_t errxsSyst  = sqrt(errxsBkg*errxsBkg + NWW[2]*NWW[2]);
   Double_t errxsLumi  = 5.0;
 
 
   if (printLevel > 0) {
     printf("\n [PAS]");
     printf(" The total uncertainty on the background estimation is about %.0f%s,",
-	   errxsSyst, "%");
+	   1e2 * totalErrorB / Background, "%");
     printf(" [PAS]\n");
   }
 
@@ -311,8 +314,8 @@ void XS(Double_t &xsValue,
   Double_t statErrorDYAll = sqrt(NDY[1]*NDY[1] + NDYtautau[1]*NDYtautau[1]);
   Double_t systErrorDYAll = sqrt(NDY[2]*NDY[2] + NDYtautau[2]*NDYtautau[2]);
 
-  Double_t statErrorSPlusB = sqrt(NWW[1]*NWW[1]                         + statErrorB*statErrorB);
-  Double_t systErrorSPlusB = sqrt((errWW*NWW[0]/1e2)*(errWW*NWW[0]/1e2) + systErrorB*systErrorB);
+  Double_t statErrorSPlusB = sqrt(NWW[1]*NWW[1]                           + statErrorB*statErrorB);
+  Double_t systErrorSPlusB = sqrt((NWW[2]*NWW[0]/1e2)*(NWW[2]*NWW[0]/1e2) + systErrorB*systErrorB);
 
 
   if (printLevel > 0) {
