@@ -148,6 +148,7 @@ void DrawHistogram(TString hname,
 
       if (dataDriven && ip == itt) hist[ip]->Scale(1.1);
       if (dataDriven && ip == itW) hist[ip]->Scale(1.1);
+      if (dataDriven && ip == iWW) hist[ip]->Scale(1.2);
       if (dataDriven && ip == iZj) hist[ip]->Scale(4.5);
 
       hstack->Add(hist[ip]);
@@ -250,7 +251,7 @@ void DrawHistogram(TString hname,
 
   DrawTLatex(0.9, 0.860 + deltaY, 0.04, "CMS preliminary");
   DrawTLatex(0.9, 0.815 + deltaY, 0.03, Form("L = %.3f fb^{-1}", luminosity/1e3));
-  DrawTLatex(0.9, 0.770 + deltaY, 0.03, "data-driven");
+  DrawTLatex(0.9, 0.770 + deltaY, 0.03, "measured WW cross section");
 
 
   //----------------------------------------------------------------------------
