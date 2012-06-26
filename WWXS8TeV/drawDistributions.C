@@ -47,7 +47,7 @@ systError[iWj]   = 0.36;
 systError[iZj]   = 0.50;
 
 
-Double_t luminosity = 3540;  // 5064;
+Double_t luminosity = 5064;
 TString  format     = "pdf";
 Bool_t   drawRatio  = true;
 Bool_t   dataDriven = true;
