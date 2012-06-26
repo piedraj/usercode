@@ -4,10 +4,10 @@
 ./run.sh 0
 ./run.sh 1
 
-rm -rf rootfiles.3.540fb
-mkdir  rootfiles.3.540fb
-mv rootfiles/0jet rootfiles.3.540fb/.
-mv rootfiles/1jet rootfiles.3.540fb/.
+rm -rf rootfiles.5.064fb
+mkdir  rootfiles.5.064fb
+mv rootfiles/0jet rootfiles.5.064fb/.
+mv rootfiles/1jet rootfiles.5.064fb/.
 rm -rf rootfiles
 
 
@@ -16,7 +16,7 @@ rm -rf rootfiles
 #
 #    ichannel   = {-1, All, SF, OF, MuMu, EE, EMu, MuE}
 #    njet       = {0, 1}
-#    luminosity = 3540
+#    luminosity = 5064
 #    printLevel = {SILENT, NOTE, DEBUG}
 #    drawTheXS  = false
 #    fiducialXS = false

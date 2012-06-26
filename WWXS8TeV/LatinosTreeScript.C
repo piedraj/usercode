@@ -176,76 +176,92 @@ void LatinosTreeScript(Float_t luminosity,
   //----------------------------------------------------------------------------
   // Input files
   //----------------------------------------------------------------------------
+  TString path = "/hadoop/LatinosSkims/ReducedTrees/R52X_S1_V05_S2_V05_S3_V05/ForICHEP2/";
+
   TChain* tree = new TChain("latino", "latino");
 
   if (theSample == "DataRun2012_Total") {
-    tree->Add("/nfs/fanae/user/lara/TreesLatinosAndrea/Trees35/TightTight_triggW/latino_100_SingleElectron2012A.root");   
-    tree->Add("/nfs/fanae/user/lara/TreesLatinosAndrea/Trees35/TightTight_triggW/latino_101_SingleMuon2012A.root");       
-    tree->Add("/nfs/fanae/user/lara/TreesLatinosAndrea/Trees35/TightTight_triggW/latino_102_DoubleElectron2012A.root");   
-    tree->Add("/nfs/fanae/user/lara/TreesLatinosAndrea/Trees35/TightTight_triggW/latino_103_DoubleMuon2012A.root");       
-    tree->Add("/nfs/fanae/user/lara/TreesLatinosAndrea/Trees35/TightTight_triggW/latino_104_MuEG2012A.root");             
-    tree->Add("/nfs/fanae/user/lara/TreesLatinosAndrea/Trees35/TightTight_triggW/latino_200_SingleElectron2012B.root");   
-    tree->Add("/nfs/fanae/user/lara/TreesLatinosAndrea/Trees35/TightTight_triggW/latino_201_SingleMuon2012B.root");       
-    tree->Add("/nfs/fanae/user/lara/TreesLatinosAndrea/Trees35/TightTight_triggW/latino_202_DoubleElectron2012B.root");   
-    tree->Add("/nfs/fanae/user/lara/TreesLatinosAndrea/Trees35/TightTight_triggW/latino_203_DoubleMuon2012B.root");       
-    tree->Add("/nfs/fanae/user/lara/TreesLatinosAndrea/Trees35/TightTight_triggW/latino_204_MuEG2012B.root");             
-    tree->Add("/nfs/fanae/user/lara/TreesLatinosAndrea/Trees35/TightTight_triggW/latino_220_SingleElectron2012B.root");   
-    tree->Add("/nfs/fanae/user/lara/TreesLatinosAndrea/Trees35/TightTight_triggW/latino_221_SingleMuon2012B.root");       
-    tree->Add("/nfs/fanae/user/lara/TreesLatinosAndrea/Trees35/TightTight_triggW/latino_222_DoubleElectron2012B.root");   
-    tree->Add("/nfs/fanae/user/lara/TreesLatinosAndrea/Trees35/TightTight_triggW/latino_223_DoubleMuon2012B.root");       
-    tree->Add("/nfs/fanae/user/lara/TreesLatinosAndrea/Trees35/TightTight_triggW/latino_224_MuEG2012B.root");             
-    tree->Add("/nfs/fanae/user/lara/TreesLatinosAndrea/Trees35/TightTight_triggW/latino_230_SingleElectron2012B.root");   
-    tree->Add("/nfs/fanae/user/lara/TreesLatinosAndrea/Trees35/TightTight_triggW/latino_231_SingleMuon2012B.root");       
-    tree->Add("/nfs/fanae/user/lara/TreesLatinosAndrea/Trees35/TightTight_triggW/latino_232_DoubleElectron2012B.root");   
-    tree->Add("/nfs/fanae/user/lara/TreesLatinosAndrea/Trees35/TightTight_triggW/latino_233_DoubleMuon2012B.root");       
-    tree->Add("/nfs/fanae/user/lara/TreesLatinosAndrea/Trees35/TightTight_triggW/latino_234_MuEG2012B.root");             
+    tree->Add(path + "latino_100_SingleElectron2012A.root");
+    tree->Add(path + "latino_101_SingleMuon2012A.root");
+    tree->Add(path + "latino_102_DoubleElectron2012A.root");
+    tree->Add(path + "latino_103_DoubleMuon2012A.root");
+    tree->Add(path + "latino_104_MuEG2012A.root");
+    tree->Add(path + "latino_200_SingleElectron2012B.root");
+    tree->Add(path + "latino_201_SingleMuon2012B.root");
+    tree->Add(path + "latino_202_DoubleElectron2012B.root");
+    tree->Add(path + "latino_203_DoubleMuon2012B.root");
+    tree->Add(path + "latino_204_MuEG2012B.root");
+    tree->Add(path + "latino_220_SingleElectron2012B.root");
+    tree->Add(path + "latino_221_SingleMuon2012B.root");
+    tree->Add(path + "latino_222_DoubleElectron2012B.root");
+    tree->Add(path + "latino_223_DoubleMuon2012B.root");
+    tree->Add(path + "latino_224_MuEG2012B.root");
+    tree->Add(path + "latino_230_SingleElectron2012B.root");
+    tree->Add(path + "latino_231_SingleMuon2012B.root");
+    tree->Add(path + "latino_232_DoubleElectron2012B.root");
+    tree->Add(path + "latino_233_DoubleMuon2012B.root");
+    tree->Add(path + "latino_234_MuEG2012B.root");
+    tree->Add(path + "latino_240_SingleElectron2012B.root");
+    tree->Add(path + "latino_240_SingleElectron2012B_extra.root");
+    tree->Add(path + "latino_241_SingleMuon2012B.root");
+    tree->Add(path + "latino_241_SingleMuon2012B_extra.root");
+    tree->Add(path + "latino_242_DoubleElectron2012B.root");
+    tree->Add(path + "latino_242_DoubleElectron2012B_extra.root");
+    tree->Add(path + "latino_243_DoubleMuon2012B.root");
+    tree->Add(path + "latino_243_DoubleMuon2012B_extra.root");
+    tree->Add(path + "latino_244_MuEG2012B.root");
+    tree->Add(path + "latino_244_MuEG2012B_extra.root");
   }
   else if (theSample == "WJetsFakes_Total") {
-    tree->Add("/nfs/fanae/user/lara/TreesLatinosAndrea/Trees35/TightTight_triggW/latino_step3_RunAB_LooseLoose_3.54fb.root");
+    tree->Add(path + "latino_10X_LooseLoose.root"); 
+    tree->Add(path + "latino_20X_LooseLoose.root");
+    tree->Add(path + "latino_22X_LooseLoose.root");
+    tree->Add(path + "latino_23X_LooseLoose.root");
+    tree->Add(path + "latino_24X_LooseLoose.root");
   }
   else if (theSample == "ggWWto2L") {
-    tree->Add("/hadoop/LatinosSkims/ReducedTrees/R52X_S1_V04_S2_V02_S3_V04_new/latino_step3_001_GluGluToWWTo4L.root");
+    tree->Add(path + "latino_001_GluGluToWWTo4L.root");
   }
   else if (theSample == "WWTo2L2Nu") {
-    tree->Add("/hadoop/LatinosSkims/ReducedTrees/R52X_S1_V04_S2_V02_S3_V04_new/latino_step3_000_WWJets2LMad.root");
+    tree->Add(path + "latino_000_WWJets2LMad.root");
   }
   else if (theSample == "WZ") {
-    tree->Add("/hadoop/LatinosSkims/ReducedTrees/R52X_S1_V04_S2_V02_S3_V04_new/latino_074_WZJetsMad.root");
+    tree->Add(path + "latino_074_WZJetsMad.root");
   }
   else if (theSample == "ZZ") {
-    tree->Add("/hadoop/LatinosSkims/ReducedTrees/R52X_S1_V04_S2_V02_S3_V04_new/latino_075_ZZJetsMad.root");
-    tree->Add("/hadoop/LatinosSkims/ReducedTrees/R52X_S1_V04_S2_V02_S3_V04_new/latino_079_ZZTo2L2QMad.root"); 
+    tree->Add(path + "latino_075_ZZJetsMad.root");
+    tree->Add(path + "latino_079_ZZTo2L2QMad.root"); 
   }
   else if (theSample == "TTbar") {
-    tree->Add("/hadoop/LatinosSkims/ReducedTrees/R52X_S1_V04_S2_V02_S3_V04_new/latino_step3_010_TTJetsMad.root");
+    tree->Add(path + "latino_010_TTJetsMad.root");
   }
   else if (theSample == "TW") {
-    tree->Add("/hadoop/LatinosSkims/ReducedTrees/R52X_S1_V04_S2_V02_S3_V04_new/latino_step3_011_TtWFullDR.root");
-    tree->Add("/hadoop/LatinosSkims/ReducedTrees/R52X_S1_V04_S2_V02_S3_V04_new/latino_step3_012_TbartWFullDR.root");
+    tree->Add(path + "latino_011_TtWFullDR.root");
+    tree->Add(path + "latino_012_TbartWFullDR.root");
   }
   else if (theSample == "Top") {
-    tree->Add("/hadoop/LatinosSkims/ReducedTrees/R52X_S1_V04_S2_V02_S3_V04_new/latino_step3_010_TTJetsMad.root");
-    tree->Add("/hadoop/LatinosSkims/ReducedTrees/R52X_S1_V04_S2_V02_S3_V04_new/latino_step3_011_TtWFullDR.root");
-    tree->Add("/hadoop/LatinosSkims/ReducedTrees/R52X_S1_V04_S2_V02_S3_V04_new/latino_step3_012_TbartWFullDR.root");
+    tree->Add(path + "latino_010_TTJetsMad.root");
+    tree->Add(path + "latino_011_TtWFullDR.root");
+    tree->Add(path + "latino_012_TbartWFullDR.root");
   }
   else if (theSample == "WJets") {
-    tree->Add("/hadoop/LatinosSkims/ReducedTrees/R52X_S1_V04_S2_V02_S3_V04_new/latino_step3_178_WJetsToLNuMad.root");
+    tree->Add(path + "latino_178_WJetsToLNuMad.root");
   }
   else if (theSample == "DY") {
-    tree->Add("/hadoop/LatinosSkims/ReducedTrees/R52X_S1_V04_S2_V02_S3_V04_new/latino_037_DY50toLLMad.root");
-    tree->Add("/hadoop/LatinosSkims/ReducedTrees/R52X_S1_V04_S2_V02_S3_V04_new/latino_step3_036_DY10toLLMad.root");  
+    tree->Add(path + "latino_036_DY10toLLMad.root");
+    tree->Add(path + "latino_037_DY50toLLMad.root");
   }
   else if (theSample == "DYtautau") {
-    tree->Add("/hadoop/LatinosSkims/ReducedTrees/R52X_S1_V04_S2_V02_S3_V04_new/latino_037_DY50toLLMad.root");
-    tree->Add("/hadoop/LatinosSkims/ReducedTrees/R52X_S1_V04_S2_V02_S3_V04_new/latino_step3_036_DY10toLLMad.root");  
+    tree->Add(path + "latino_036_DY10toLLMad.root");  
+    tree->Add(path + "latino_037_DY50toLLMad.root");
   }
   else if (theSample == "WgammaNoStar") {
-    tree->Add("/hadoop/LatinosSkims/ReducedTrees/R52X_S1_V04_S2_V02_S3_V04_new/latino_085_WgammaToLNuG.root");
+    tree->Add(path + "latino_085_WgammaToLNuG.root");
   }
   else if(theSample == "WgammaStar") {
-    tree->Add("/hadoop/LatinosSkims/ReducedTrees/R52X_S1_V04_S2_V02_S3_V04_new/latino_084_WGstarToTauNuMad.root");
-    tree->Add("/hadoop/LatinosSkims/ReducedTrees/R52X_S1_V04_S2_V02_S3_V04_new/latino_083_WGstarToMuNuMad.root");
-    tree->Add("/hadoop/LatinosSkims/ReducedTrees/R52X_S1_V04_S2_V02_S3_V04_new/latino_082_WGstarToElNuMad.root");
+    tree->Add(path + "latino_082_WGstarToElNuMad.root");
+    tree->Add(path + "latino_083_WGstarToMuNuMad.root");
+    tree->Add(path + "latino_084_WGstarToTauNuMad.root");
   }
   else {
     return;
@@ -340,14 +356,15 @@ void LatinosTreeScript(Float_t luminosity,
 
     // The selection begins here
     //--------------------------------------------------------------------------
+    if (theSample.Contains("DYtautau") && mctruth < 1.5) continue;
+    if (theSample.Contains("WgammaStar") && (pt1 > 70 || jetpt1 > 70)) continue;
+
     if ((SelectedChannel == -1)           ||
 	(channel == SelectedChannel)      ||
 	(flavorChannel == "OF" && !sameflav) ||
 	(flavorChannel == "SF" &&  sameflav)) {
       
       if (trigger == 1 && pt2 > 20) {
-            
-	if (theSample.Contains("DYtautau") && mctruth < 1.5) continue;
 	
 	hWTrigger   ->Fill(1, totalW); 
 	hWeffTrigger->Fill(1, efficiencyW);
