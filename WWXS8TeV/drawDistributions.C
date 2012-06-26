@@ -9,7 +9,7 @@
 
 const UInt_t nProcesses = 9;
 
-enum {iData, itt, itW, iWW, iWZ, iZZ, iWg, iWj, iZj};
+enum {iData, iWW, iWZ, iZZ, iWg, itt, itW, iWj, iZj};
 
 TFile*  input     [nProcesses];
 TString process   [nProcesses];
@@ -48,7 +48,7 @@ systError[iZj]   = 0.50;
 
 
 Double_t luminosity = 3540;
-TString  format     = "png";
+TString  format     = "pdf";
 Bool_t   drawRatio  = true;
 Bool_t   dataDriven = true;
 
@@ -80,9 +80,9 @@ void drawDistributions(TString channel = "All")
 
   // PAS
   //----------------------------------------------------------------------------
-  DrawHistogram("hPtLepton1WWLevel",  "p_{T}^{max}", 5, 0, "GeV");
-  DrawHistogram("hPtLepton2WWLevel",  "p_{T}^{min}", 5, 0, "GeV");
-  DrawHistogram("hPtDiLeptonWWLevel", "p_{T}^{ll}",  5, 0, "GeV");
+  DrawHistogram("hPtLepton1WWLevel",  "p_{T}^{max}", 5, 0, "GeV", 0, 160);
+  DrawHistogram("hPtLepton2WWLevel",  "p_{T}^{min}", 5, 0, "GeV", 0,  80);
+  DrawHistogram("hPtDiLeptonWWLevel", "p_{T}^{ll}",  5, 0, "GeV", 0, 120);
   DrawHistogram("hMinvWWLevel",       "m_{ll}",      5, 0, "GeV");
 }
 
@@ -90,11 +90,13 @@ void drawDistributions(TString channel = "All")
 //------------------------------------------------------------------------------
 // DrawHistogram
 //------------------------------------------------------------------------------
-void DrawHistogram(TString hname,
-		   TString xtitle,
-		   Int_t   ngroup    = -1,
-		   Int_t   precision = 1,
-		   TString units     = "NULL")
+void DrawHistogram(TString  hname,
+		   TString  xtitle,
+		   Int_t    ngroup    = -1,
+		   Int_t    precision = 1,
+		   TString  units     = "NULL",
+		   Double_t xmin      = -999,
+		   Double_t xmax      = -999)
 {
   TCanvas* canvas;
 
@@ -211,6 +213,8 @@ void DrawHistogram(TString hname,
 
   // Draw
   //----------------------------------------------------------------------------
+  if (xmin > -999 && xmax > -999) xaxis->SetRangeUser(xmin, xmax);
+
   hist[iData]->Draw("ep");
   hstack     ->Draw("hist,same");
   allmc      ->Draw("e2,same");
@@ -232,17 +236,17 @@ void DrawHistogram(TString hname,
   // Legend
   //----------------------------------------------------------------------------
   Double_t yoffset = (drawRatio) ? 0.054 : 0.048;
-  Double_t xmin    = (drawRatio) ? 0.370 : 0.400; 
+  Double_t x0      = (drawRatio) ? 0.370 : 0.400; 
 
   TString allmcTitle = (dataDriven) ? " stat #oplus syst" : " #sigma_{stat}";
 
   DrawLegend(0.23, 0.74 + 2.*(yoffset+0.001), hist[iData], " data",    "lp", 0.035, 0.2, yoffset);
   DrawLegend(0.23, 0.74 + 1.*(yoffset+0.001), hist[iWW],   " WW",      "f",  0.035, 0.2, yoffset);
   DrawLegend(0.23, 0.74,                      hist[iWZ],   " VV",      "f",  0.035, 0.2, yoffset);
-  DrawLegend(xmin, 0.74 + 2.*(yoffset+0.001), hist[iZj],   " Z+jets",  "f",  0.035, 0.2, yoffset);
-  DrawLegend(xmin, 0.74 + 1.*(yoffset+0.001), hist[iWj],   " W+jets",  "f",  0.035, 0.2, yoffset);
-  DrawLegend(xmin, 0.74,                      hist[itt],   " top",     "f",  0.035, 0.2, yoffset);
-  DrawLegend(xmin, 0.74 - 1.*(yoffset+0.001), allmc,       allmcTitle, "f",  0.035, 0.2, yoffset);
+  DrawLegend(  x0, 0.74 + 2.*(yoffset+0.001), hist[iZj],   " Z+jets",  "f",  0.035, 0.2, yoffset);
+  DrawLegend(  x0, 0.74 + 1.*(yoffset+0.001), hist[iWj],   " W+jets",  "f",  0.035, 0.2, yoffset);
+  DrawLegend(  x0, 0.74,                      hist[itt],   " top",     "f",  0.035, 0.2, yoffset);
+  DrawLegend(  x0, 0.74 - 1.*(yoffset+0.001), allmc,       allmcTitle, "f",  0.035, 0.2, yoffset);
 
 
   // Additional titles
@@ -282,7 +286,13 @@ void DrawHistogram(TString hname,
       uncertainty->SetBinContent(ibin, 1.0);
       uncertainty->SetBinError  (ibin, uncertaintyError);
     }
-      
+
+
+    TAxis* uaxis = (TAxis*)uncertainty->GetXaxis();
+    
+    if (xmin > -999 && xmax > -999) uaxis->SetRangeUser(xmin, xmax);
+    
+    
     uncertainty->Draw("e2");
     ratio      ->Draw("ep,same");
 
