@@ -412,7 +412,7 @@ void Pad2TAxis(TH1* hist, TString xtitle, TString ytitle)
   TAxis* yaxis = (TAxis*)hist->GetYaxis();
 
   xaxis->SetLabelFont  (    42);
-  xaxis->SetLabelOffset(  0.03);
+  xaxis->SetLabelOffset( 0.025);
   xaxis->SetLabelSize  (   0.1);
   xaxis->SetNdivisions (   505);
   xaxis->SetTitle      (xtitle);
