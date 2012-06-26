@@ -137,7 +137,7 @@ void DrawXS(Int_t    ichannel,
 
   mg->Draw("ap");
 
-  mg->GetYaxis()->SetTitle("#sigma_{WW} (pb)");
+  mg->GetYaxis()->SetTitle("#sigma_{WW} [pb]");
   mg->GetYaxis()->SetTitleOffset(1.6);
 
   (yMin > 0) ? mg->SetMinimum(yMin) : mg->SetMinimum(absoluteMin -  5);
