@@ -115,45 +115,6 @@ void XS(Double_t &xsValue,
 
   //----------------------------------------------------------------------------
   //
-  // Estimate WW efficiency
-  //
-  //----------------------------------------------------------------------------
-  TH1F* hgg = (TH1F*) inputggWW->Get("hWeffTopTagging");
-  TH1F* hqq = (TH1F*) inputqqWW->Get("hWeffTopTagging");
-
-  Double_t NGenggWW = (fiducialXS) ? NFiducialggWW : NTotalggWW;
-  Double_t NGenqqWW = (fiducialXS) ? NFiducialqqWW : NTotalqqWW;
-
-  Double_t errNGenggWW = sqrt(NGenggWW);
-  Double_t errNGenqqWW = sqrt(NGenqqWW);
-
-  Double_t ggWW_weight = ggWW_xs / (ggWW_xs + qqWW_xs);
-  Double_t qqWW_weight = qqWW_xs / (ggWW_xs + qqWW_xs);
-
-  Double_t ggWW_efficiency = ratioValue(hgg->GetBinContent(2), NGenggWW);
-  Double_t qqWW_efficiency = ratioValue(hqq->GetBinContent(2), NGenqqWW);
-  Double_t   WW_efficiency = ggWW_weight*ggWW_efficiency + qqWW_weight*qqWW_efficiency;
-
-  Double_t ggWW_efficiencyError = ratioError(hgg->GetBinContent(2), NGenggWW, hgg->GetBinError(2), errNGenggWW);
-  Double_t qqWW_efficiencyError = ratioError(hqq->GetBinContent(2), NGenqqWW, hqq->GetBinError(2), errNGenqqWW);
-  Double_t   WW_efficiencyError = 0;
-
-  WW_efficiencyError += (ggWW_weight*ggWW_efficiencyError)*(ggWW_weight*ggWW_efficiencyError);
-  WW_efficiencyError += (qqWW_weight*qqWW_efficiencyError)*(qqWW_weight*qqWW_efficiencyError);
-  WW_efficiencyError = sqrt(WW_efficiencyError);
-  
-  
-  if (printLevel > 0) {
-    printf("\n signal efficiencies\n");
-    printf(" -------------------------------------------------\n");
-    printf("       ggWW efficiency = (%6.3f +- %5.3f)%s\n", 1e2*ggWW_efficiency, 1e2*ggWW_efficiencyError, "%");
-    printf("       qqWW efficiency = (%6.3f +- %5.3f)%s\n", 1e2*qqWW_efficiency, 1e2*qqWW_efficiencyError, "%");
-    printf("         WW efficiency = (%6.3f +- %5.3f)%s\n", 1e2*  WW_efficiency, 1e2*  WW_efficiencyError, "%");
-  }
-
-
-  //----------------------------------------------------------------------------
-  //
   // Estimate WW cross-section
   //
   //----------------------------------------------------------------------------
@@ -273,6 +234,49 @@ void XS(Double_t &xsValue,
   Double_t totalErrorB = sqrt(statErrorB*statErrorB + systErrorB*systErrorB);
 
 
+  //----------------------------------------------------------------------------
+  //
+  // Estimate WW efficiency
+  //
+  //----------------------------------------------------------------------------
+  TH1F* hgg = (TH1F*) inputggWW->Get("hWeffTopTagging");
+  TH1F* hqq = (TH1F*) inputqqWW->Get("hWeffTopTagging");
+
+  Double_t NGenggWW = (fiducialXS) ? NFiducialggWW : NTotalggWW;
+  Double_t NGenqqWW = (fiducialXS) ? NFiducialqqWW : NTotalqqWW;
+
+  Double_t f_gg = ggWW_xs / (ggWW_xs + qqWW_xs);
+  Double_t f_qq = 1 - f_gg;
+
+  Double_t ggWW_efficiency = ratioValue(hgg->GetBinContent(2), NGenggWW);
+  Double_t qqWW_efficiency = ratioValue(hqq->GetBinContent(2), NGenqqWW);
+  Double_t   WW_efficiency = f_gg*ggWW_efficiency + f_qq*qqWW_efficiency;
+
+  Double_t ggWW_efficiencyErr = ratioError(hgg->GetBinContent(2), NGenggWW, hgg->GetBinError(2), sqrt(NGenggWW));
+  Double_t qqWW_efficiencyErr = ratioError(hqq->GetBinContent(2), NGenqqWW, hqq->GetBinError(2), sqrt(NGenqqWW));
+
+  // Systematic component
+  Double_t WW_efficiencyErr = (f_gg*NggWW[2]*NggWW[0] + f_qq*NqqWW[2]*NqqWW[0]) / NWW[0];
+  WW_efficiencyErr *= WW_efficiency / 1e2;
+  WW_efficiencyErr *= WW_efficiencyErr;
+
+  // Statistical component (negligible)
+  WW_efficiencyErr += (f_gg*ggWW_efficiencyErr)*(f_gg*ggWW_efficiencyErr);
+  WW_efficiencyErr += (f_qq*qqWW_efficiencyErr)*(f_qq*qqWW_efficiencyErr);
+
+  // Absolute efficiency uncertainty
+  WW_efficiencyErr = sqrt(WW_efficiencyErr);
+
+
+  if (printLevel > 0) {
+    printf("\n signal efficiencies\n");
+    printf(" -------------------------------------------------\n");
+    printf("       ggWW efficiency = (%6.3f +- %5.3f)%s (stat.)\n", 1e2*ggWW_efficiency, 1e2*ggWW_efficiencyErr, "%");
+    printf("       qqWW efficiency = (%6.3f +- %5.3f)%s (stat.)\n", 1e2*qqWW_efficiency, 1e2*qqWW_efficiencyErr, "%");
+    printf("         WW efficiency = (%6.3f +- %5.3f)%s (total)\n", 1e2*  WW_efficiency, 1e2*  WW_efficiencyErr, "%");
+  }
+
+
   // Estimate WW cross-section
   //----------------------------------------------------------------------------
   Double_t BR_WW_to_lnln = (3 * 0.108) * (3 * 0.108);
@@ -286,7 +290,8 @@ void XS(Double_t &xsValue,
   //----------------------------------------------------------------------------
   Double_t errxsStats = 1e2 * sqrt(NData[0]) / (NData[0] - Background);
   Double_t errxsBkg   = 1e2 * totalErrorB    / (NData[0] - Background);
-  Double_t errxsSyst  = sqrt(errxsBkg*errxsBkg + NWW[2]*NWW[2]);
+  Double_t errxsEff   = 1e2 * WW_efficiencyErr / WW_efficiency;
+  Double_t errxsSyst  = sqrt(errxsBkg*errxsBkg + errxsEff*errxsEff);
   Double_t errxsLumi  = 5.0;
 
 
