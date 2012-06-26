@@ -62,7 +62,7 @@ void drawDistributions(TString channel = "All")
   gStyle->SetHatchesSpacing  (0.55);
 
 
-  TString path = Form("rootfiles.%.3ffb/0jet/%s/", luminosity/1e3, channel.Data());
+  TString path = Form("../rootfiles.%.3ffb/0jet/%s/", luminosity/1e3, channel.Data());
 
   for (UInt_t ip=0; ip<nProcesses; ip++)
     input[ip] = new TFile(path + process[ip] + ".root", "read");
@@ -412,7 +412,7 @@ void Pad2TAxis(TH1* hist, TString xtitle, TString ytitle)
   TAxis* yaxis = (TAxis*)hist->GetYaxis();
 
   xaxis->SetLabelFont  (    42);
-  xaxis->SetLabelOffset(  0.02);
+  xaxis->SetLabelOffset(  0.03);
   xaxis->SetLabelSize  (   0.1);
   xaxis->SetNdivisions (   505);
   xaxis->SetTitle      (xtitle);
