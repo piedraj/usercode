@@ -47,7 +47,7 @@ systError[iWj]   = 0.36;
 systError[iZj]   = 0.50;
 
 
-Double_t luminosity = 3540;
+Double_t luminosity = 3540;  // 5064;
 TString  format     = "pdf";
 Bool_t   drawRatio  = true;
 Bool_t   dataDriven = true;
@@ -70,12 +70,10 @@ void drawDistributions(TString channel = "All")
 
   // Top
   //----------------------------------------------------------------------------
-  if (0) {
-    DrawHistogram("hbTagDisNTopTaggedTopControlRegion", "2^{nd} jet TCHE",   5, 1, "NULL");
-    DrawHistogram("hbTagDisNTopControlRegion",          "2^{nd} jet TCHE",   5, 1, "NULL");
-    DrawHistogram("hbTagDisTopTaggedEvents",            "2^{nd} jet TCHE",   5, 1, "NULL");
-    DrawHistogram("h_jetpt1",                           "1^{st} jet p_{T}", 20, 0, "GeV");
-  }
+  DrawHistogram("hbTagDisNTopTaggedTopControlRegion", "2^{nd} jet TCHE",   5, 1, "NULL", -999, -999, false);
+  DrawHistogram("hbTagDisNTopControlRegion",          "2^{nd} jet TCHE",   5, 1, "NULL", -999, -999, false);
+  DrawHistogram("hbTagDisTopTaggedEvents",            "2^{nd} jet TCHE",   5, 1, "NULL", -999, -999, false);
+  DrawHistogram("h_jetpt1",                           "1^{st} jet p_{T}", 20, 0, "GeV",  -999, -999, false);
 
 
   // PAS
@@ -92,11 +90,12 @@ void drawDistributions(TString channel = "All")
 //------------------------------------------------------------------------------
 void DrawHistogram(TString  hname,
 		   TString  xtitle,
-		   Int_t    ngroup    = -1,
-		   Int_t    precision = 1,
-		   TString  units     = "NULL",
-		   Double_t xmin      = -999,
-		   Double_t xmax      = -999)
+		   Int_t    ngroup       = -1,
+		   Int_t    precision    = 1,
+		   TString  units        = "NULL",
+		   Double_t xmin         = -999,
+		   Double_t xmax         = -999,
+		   Bool_t   moveOverflow = true)
 {
   TCanvas* canvas;
 
@@ -136,7 +135,7 @@ void DrawHistogram(TString  hname,
     hist[ip] = (TH1F*)input[ip]->Get(hname);
     hist[ip]->SetName(hname + process[ip]);
 
-    MoveOverflowBins(hist[ip]);
+    if (moveOverflow) MoveOverflowBins(hist[ip]);
 
     if (ngroup > 0) hist[ip]->Rebin(ngroup);
 
