@@ -51,18 +51,21 @@ Double_t luminosity = 5064;
 TString  format     = "pdf";
 Bool_t   drawRatio  = true;
 Bool_t   dataDriven = true;
+Bool_t   savePlots  = true;
 
 
 //------------------------------------------------------------------------------
 // drawDistributions
 //------------------------------------------------------------------------------
-void drawDistributions(TString channel = "All")
+void drawDistributions(TString channel = "All",
+		       Int_t   njet    = 1)
 {
   gStyle->SetHatchesLineWidth(1.00);
   gStyle->SetHatchesSpacing  (0.55);
 
 
-  TString path = Form("rootfiles.%.3ffb/0jet/%s/", luminosity/1e3, channel.Data());
+  TString path = Form("rootfiles.%.3ffb/%djet/%s/",
+		      luminosity/1e3, njet, channel.Data());
 
   for (UInt_t ip=0; ip<nProcesses; ip++)
     input[ip] = new TFile(path + process[ip] + ".root", "read");
@@ -222,7 +225,10 @@ void DrawHistogram(TString  hname,
 
   // Adjust scale
   //----------------------------------------------------------------------------
-  Float_t theMax = GetMaximumIncludingErrors(hist[iData]);
+  Float_t theMax   = GetMaximumIncludingErrors(hist[iData]);
+  Float_t theMaxMC = GetMaximumIncludingErrors(allmc);
+
+  if (theMaxMC > theMax) theMax = theMaxMC;
 
   if (canvas->GetLogy()) {
     hist[iData]->SetMaximum(500 * theMax);
@@ -254,7 +260,10 @@ void DrawHistogram(TString  hname,
 
   DrawTLatex(0.9, 0.860 + deltaY, 0.04, "CMS preliminary");
   DrawTLatex(0.9, 0.815 + deltaY, 0.03, Form("L = %.3f fb^{-1}", luminosity/1e3));
-  DrawTLatex(0.9, 0.770 + deltaY, 0.03, "measured WW cross section");
+
+  if (dataDriven) {
+    DrawTLatex(0.9, 0.770 + deltaY, 0.03, "measured WW cross section");
+  }
 
 
   //----------------------------------------------------------------------------
@@ -313,8 +322,10 @@ void DrawHistogram(TString  hname,
     pad2->RedrawAxis();
   }
 
-  canvas->cd();
-  canvas->SaveAs(hname + "." + format);
+  if (savePlots) {
+    canvas->cd();
+    canvas->SaveAs(hname + "." + format);
+  }
 }
 
 
