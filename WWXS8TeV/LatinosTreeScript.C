@@ -85,9 +85,9 @@ void LatinosTreeScript(Float_t luminosity,
 
   // WW level histograms
   //----------------------------------------------------------------------------
-  TH1F *hPtLepton1WWLevel       = new TH1F("hPtLepton1WWLevel",       "", 200, 0, 200);
-  TH1F *hPtLepton2WWLevel       = new TH1F("hPtLepton2WWLevel",       "", 200, 0, 200);
-  TH1F *hPtDiLeptonWWLevel      = new TH1F("hPtDiLeptonWWLevel",      "", 200, 0, 200);
+  TH1F *hPtLepton1WWLevel       = new TH1F("hPtLepton1WWLevel",       "", 160, 0, 160);  // 200, 0, 200
+  TH1F *hPtLepton2WWLevel       = new TH1F("hPtLepton2WWLevel",       "",  80, 0,  80);  // 200, 0, 200
+  TH1F *hPtDiLeptonWWLevel      = new TH1F("hPtDiLeptonWWLevel",      "", 120, 0, 120);  // 200, 0, 200
   TH1F *hMinvWWLevel            = new TH1F("hMinvWWLevel",            "", 200, 0, 200);
   TH1F *hMtWWLevel              = new TH1F("hMtWWLevel",              "", 250, 0, 250);
   TH1F *hNJets30WWLevel         = new TH1F("hNJetsPF30WWLevel",       "",  10, 0,  10);
@@ -259,9 +259,9 @@ void LatinosTreeScript(Float_t luminosity,
     tree->Add(fanaePath + "latino_085_WgammaToLNuG.root");
   }
   else if(theSample == "WgammaStar") {
-    tree->Add(fanaePath + "latino_082_WGstarToElNuMad.root");
-    tree->Add(fanaePath + "latino_083_WGstarToMuNuMad.root");
-    tree->Add(fanaePath + "latino_084_WGstarToTauNuMad.root");
+    tree->Add(fanaePath + "latino_082_WGstarToElNuMad_filtered.root");
+    tree->Add(fanaePath + "latino_083_WGstarToMuNuMad_filtered.root");
+    tree->Add(fanaePath + "latino_084_WGstarToTauNuMad_filtered.root");
   }
   else {
     return;
@@ -313,11 +313,11 @@ void LatinosTreeScript(Float_t luminosity,
   Float_t drll;        tree->SetBranchAddress("drll"      , &drll);
   Float_t mctruth;     tree->SetBranchAddress("mctruth"   , &mctruth);
 
-  Float_t puWsmurf;
+  Float_t puWobs;
   Float_t fake2W;
 
   if (!theSample.Contains("WJetsFakes") && !theSample.Contains("Data"))
-    tree->SetBranchAddress("puWsmurf", &puWsmurf);
+    tree->SetBranchAddress("puWobs", &puWobs);
 
   if (theSample.Contains("WJetsFakes"))
     tree->SetBranchAddress("fake2W" , &fake2W);
@@ -349,7 +349,7 @@ void LatinosTreeScript(Float_t luminosity,
     else if (theSample.Contains("WJetsFakes"))
       totalW = fake2W;
     else {
-      efficiencyW = puWsmurf * effW * triggW;
+      efficiencyW = puWobs * effW * triggW;
       totalW      = baseW * efficiencyW * luminosity;
     }
 
@@ -357,7 +357,8 @@ void LatinosTreeScript(Float_t luminosity,
     // The selection begins here
     //--------------------------------------------------------------------------
     if (theSample.Contains("DYtautau") && mctruth < 1.5) continue;
-    if (theSample.Contains("WgammaStar") && (pt1 > 70 || jetpt1 > 70)) continue;
+
+    //    if (theSample.Contains("WgammaStar") && (pt1 > 100 || jetpt1 > 100)) continue;  // Not needed in Maiko's opinion
 
     if ((SelectedChannel == -1)           ||
 	(channel == SelectedChannel)      ||
