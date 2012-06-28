@@ -449,17 +449,17 @@ void Top(Double_t &yield,
   if (printLevel > 0) {
     printf("\n [%s] Top values for the note\n", channel.Data());
     printf(" -------------------------------------------------\n");
-    printf(" N^{control,data}                    & %4.0f $\\pm$ %5.1f\n",           NdenData,                    errNdenData);
-    printf(" N^{control,data}_{tag}              & %4.0f $\\pm$ %5.1f\n",           NnumData,                    errNnumData);
-    printf(" eff_{top-tag}^{data}  (%s)           & %4.1f $\\pm$ %4.1f\n", "%", 1e2*eff2bDataFinal,          1e2*erreff2bDataFinal);
-    printf(" eff_{top-tag}^{tW}    (%s)           & %4.1f $\\pm$ %4.1f\n", "%", 1e2*eff2bTW,                 1e2*erreff2bTW);
-    printf(" f_{tt}                (%s)           & %4.1f $\\pm$ %4.1f\n", "%", 1e2*finalfTT,                1e2*errorfinalfTT);
-    printf(" eff_{top-tag}^{0-jet} (%s)           & %4.1f $\\pm$ %4.1f\n", "%", 1e2*eff0bDataFinal_fraction, 1e2*erreff0bDataFinal_fraction);
-    printf(" data top-tagged events              & %4.0f\n",                        NTaggedDATA);
-    printf(" background events in control region & %5.1f $\\pm$ %4.1f\n",           Nbkg,                        errNbkg);
-    printf(" estimated top events in simulation  & %5.1f $\\pm$ %4.1f\n",           NTopTotalMC,                 errNTopTotalMC);
-    printf(" data-driven top estimate            & %5.1f $\\pm$ %4.1f\n",           yield,                       statError);
-    printf(" data/MC                             & %5.2f $\\pm$ %4.2f\n\n",         topScaleFactor,              topScaleFactorError);
+    printf(" N^{control,data}                    &   %4.0f $\\pm$ %4.0f\n",         NdenData,                    errNdenData);
+    printf(" N^{control,data}_{tag}              &   %4.0f $\\pm$ %4.0f\n",         NnumData,                    errNnumData);
+    printf(" data top-tagged events              &   %4.0f $\\pm$ %4.0f\n",         NTaggedDATA,                 errNTaggedDATA);
+    printf(" eff_{top-tag}^{data}  (%s)           & %6.1f $\\pm$ %4.1f\n", "%", 1e2*eff2bDataFinal,          1e2*erreff2bDataFinal);
+    printf(" eff_{top-tag}^{tW}    (%s)           & %6.1f $\\pm$ %4.1f\n", "%", 1e2*eff2bTW,                 1e2*erreff2bTW);
+    printf(" f_{tt}                (%s)           & %6.1f $\\pm$ %4.1f\n", "%", 1e2*finalfTT,                1e2*errorfinalfTT);
+    printf(" eff_{top-tag}^{0-jet} (%s)           & %6.1f $\\pm$ %4.1f\n", "%", 1e2*eff0bDataFinal_fraction, 1e2*erreff0bDataFinal_fraction);
+    printf(" background events in control region & %6.1f $\\pm$ %4.1f\n",           Nbkg,                        errNbkg);
+    printf(" estimated top events in simulation  & %6.1f $\\pm$ %4.1f\n",           NTopTotalMC,                 errNTopTotalMC);
+    printf(" data-driven top estimate            & %6.1f $\\pm$ %4.1f\n",           yield,                       statError);
+    printf(" data/MC                             & %6.1f $\\pm$ %4.1f\n\n",         topScaleFactor,              topScaleFactorError);
     printf("\n [%s] Top relative systematic uncertainties\n", channel.Data());
     printf(" -------------------------------------------------\n");
     printf(" top normalisation = %.0f (stat.) $\\bigoplus$ %.0f (syst.)\n\n",
