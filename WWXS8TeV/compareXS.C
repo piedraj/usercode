@@ -28,15 +28,15 @@ void compareXS()
   Double_t syst7tev_0jet[nchannels] = { 4.11,  4.08,  5.39,  4.46,  4.27};
   Double_t lumi7tev_0jet[nchannels] = { 1.15,  1.14,  1.32,  1.07,  1.16};
 
-  Double_t xs8tev_0jet  [nchannels] = {68.92, 64.30, 58.62, 74.22, 73.53};
+  Double_t xs8tev_0jet  [nchannels] = {69.85, 64.37, 64.21, 74.46, 73.74};
   Double_t stat8tev_0jet[nchannels] = { 2.79,  5.87,  7.64,  4.76,  5.09};
-  Double_t syst8tev_0jet[nchannels] = { 6.32,  6.26,  7.47,  6.82,  6.41};
-  Double_t lumi8tev_0jet[nchannels] = { 3.45,  3.22,  2.93,  3.71,  3.68};
+  Double_t syst8tev_0jet[nchannels] = { 5.58,  5.65,  6.56,  6.06,  5.63};
+  Double_t lumi8tev_0jet[nchannels] = { 3.07,  2.83,  2.83,  3.28,  3.24};
 
-  Double_t xs8tev_1jet  [nchannels] = {44.78, 46.07, 68.48, 48.88, 37.89};
+  Double_t xs8tev_1jet  [nchannels] = {48.26, 46.92, 95.69, 49.05, 38.14};
   Double_t stat8tev_1jet[nchannels] = { 5.91, 14.63, 19.92,  9.38,  9.72};
-  Double_t syst8tev_1jet[nchannels] = { 0.00,  0.00,  0.00,  0.00,  0.00};
-  Double_t lumi8tev_1jet[nchannels] = { 2.24,  2.30,  3.42,  2.44,  1.89};
+  Double_t syst8tev_1jet[nchannels] = {11.62, 15.47, 14.79, 12.23, 12.04};
+  Double_t lumi8tev_1jet[nchannels] = { 2.12,  2.06,  4.21,  2.16,  1.68};
 
   TGraphAsymmErrors* ratio8tev_0jet = new TGraphAsymmErrors(nchannels);
   TGraphAsymmErrors* ratio8tev_1jet = new TGraphAsymmErrors(nchannels);
@@ -80,8 +80,6 @@ void compareXS()
 
   mg->GetYaxis()->SetTitle("#sigma_{WW} [pb]");
   mg->GetYaxis()->SetTitleOffset(1.6);
-
-  mg->SetMaximum(100);
 
   canvas->Update();
 
@@ -134,10 +132,10 @@ void compareXS()
 
   // Put everything together
   //----------------------------------------------------------------------------
+  legend->Draw("same");
   nlo   ->Draw("e2,same");
   line  ->Draw("same");
   mg    ->Draw("p,same");
-  legend->Draw("same");
 
 
   // And save it

@@ -63,7 +63,7 @@ Bool_t   _savePlots;
 //------------------------------------------------------------------------------
 void drawDistributions(TString  channel    = "All",
 		       Int_t    njet       = 0,
-		       Double_t luminosity = 5064,
+		       Double_t luminosity = 3540,
 		       TString  format     = "pdf",
 		       Bool_t   drawRatio  = true,
 		       Bool_t   dataDriven = true,
@@ -170,7 +170,7 @@ void DrawHistogram(TString  hname,
       if (_dataDriven && ip == itt) hist[ip]->Scale(1.1);
       if (_dataDriven && ip == itW) hist[ip]->Scale(1.1);
       if (_dataDriven && ip == iWW) hist[ip]->Scale(1.2);
-      if (_dataDriven && ip == iZj) hist[ip]->Scale(4.5);
+      if (_dataDriven && ip == iZj) hist[ip]->Scale(4.0);
 
       hstack->Add(hist[ip]);
     }
