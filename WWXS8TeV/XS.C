@@ -292,7 +292,7 @@ void XS(Double_t &xsValue,
   Double_t errxsBkg   = 1e2 * totalErrorB    / (NData[0] - Background);
   Double_t errxsEff   = 1e2 * WW_efficiencyErr / WW_efficiency;
   Double_t errxsSyst  = sqrt(errxsBkg*errxsBkg + errxsEff*errxsEff);
-  Double_t errxsLumi  = 5.0;
+  Double_t errxsLumi  = 4.4;
 
 
   if (printLevel > 0) {

@@ -358,8 +358,6 @@ void LatinosTreeScript(Float_t luminosity,
     //--------------------------------------------------------------------------
     if (theSample.Contains("DYtautau") && mctruth < 1.5) continue;
 
-    //    if (theSample.Contains("WgammaStar") && (pt1 > 100 || jetpt1 > 100)) continue;  // Not needed in Maiko's opinion
-
     if ((SelectedChannel == -1)           ||
 	(channel == SelectedChannel)      ||
 	(flavorChannel == "OF" && !sameflav) ||
