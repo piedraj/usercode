@@ -47,25 +47,42 @@ systError[iWj]   = 0.36;
 systError[iZj]   = 0.50;
 
 
-Double_t luminosity = 5064;
-TString  format     = "pdf";
-Bool_t   drawRatio  = true;
-Bool_t   dataDriven = true;
-Bool_t   savePlots  = true;
+// Settings
+//------------------------------------------------------------------------------
+TString  _channel;
+Int_t    _njet;
+Double_t _luminosity;
+TString  _format;
+Bool_t   _drawRatio;
+Bool_t   _dataDriven;
+Bool_t   _savePlots;
 
 
 //------------------------------------------------------------------------------
 // drawDistributions
 //------------------------------------------------------------------------------
-void drawDistributions(TString channel = "All",
-		       Int_t   njet    = 1)
+void drawDistributions(TString  channel    = "All",
+		       Int_t    njet       = 0,
+		       Double_t luminosity = 5064,
+		       TString  format     = "pdf",
+		       Bool_t   drawRatio  = true,
+		       Bool_t   dataDriven = true,
+		       Bool_t   savePlots  = true)
 {
+  _channel    = channel;
+  _njet       = njet;
+  _luminosity = luminosity;
+  _format     = format;
+  _drawRatio  = drawRatio;
+  _dataDriven = dataDriven;
+  _savePlots  = savePlots;
+  
   gStyle->SetHatchesLineWidth(1.00);
   gStyle->SetHatchesSpacing  (0.55);
 
 
   TString path = Form("rootfiles.%.3ffb/%djet/%s/",
-		      luminosity/1e3, njet, channel.Data());
+		      _luminosity/1e3, _njet, _channel.Data());
 
   for (UInt_t ip=0; ip<nProcesses; ip++)
     input[ip] = new TFile(path + process[ip] + ".root", "read");
@@ -105,7 +122,7 @@ void DrawHistogram(TString  hname,
   TPad* pad1;
   TPad* pad2;
 
-  if (drawRatio) {
+  if (_drawRatio) {
     canvas = new TCanvas(hname, hname, 550, 1.2*600);
 
     pad1 = new TPad("pad1", "pad1", 0, 0.3, 1, 1);
@@ -150,10 +167,10 @@ void DrawHistogram(TString  hname,
       hist[ip]->SetFillStyle(1001);
       hist[ip]->SetLineColor(color[ip]);
 
-      if (dataDriven && ip == itt) hist[ip]->Scale(1.1);
-      if (dataDriven && ip == itW) hist[ip]->Scale(1.1);
-      if (dataDriven && ip == iWW) hist[ip]->Scale(1.2);
-      if (dataDriven && ip == iZj) hist[ip]->Scale(4.5);
+      if (_dataDriven && ip == itt) hist[ip]->Scale(1.1);
+      if (_dataDriven && ip == itW) hist[ip]->Scale(1.1);
+      if (_dataDriven && ip == iWW) hist[ip]->Scale(1.2);
+      if (_dataDriven && ip == iZj) hist[ip]->Scale(4.5);
 
       hstack->Add(hist[ip]);
     }
@@ -184,7 +201,7 @@ void DrawHistogram(TString  hname,
       binValue += binContent;
       binError += (hist[ip]->GetBinError(ibin) * hist[ip]->GetBinError(ibin));
 
-      if (dataDriven)
+      if (_dataDriven)
 	binError += (systError[ip]*binContent * systError[ip]*binContent);
     }
     
@@ -240,10 +257,10 @@ void DrawHistogram(TString  hname,
 
   // Legend
   //----------------------------------------------------------------------------
-  Double_t yoffset = (drawRatio) ? 0.054 : 0.048;
-  Double_t x0      = (drawRatio) ? 0.370 : 0.400; 
+  Double_t yoffset = (_drawRatio) ? 0.054 : 0.048;
+  Double_t x0      = (_drawRatio) ? 0.370 : 0.400; 
 
-  TString allmcTitle = (dataDriven) ? " stat #oplus syst" : " #sigma_{stat}";
+  TString allmcTitle = (_dataDriven) ? " stat #oplus syst" : " #sigma_{stat}";
 
   DrawLegend(0.23, 0.74 + 2.*(yoffset+0.001), hist[iData], " data",    "lp", 0.035, 0.2, yoffset);
   DrawLegend(0.23, 0.74 + 1.*(yoffset+0.001), hist[iWW],   " WW",      "f",  0.035, 0.2, yoffset);
@@ -256,12 +273,12 @@ void DrawHistogram(TString  hname,
 
   // Additional titles
   //----------------------------------------------------------------------------
-  Double_t deltaY = (drawRatio) ? 0.02 : 0.0;
+  Double_t deltaY = (_drawRatio) ? 0.02 : 0.0;
 
   DrawTLatex(0.9, 0.860 + deltaY, 0.04, "CMS preliminary");
-  DrawTLatex(0.9, 0.815 + deltaY, 0.03, Form("L = %.3f fb^{-1}", luminosity/1e3));
+  DrawTLatex(0.9, 0.815 + deltaY, 0.03, Form("L = %.3f fb^{-1}", _luminosity/1e3));
 
-  if (dataDriven) {
+  if (_dataDriven) {
     DrawTLatex(0.9, 0.770 + deltaY, 0.03, "measured WW cross section");
   }
 
@@ -269,7 +286,7 @@ void DrawHistogram(TString  hname,
   //----------------------------------------------------------------------------
   // pad2
   //----------------------------------------------------------------------------
-  if (drawRatio) {
+  if (_drawRatio) {
 
     pad2->cd();
     
@@ -316,15 +333,15 @@ void DrawHistogram(TString  hname,
   pad1->GetFrame()->DrawClone();
   pad1->RedrawAxis();
 
-  if (drawRatio) {
+  if (_drawRatio) {
     pad2->cd();
     pad2->GetFrame()->DrawClone();
     pad2->RedrawAxis();
   }
 
-  if (savePlots) {
+  if (_savePlots) {
     canvas->cd();
-    canvas->SaveAs(hname + "." + format);
+    canvas->SaveAs(Form("%s_%djet.%s", hname.Data(), _njet, _format.Data()));
   }
 }
 
@@ -353,47 +370,39 @@ Float_t GetMaximumIncludingErrors(TH1F* h)
 void MoveOverflowBins(TH1* h) const
 {
   UInt_t nbinsx = h->GetNbinsX();
-  UInt_t nbinsy = h->GetNbinsY();
 
-  Double_t underVal, underErr;
-  Double_t firstVal, firstErr;
-  Double_t overVal,  overErr;
-  Double_t lastVal,  lastErr;
- 
-  for (UInt_t i=1; i<=nbinsy; ++i) {
 
-    // Get underflow
-    underVal = h->GetBinContent(0, i);
-    underErr = h->GetBinError  (0, i);
+  // Get underflow
+  Double_t underVal = h->GetBinContent(0);
+  Double_t underErr = h->GetBinError  (0);
 
-    // Get first bin
-    firstVal = h->GetBinContent(1, i);
-    firstErr = h->GetBinError  (1, i);
+  // Get first bin
+  Double_t firstVal = h->GetBinContent(1);
+  Double_t firstErr = h->GetBinError  (1);
 
-    // Zero underflow
-    h->SetBinContent(0, i, 0);
-    h->SetBinError  (0, i, 0);
+  // Zero underflow
+  h->SetBinContent(0, 0);
+  h->SetBinError  (0, 0);
 
-    // Set first bin
-    h->SetBinContent(1, i, (underVal+firstVal));
-    h->SetBinError  (1, i, (sqrt(underErr*underErr + firstErr*firstErr)));
+  // Set first bin
+  h->SetBinContent(1, (underVal+firstVal));
+  h->SetBinError  (1, (sqrt(underErr*underErr + firstErr*firstErr)));
 
-    // Get overflow
-    overVal = h->GetBinContent(nbinsx+1, i);
-    overErr = h->GetBinError  (nbinsx+1, i);
+  // Get overflow
+  Double_t overVal = h->GetBinContent(nbinsx+1);
+  Double_t overErr = h->GetBinError  (nbinsx+1);
 
-    // Get last bin
-    lastVal = h->GetBinContent(nbinsx, i);
-    lastErr = h->GetBinError  (nbinsx, i);
+  // Get last bin
+  Double_t lastVal = h->GetBinContent(nbinsx);
+  Double_t lastErr = h->GetBinError  (nbinsx);
 
-    // Zero overflow
-    h->SetBinContent(nbinsx+1, i, 0);
-    h->SetBinError  (nbinsx+1, i, 0);
+  // Zero overflow
+  h->SetBinContent(nbinsx+1, 0);
+  h->SetBinError  (nbinsx+1, 0);
 
-    // Set last bin
-    h->SetBinContent(nbinsx, i, (lastVal+overVal));
-    h->SetBinError  (nbinsx, i, (sqrt(lastErr*lastErr + overErr*overErr)));
-  }
+  // Set last bin
+  h->SetBinContent(nbinsx, (lastVal+overVal));
+  h->SetBinError  (nbinsx, (sqrt(lastErr*lastErr + overErr*overErr)));
 }
 
 
