@@ -3,8 +3,19 @@ const UInt_t nchannels = 5;
 TString channelLabel[] = {"all", "#mu#mu", "ee", "e#mu", "#mue"};
 
 
-void compareXS()
+// Settings
+//------------------------------------------------------------------------------
+Double_t _luminosity;
+
+
+//------------------------------------------------------------------------------
+// compareXS
+//------------------------------------------------------------------------------
+void compareXS(Double_t luminosity = 3540)
 {
+  _luminosity = luminosity;
+
+
   // NLO values
   //----------------------------------------------------------------------------
   Double_t nlo7tev      = 47.04;
@@ -28,15 +39,15 @@ void compareXS()
   Double_t syst7tev_0jet[nchannels] = { 4.11,  4.08,  5.39,  4.46,  4.27};
   Double_t lumi7tev_0jet[nchannels] = { 1.15,  1.14,  1.32,  1.07,  1.16};
 
-  Double_t xs8tev_0jet  [nchannels] = {69.85, 64.37, 64.21, 74.46, 73.74};
+  Double_t xs8tev_0jet  [nchannels] = {69.86, 64.36, 64.22, 74.46, 73.75};
   Double_t stat8tev_0jet[nchannels] = { 2.79,  5.87,  7.64,  4.76,  5.09};
   Double_t syst8tev_0jet[nchannels] = { 5.58,  5.65,  6.56,  6.06,  5.63};
-  Double_t lumi8tev_0jet[nchannels] = { 3.07,  2.83,  2.83,  3.28,  3.24};
+  Double_t lumi8tev_0jet[nchannels] = { 3.07,  2.83,  2.83,  3.28,  3.25};
 
-  Double_t xs8tev_1jet  [nchannels] = {48.26, 46.92, 95.69, 49.05, 38.14};
+  Double_t xs8tev_1jet  [nchannels] = {47.79, 46.93, 92.20, 49.01, 37.98};
   Double_t stat8tev_1jet[nchannels] = { 5.91, 14.63, 19.92,  9.38,  9.72};
-  Double_t syst8tev_1jet[nchannels] = {11.62, 15.47, 14.79, 12.23, 12.04};
-  Double_t lumi8tev_1jet[nchannels] = { 2.12,  2.06,  4.21,  2.16,  1.68};
+  Double_t syst8tev_1jet[nchannels] = {11.62, 15.47, 14.74, 12.23, 12.04};
+  Double_t lumi8tev_1jet[nchannels] = { 2.10,  2.07,  4.06,  2.16,  1.67};
 
   TGraphAsymmErrors* ratio8tev_0jet = new TGraphAsymmErrors(nchannels);
   TGraphAsymmErrors* ratio8tev_1jet = new TGraphAsymmErrors(nchannels);
@@ -138,10 +149,32 @@ void compareXS()
   mg    ->Draw("p,same");
 
 
+  // Additional titles
+  //----------------------------------------------------------------------------
+  DrawTLatex(0.9, 0.860, 0.04, "CMS preliminary");
+  DrawTLatex(0.9, 0.815, 0.03, Form("L = %.3f fb^{-1}", _luminosity/1e3));
+
+
   // And save it
   //----------------------------------------------------------------------------
   canvas->Update();
   canvas->GetFrame()->DrawClone();
 
   canvas->SaveAs("wwxs0jet1jet.png");
+}
+
+
+//------------------------------------------------------------------------------
+// DrawTLatex
+//------------------------------------------------------------------------------
+void DrawTLatex(Double_t x, Double_t y, Double_t tsize, const char* text)
+{
+  TLatex* tl = new TLatex(x, y, text);
+
+  tl->SetNDC();
+  tl->SetTextAlign(   32);
+  tl->SetTextFont (   42);
+  tl->SetTextSize (tsize);
+
+  tl->Draw("same");
 }
