@@ -11,10 +11,10 @@ const UInt_t nProcesses = 9;
 
 enum {iData, iWW, iWZ, iZZ, iWg, itt, itW, iWj, iZj};
 
-TFile*  input     [nProcesses];
-TString process   [nProcesses];
-Color_t color     [nProcesses];
-Double_t systError[nProcesses];
+TFile* input[nProcesses];
+
+
+TString process[nProcesses];
 
 process[iData] = "DataRun2012_Total";
 process[itt]   = "TTbar";
@@ -26,6 +26,9 @@ process[iWg]   = "Wgamma";
 process[iWj]   = "WJetsFakes_Total";
 process[iZj]   = "DY";
 
+
+Color_t color[nProcesses];
+
 color[iData] = kBlack;
 color[itt]   = kYellow;
 color[itW]   = kYellow;
@@ -36,15 +39,20 @@ color[iWg]   = kAzure-2;
 color[iWj]   = kGray+1;
 color[iZj]   = kGreen+2;
 
+
+Double_t systError[nProcesses];
+
 systError[iData] = 0.0;
-systError[itt]   = 0.18;
-systError[itW]   = 0.18;
-systError[iWW]   = 0.078;
-systError[iWZ]   = 0.094;
-systError[iZZ]   = 0.094;
-systError[iWg]   = 0.30;
-systError[iWj]   = 0.36;
-systError[iZj]   = 0.50;
+
+// syst. / yield from SMP-12-013
+systError[itt] = 19.5 / 131.6;
+systError[itW] = 19.5 / 131.6;
+systError[iWW] = 49.3 / 683.6;
+systError[iWZ] =  2.9 /  27.4;
+systError[iZZ] =  2.9 /  27.4;
+systError[iWg] =  4.3 /  13.6;
+systError[iWj] = 21.6 /  60.0;
+systError[iZj] =  9.9 /  42.5;
 
 
 // Settings
@@ -116,7 +124,7 @@ void DrawHistogram(TString  hname,
 		   Int_t    precision    = 1,
 		   TString  units        = "NULL",
 		   Double_t xmin         = -999,
-		   Double_t xmax         = -999,
+		   Double_t xmax         =  999,
 		   Bool_t   moveOverflow = true)
 {
   TCanvas* canvas;
@@ -157,7 +165,7 @@ void DrawHistogram(TString  hname,
     hist[ip] = (TH1F*)input[ip]->Get(hname);
     hist[ip]->SetName(hname + process[ip]);
 
-    if (moveOverflow) MoveOverflowBins(hist[ip]);
+    if (moveOverflow) MoveOverflowBins(hist[ip], xmin, xmax);
 
     if (ngroup > 0) hist[ip]->Rebin(ngroup);
 
@@ -325,7 +333,7 @@ void DrawHistogram(TString  hname,
 
     uncertainty->GetYaxis()->SetRangeUser(0, 2);
 
-    Pad2TAxis(uncertainty, hist[iData]->GetXaxis()->GetTitle(), "data / MC");
+    Pad2TAxis(uncertainty, hist[iData]->GetXaxis()->GetTitle(), "data / prediction");
   }
 
 
@@ -369,42 +377,47 @@ Float_t GetMaximumIncludingErrors(TH1F* h)
 //------------------------------------------------------------------------------
 // MoveOverflowBins
 //------------------------------------------------------------------------------
-void MoveOverflowBins(TH1* h) const
+void MoveOverflowBins(TH1* h, Double_t xmin, Double_t xmax) const
 {
-  UInt_t nbinsx = h->GetNbinsX();
+  UInt_t nbins = h->GetNbinsX();
 
+  TAxis* axis = (TAxis*)h->GetXaxis();
+  
+  Int_t firstBin = (xmin > -999) ? axis->FindBin(xmin) : 1;
+  Int_t lastBin  = (xmax <  999) ? axis->FindBin(xmax) : nbins;
 
-  // Get underflow
-  Double_t underVal = h->GetBinContent(0);
-  Double_t underErr = h->GetBinError  (0);
+  Double_t firstVal = 0;
+  Double_t firstErr = 0;
 
-  // Get first bin
-  Double_t firstVal = h->GetBinContent(1);
-  Double_t firstErr = h->GetBinError  (1);
+  Double_t lastVal = 0;
+  Double_t lastErr = 0;
 
-  // Zero underflow
-  h->SetBinContent(0, 0);
-  h->SetBinError  (0, 0);
+  for (UInt_t i=0; i<=nbins+1; i++) {
 
-  // Set first bin
-  h->SetBinContent(1, (underVal+firstVal));
-  h->SetBinError  (1, (sqrt(underErr*underErr + firstErr*firstErr)));
+    if (i <= firstBin) {
+      firstVal += h->GetBinContent(i);
+      firstErr += (h->GetBinError(i)*h->GetBinError(i));
+    }
 
-  // Get overflow
-  Double_t overVal = h->GetBinContent(nbinsx+1);
-  Double_t overErr = h->GetBinError  (nbinsx+1);
+    if (i >= lastBin) {
+      lastVal += h->GetBinContent(i);
+      lastErr += (h->GetBinError(i)*h->GetBinError(i));
+    }
 
-  // Get last bin
-  Double_t lastVal = h->GetBinContent(nbinsx);
-  Double_t lastErr = h->GetBinError  (nbinsx);
+    if (i < firstBin || i > lastBin) {
+      h->SetBinContent(i, 0);
+      h->SetBinError  (i, 0);
+    }
+  }
 
-  // Zero overflow
-  h->SetBinContent(nbinsx+1, 0);
-  h->SetBinError  (nbinsx+1, 0);
+  firstErr = sqrt(firstErr);
+  lastErr  = sqrt(lastErr);
 
-  // Set last bin
-  h->SetBinContent(nbinsx, (lastVal+overVal));
-  h->SetBinError  (nbinsx, (sqrt(lastErr*lastErr + overErr*overErr)));
+  h->SetBinContent(firstBin, firstVal);
+  h->SetBinError  (firstBin, firstErr);
+
+  h->SetBinContent(lastBin, lastVal);
+  h->SetBinError  (lastBin, lastErr);
 }
 
 

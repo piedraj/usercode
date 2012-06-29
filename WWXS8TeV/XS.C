@@ -336,6 +336,7 @@ void XS(Double_t &xsValue,
     printf(" (%.1f Z/g* + %.1f Z/g* -> tautau)\n",                           NDY[0],              NDYtautau[0]);
     printf("       Wg+Wg*              & %6.1f $\\pm$ %5.1f $\\pm$ %5.1f\n", NWg[0],              NWg[1],          NWg[2]);
     printf("       total background    & %6.1f $\\pm$ %5.1f $\\pm$ %5.1f\n", Background,          statErrorB,      systErrorB);
+    printf(" ***** signal              & %6.1f $\\pm$ %5.1f $\\pm$ %5.1f\n", NWW[0],              NWW[1],          NWW[2]*NWW[0]/1e2);
     printf("       signal + background & %6.1f $\\pm$ %5.1f $\\pm$ %5.1f\n", NWW[0]+Background,   statErrorSPlusB, systErrorSPlusB);
     printf("       data                & %4.0f\n",                           NData[0]);
 
