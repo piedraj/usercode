@@ -90,10 +90,12 @@ void drawDistributions(TString  channel    = "All",
 
   // Top
   //----------------------------------------------------------------------------
-  DrawHistogram("hbTagDisNTopTaggedTopControlRegion", "2^{nd} jet TCHE",   5, 1, "NULL", -999, -999, false);
-  DrawHistogram("hbTagDisNTopControlRegion",          "2^{nd} jet TCHE",   5, 1, "NULL", -999, -999, false);
-  DrawHistogram("hbTagDisTopTaggedEvents",            "2^{nd} jet TCHE",   5, 1, "NULL", -999, -999, false);
-  DrawHistogram("h_jetpt1",                           "1^{st} jet p_{T}", 20, 0, "GeV",  -999, -999, false);
+  if (0) {
+    DrawHistogram("hbTagDisNTopTaggedTopControlRegion", "2^{nd} jet TCHE",   5, 1, "NULL", -999, -999, false);
+    DrawHistogram("hbTagDisNTopControlRegion",          "2^{nd} jet TCHE",   5, 1, "NULL", -999, -999, false);
+    DrawHistogram("hbTagDisTopTaggedEvents",            "2^{nd} jet TCHE",   5, 1, "NULL", -999, -999, false);
+    DrawHistogram("h_jetpt1",                           "1^{st} jet p_{T}", 20, 0, "GeV",  -999, -999, false);
+  }
 
 
   // PAS
@@ -279,7 +281,7 @@ void DrawHistogram(TString  hname,
   DrawTLatex(0.9, 0.815 + deltaY, 0.03, Form("L = %.3f fb^{-1}", _luminosity/1e3));
 
   if (_dataDriven) {
-    DrawTLatex(0.9, 0.770 + deltaY, 0.03, "measured WW cross section");
+    DrawTLatex(0.9, 0.770 + deltaY, 0.03, "CMS WW cross section");
   }
 
 
