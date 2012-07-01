@@ -289,7 +289,7 @@ void DrawHistogram(TString  hname,
   DrawTLatex(0.9, 0.815 + deltaY, 0.03, Form("L = %.3f fb^{-1}", _luminosity/1e3));
 
   if (_dataDriven) {
-    DrawTLatex(0.9, 0.770 + deltaY, 0.03, "CMS WW cross section");
+    DrawTLatex(0.9, 0.770 + deltaY, 0.03, "data-driven normalization");
   }
 
 
