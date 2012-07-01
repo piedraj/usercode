@@ -108,9 +108,9 @@ void drawDistributions(TString  channel    = "All",
 
   // PAS
   //----------------------------------------------------------------------------
-  DrawHistogram("hPtLepton1WWLevel",  "p_{T}^{max}", 5, 0, "GeV", 0, 160);
-  DrawHistogram("hPtLepton2WWLevel",  "p_{T}^{min}", 5, 0, "GeV", 0,  80);
-  DrawHistogram("hPtDiLeptonWWLevel", "p_{T}^{ll}",  5, 0, "GeV", 0, 120);
+  DrawHistogram("hPtLepton1WWLevel",  "p_{T}^{max}", 5, 0, "GeV",  0, 160);
+  DrawHistogram("hPtLepton2WWLevel",  "p_{T}^{min}", 5, 0, "GeV", 15,  80);
+  DrawHistogram("hPtDiLeptonWWLevel", "p_{T}^{ll}",  5, 0, "GeV", 40, 120);
   DrawHistogram("hMinvWWLevel",       "m_{ll}",      5, 0, "GeV");
 }
 
@@ -246,7 +246,7 @@ void DrawHistogram(TString  hname,
 
   hist[iData]->Draw("ep");
   hstack     ->Draw("hist,same");
-  allmc      ->Draw("e2,same");
+  //  allmc      ->Draw("e2,same");
   hist[iData]->Draw("ep,same");
 
 
