@@ -108,10 +108,10 @@ void drawDistributions(TString  channel    = "All",
 
   // PAS
   //----------------------------------------------------------------------------
-  DrawHistogram("hPtLepton1WWLevel",  "p_{T}^{max}", 5, 0, "GeV",  0, 160);
-  DrawHistogram("hPtLepton2WWLevel",  "p_{T}^{min}", 5, 0, "GeV", 15,  80);
-  DrawHistogram("hPtDiLeptonWWLevel", "p_{T}^{ll}",  5, 0, "GeV", 40, 120);
-  DrawHistogram("hMinvWWLevel",       "m_{ll}",      5, 0, "GeV");
+  DrawHistogram("hPtLepton1WWLevel",  "p_{T}^{max}",           5, 0, "GeV",  0, 160);
+  DrawHistogram("hPtLepton2WWLevel",  "p_{T}^{min}",           5, 0, "GeV", 15,  80);
+  DrawHistogram("hPtDiLeptonWWLevel", "p_{T}^{#font[12]{ll}}", 5, 0, "GeV", 40, 120);
+  DrawHistogram("hMinvWWLevel",       "m_{#font[12]{ll}}",     5, 0, "GeV");
 }
 
 
