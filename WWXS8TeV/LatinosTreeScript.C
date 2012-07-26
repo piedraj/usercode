@@ -203,15 +203,10 @@ void LatinosTreeScript(Float_t luminosity,
     tree->Add(filesPath + "latino_233_DoubleMuon2012B.root");
     tree->Add(filesPath + "latino_234_MuEG2012B.root");
     tree->Add(filesPath + "latino_240_SingleElectron2012B.root");
-    tree->Add(filesPath + "latino_240_SingleElectron2012B_extra.root");
     tree->Add(filesPath + "latino_241_SingleMuon2012B.root");
-    tree->Add(filesPath + "latino_241_SingleMuon2012B_extra.root");
     tree->Add(filesPath + "latino_242_DoubleElectron2012B.root");
-    tree->Add(filesPath + "latino_242_DoubleElectron2012B_extra.root");
     tree->Add(filesPath + "latino_243_DoubleMuon2012B.root");
-    tree->Add(filesPath + "latino_243_DoubleMuon2012B_extra.root");
     tree->Add(filesPath + "latino_244_MuEG2012B.root");
-    tree->Add(filesPath + "latino_244_MuEG2012B_extra.root");
   }
   else if (theSample == "WJetsFakes_Total") {
     tree->Add(filesPath + "latino_10X_LooseLoose.root"); 
@@ -263,6 +258,10 @@ void LatinosTreeScript(Float_t luminosity,
     tree->Add(filesPath + "latino_082_WGstarToElNuMad_filtered.root");
     tree->Add(filesPath + "latino_083_WGstarToMuNuMad_filtered.root");
     tree->Add(filesPath + "latino_084_WGstarToTauNuMad_filtered.root");
+  }
+  else if(theSample == "HWW125") { 
+    tree->Add(filesPath + "latino_1125_ggToH125toWWTo2LAndTau2Nu.root");
+    tree->Add(filesPath + "latino_2125_vbfToH125toWWTo2LAndTau2Nu.root");
   }
   else {
     return;

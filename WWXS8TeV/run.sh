@@ -25,6 +25,7 @@ WgammaNoStar       \
 WJetsFakes\_Total  \
 DataRun2012\_Total \
 DYtautau           \
+HWW125             \
 "
 
 

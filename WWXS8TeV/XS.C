@@ -107,8 +107,8 @@ void XS(Double_t &xsValue,
   TFile* inputDY       = new TFile(path + "DY.root");  
   TFile* inputDYtautau = new TFile(path + "DYtautau.root");  
   TFile* inputWg       = new TFile(path + "Wgamma.root");  
+  TFile* inputHWW125   = new TFile(path + "HWW125.root");  
   TFile* inputData     = new TFile(path + "DataRun2012_Total.root");
-
 
   TFile* inputDYOF = new TFile(Form("%s/%djet/OF/DY.root", directory.Data(), njet));
 
@@ -129,6 +129,7 @@ void XS(Double_t &xsValue,
   TH1F* hNDY       = (TH1F*) inputDY      ->Get("hWTopTagging");
   TH1F* hNDYtautau = (TH1F*) inputDYtautau->Get("hWTopTagging");
   TH1F* hNWg       = (TH1F*) inputWg      ->Get("hWTopTagging");
+  TH1F* hNHWW125   = (TH1F*) inputHWW125  ->Get("hWTopTagging");
   TH1F* hNData     = (TH1F*) inputData    ->Get("hWTopTagging");
   TH1F* hNDYOF     = (TH1F*) inputDYOF    ->Get("hWTopTagging");
 
@@ -143,6 +144,7 @@ void XS(Double_t &xsValue,
   Double_t NZZ[]       = {hNZZ      ->GetBinContent(2), hNZZ      ->GetBinError(2), 0.00};
   Double_t NDYtautau[] = {hNDYtautau->GetBinContent(2), hNDYtautau->GetBinError(2), 0.00};
   Double_t NWg[]       = {hNWg      ->GetBinContent(2), hNWg      ->GetBinError(2), 0.00};
+  Double_t NHWW125[]   = {hNHWW125  ->GetBinContent(2), hNHWW125  ->GetBinError(2), 0.00};
   Double_t NData[]     = {hNData    ->GetBinContent(2), hNData    ->GetBinError(2)};
 
 
@@ -209,11 +211,12 @@ void XS(Double_t &xsValue,
   NWW[2] += (NqqWW[2]*NqqWW[0] * NqqWW[2]*NqqWW[0]);
   NWW[2]  = sqrt(NWW[2]) / NWW[0];  // Relative systematic uncertainty
 
-  NWZ[2] = sqrt(NWZ[2]) * NWZ[0] / 1e2;  // Absolute systematic uncertainty
-  NZZ[2] = sqrt(NZZ[2]) * NZZ[0] / 1e2;  // Absolute systematic uncertainty
-  NWg[2] = sqrt(NWg[2]) * NWg[0] / 1e2;  // Absolute systematic uncertainty
+  NWZ[2]     = sqrt(NWZ[2])     * NWZ[0]     / 1e2;  // Absolute systematic uncertainty
+  NZZ[2]     = sqrt(NZZ[2])     * NZZ[0]     / 1e2;  // Absolute systematic uncertainty
+  NWg[2]     = sqrt(NWg[2])     * NWg[0]     / 1e2;  // Absolute systematic uncertainty
+  NHWW125[2] = sqrt(NHWW125[2]) * NHWW125[0] / 1e2;  // Absolute systematic uncertainty
 
-  Double_t Background = NWj[0] + NWZ[0] + NZZ[0] + NWg[0] + NTop[0] + NDY[0] + NDYtautau[0];
+  Double_t Background = NWj[0] + NWZ[0] + NZZ[0] + NWg[0] + NTop[0] + NDY[0] + NDYtautau[0] + NHWW125[0];
   
   Double_t statErrorB = sqrt(NWj      [1]*NWj      [1] +
 			     NWZ      [1]*NWZ      [1] +
@@ -221,7 +224,8 @@ void XS(Double_t &xsValue,
 			     NWg      [1]*NWg      [1] +
 			     NTop     [1]*NTop     [1] +
 			     NDY      [1]*NDY      [1] +
-			     NDYtautau[1]*NDYtautau[1]);
+			     NDYtautau[1]*NDYtautau[1] +
+			     NHWW125  [1]*NHWW125  [1]);
 
   Double_t systErrorB = sqrt(NWj      [2]*NWj      [2] +
 			     NWZ      [2]*NWZ      [2] +
@@ -229,7 +233,8 @@ void XS(Double_t &xsValue,
 			     NWg      [2]*NWg      [2] +
 			     NTop     [2]*NTop     [2] +
 			     NDY      [2]*NDY      [2] +
-			     NDYtautau[2]*NDYtautau[2]);
+			     NDYtautau[2]*NDYtautau[2] +
+			     NHWW125  [2]*NHWW125  [2]);
 
   Double_t totalErrorB = sqrt(statErrorB*statErrorB + systErrorB*systErrorB);
 
@@ -335,6 +340,7 @@ void XS(Double_t &xsValue,
     printf("       Z/g*                & %6.1f $\\pm$ %5.1f $\\pm$ %5.1f",   NDY[0]+NDYtautau[0], statErrorDYAll,  systErrorDYAll);
     printf(" (%.1f Z/g* + %.1f Z/g* -> tautau)\n",                           NDY[0],              NDYtautau[0]);
     printf("       Wg+Wg*              & %6.1f $\\pm$ %5.1f $\\pm$ %5.1f\n", NWg[0],              NWg[1],          NWg[2]);
+    printf("       HWW125              & %6.1f $\\pm$ %5.1f $\\pm$ %5.1f\n", NHWW125[0],          NHWW125[1],      NHWW125[2]);
     printf("       total background    & %6.1f $\\pm$ %5.1f $\\pm$ %5.1f\n", Background,          statErrorB,      systErrorB);
     printf(" ***** signal              & %6.1f $\\pm$ %5.1f $\\pm$ %5.1f\n", NWW[0],              NWW[1],          NWW[2]*NWW[0]/1e2);
     printf("       signal + background & %6.1f $\\pm$ %5.1f $\\pm$ %5.1f\n", NWW[0]+Background,   statErrorSPlusB, systErrorSPlusB);
