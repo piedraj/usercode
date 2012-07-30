@@ -27,7 +27,8 @@ void Top(Double_t &yield,
 	 Int_t     njet,
 	 TString   channel,
 	 TString   directory,
-	 Bool_t    printLevel)
+	 Bool_t    useDataDriven,
+	 Int_t     printLevel)
 {
   TString path = Form("%s/%djet/%s/", directory.Data(), njet, channel.Data());
 
@@ -433,7 +434,7 @@ void Top(Double_t &yield,
 
   // Save the result
   //----------------------------------------------------------------------------
-  yield          = NTopEstimatedDataFinal_fraction;
+  yield          = (useDataDriven) ? NTopEstimatedDataFinal_fraction : NTopTotalMC;
   statError      = errNTopEstimatedDataFinal_fraction;
   systError      = errtotal_syst;
   topScaleFactor = yield / NTopTotalMC;

@@ -43,6 +43,7 @@ void XS(Double_t &xsValue,
 	Int_t     njet,
 	TString   channel,
 	TString   directory,
+	Bool_t    useDataDriven,
 	Int_t     printLevel,
 	Bool_t    fiducialXS)
 {
@@ -68,6 +69,7 @@ void XS(Double_t &xsValue,
      njet,
      "SF",  // "SF" --> dyChannel (individual topScaleFactor)
      directory,
+     useDataDriven,
      0,
      false);
 
@@ -79,6 +81,7 @@ void XS(Double_t &xsValue,
       njet,
       "All",  // "All" --> channel (individual topScaleFactor)
       directory,
+      useDataDriven,
       printLevel);
 
   DY(NDY[0],
@@ -88,6 +91,7 @@ void XS(Double_t &xsValue,
      njet,
      dyChannel,
      directory,
+     useDataDriven,
      printLevel,
      false);
 

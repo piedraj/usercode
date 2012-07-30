@@ -33,14 +33,15 @@ enum {SILENT, NOTE, DEBUG};
 //     -1 --> do all channels
 //
 //------------------------------------------------------------------------------
-void runXS(Int_t    ichannel   = All,
-	   Int_t    njet       = 0,
-	   Double_t luminosity = 5064,
-	   Int_t    printLevel = NOTE,
-	   Bool_t   drawTheXS  = false,
-	   Bool_t   fiducialXS = false,
-	   Double_t yMin       = -999,
-	   Double_t yMax       = -999)
+void runXS(Int_t    ichannel      = All,
+	   Int_t    njet          = 1,
+	   Double_t luminosity    = 5064,
+	   Int_t    printLevel    = NOTE,
+	   Bool_t   useDataDriven = true,  // false => DY and Top from MC
+	   Bool_t   drawTheXS     = false,
+	   Bool_t   fiducialXS    = false,
+	   Double_t yMin          = -999,
+	   Double_t yMax          = -999)
 {
   if (ichannel >= Int_t(nchannels)) return;
 
@@ -76,6 +77,7 @@ void runXS(Int_t    ichannel   = All,
        njet,
        channel[thechannel],
        directory,
+       useDataDriven,
        printLevel,
        fiducialXS);
 
