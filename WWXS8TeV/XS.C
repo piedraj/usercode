@@ -363,6 +363,7 @@ void XS(Double_t &xsValue,
 
     deltaXSErr = sqrt(deltaXSErr);
 
+    printf("\n       sigma(NLO) = %.2f + %.2f - %.2f pb\n", nlo8tev, nlo8tevPlus, nlo8tevMinus);
     printf("\n       sigmaWW(%s) - sigma(NLO) = %.2f +- %.2f pb", channel.Data(), deltaXS, deltaXSErr);
     printf(" = (%.0f +- %.0f)\%s of the theoretical value\n\n", 1e2*deltaXS/nlo8tev, 1e2*deltaXSErr/nlo8tev, "%");
   }
