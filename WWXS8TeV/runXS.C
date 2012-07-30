@@ -35,7 +35,7 @@ enum {SILENT, NOTE, DEBUG};
 //------------------------------------------------------------------------------
 void runXS(Int_t    ichannel   = All,
 	   Int_t    njet       = 0,
-	   Double_t luminosity = 3540,
+	   Double_t luminosity = 5064,
 	   Int_t    printLevel = NOTE,
 	   Bool_t   drawTheXS  = false,
 	   Bool_t   fiducialXS = false,
