@@ -297,7 +297,7 @@ void DY(Double_t &yield,
   yield       = (useDataDriven) ? NestSFNoDibosonFinal : hExpectedDYSF->GetBinContent(2);
   statError   = errNestSFNoDibosonFinal;
   systError   = RelDiffR*NestSFNoDibosonFinal;
-  scaleFactor = SFsf;
+  scaleFactor = yield / hExpectedDYSF->GetBinContent(2);
 
 
   // For the note
