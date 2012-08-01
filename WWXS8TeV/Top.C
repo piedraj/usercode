@@ -37,6 +37,7 @@ void Top(Double_t &yield,
   TFile* inputWW   = new TFile(path + "WW.root");  
   TFile* inputWZ   = new TFile(path + "WZ.root");  
   TFile* inputWG   = new TFile(path + "Wgamma.root");
+  TFile* inputH125 = new TFile(path + "HWW125.root");
   TFile* inputZZ   = new TFile(path + "ZZ.root");  
   TFile* inputZjnt = new TFile(path + "DY.root");
   TFile* inputWj   = new TFile(path + "WJetsFakes_Total.root");
@@ -105,6 +106,10 @@ void Top(Double_t &yield,
   TH1F* hNTopControlRegionWG             = (TH1F*) inputWG->Get("hNTopControlRegion");
   TH1F* hTopTaggedEventsWG               = (TH1F*) inputWG->Get("hTopTaggedEvents");
 
+  TH1F* hNTopTaggedEventsControlRegionH125 = (TH1F*) inputH125->Get("hNTopTaggedTopControlRegion");
+  TH1F* hNTopControlRegionH125             = (TH1F*) inputH125->Get("hNTopControlRegion");
+  TH1F* hTopTaggedEventsH125               = (TH1F*) inputH125->Get("hTopTaggedEvents");
+
   TH1F* hNTopTaggedEventsControlRegionZZ = (TH1F*) inputZZ->Get("hNTopTaggedTopControlRegion");
   TH1F* hNTopControlRegionZZ             = (TH1F*) inputZZ->Get("hNTopControlRegion");
   TH1F* hTopTaggedEventsZZ               = (TH1F*) inputZZ->Get("hTopTaggedEvents");
@@ -129,12 +134,13 @@ void Top(Double_t &yield,
   Double_t NnumWW   = hNTopTaggedEventsControlRegionWW  ->GetBinContent(2);
   Double_t NnumWZ   = hNTopTaggedEventsControlRegionWZ  ->GetBinContent(2);
   Double_t NnumWG   = hNTopTaggedEventsControlRegionWG  ->GetBinContent(2);
+  Double_t NnumH125 = hNTopTaggedEventsControlRegionH125->GetBinContent(2);
   Double_t NnumZZ   = hNTopTaggedEventsControlRegionZZ  ->GetBinContent(2);
   Double_t NnumWj   = hNTopTaggedEventsControlRegionWj  ->GetBinContent(2);
   Double_t NnumZjnt = hNTopTaggedEventsControlRegionZjnt->GetBinContent(2) * dyScaleFactor;
   Double_t NnumData = hNTopTaggedEventsControlRegionDATA->GetBinContent(2);
 
-  Double_t NnumBkg       = NnumTW + NnumWW + NnumWZ + NnumWG + NnumZZ + NnumWj + NnumZjnt;
+  Double_t NnumBkg       = NnumTW + NnumWW + NnumWZ + NnumWG + NnumH125 + NnumZZ + NnumWj + NnumZjnt;
   Double_t NnumDataFinal = NnumData - NnumBkg;
 
   Double_t errNnumTT   = hNTopTaggedEventsControlRegionTT  ->GetBinError(2);
@@ -142,6 +148,7 @@ void Top(Double_t &yield,
   Double_t errNnumWW   = hNTopTaggedEventsControlRegionWW  ->GetBinError(2);
   Double_t errNnumWZ   = hNTopTaggedEventsControlRegionWZ  ->GetBinError(2);
   Double_t errNnumWG   = hNTopTaggedEventsControlRegionWG  ->GetBinError(2);
+  Double_t errNnumH125 = hNTopTaggedEventsControlRegionH125->GetBinError(2);
   Double_t errNnumZZ   = hNTopTaggedEventsControlRegionZZ  ->GetBinError(2);
   Double_t errNnumWj   = hNTopTaggedEventsControlRegionWj  ->GetBinError(2);
   Double_t errNnumZjnt = hNTopTaggedEventsControlRegionZjnt->GetBinError(2) * dyScaleFactor;
@@ -152,6 +159,7 @@ void Top(Double_t &yield,
   errNnumBkg += errNnumWW   * errNnumWW;
   errNnumBkg += errNnumWZ   * errNnumWZ;
   errNnumBkg += errNnumWG   * errNnumWG;
+  errNnumBkg += errNnumH125 * errNnumH125;
   errNnumBkg += errNnumZZ   * errNnumZZ;
   errNnumBkg += errNnumWj   * errNnumWj;
   errNnumBkg += errNnumZjnt * errNnumZjnt;
@@ -167,12 +175,13 @@ void Top(Double_t &yield,
   Double_t NdenWW   = hNTopControlRegionWW  ->GetBinContent(2);
   Double_t NdenWZ   = hNTopControlRegionWZ  ->GetBinContent(2);
   Double_t NdenWG   = hNTopControlRegionWG  ->GetBinContent(2);
+  Double_t NdenH125 = hNTopControlRegionH125->GetBinContent(2);
   Double_t NdenZZ   = hNTopControlRegionZZ  ->GetBinContent(2);
   Double_t NdenWj   = hNTopControlRegionWj  ->GetBinContent(2);
   Double_t NdenZjnt = hNTopControlRegionZjnt->GetBinContent(2) * dyScaleFactor;
   Double_t NdenData = hNTopControlRegionDATA->GetBinContent(2);
 
-  Double_t NdenBkg       = NdenTW + NdenWW + NdenWZ + NdenWG + NdenZZ + NdenWj + NdenZjnt ;
+  Double_t NdenBkg       = NdenTW + NdenWW + NdenWZ + NdenWG + NdenH125 + NdenZZ + NdenWj + NdenZjnt;
   Double_t NdenDataFinal = NdenData - NdenBkg;
 
   Double_t errNdenTT   = hNTopControlRegionTT  ->GetBinError(2);
@@ -180,6 +189,7 @@ void Top(Double_t &yield,
   Double_t errNdenWW   = hNTopControlRegionWW  ->GetBinError(2);
   Double_t errNdenWZ   = hNTopControlRegionWZ  ->GetBinError(2);
   Double_t errNdenWG   = hNTopControlRegionWG  ->GetBinError(2);
+  Double_t errNdenH125 = hNTopControlRegionH125->GetBinError(2);
   Double_t errNdenZZ   = hNTopControlRegionZZ  ->GetBinError(2);
   Double_t errNdenWj   = hNTopControlRegionWj  ->GetBinError(2);
   Double_t errNdenZjnt = hNTopControlRegionZjnt->GetBinError(2) * dyScaleFactor;
@@ -190,6 +200,7 @@ void Top(Double_t &yield,
   errNdenBkg += errNdenWW   * errNdenWW;
   errNdenBkg += errNdenWZ   * errNdenWZ;
   errNdenBkg += errNdenWG   * errNdenWG;
+  errNdenBkg += errNdenH125 * errNdenH125;
   errNdenBkg += errNdenZZ   * errNdenZZ;
   errNdenBkg += errNdenWj   * errNdenWj;
   errNdenBkg += errNdenZjnt * errNdenZjnt;
@@ -233,6 +244,7 @@ void Top(Double_t &yield,
     printf("       WW                = %9.4f +- %8.4f\n", NnumWW,        errNnumWW);
     printf("       WZ                = %9.4f +- %8.4f\n", NnumWZ,        errNnumWZ);
     printf("       Wg                = %9.4f +- %8.4f\n", NnumWG,        errNnumWG);
+    printf("       H125              = %9.4f +- %8.4f\n", NnumH125,      errNnumH125);
     printf("       ZZ                = %9.4f +- %8.4f\n", NnumZZ,        errNnumZZ);
     printf("       Wj                = %9.4f +- %8.4f\n", NnumWj,        errNnumWj);
     printf("       Zjnt              = %9.4f +- %8.4f\n", NnumZjnt,      errNnumZjnt);
@@ -247,6 +259,7 @@ void Top(Double_t &yield,
     printf("       WW                = %9.4f +- %8.4f\n", NdenWW,        errNdenWW);
     printf("       WZ                = %9.4f +- %8.4f\n", NdenWZ,        errNdenWZ);
     printf("       Wg                = %9.4f +- %8.4f\n", NdenWG,        errNdenWG);
+    printf("       H125              = %9.4f +- %8.4f\n", NdenH125,      errNdenH125);
     printf("       ZZ                = %9.4f +- %8.4f\n", NdenZZ,        errNdenZZ);
     printf("       Wj                = %9.4f +- %8.4f\n", NdenWj,        errNdenWj);
     printf("       Zjnt              = %9.4f +- %8.4f\n", NdenZjnt,      errNdenZjnt);
@@ -284,6 +297,7 @@ void Top(Double_t &yield,
   Double_t NTaggedWW    = hTopTaggedEventsWW  ->GetBinContent(2);
   Double_t NTaggedWZ    = hTopTaggedEventsWZ  ->GetBinContent(2);
   Double_t NTaggedWG    = hTopTaggedEventsWG  ->GetBinContent(2);
+  Double_t NTaggedH125  = hTopTaggedEventsH125->GetBinContent(2);
   Double_t NTaggedZZ    = hTopTaggedEventsZZ  ->GetBinContent(2);
   Double_t NTaggedWj    = hTopTaggedEventsWj  ->GetBinContent(2);
   Double_t NTaggedZjnt  = hTopTaggedEventsZjnt->GetBinContent(2) * dyScaleFactor;
@@ -294,17 +308,19 @@ void Top(Double_t &yield,
   Double_t errNTaggedWW   = hTopTaggedEventsWW  ->GetBinError(2);
   Double_t errNTaggedWZ   = hTopTaggedEventsWZ  ->GetBinError(2);
   Double_t errNTaggedWG   = hTopTaggedEventsWG  ->GetBinError(2);
+  Double_t errNTaggedH125 = hTopTaggedEventsH125->GetBinError(2);
   Double_t errNTaggedZZ   = hTopTaggedEventsZZ  ->GetBinError(2);
   Double_t errNTaggedWj   = hTopTaggedEventsWj  ->GetBinError(2);
   Double_t errNTaggedZjnt = hTopTaggedEventsZjnt->GetBinError(2) * dyScaleFactor;
   Double_t errNTaggedDATA = hTopTaggedEventsData->GetBinError(2);
 				   
-  Double_t Nbkg = NTaggedWW + NTaggedWZ + NTaggedWG + NTaggedZZ + NTaggedWj + NTaggedZjnt;
+  Double_t Nbkg = NTaggedWW + NTaggedWZ + NTaggedWG + NTaggedH125 + NTaggedZZ + NTaggedWj + NTaggedZjnt;
 
   Double_t errNbkg = 0;
   errNbkg += errNTaggedWW     * errNTaggedWW;
   errNbkg += errNTaggedWZ     * errNTaggedWZ;
   errNbkg += errNTaggedWG     * errNTaggedWG;
+  errNbkg += errNTaggedH125   * errNTaggedH125;
   errNbkg += errNTaggedZZ     * errNTaggedZZ;
   errNbkg += errNTaggedWj     * errNTaggedWj;
   errNbkg += wjSyst*NTaggedWj * wjSyst*NTaggedWj;
@@ -353,6 +369,7 @@ void Top(Double_t &yield,
     printf("       WW   = %9.4f +- %8.4f\n", NTaggedWW,   errNTaggedWW);
     printf("       WZ   = %9.4f +- %8.4f\n", NTaggedWZ,   errNTaggedWZ);
     printf("       Wg   = %9.4f +- %8.4f\n", NTaggedWG,   errNTaggedWG);
+    printf("       H125 = %9.4f +- %8.4f\n", NTaggedH125, errNTaggedH125);
     printf("       ZZ   = %9.4f +- %8.4f\n", NTaggedZZ,   errNTaggedZZ);
     printf("       Wj   = %9.4f +- %8.4f\n", NTaggedWj,   errNTaggedWj);
     printf("       Zjnt = %9.4f +- %8.4f\n", NTaggedZjnt, errNTaggedZjnt);
