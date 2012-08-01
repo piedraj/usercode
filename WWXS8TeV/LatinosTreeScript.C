@@ -14,6 +14,9 @@ const UInt_t numberMetCuts = 5;
 
 Double_t MetCut[] = {20, 25, 30, 45, 1000};
 
+Bool_t runAtOviedo = true;
+Bool_t runAtIfca   = !runAtOviedo;
+
 
 //------------------------------------------------------------------------------
 // LatinosTreeScript
@@ -176,8 +179,10 @@ void LatinosTreeScript(Float_t luminosity,
   //----------------------------------------------------------------------------
   // Input files
   //----------------------------------------------------------------------------
-  TString filesPath = "/hadoop/LatinosSkims/ReducedTrees/R52X_S1_V05_S2_V05_S3_V05/ForICHEP2/";
-  //  TString filesPath = "/gpfs/csic_projects/cms/data/LatinosSkims/ReducedTrees/R52X_S1_V05_S2_V05_S3_V05/ForICHEP2/";
+  TString filesPath;
+
+  if (runAtOviedo) filesPath = "/hadoop/LatinosSkims/ReducedTrees/R52X_S1_V05_S2_V05_S3_V05/TightTight_JEC2012/";
+  if (runAtIfca)   filesPath = "/gpfs/csic_projects/cms/data/LatinosSkims/ReducedTrees/R52X_S1_V05_S2_V05_S3_V05/ForICHEP2/";
 
   TChain* tree = new TChain("latino", "latino");
 
@@ -191,13 +196,12 @@ void LatinosTreeScript(Float_t luminosity,
     tree->Add(filesPath + "latino_201_SingleMuon2012B.root");
     tree->Add(filesPath + "latino_202_DoubleElectron2012B.root");
     tree->Add(filesPath + "latino_203_DoubleMuon2012B.root");
-    tree->Add(filesPath + "latino_204_MuEG2012B.root");
     tree->Add(filesPath + "latino_220_SingleElectron2012B.root");
     tree->Add(filesPath + "latino_221_SingleMuon2012B.root");
     tree->Add(filesPath + "latino_222_DoubleElectron2012B.root");
     tree->Add(filesPath + "latino_223_DoubleMuon2012B.root");
-    tree->Add(filesPath + "latino_224_MuEG2012B.root");
     tree->Add(filesPath + "latino_230_SingleElectron2012B.root");
+    tree->Add(filesPath + "latino_224_MuEG2012B.root");
     tree->Add(filesPath + "latino_231_SingleMuon2012B.root");
     tree->Add(filesPath + "latino_232_DoubleElectron2012B.root");
     tree->Add(filesPath + "latino_233_DoubleMuon2012B.root");
@@ -207,13 +211,14 @@ void LatinosTreeScript(Float_t luminosity,
     tree->Add(filesPath + "latino_242_DoubleElectron2012B.root");
     tree->Add(filesPath + "latino_243_DoubleMuon2012B.root");
     tree->Add(filesPath + "latino_244_MuEG2012B.root");
+    tree->Add(filesPath + "latino_204_MuEG2012B.root");
   }
   else if (theSample == "WJetsFakes_Total") {
-    tree->Add(filesPath + "latino_10X_LooseLoose.root"); 
-    tree->Add(filesPath + "latino_20X_LooseLoose.root");
-    tree->Add(filesPath + "latino_22X_LooseLoose.root");
-    tree->Add(filesPath + "latino_23X_LooseLoose.root");
-    tree->Add(filesPath + "latino_24X_LooseLoose.root");
+    tree->Add(filesPath + "latino_step3_10X_LooseLoose_JEC2012.root"); 
+    tree->Add(filesPath + "latino_step3_20X_LooseLoose_JEC2012.root");
+    tree->Add(filesPath + "latino_step3_22X_LooseLoose_JEC2012.root");
+    tree->Add(filesPath + "latino_step3_23X_LooseLoose_JEC2012.root");
+    tree->Add(filesPath + "latino_step3_24X_LooseLoose_JEC2012.root");
   }
   else if (theSample == "ggWWto2L") {
     tree->Add(filesPath + "latino_001_GluGluToWWTo4L.root");
@@ -223,20 +228,21 @@ void LatinosTreeScript(Float_t luminosity,
   }
   else if (theSample == "WZ") {
     tree->Add(filesPath + "latino_074_WZJetsMad.root");
+    tree->Add(filesPath + "latino_078_WZTo2L2QMad.root");
   }
   else if (theSample == "ZZ") {
     tree->Add(filesPath + "latino_075_ZZJetsMad.root");
     tree->Add(filesPath + "latino_079_ZZTo2L2QMad.root"); 
   }
   else if (theSample == "TTbar") {
-    tree->Add(filesPath + "latino_010_TTJetsMad.root");
+    tree->Add(filesPath + "latino_019_TTTo2L2Nu2B.root");
   }
   else if (theSample == "TW") {
     tree->Add(filesPath + "latino_011_TtWFullDR.root");
     tree->Add(filesPath + "latino_012_TbartWFullDR.root");
   }
   else if (theSample == "Top") {
-    tree->Add(filesPath + "latino_010_TTJetsMad.root");
+    tree->Add(filesPath + "latino_019_TTTo2L2Nu2B.root");
     tree->Add(filesPath + "latino_011_TtWFullDR.root");
     tree->Add(filesPath + "latino_012_TbartWFullDR.root");
   }
@@ -254,12 +260,12 @@ void LatinosTreeScript(Float_t luminosity,
   else if (theSample == "WgammaNoStar") {
     tree->Add(filesPath + "latino_085_WgammaToLNuG.root");
   }
-  else if(theSample == "WgammaStar") {
-    tree->Add(filesPath + "latino_082_WGstarToElNuMad_filtered.root");
-    tree->Add(filesPath + "latino_083_WGstarToMuNuMad_filtered.root");
-    tree->Add(filesPath + "latino_084_WGstarToTauNuMad_filtered.root");
+  else if (theSample == "WgammaStar") {
+    tree->Add(filesPath + "latino_082_WGstarToElNuMad.root");
+    tree->Add(filesPath + "latino_083_WGstarToMuNuMad.root");
+    tree->Add(filesPath + "latino_084_WGstarToTauNuMad.root");
   }
-  else if(theSample == "HWW125") { 
+  else if (theSample == "HWW125") { 
     tree->Add(filesPath + "latino_1125_ggToH125toWWTo2LAndTau2Nu.root");
     tree->Add(filesPath + "latino_2125_vbfToH125toWWTo2LAndTau2Nu.root");
   }
