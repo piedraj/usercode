@@ -66,12 +66,20 @@ Bool_t   _dataDriven;
 Bool_t   _savePlots;
 
 
+// Scale factors
+//------------------------------------------------------------------------------
+Double_t _ttScale;
+Double_t _tWScale;
+Double_t _WWScale;
+Double_t _ZjScale;
+
+
 //------------------------------------------------------------------------------
 // drawDistributions
 //------------------------------------------------------------------------------
 void drawDistributions(TString  channel    = "All",
 		       Int_t    njet       = 0,
-		       Double_t luminosity = 3540,
+		       Double_t luminosity = 5064,
 		       TString  format     = "pdf",
 		       Bool_t   drawRatio  = true,
 		       Bool_t   dataDriven = true,
@@ -84,7 +92,13 @@ void drawDistributions(TString  channel    = "All",
   _drawRatio  = drawRatio;
   _dataDriven = dataDriven;
   _savePlots  = savePlots;
+
+  _ttScale = (njet = 0) ? 1.1 : 0.4;
+  _tWScale = (njet = 0) ? 1.1 : 0.4;
+  _WWScale = (njet = 0) ? 1.2 : 1.2;
+  _ZjScale = (njet = 0) ? 4.0 : 3.7;
   
+
   gStyle->SetHatchesLineWidth(1.00);
   gStyle->SetHatchesSpacing  (0.55);
 
@@ -108,10 +122,12 @@ void drawDistributions(TString  channel    = "All",
 
   // PAS
   //----------------------------------------------------------------------------
-  DrawHistogram("hPtLepton1WWLevel",  "p_{T}^{max}",           5, 0, "GeV",  0, 160);
-  DrawHistogram("hPtLepton2WWLevel",  "p_{T}^{min}",           5, 0, "GeV", 15,  80);
-  DrawHistogram("hPtDiLeptonWWLevel", "p_{T}^{#font[12]{ll}}", 5, 0, "GeV", 40, 120);
-  DrawHistogram("hMinvWWLevel",       "m_{#font[12]{ll}}",     5, 0, "GeV");
+  if (1) {
+    DrawHistogram("hPtLepton1WWLevel",  "p_{T}^{max}",           5, 0, "GeV",  0, 160);
+    DrawHistogram("hPtLepton2WWLevel",  "p_{T}^{min}",           5, 0, "GeV", 15,  80);
+    DrawHistogram("hPtDiLeptonWWLevel", "p_{T}^{#font[12]{ll}}", 5, 0, "GeV", 40, 120);
+    DrawHistogram("hMinvWWLevel",       "m_{#font[12]{ll}}",     5, 0, "GeV");
+  }
 }
 
 
@@ -177,10 +193,10 @@ void DrawHistogram(TString  hname,
       hist[ip]->SetFillStyle(1001);
       hist[ip]->SetLineColor(color[ip]);
 
-      if (_dataDriven && ip == itt) hist[ip]->Scale(1.1);
-      if (_dataDriven && ip == itW) hist[ip]->Scale(1.1);
-      if (_dataDriven && ip == iWW) hist[ip]->Scale(1.2);
-      if (_dataDriven && ip == iZj) hist[ip]->Scale(4.0);
+      if (_dataDriven && ip == itt) hist[ip]->Scale(_ttScale);
+      if (_dataDriven && ip == itW) hist[ip]->Scale(_tWScale);
+      if (_dataDriven && ip == iWW) hist[ip]->Scale(_WWScale);
+      if (_dataDriven && ip == iZj) hist[ip]->Scale(_ZjScale);
 
       hstack->Add(hist[ip]);
     }
