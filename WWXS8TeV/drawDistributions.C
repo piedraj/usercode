@@ -78,7 +78,7 @@ Double_t _ZjScale;
 // drawDistributions
 //------------------------------------------------------------------------------
 void drawDistributions(TString  channel    = "All",
-		       Int_t    njet       = 0,
+		       Int_t    njet       = 1,
 		       Double_t luminosity = 5064,
 		       TString  format     = "pdf",
 		       Bool_t   drawRatio  = true,
@@ -93,18 +93,17 @@ void drawDistributions(TString  channel    = "All",
   _dataDriven = dataDriven;
   _savePlots  = savePlots;
 
-  _ttScale = (njet = 0) ? 1.1 : 0.4;
-  _tWScale = (njet = 0) ? 1.1 : 0.4;
-  _WWScale = (njet = 0) ? 1.2 : 1.2;
-  _ZjScale = (njet = 0) ? 4.0 : 3.7;
+  _ttScale = (njet = 0) ? 1.1 : 1.1;
+  _tWScale = (njet = 0) ? 1.1 : 1.1;
+  _WWScale = (njet = 0) ? 1.2 : 0.9;
+  _ZjScale = (njet = 0) ? 4.0 : 4.2;
   
 
   gStyle->SetHatchesLineWidth(1.00);
   gStyle->SetHatchesSpacing  (0.55);
 
 
-  TString path = Form("rootfiles.%.3ffb/%djet/%s/",
-		      _luminosity/1e3, _njet, _channel.Data());
+  TString path = Form("rootfiles/%djet/%s/", _njet, _channel.Data());
 
   for (UInt_t ip=0; ip<nProcesses; ip++)
     input[ip] = new TFile(path + process[ip] + ".root", "read");

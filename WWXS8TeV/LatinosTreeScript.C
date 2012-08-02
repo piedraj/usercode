@@ -267,7 +267,7 @@ void LatinosTreeScript(Float_t luminosity,
   }
   else if (theSample == "HWW125") { 
     tree->Add(filesPath + "latino_1125_ggToH125toWWTo2LAndTau2Nu.root");
-    tree->Add(filesPath + "latino_2125_vbfToH125toWWTo2LAndTau2Nu.root");
+    //    tree->Add(filesPath + "latino_2125_vbfToH125toWWTo2LAndTau2Nu.root");
   }
   else {
     return;
@@ -306,6 +306,7 @@ void LatinosTreeScript(Float_t luminosity,
   Int_t   bveto_mu;    tree->SetBranchAddress("bveto_mu"  , &bveto_mu);
   Int_t   bveto_ip;    tree->SetBranchAddress("bveto_ip"  , &bveto_ip);
   Float_t nbjet;       tree->SetBranchAddress("nbjet"     , &nbjet);
+  Float_t nbjettche;   tree->SetBranchAddress("nbjettche" , &nbjettche);
  
   Float_t pfmet;       tree->SetBranchAddress("pfmet"     , &pfmet);
   Float_t ppfmet;      tree->SetBranchAddress("ppfmet"    , &ppfmet);
@@ -513,7 +514,7 @@ void LatinosTreeScript(Float_t luminosity,
 			  hWPtll->Fill(1, totalW);
 			  hWeffPtll->Fill(1, efficiencyW);
 
-			  if (bveto_ip) {			    
+			  if (bveto_ip && nbjettche == 0) {			    
 			    
 			    hWTopTagging->Fill(1, totalW);
 			    hWeffTopTagging->Fill(1, efficiencyW);

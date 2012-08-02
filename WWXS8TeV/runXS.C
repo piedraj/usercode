@@ -34,7 +34,7 @@ enum {SILENT, NOTE, DEBUG};
 //
 //------------------------------------------------------------------------------
 void runXS(Int_t    ichannel      = All,
-	   Int_t    njet          = 0,
+	   Int_t    njet          = 1,
 	   Double_t luminosity    = 5064,
 	   Int_t    printLevel    = NOTE,
 	   Bool_t   useDataDriven = true,  // false => DY and Top from MC
@@ -45,7 +45,7 @@ void runXS(Int_t    ichannel      = All,
 {
   if (ichannel >= Int_t(nchannels)) return;
 
-  TString directory = Form("rootfiles.%.3ffb", luminosity/1e3);
+  TString directory = "rootfiles";
 
   gInterpreter->LoadMacro("DY.C+");
   gInterpreter->LoadMacro("Top.C+");

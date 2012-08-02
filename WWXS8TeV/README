@@ -4,12 +4,6 @@
 ./run.sh 0
 ./run.sh 1
 
-rm -rf rootfiles.5.064fb
-mkdir  rootfiles.5.064fb
-mv rootfiles/0jet rootfiles.5.064fb/.
-mv rootfiles/1jet rootfiles.5.064fb/.
-rm -rf rootfiles
-
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # 2. Print DY scale, top scale and WW cross section

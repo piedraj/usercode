@@ -11,7 +11,7 @@ Double_t _luminosity;
 //------------------------------------------------------------------------------
 // compareXS
 //------------------------------------------------------------------------------
-void compareXS(Double_t luminosity = 3540)
+void compareXS(Double_t luminosity = 5064)
 {
   _luminosity = luminosity;
 
@@ -39,15 +39,15 @@ void compareXS(Double_t luminosity = 3540)
   Double_t syst7tev_0jet[nchannels] = { 4.11,  4.08,  5.39,  4.46,  4.27};
   Double_t lumi7tev_0jet[nchannels] = { 1.15,  1.14,  1.32,  1.07,  1.16};
 
-  Double_t xs8tev_0jet  [nchannels] = {69.86, 64.36, 64.22, 74.46, 73.75};
-  Double_t stat8tev_0jet[nchannels] = { 2.79,  5.87,  7.64,  4.76,  5.09};
-  Double_t syst8tev_0jet[nchannels] = { 5.58,  5.65,  6.56,  6.06,  5.63};
-  Double_t lumi8tev_0jet[nchannels] = { 3.07,  2.83,  2.83,  3.28,  3.25};
+  Double_t xs8tev_0jet  [nchannels] = {65.87, 66.28, 56.36, 68.27, 69.50};
+  Double_t stat8tev_0jet[nchannels] = { 2.35,  5.06,  6.37,  3.98,  4.30};
+  Double_t syst8tev_0jet[nchannels] = { 5.37,  5.59,  5.90,  5.83,  5.34};
+  Double_t lumi8tev_0jet[nchannels] = { 2.90,  2.92,  2.48,  3.00,  3.06};
 
-  Double_t xs8tev_1jet  [nchannels] = {47.79, 46.93, 92.20, 49.01, 37.98};
-  Double_t stat8tev_1jet[nchannels] = { 5.91, 14.63, 19.92,  9.38,  9.72};
-  Double_t syst8tev_1jet[nchannels] = {11.62, 15.47, 14.74, 12.23, 12.04};
-  Double_t lumi8tev_1jet[nchannels] = { 2.10,  2.07,  4.06,  2.16,  1.67};
+  Double_t xs8tev_1jet  [nchannels] = {51.59, 52.19, 58.77, 58.07, 47.98};
+  Double_t stat8tev_1jet[nchannels] = { 5.02, 12.71, 15.99,  8.00,  8.31};
+  Double_t syst8tev_1jet[nchannels] = {10.63, 14.53, 12.33, 10.76, 10.10};
+  Double_t lumi8tev_1jet[nchannels] = { 2.27,  2.30,  2.59,  2.56,  2.09};
 
   TGraphAsymmErrors* ratio8tev_0jet = new TGraphAsymmErrors(nchannels);
   TGraphAsymmErrors* ratio8tev_1jet = new TGraphAsymmErrors(nchannels);
@@ -147,6 +147,10 @@ void compareXS(Double_t luminosity = 3540)
   nlo   ->Draw("e2,same");
   line  ->Draw("same");
   mg    ->Draw("p,same");
+
+
+  mg->SetMaximum(90);
+  mg->SetMinimum(35);
 
 
   // Additional titles
