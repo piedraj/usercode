@@ -1,81 +1,73 @@
+const Double_t nlo7tev      = 47.04;  // [pb]
+const Double_t nlo7tevPlus  = 4.3 * nlo7tev / 1e2;
+const Double_t nlo7tevMinus = 3.2 * nlo7tev / 1e2;
+
+const Double_t nlo8tev      = 57.25;  // [pb]
+const Double_t nlo8tevPlus  = 4.1 * nlo8tev / 1e2;
+const Double_t nlo8tevMinus = 2.8 * nlo8tev / 1e2;
+
+
 const UInt_t nchannels = 5;
 
 TString channelLabel[] = {"all", "#mu#mu", "ee", "e#mu", "#mue"};
 
 
-// Settings
-//------------------------------------------------------------------------------
-Double_t _luminosity;
+Double_t luminosity = 5.064;  // [fb-1]
 
 
-//------------------------------------------------------------------------------
-// compareXS
-//------------------------------------------------------------------------------
-void compareXS(Double_t luminosity = 5064)
+void compareXS()
 {
-  _luminosity = luminosity;
-
-
-  // NLO values
-  //----------------------------------------------------------------------------
-  Double_t nlo7tev      = 47.04;
-  Double_t nlo7tevPlus  = 4.3 * nlo7tev / 1e2;
-  Double_t nlo7tevMinus = 3.2 * nlo7tev / 1e2;
-
-  Double_t nlo8tev      = 57.25;
-  Double_t nlo8tevPlus  = 4.1 * nlo8tev / 1e2;
-  Double_t nlo8tevMinus = 2.8 * nlo8tev / 1e2;
-
-  printf("\n");
-  printf(" sigma(NLO, 7 TeV) = %6.3f +%5.3f -%5.3f pb\n", nlo7tev, nlo7tevPlus, nlo7tevMinus);
-  printf(" sigma(NLO, 8 TeV) = %6.3f +%5.3f -%5.3f pb\n", nlo8tev, nlo8tevPlus, nlo8tevMinus);
-  printf("\n");
-
-
-  // CMS values
-  //----------------------------------------------------------------------------
   Double_t xs7tev_0jet  [nchannels] = {52.37, 51.88, 60.19, 48.76, 52.60};
   Double_t stat7tev_0jet[nchannels] = { 1.99,  3.96,  5.66,  3.43,  3.67};
   Double_t syst7tev_0jet[nchannels] = { 4.11,  4.08,  5.39,  4.46,  4.27};
   Double_t lumi7tev_0jet[nchannels] = { 1.15,  1.14,  1.32,  1.07,  1.16};
 
-  Double_t xs8tev_0jet  [nchannels] = {65.87, 66.28, 56.36, 68.27, 69.50};
+  Double_t xs8tev_0jet  [nchannels] = {65.51, 65.93, 56.01, 67.91, 69.14};
   Double_t stat8tev_0jet[nchannels] = { 2.35,  5.06,  6.37,  3.98,  4.30};
-  Double_t syst8tev_0jet[nchannels] = { 5.37,  5.59,  5.90,  5.83,  5.34};
-  Double_t lumi8tev_0jet[nchannels] = { 2.90,  2.92,  2.48,  3.00,  3.06};
 
-  Double_t xs8tev_1jet  [nchannels] = {51.59, 52.19, 58.77, 58.07, 47.98};
+  Double_t xs8tev_1jet  [nchannels] = {52.76, 53.50, 59.94, 59.19, 48.63};
   Double_t stat8tev_1jet[nchannels] = { 5.02, 12.71, 15.99,  8.00,  8.31};
-  Double_t syst8tev_1jet[nchannels] = {10.63, 14.53, 12.33, 10.76, 10.10};
-  Double_t lumi8tev_1jet[nchannels] = { 2.27,  2.30,  2.59,  2.56,  2.09};
 
-  TGraphAsymmErrors* ratio8tev_0jet = new TGraphAsymmErrors(nchannels);
-  TGraphAsymmErrors* ratio8tev_1jet = new TGraphAsymmErrors(nchannels);
+  Double_t xs8tev_incl  [nchannels] = {61.82, 62.67, 57.00, 65.28, 62.81};
+  Double_t stat8tev_incl[nchannels] = { 2.21,  4.95,  6.25,  3.68,  3.93};
+
+
+  TGraphErrors* g8tev_0jet = new TGraphErrors(nchannels);
+  TGraphErrors* g8tev_1jet = new TGraphErrors(nchannels);
+  TGraphErrors* g8tev_incl = new TGraphErrors(nchannels);
 
   
   // Loop
   //----------------------------------------------------------------------------
   for (UInt_t i=0; i<nchannels; i++) {
 
-    ratio8tev_0jet->SetPoint(i, i, xs8tev_0jet[i]);
-    ratio8tev_1jet->SetPoint(i, i, xs8tev_1jet[i]);
+    g8tev_0jet->SetPoint(i, i, xs8tev_0jet[i]);
+    g8tev_1jet->SetPoint(i, i, xs8tev_1jet[i]);
+    g8tev_incl->SetPoint(i, i, xs8tev_incl[i]);
 
-    ratio8tev_0jet->SetPointError(i, 0.5, 0.5, stat8tev_0jet[i], stat8tev_0jet[i]);
-    ratio8tev_1jet->SetPointError(i, 0.5, 0.5, stat8tev_1jet[i], stat8tev_1jet[i]);
+    g8tev_0jet->SetPointError(i, 0.5, stat8tev_0jet[i]);
+    g8tev_1jet->SetPointError(i, 0.5, stat8tev_1jet[i]);
+    g8tev_incl->SetPointError(i, 0.5, stat8tev_incl[i]);
   }
 
-  
+
   // Cosmetics
   //----------------------------------------------------------------------------
-  ratio8tev_0jet->SetLineWidth  (2);
-  ratio8tev_0jet->SetMarkerSize (1.4);
-  ratio8tev_0jet->SetMarkerStyle(kFullCircle);
+  g8tev_0jet->SetLineWidth  (2);
+  g8tev_0jet->SetMarkerSize (1.4);
+  g8tev_0jet->SetMarkerStyle(kFullCircle);
 
-  ratio8tev_1jet->SetLineColor  (kBlue);
-  ratio8tev_1jet->SetLineWidth  (2);
-  ratio8tev_1jet->SetMarkerColor(kBlue);
-  ratio8tev_1jet->SetMarkerSize (1.4);
-  ratio8tev_1jet->SetMarkerStyle(kFullSquare);
+  g8tev_1jet->SetLineColor  (kBlue);
+  g8tev_1jet->SetLineWidth  (2);
+  g8tev_1jet->SetMarkerColor(kBlue);
+  g8tev_1jet->SetMarkerSize (1.4);
+  g8tev_1jet->SetMarkerStyle(kFullSquare);
+
+  g8tev_incl->SetLineColor  (kGreen+1);
+  g8tev_incl->SetLineWidth  (2);
+  g8tev_incl->SetMarkerColor(kGreen+1);
+  g8tev_incl->SetMarkerSize (1.4);
+  g8tev_incl->SetMarkerStyle(kOpenCircle);
 
 
   // Draw
@@ -84,15 +76,14 @@ void compareXS(Double_t luminosity = 5064)
   
   TMultiGraph* mg = new TMultiGraph();
 
-  mg->Add(ratio8tev_1jet);
-  mg->Add(ratio8tev_0jet);
+  mg->Add(g8tev_1jet);
+  mg->Add(g8tev_0jet);
+  mg->Add(g8tev_incl);
 
   mg->Draw("ap");
 
-  mg->GetYaxis()->SetTitle("#sigma_{WW} [pb]");
-  mg->GetYaxis()->SetTitleOffset(1.6);
-
-  canvas->Update();
+  mg->GetYaxis()->SetTitle("#sigma_{WW} (pb)");
+  mg->GetYaxis()->SetTitleOffset(1.5);
 
 
   // x-axis label
@@ -130,15 +121,16 @@ void compareXS(Double_t luminosity = 5064)
 
   // Legend
   //----------------------------------------------------------------------------
-  TLegend* legend = new TLegend(0.225, 0.705, 0.500, 0.895);
+  TLegend* legend = new TLegend(0.223, 0.673, 0.467, 0.895);
 
   legend->SetFillColor(0);
   legend->SetTextFont (42);
   legend->SetTextSize (0.035);
 
-  legend->AddEntry(nlo,            " NLO",   "f");
-  legend->AddEntry(ratio8tev_0jet, " 0-jet", "lp");
-  legend->AddEntry(ratio8tev_1jet, " 1-jet", "lp");
+  legend->AddEntry(nlo,        " NLO",   "f");
+  legend->AddEntry(g8tev_0jet, " 0-jet", "lp");
+  legend->AddEntry(g8tev_1jet, " 1-jet", "lp");
+  legend->AddEntry(g8tev_incl, " inclusive", "lp");
 
 
   // Put everything together
@@ -149,14 +141,14 @@ void compareXS(Double_t luminosity = 5064)
   mg    ->Draw("p,same");
 
 
-  mg->SetMaximum(90);
-  mg->SetMinimum(35);
+  mg->SetMaximum(91);
+  mg->SetMinimum(38);
 
 
   // Additional titles
   //----------------------------------------------------------------------------
-  DrawTLatex(0.9, 0.860, 0.04, "CMS preliminary");
-  DrawTLatex(0.9, 0.815, 0.03, Form("L = %.3f fb^{-1}", _luminosity/1e3));
+  DrawTLatex(0.185, 0.970, 0.04, 13, "CMS preliminary");
+  DrawTLatex(0.940, 0.978, 0.04, 33, Form("#sqrt{s} = 8 TeV, L = %.3f fb^{-1}", luminosity));
 
 
   // And save it
@@ -164,19 +156,24 @@ void compareXS(Double_t luminosity = 5064)
   canvas->Update();
   canvas->GetFrame()->DrawClone();
 
-  canvas->SaveAs("wwxs0jet1jet.png");
+  canvas->SaveAs("wwxs013.png");
 }
 
 
 //------------------------------------------------------------------------------
 // DrawTLatex
 //------------------------------------------------------------------------------
-void DrawTLatex(Double_t x, Double_t y, Double_t tsize, const char* text)
+void DrawTLatex(Double_t    x,
+		Double_t    y,
+		Double_t    tsize,
+		Short_t     align,
+		const char* text)
 {
   TLatex* tl = new TLatex(x, y, text);
 
   tl->SetNDC();
-  tl->SetTextAlign(   32);
+
+  tl->SetTextAlign(align);
   tl->SetTextFont (   42);
   tl->SetTextSize (tsize);
 

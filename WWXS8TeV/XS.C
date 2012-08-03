@@ -81,8 +81,12 @@ void XS(Double_t &xsValue,
       njet,
       "All",  // "All" --> channel (individual topScaleFactor)
       directory,
-      useDataDriven,
+      false,  // useDataDriven
       printLevel);
+
+
+  printf("\n >>>>>>> WARNING: Taking top from MC <<<<<<<\n");
+
 
   DY(NDY[0],
      NDY[1],

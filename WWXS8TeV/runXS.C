@@ -33,8 +33,8 @@ enum {SILENT, NOTE, DEBUG};
 //     -1 --> do all channels
 //
 //------------------------------------------------------------------------------
-void runXS(Int_t    ichannel      = All,
-	   Int_t    njet          = 1,
+void runXS(Int_t    njet          = 0,
+	   Int_t    ichannel      = All,
 	   Double_t luminosity    = 5064,
 	   Int_t    printLevel    = NOTE,
 	   Bool_t   useDataDriven = true,  // false => DY and Top from MC

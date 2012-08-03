@@ -451,10 +451,14 @@ void Top(Double_t &yield,
 
   // Save the result
   //----------------------------------------------------------------------------
-  yield          = (useDataDriven) ? NTopEstimatedDataFinal_fraction : NTopTotalMC;
+  yield          = (useDataDriven) ? NTopEstimatedDataFinal_fraction : 1.1 * NTopTotalMC;
   statError      = errNTopEstimatedDataFinal_fraction;
   systError      = errtotal_syst;
   topScaleFactor = yield / NTopTotalMC;
+
+
+  printf("\n >>>>>>> WARNING: Top from MC is scaled x 1.1 <<<<<<<\n");
+
 
   Double_t topScaleFactorError = ratioError(yield,
 					    NTopTotalMC,
