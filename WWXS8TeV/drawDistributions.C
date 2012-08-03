@@ -68,23 +68,25 @@ Bool_t   _savePlots;
 
 // Scale factors
 //------------------------------------------------------------------------------
-Double_t _ttScale;
-Double_t _tWScale;
-Double_t _WWScale;
-Double_t _ZjScale;
+Double_t ttScale[] = {1.10, 1.10, 999, 1.10};
+Double_t tWScale[] = {1.10, 1.10, 999, 1.10};
+Double_t WWScale[] = {1.14, 0.92, 999, 1.08};
+Double_t ZjScale[] = {3.70, 4.20, 999, 4.00};
 
 
 //------------------------------------------------------------------------------
 // drawDistributions
 //------------------------------------------------------------------------------
-void drawDistributions(TString  channel    = "All",
-		       Int_t    njet       = 1,
+void drawDistributions(Int_t    njet       = 3,
+		       TString  channel    = "All",
 		       Double_t luminosity = 5064,
 		       TString  format     = "pdf",
 		       Bool_t   drawRatio  = true,
 		       Bool_t   dataDriven = true,
 		       Bool_t   savePlots  = true)
 {
+  if (njet == 2) return;
+
   _channel    = channel;
   _njet       = njet;
   _luminosity = luminosity;
@@ -93,11 +95,6 @@ void drawDistributions(TString  channel    = "All",
   _dataDriven = dataDriven;
   _savePlots  = savePlots;
 
-  _ttScale = (njet = 0) ? 1.1 : 1.1;
-  _tWScale = (njet = 0) ? 1.1 : 1.1;
-  _WWScale = (njet = 0) ? 1.2 : 0.9;
-  _ZjScale = (njet = 0) ? 4.0 : 4.2;
-  
 
   gStyle->SetHatchesLineWidth(1.00);
   gStyle->SetHatchesSpacing  (0.55);
@@ -192,10 +189,10 @@ void DrawHistogram(TString  hname,
       hist[ip]->SetFillStyle(1001);
       hist[ip]->SetLineColor(color[ip]);
 
-      if (_dataDriven && ip == itt) hist[ip]->Scale(_ttScale);
-      if (_dataDriven && ip == itW) hist[ip]->Scale(_tWScale);
-      if (_dataDriven && ip == iWW) hist[ip]->Scale(_WWScale);
-      if (_dataDriven && ip == iZj) hist[ip]->Scale(_ZjScale);
+      if (_dataDriven && ip == itt) hist[ip]->Scale(ttScale[_njet]);
+      if (_dataDriven && ip == itW) hist[ip]->Scale(tWScale[_njet]);
+      if (_dataDriven && ip == iWW) hist[ip]->Scale(WWScale[_njet]);
+      if (_dataDriven && ip == iZj) hist[ip]->Scale(ZjScale[_njet]);
 
       hstack->Add(hist[ip]);
     }
