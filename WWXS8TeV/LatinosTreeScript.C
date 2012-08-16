@@ -267,7 +267,7 @@ void LatinosTreeScript(Float_t luminosity,
   }
   else if (theSample == "HWW125") { 
     tree->Add(filesPath + "latino_1125_ggToH125toWWTo2LAndTau2Nu.root");
-    //    tree->Add(filesPath + "latino_2125_vbfToH125toWWTo2LAndTau2Nu.root");
+    tree->Add(filesPath + "latino_2125_vbfToH125toWWTo2LAndTau2Nu.root");
   }
   else {
     return;
