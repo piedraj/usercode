@@ -27,6 +27,8 @@ void LatinosTreeScript(Float_t luminosity,
 		       TString theSample,
 		       Bool_t  verbose)
 {
+  TH1::SetDefaultSumw2();
+
   TString path = Form("rootfiles/%djet/%s/", jetChannel, flavorChannel.Data());
 
   gSystem->mkdir(path, kTRUE);
@@ -36,93 +38,52 @@ void LatinosTreeScript(Float_t luminosity,
 
   // Counting histograms
   //----------------------------------------------------------------------------
-  TH1F *hWTrigger     = new TH1F("hWTrigger",     "", 3, 0, 3);
-  TH1F *hWMetCut      = new TH1F("hWMetCut",      "", 3, 0, 3);
-  TH1F *hWLowMinv     = new TH1F("hWLowMinv",     "", 3, 0, 3);
-  TH1F *hWZVeto       = new TH1F("hWZVeto",       "", 3, 0, 3);
-  TH1F *hWpMetCut     = new TH1F("hWpMetCut",     "", 3, 0, 3);
-  TH1F *hWJetVeto     = new TH1F("hWJetVeto",     "", 3, 0, 3);
-  TH1F *hWDeltaPhiJet = new TH1F("hWDeltaPhiJet", "", 3, 0, 3);
-  TH1F *hWSoftMuVeto  = new TH1F("hWSoftMuVeto",  "", 3, 0, 3); 
-  TH1F *hWExtraLepton = new TH1F("hWExtraLepton", "", 3, 0, 3);
-  TH1F *hWPtll        = new TH1F("hWPtll",        "", 3, 0, 3);
-  TH1F *hWTopTagging  = new TH1F("hWTopTagging",  "", 3, 0, 3);
+  TH1F* hWTrigger     = new TH1F("hWTrigger",     "", 3, 0, 3);
+  TH1F* hWMetCut      = new TH1F("hWMetCut",      "", 3, 0, 3);
+  TH1F* hWLowMinv     = new TH1F("hWLowMinv",     "", 3, 0, 3);
+  TH1F* hWZVeto       = new TH1F("hWZVeto",       "", 3, 0, 3);
+  TH1F* hWpMetCut     = new TH1F("hWpMetCut",     "", 3, 0, 3);
+  TH1F* hWJetVeto     = new TH1F("hWJetVeto",     "", 3, 0, 3);
+  TH1F* hWDeltaPhiJet = new TH1F("hWDeltaPhiJet", "", 3, 0, 3);
+  TH1F* hWSoftMuVeto  = new TH1F("hWSoftMuVeto",  "", 3, 0, 3); 
+  TH1F* hWExtraLepton = new TH1F("hWExtraLepton", "", 3, 0, 3);
+  TH1F* hWPtll        = new TH1F("hWPtll",        "", 3, 0, 3);
+  TH1F* hWTopTagging  = new TH1F("hWTopTagging",  "", 3, 0, 3);
 
-  hWTrigger    ->Sumw2();
-  hWMetCut     ->Sumw2();
-  hWLowMinv    ->Sumw2();
-  hWZVeto      ->Sumw2();
-  hWpMetCut    ->Sumw2();
-  hWJetVeto    ->Sumw2();
-  hWDeltaPhiJet->Sumw2();
-  hWSoftMuVeto ->Sumw2();
-  hWExtraLepton->Sumw2();
-  hWPtll       ->Sumw2();
-  hWTopTagging ->Sumw2();
-
-
-  TH1F *hWeffTrigger     = new TH1F("hWeffTrigger",     "", 3, 0, 3);
-  TH1F *hWeffMetCut      = new TH1F("hWeffMetCut",      "", 3, 0, 3);
-  TH1F *hWeffLowMinv     = new TH1F("hWeffLowMinv",     "", 3, 0, 3);
-  TH1F *hWeffZVeto       = new TH1F("hWeffZVeto",       "", 3, 0, 3);
-  TH1F *hWeffpMetCut     = new TH1F("hWeffpMetCut",     "", 3, 0, 3);
-  TH1F *hWeffJetVeto     = new TH1F("hWeffJetVeto",     "", 3, 0, 3);
-  TH1F *hWeffDeltaPhiJet = new TH1F("hWeffDeltaPhiJet", "", 3, 0, 3);
-  TH1F *hWeffSoftMuVeto  = new TH1F("hWeffSoftMuVeto",  "", 3, 0, 3); 
-  TH1F *hWeffExtraLepton = new TH1F("hWeffExtraLepton", "", 3, 0, 3);
-  TH1F *hWeffPtll        = new TH1F("hWeffPtll",        "", 3, 0, 3);
-  TH1F *hWeffTopTagging  = new TH1F("hWeffTopTagging",  "", 3, 0, 3);
-
-  hWeffTrigger    ->Sumw2();
-  hWeffMetCut     ->Sumw2();
-  hWeffLowMinv    ->Sumw2();
-  hWeffZVeto      ->Sumw2();
-  hWeffpMetCut    ->Sumw2();
-  hWeffJetVeto    ->Sumw2();
-  hWeffDeltaPhiJet->Sumw2();
-  hWeffSoftMuVeto ->Sumw2();
-  hWeffExtraLepton->Sumw2();
-  hWeffPtll       ->Sumw2();
-  hWeffTopTagging ->Sumw2();
+  TH1F* hWeffTrigger     = new TH1F("hWeffTrigger",     "", 3, 0, 3);
+  TH1F* hWeffMetCut      = new TH1F("hWeffMetCut",      "", 3, 0, 3);
+  TH1F* hWeffLowMinv     = new TH1F("hWeffLowMinv",     "", 3, 0, 3);
+  TH1F* hWeffZVeto       = new TH1F("hWeffZVeto",       "", 3, 0, 3);
+  TH1F* hWeffpMetCut     = new TH1F("hWeffpMetCut",     "", 3, 0, 3);
+  TH1F* hWeffJetVeto     = new TH1F("hWeffJetVeto",     "", 3, 0, 3);
+  TH1F* hWeffDeltaPhiJet = new TH1F("hWeffDeltaPhiJet", "", 3, 0, 3);
+  TH1F* hWeffSoftMuVeto  = new TH1F("hWeffSoftMuVeto",  "", 3, 0, 3); 
+  TH1F* hWeffExtraLepton = new TH1F("hWeffExtraLepton", "", 3, 0, 3);
+  TH1F* hWeffPtll        = new TH1F("hWeffPtll",        "", 3, 0, 3);
+  TH1F* hWeffTopTagging  = new TH1F("hWeffTopTagging",  "", 3, 0, 3);
 
 
   // WW level histograms
   //----------------------------------------------------------------------------
-  TH1F *hPtLepton1WWLevel       = new TH1F("hPtLepton1WWLevel",       "", 160, 0, 160);  // 200, 0, 200
-  TH1F *hPtLepton2WWLevel       = new TH1F("hPtLepton2WWLevel",       "",  80, 0,  80);  // 200, 0, 200
-  TH1F *hPtDiLeptonWWLevel      = new TH1F("hPtDiLeptonWWLevel",      "", 120, 0, 120);  // 200, 0, 200
-  TH1F *hMinvWWLevel            = new TH1F("hMinvWWLevel",            "", 200, 0, 200);
-  TH1F *hMtWWLevel              = new TH1F("hMtWWLevel",              "", 250, 0, 250);
-  TH1F *hNJets30WWLevel         = new TH1F("hNJetsPF30WWLevel",       "",  10, 0,  10);
-  TH1F *hpfMetWWLevel           = new TH1F("hpfMetWWLevel",           "", 150, 0, 150);
-  TH1F *hppfMetWWLevel          = new TH1F("hppfMetWWLevel",          "", 150, 0, 150);
-  TH1F *hchMetWWLevel           = new TH1F("hchMetWWLevel",           "", 150, 0, 150);
-  TH1F *hpchMetWWLevel          = new TH1F("hpchMetWWLevel",          "", 150, 0, 150);
-  TH1F *hpminMetWWLevel         = new TH1F("hpminMetWWLevel",         "", 150, 0, 150);
-  TH1F *hDeltaRLeptonsWWLevel   = new TH1F("hDeltaRLeptonsWWLevel",   "",  50, 0,   5);
-  TH1F *hDeltaPhiLeptonsWWLevel = new TH1F("hDeltaPhiLeptonsWWLevel", "",  32, 0, 3.2);
-  TH1F *hDPhiPtllJetWWLevel     = new TH1F("hDPhiPtllJetWWLevel",     "",  32, 0, 3.2);
-
-  hPtLepton1WWLevel      ->Sumw2();
-  hPtLepton2WWLevel      ->Sumw2();
-  hPtDiLeptonWWLevel     ->Sumw2();
-  hMinvWWLevel           ->Sumw2();
-  hMtWWLevel             ->Sumw2();
-  hNJets30WWLevel        ->Sumw2();
-  hpfMetWWLevel          ->Sumw2();
-  hppfMetWWLevel         ->Sumw2();
-  hpchMetWWLevel         ->Sumw2();
-  hpminMetWWLevel        ->Sumw2();
-  hDeltaRLeptonsWWLevel  ->Sumw2();  
-  hDeltaPhiLeptonsWWLevel->Sumw2();
-  hDPhiPtllJetWWLevel    ->Sumw2();
+  TH1F* hPtLepton1WWLevel       = new TH1F("hPtLepton1WWLevel",       "", 200, 0, 200);
+  TH1F* hPtLepton2WWLevel       = new TH1F("hPtLepton2WWLevel",       "", 200, 0, 200);
+  TH1F* hPtDiLeptonWWLevel      = new TH1F("hPtDiLeptonWWLevel",      "", 200, 0, 200);
+  TH1F* hMinvWWLevel            = new TH1F("hMinvWWLevel",            "", 200, 0, 200);
+  TH1F* hMtWWLevel              = new TH1F("hMtWWLevel",              "", 250, 0, 250);
+  TH1F* hNJets30WWLevel         = new TH1F("hNJetsPF30WWLevel",       "",  10, 0,  10);
+  TH1F* hpfMetWWLevel           = new TH1F("hpfMetWWLevel",           "", 150, 0, 150);
+  TH1F* hppfMetWWLevel          = new TH1F("hppfMetWWLevel",          "", 150, 0, 150);
+  TH1F* hchMetWWLevel           = new TH1F("hchMetWWLevel",           "", 150, 0, 150);
+  TH1F* hpchMetWWLevel          = new TH1F("hpchMetWWLevel",          "", 150, 0, 150);
+  TH1F* hpminMetWWLevel         = new TH1F("hpminMetWWLevel",         "", 150, 0, 150);
+  TH1F* hDeltaRLeptonsWWLevel   = new TH1F("hDeltaRLeptonsWWLevel",   "",  50, 0,   5);
+  TH1F* hDeltaPhiLeptonsWWLevel = new TH1F("hDeltaPhiLeptonsWWLevel", "",  32, 0, 3.2);
+  TH1F* hDPhiPtllJetWWLevel     = new TH1F("hDPhiPtllJetWWLevel",     "",  32, 0, 3.2);
 
 
   // Data-driven methods: Z+jets
   //----------------------------------------------------------------------------
   TH1F* hCountedMinvDYStudies = new TH1F("hCountedMinvDYStudies", "", 3, 0,3);
-
-  hCountedMinvDYStudies->Sumw2();
 
   TH1F* hNinZevents     [numberMetCuts];
   TH1F* hNoutZevents    [numberMetCuts];
@@ -138,13 +99,6 @@ void LatinosTreeScript(Float_t luminosity,
     hMassInZevents  [nC] = new TH1F(Form("hMassInZevents%.1f",   MetCut[nC]), "", 200, 0, 200);
     hMassOutZevents [nC] = new TH1F(Form("hMassOutZevents%.1f",  MetCut[nC]), "", 200, 0, 200);
     hMinvDYStudies  [nC] = new TH1F(Form("hMinvDYStudies%.1f",   MetCut[nC]), "", 200, 0, 200);
-    
-    hNinZevents     [nC]->Sumw2();
-    hNoutZevents    [nC]->Sumw2();
-    hNinLooseZevents[nC]->Sumw2();
-    hMassInZevents  [nC]->Sumw2();
-    hMassOutZevents [nC]->Sumw2();
-    hMinvDYStudies  [nC]->Sumw2();
   }
 
 
@@ -157,23 +111,6 @@ void LatinosTreeScript(Float_t luminosity,
   TH1F* hbTagDisTopTaggedEvents            = new TH1F("hbTagDisTopTaggedEvents",            "", 300, -10, 20);
   TH1F* hbTagDisNTopControlRegion          = new TH1F("hbTagDisNTopControlRegion",          "", 300, -10, 20);
   TH1F* hbTagDisNTopTaggedTopControlRegion = new TH1F("hbTagDisNTopTaggedTopControlRegion", "", 300, -10, 20);
-  
-  hTopTaggedEvents           ->Sumw2();
-  hNTopControlRegion         ->Sumw2();
-  hNTopTaggedTopControlRegion->Sumw2();
-
-  hbTagDisTopTaggedEvents           ->Sumw2();
-  hbTagDisNTopControlRegion         ->Sumw2();
-  hbTagDisNTopTaggedTopControlRegion->Sumw2();
-
-
-  // Top checks
-  //----------------------------------------------------------------------------
-  TH1F* h_softtche = new TH1F("h_softtche", "", 300, -10, 20); 
-  TH1F* h_jetpt1   = new TH1F("h_jetpt1",   "", 400,   0, 40); 
-
-  h_softtche->Sumw2();
-  h_jetpt1  ->Sumw2();
 
 
   //----------------------------------------------------------------------------
@@ -276,58 +213,55 @@ void LatinosTreeScript(Float_t luminosity,
 
   // Declaration of leaf types
   //----------------------------------------------------------------------------
-  Float_t channel;     tree->SetBranchAddress("channel"   , &channel);
-  UInt_t  run;         tree->SetBranchAddress("run"       , &run);
-  UInt_t  lumi;        tree->SetBranchAddress("lumi"      , &lumi);
-  UInt_t  event;       tree->SetBranchAddress("event"     , &event);
-
   Float_t baseW;       tree->SetBranchAddress("baseW"     , &baseW);
-  Float_t effW;        tree->SetBranchAddress("effW"      , &effW);
-  Float_t triggW;      tree->SetBranchAddress("triggW"    , &triggW);
-  Float_t nvtx;        tree->SetBranchAddress("nvtx"      , &nvtx);
-
-  Int_t   sameflav;    tree->SetBranchAddress("sameflav"  , &sameflav);
-  Float_t trigger;     tree->SetBranchAddress("trigger"   , &trigger);
-  Float_t mll;         tree->SetBranchAddress("mll"       , &mll);
-  Float_t pt1;         tree->SetBranchAddress("pt1"       , &pt1);
-  Float_t pt2;         tree->SetBranchAddress("pt2"       , &pt2);
-  Float_t ptll;        tree->SetBranchAddress("ptll"      , &ptll);
-  Float_t mth;         tree->SetBranchAddress("mth"       , &mth);
+  Float_t channel;     tree->SetBranchAddress("channel"   , &channel);
+  Float_t chmet;       tree->SetBranchAddress("chmet"     , &chmet);
+  Float_t dphill;      tree->SetBranchAddress("dphill"    , &dphill);
   Float_t dphilljet;   tree->SetBranchAddress("dphilljet" , &dphilljet);
-  Float_t njet;        tree->SetBranchAddress("njet"      , &njet);
+  Float_t drll;        tree->SetBranchAddress("drll"      , &drll);
+  Float_t effW;        tree->SetBranchAddress("effW"      , &effW);
   Float_t jetpt1;      tree->SetBranchAddress("jetpt1"    , &jetpt1);
   Float_t jetpt2;      tree->SetBranchAddress("jetpt2"    , &jetpt2);
   Float_t jettche1;    tree->SetBranchAddress("jettche1"  , &jettche1);
   Float_t jettche2;    tree->SetBranchAddress("jettche2"  , &jettche2);
-  Float_t softtche;    tree->SetBranchAddress("softtche"  , &softtche);
-  Float_t nextra;      tree->SetBranchAddress("nextra"    , &nextra);
-  Int_t   bveto;       tree->SetBranchAddress("bveto"     , &bveto);
-  Int_t   bveto_nj30;  tree->SetBranchAddress("bveto_nj30", &bveto_nj30);
-  Int_t   bveto_mu;    tree->SetBranchAddress("bveto_mu"  , &bveto_mu);
-  Int_t   bveto_ip;    tree->SetBranchAddress("bveto_ip"  , &bveto_ip);
+  Float_t mctruth;     tree->SetBranchAddress("mctruth"   , &mctruth);
+  Float_t mll;         tree->SetBranchAddress("mll"       , &mll);
+  Float_t mpmet;       tree->SetBranchAddress("mpmet"     , &mpmet); 
+  Float_t mth;         tree->SetBranchAddress("mth"       , &mth);
   Float_t nbjet;       tree->SetBranchAddress("nbjet"     , &nbjet);
   Float_t nbjettche;   tree->SetBranchAddress("nbjettche" , &nbjettche);
- 
+  Float_t nextra;      tree->SetBranchAddress("nextra"    , &nextra);
+  Float_t njet;        tree->SetBranchAddress("njet"      , &njet);
+  Float_t nvtx;        tree->SetBranchAddress("nvtx"      , &nvtx);
+  Float_t pchmet;      tree->SetBranchAddress("pchmet"    , &pchmet);
   Float_t pfmet;       tree->SetBranchAddress("pfmet"     , &pfmet);
   Float_t ppfmet;      tree->SetBranchAddress("ppfmet"    , &ppfmet);
-  Float_t chmet;       tree->SetBranchAddress("chmet"     , &chmet);
-  Float_t pchmet;      tree->SetBranchAddress("pchmet"    , &pchmet);
-  Float_t mpmet;       tree->SetBranchAddress("mpmet"     , &mpmet); 
-
-  Int_t   zveto;       tree->SetBranchAddress("zveto"     , &zveto);
+  Float_t pt1;         tree->SetBranchAddress("pt1"       , &pt1);
+  Float_t pt2;         tree->SetBranchAddress("pt2"       , &pt2);
+  Float_t ptll;        tree->SetBranchAddress("ptll"      , &ptll);
+  Float_t softtche;    tree->SetBranchAddress("softtche"  , &softtche);
+  Float_t trigger;     tree->SetBranchAddress("trigger"   , &trigger);
+  Float_t triggW;      tree->SetBranchAddress("triggW"    , &triggW);
+  Int_t   bveto;       tree->SetBranchAddress("bveto"     , &bveto);
+  Int_t   bveto_ip;    tree->SetBranchAddress("bveto_ip"  , &bveto_ip);
+  Int_t   bveto_mu;    tree->SetBranchAddress("bveto_mu"  , &bveto_mu);
+  Int_t   bveto_nj30;  tree->SetBranchAddress("bveto_nj30", &bveto_nj30);
   Int_t   dphiveto;    tree->SetBranchAddress("dphiveto"  , &dphiveto);
-  Float_t dphill;      tree->SetBranchAddress("dphill"    , &dphill);
-  Float_t drll;        tree->SetBranchAddress("drll"      , &drll);
-  Float_t mctruth;     tree->SetBranchAddress("mctruth"   , &mctruth);
+  Int_t   sameflav;    tree->SetBranchAddress("sameflav"  , &sameflav);
+  Int_t   zveto;       tree->SetBranchAddress("zveto"     , &zveto);
+  UInt_t  event;       tree->SetBranchAddress("event"     , &event);
+  UInt_t  lumi;        tree->SetBranchAddress("lumi"      , &lumi);
+  UInt_t  run;         tree->SetBranchAddress("run"       , &run);
+
+  Float_t fake2W;
+  
+  if (theSample.Contains("WJetsFakes"))
+    tree->SetBranchAddress("fake2W" , &fake2W);
 
   Float_t puWobs;
-  Float_t fake2W;
 
   if (!theSample.Contains("WJetsFakes") && !theSample.Contains("Data"))
     tree->SetBranchAddress("puWobs", &puWobs);
-
-  if (theSample.Contains("WJetsFakes"))
-    tree->SetBranchAddress("fake2W" , &fake2W);
 
 
   // Set the channel
@@ -454,18 +388,6 @@ void LatinosTreeScript(Float_t luminosity,
 
 	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	//
-	// Top checks
-	//
-	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-	if (commonCuts && zveto && pfmet > 20 && mpmet > (20 + 25*sameflav) && njet < 1) {
-	  
-	  if (!bveto)    h_softtche->Fill(softtche, totalW);
-	  if (!bveto_ip) h_jetpt1  ->Fill(jetpt1,   totalW);
-	}
-
-
-	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-	//
 	// Main analysis
 	//
 	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -551,35 +473,37 @@ void LatinosTreeScript(Float_t luminosity,
   // Print
   //----------------------------------------------------------------------------
   if (verbose) {
-    cout << " -------------------------------------" << endl;
-    cout << " --- Expected number of RAW events ---" << endl;
-    cout << " -------------------------------------" << endl;
-    cout << "Trigger          -- " << hWTrigger    ->GetEntries() << endl;
-    cout << "Met Cut          -- " << hWMetCut     ->GetEntries() << endl;
-    cout << "Low Minv Cut     -- " << hWLowMinv    ->GetEntries() << endl;
-    cout << "Z Veto           -- " << hWZVeto      ->GetEntries() << endl;
-    cout << "projected MetCut -- " << hWpMetCut    ->GetEntries() << endl;
-    cout << "Jet Veto         -- " << hWJetVeto    ->GetEntries() << endl;
-    cout << "DeltaPhiJet Veto -- " << hWDeltaPhiJet->GetEntries() << endl;
-    cout << "Soft Muon Veto   -- " << hWSoftMuVeto ->GetEntries() << endl;
-    cout << "Extra Lepton     -- " << hWExtraLepton->GetEntries() << endl;
-    cout << "Top Tagging      -- " << hWTopTagging ->GetEntries() << endl;
+    cout << endl;
+    cout << " Expected number of RAW events for " << theSample.Data() << endl;
+    cout << " ------------------+-----------" << endl;
+    cout << " trigger           | " << hWTrigger    ->GetEntries() << endl;
+    cout << " MET cut           | " << hWMetCut     ->GetEntries() << endl;
+    cout << " low minv cut      | " << hWLowMinv    ->GetEntries() << endl;
+    cout << " Z veto            | " << hWZVeto      ->GetEntries() << endl;
+    cout << " projected MET cut | " << hWpMetCut    ->GetEntries() << endl;
+    cout << " jet veto          | " << hWJetVeto    ->GetEntries() << endl;
+    cout << " DeltaPhiJet veto  | " << hWDeltaPhiJet->GetEntries() << endl;
+    cout << " soft muon veto    | " << hWSoftMuVeto ->GetEntries() << endl;
+    cout << " extra lepton veto | " << hWExtraLepton->GetEntries() << endl;
+    cout << " top tagging       | " << hWTopTagging ->GetEntries() << endl;
+    cout << endl;
 
     if (!theSample.Contains("Data")) {
-      cout << " -------------------------------------" << endl;
-      cout << " --- Normalized to " << luminosity << " fb-1 --------" << endl;
-      cout << " -------------------------------------" << endl;
-      cout << "Trigger          -- " << hWTrigger    ->GetSumOfWeights() << endl;
-      cout << "Met Cut          -- " << hWMetCut     ->GetSumOfWeights() << endl;
-      cout << "Low Minv Cut     -- " << hWLowMinv    ->GetSumOfWeights() << endl;
-      cout << "Z Veto           -- " << hWZVeto      ->GetSumOfWeights() << endl;
-      cout << "projected MetCut -- " << hWpMetCut    ->GetSumOfWeights() << endl;
-      cout << "Jet Veto         -- " << hWJetVeto    ->GetSumOfWeights() << endl;
-      cout << "DeltaPhiJet Veto -- " << hWDeltaPhiJet->GetSumOfWeights() << endl;
-      cout << "Soft Muon Veto   -- " << hWSoftMuVeto ->GetSumOfWeights() << endl;
-      cout << "Extra Lepton     -- " << hWExtraLepton->GetSumOfWeights() << endl;
-      cout << "Top Tagging      -- " << hWTopTagging ->GetSumOfWeights() << endl; 
-    }    
+      cout << endl;
+      cout << " Normalized to " << luminosity << " 1/fb" << endl;
+      cout << " ------------------+-----------" << endl;
+      cout << " trigger           | " << hWTrigger    ->GetSumOfWeights() << endl;
+      cout << " MET cut           | " << hWMetCut     ->GetSumOfWeights() << endl;
+      cout << " low minv cut      | " << hWLowMinv    ->GetSumOfWeights() << endl;
+      cout << " Z veto            | " << hWZVeto      ->GetSumOfWeights() << endl;
+      cout << " projected MET cut | " << hWpMetCut    ->GetSumOfWeights() << endl;
+      cout << " jet veto          | " << hWJetVeto    ->GetSumOfWeights() << endl;
+      cout << " DeltaPhiJet veto  | " << hWDeltaPhiJet->GetSumOfWeights() << endl;
+      cout << " soft muon veto    | " << hWSoftMuVeto ->GetSumOfWeights() << endl;
+      cout << " extra lepton veto | " << hWExtraLepton->GetSumOfWeights() << endl;
+      cout << " top tagging       | " << hWTopTagging ->GetSumOfWeights() << endl; 
+      cout << endl;
+    }
   }
 
 
