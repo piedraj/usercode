@@ -22,13 +22,13 @@ void compareXS()
   Double_t syst7tev_0jet[nchannels] = { 4.11,  4.08,  5.39,  4.46,  4.27};
   Double_t lumi7tev_0jet[nchannels] = { 1.15,  1.14,  1.32,  1.07,  1.16};
 
-  Double_t xs8tev_0jet  [nchannels] = {65.51, 65.93, 56.01, 67.91, 69.14};
+  Double_t xs8tev_0jet  [nchannels] = {65.48, 65.90, 55.98, 67.87, 69.11};
   Double_t stat8tev_0jet[nchannels] = { 2.35,  5.06,  6.37,  3.98,  4.30};
 
-  Double_t xs8tev_1jet  [nchannels] = {52.76, 53.50, 59.94, 59.19, 48.63};
+  Double_t xs8tev_1jet  [nchannels] = {52.34, 53.13, 59.63, 58.73, 48.20};
   Double_t stat8tev_1jet[nchannels] = { 5.02, 12.71, 15.99,  8.00,  8.31};
 
-  Double_t xs8tev_incl  [nchannels] = {61.82, 62.67, 57.00, 65.28, 62.81};
+  Double_t xs8tev_incl  [nchannels] = {61.68, 62.55, 56.90, 65.11, 62.66};
   Double_t stat8tev_incl[nchannels] = { 2.21,  4.95,  6.25,  3.68,  3.93};
 
 

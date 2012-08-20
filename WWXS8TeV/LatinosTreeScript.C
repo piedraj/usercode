@@ -299,32 +299,34 @@ void LatinosTreeScript(Float_t luminosity,
     //--------------------------------------------------------------------------
     if (theSample.Contains("DYtautau") && mctruth < 1.5) continue;
 
+
     if ((SelectedChannel == -1)           ||
 	(channel == SelectedChannel)      ||
 	(flavorChannel == "OF" && !sameflav) ||
 	(flavorChannel == "SF" &&  sameflav)) {
-      
-      if (trigger == 1 && pt2 > 20) {
-	
-	hWTrigger   ->Fill(1, totalW); 
-	hWeffTrigger->Fill(1, efficiencyW);
-	
-	Bool_t commonCuts = (mll > 12 && ptll > 45 && nextra == 0 && (dphiveto || !sameflav));
+
+
+      //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      //
+      // Data-driven methods
+      //
+      //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      if (trigger == 1 && pt2 > 20 && mll > 12 && ptll > 45 && nextra == 0 && (dphiveto || !sameflav)) {
 
 
 	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	//
-	// Data-driven methods: Z+jets
+	// Z+jets
 	//
 	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-	if (commonCuts && dphiveto && njet == jetChannel && bveto) {
+	if (dphiveto && njet == jetChannel && bveto) {
 	  
 	  if (fabs(mll - ZMASS) < 7.5 && pfmet > 20 && mpmet > 45) {
 	    hCountedMinvDYStudies->Fill(1, totalW);
 	  }
 	  
 
-	  // Loop over the mpmet cuts
+	  // Loop over the mpmet bins
 	  //--------------------------------------------------------------------
 	  for (size_t mc=0; mc<numberMetCuts; mc ++) {
 	    
@@ -351,11 +353,11 @@ void LatinosTreeScript(Float_t luminosity,
 
 	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	//
-	// Data-driven methods: Top
+	// Top
 	//
 	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-	if (commonCuts && zveto && pfmet > 20 && mpmet > (20 + 25*sameflav)) {
-       
+	if (zveto && pfmet > 20 && mpmet > (20 + 25*sameflav)) {
+	  
 	  // btag_eff denominator
 	  if ((jetChannel == 0 && njet == 1 && nbjet == 1) ||
 	      (jetChannel == 1 && njet == 2 && jettche2 > 2.1)) {
@@ -366,7 +368,7 @@ void LatinosTreeScript(Float_t luminosity,
 	    // btag_eff numerator
 	    if ((jetChannel == 0 && !bveto_nj30) ||
 		(jetChannel == 1 && jettche1 > 2.1)) {
-
+	      
 	      hNTopTaggedTopControlRegion->Fill(1, totalW);
 	      hbTagDisNTopTaggedTopControlRegion->Fill(jettche2, totalW);
 	    }
@@ -375,22 +377,28 @@ void LatinosTreeScript(Float_t luminosity,
 	
 	// Top-tagged events for ttbar estimation
 	//----------------------------------------------------------------------
-	if (commonCuts && zveto && pfmet > 20 && mpmet > (20 + 25*sameflav)) {
+	if (zveto && pfmet > 20 && mpmet > (20 + 25*sameflav)) {
 
 	  if ((jetChannel == 0 && njet == 0 && !bveto) ||
 	      (jetChannel == 1 && njet == 1 && bveto && jettche1 > 2.1)) {
-	  
+	    
 	    hTopTaggedEvents->Fill(1, totalW);
 	    hbTagDisTopTaggedEvents->Fill(jettche2, totalW);
 	  }
 	}
+      }
 
 
-	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-	//
-	// Main analysis
-	//
-	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      //
+      // Main analysis
+      //
+      //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      if (trigger == 1 && pt2 > 20) {
+	
+	hWTrigger   ->Fill(1, totalW); 
+	hWeffTrigger->Fill(1, efficiencyW);
+
 	if (pfmet > 20 && mpmet > 20) {
 	  
 	  hWMetCut->Fill(1, totalW);
