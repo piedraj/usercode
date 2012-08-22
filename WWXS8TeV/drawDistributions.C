@@ -91,8 +91,6 @@ void drawDistributions(Int_t    njet       = 3,
 		       Bool_t   dataDriven = true,
 		       Bool_t   savePlots  = true)
 {
-  if (njet == 2) return;
-
   _channel    = channel;
   _njet       = njet;
   _luminosity = luminosity;
@@ -101,35 +99,37 @@ void drawDistributions(Int_t    njet       = 3,
   _dataDriven = dataDriven;
   _savePlots  = savePlots;
 
+  if (_njet == 2) return;
+
+  gSystem->mkdir(_format, kTRUE);
 
   gStyle->SetHatchesLineWidth(1.00);
   gStyle->SetHatchesSpacing  (0.55);
 
 
+  // Read input files
+  //----------------------------------------------------------------------------
   TString path = Form("rootfiles/%djet/%s/", _njet, _channel.Data());
 
   for (UInt_t ip=0; ip<nProcesses; ip++)
     input[ip] = new TFile(path + process[ip] + ".root", "read");
 
 
-  // Top
+  // Top distributions
   //----------------------------------------------------------------------------
   if (0) {
     DrawHistogram("hbTagDisNTopTaggedTopControlRegion", "2^{nd} jet TCHE",   5, 1, "NULL", -999, -999, false);
     DrawHistogram("hbTagDisNTopControlRegion",          "2^{nd} jet TCHE",   5, 1, "NULL", -999, -999, false);
     DrawHistogram("hbTagDisTopTaggedEvents",            "2^{nd} jet TCHE",   5, 1, "NULL", -999, -999, false);
-    DrawHistogram("h_jetpt1",                           "1^{st} jet p_{T}", 20, 0, "GeV",  -999, -999, false);
   }
 
 
-  // PAS
+  // PAS distributions
   //----------------------------------------------------------------------------
-  if (1) {
-    DrawHistogram("hPtLepton1WWLevel",  "p_{T}^{max}",           5, 0, "GeV",  0, 160);
-    DrawHistogram("hPtLepton2WWLevel",  "p_{T}^{min}",           5, 0, "GeV", 15,  80);
-    DrawHistogram("hPtDiLeptonWWLevel", "p_{T}^{#font[12]{ll}}", 5, 0, "GeV", 40, 120);
-    DrawHistogram("hMinvWWLevel",       "m_{#font[12]{ll}}",     5, 0, "GeV");
-  }
+  DrawHistogram("hPtLepton1WWLevel",  "p_{T}^{max}",           5, 0, "GeV",  0, 160);
+  DrawHistogram("hPtLepton2WWLevel",  "p_{T}^{min}",           5, 0, "GeV", 15,  80);
+  DrawHistogram("hPtDiLeptonWWLevel", "p_{T}^{#font[12]{ll}}", 5, 0, "GeV", 40, 120);
+  DrawHistogram("hMinvWWLevel",       "m_{#font[12]{ll}}",     5, 0, "GeV");
 }
 
 
@@ -372,7 +372,11 @@ void DrawHistogram(TString  hname,
 
   if (_savePlots) {
     canvas->cd();
-    canvas->SaveAs(Form("%s_%djet.%s", hname.Data(), _njet, _format.Data()));
+    canvas->SaveAs(Form("%s/%s_%djet.%s",
+			_format.Data(),
+			hname.Data(),
+			_njet,
+			_format.Data()));
   }
 }
 
