@@ -7,37 +7,41 @@
 #include "TTree.h"
 
 
-const UInt_t nProcesses = 9;
+const UInt_t nProcesses = 11;
 
-enum {iData, iWW, iWZ, iZZ, iWg, itt, itW, iWj, iZj};
+enum {iData, iWW, iWZ, iZZ, iWg, itt, itW, iWj, iDY, iDYtau, iH125};
 
 TFile* input[nProcesses];
 
 
 TString process[nProcesses];
 
-process[iData] = "DataRun2012_Total";
-process[itt]   = "TTbar";
-process[itW]   = "TW";
-process[iWW]   = "WW";
-process[iWZ]   = "WZ";
-process[iZZ]   = "ZZ";
-process[iWg]   = "Wgamma";
-process[iWj]   = "WJetsFakes_Total";
-process[iZj]   = "DY";
+process[iData]  = "DataRun2012_Total";
+process[itt]    = "TTbar";
+process[itW]    = "TW";
+process[iWW]    = "WW";
+process[iWZ]    = "WZ";
+process[iZZ]    = "ZZ";
+process[iWg]    = "Wgamma";
+process[iWj]    = "WJetsFakes_Total";
+process[iDY]    = "DY";
+process[iDYtau] = "DYtautau";
+process[iH125]  = "HWW125";
 
 
 Color_t color[nProcesses];
 
-color[iData] = kBlack;
-color[itt]   = kYellow;
-color[itW]   = kYellow;
-color[iWW]   = kAzure-9;
-color[iWZ]   = kAzure-2;
-color[iZZ]   = kAzure-2;
-color[iWg]   = kAzure-2;
-color[iWj]   = kGray+1;
-color[iZj]   = kGreen+2;
+color[iData]  = kBlack;
+color[itt]    = kYellow;
+color[itW]    = kYellow;
+color[iWW]    = kAzure-9;
+color[iWZ]    = kAzure-2;
+color[iZZ]    = kAzure-2;
+color[iWg]    = kAzure-2;
+color[iWj]    = kGray+1;
+color[iDY]    = kGreen+2;
+color[iDYtau] = kGreen+2;
+color[iH125]  = kRed;
 
 
 Double_t systError[nProcesses];
@@ -45,14 +49,16 @@ Double_t systError[nProcesses];
 systError[iData] = 0.0;
 
 // syst. / yield from SMP-12-013
-systError[itt] = 19.5 / 131.6;
-systError[itW] = 19.5 / 131.6;
-systError[iWW] = 49.3 / 683.6;
-systError[iWZ] =  2.9 /  27.4;
-systError[iZZ] =  2.9 /  27.4;
-systError[iWg] =  4.3 /  13.6;
-systError[iWj] = 21.6 /  60.0;
-systError[iZj] =  9.9 /  42.5;
+systError[itt]    = 19.5 / 131.6;
+systError[itW]    = 19.5 / 131.6;
+systError[iWW]    = 49.3 / 683.6;
+systError[iWZ]    =  2.9 /  27.4;
+systError[iZZ]    =  2.9 /  27.4;
+systError[iWg]    =  4.3 /  13.6;
+systError[iWj]    = 21.6 /  60.0;
+systError[iDY]    =  9.9 /  42.5;
+systError[iDYtau] =  9.9 /  42.5;
+systError[iH125]  =  0.0 / 999.9;
 
 
 // Settings
@@ -189,10 +195,13 @@ void DrawHistogram(TString  hname,
       hist[ip]->SetFillStyle(1001);
       hist[ip]->SetLineColor(color[ip]);
 
-      if (_dataDriven && ip == itt) hist[ip]->Scale(ttScale[_njet]);
-      if (_dataDriven && ip == itW) hist[ip]->Scale(tWScale[_njet]);
-      if (_dataDriven && ip == iWW) hist[ip]->Scale(WWScale[_njet]);
-      if (_dataDriven && ip == iZj) hist[ip]->Scale(ZjScale[_njet]);
+      if (ip == iH125) hist[ip]->SetFillStyle(3354);
+
+      if (_dataDriven && ip == itt)    hist[ip]->Scale(ttScale[_njet]);
+      if (_dataDriven && ip == itW)    hist[ip]->Scale(tWScale[_njet]);
+      if (_dataDriven && ip == iWW)    hist[ip]->Scale(WWScale[_njet]);
+      if (_dataDriven && ip == iDY)    hist[ip]->Scale(ZjScale[_njet]);
+      if (_dataDriven && ip == iDYtau) hist[ip]->Scale(ZjScale[_njet]);
 
       hstack->Add(hist[ip]);
     }
@@ -203,11 +212,11 @@ void DrawHistogram(TString  hname,
   //----------------------------------------------------------------------------
   TH1F* allmc = (TH1F*)hist[iData]->Clone("allmc");
 
-  allmc->SetFillColor  (kRed+2);
-  allmc->SetFillStyle  (  3354);
-  allmc->SetLineColor  (kRed+2);
-  allmc->SetMarkerColor(kRed+2);
-  allmc->SetMarkerSize (     0);
+  allmc->SetFillColor  (kGray+2);
+  allmc->SetFillStyle  (   3345);
+  allmc->SetLineColor  (kGray+2);
+  allmc->SetMarkerColor(kGray+2);
+  allmc->SetMarkerSize (      0);
 
   for (UInt_t ibin=1; ibin<=allmc->GetNbinsX(); ibin++) {
 
@@ -254,11 +263,10 @@ void DrawHistogram(TString  hname,
 
   // Draw
   //----------------------------------------------------------------------------
-  if (xmin > -999 && xmax > -999) xaxis->SetRangeUser(xmin, xmax);
+  xaxis->SetRangeUser(xmin, xmax);
 
   hist[iData]->Draw("ep");
   hstack     ->Draw("hist,same");
-  //  allmc      ->Draw("e2,same");
   hist[iData]->Draw("ep,same");
 
 
@@ -287,7 +295,8 @@ void DrawHistogram(TString  hname,
   DrawLegend(0.23, 0.74 + 2.*(yoffset+0.001), hist[iData], " data",    "lp", 0.035, 0.2, yoffset);
   DrawLegend(0.23, 0.74 + 1.*(yoffset+0.001), hist[iWW],   " WW",      "f",  0.035, 0.2, yoffset);
   DrawLegend(0.23, 0.74,                      hist[iWZ],   " VV",      "f",  0.035, 0.2, yoffset);
-  DrawLegend(  x0, 0.74 + 2.*(yoffset+0.001), hist[iZj],   " Z+jets",  "f",  0.035, 0.2, yoffset);
+  DrawLegend(0.23, 0.74 - 1.*(yoffset+0.001), hist[iH125], " Higgs",   "f",  0.035, 0.2, yoffset);
+  DrawLegend(  x0, 0.74 + 2.*(yoffset+0.001), hist[iDY],   " Z+jets",  "f",  0.035, 0.2, yoffset);
   DrawLegend(  x0, 0.74 + 1.*(yoffset+0.001), hist[iWj],   " W+jets",  "f",  0.035, 0.2, yoffset);
   DrawLegend(  x0, 0.74,                      hist[itt],   " top",     "f",  0.035, 0.2, yoffset);
   DrawLegend(  x0, 0.74 - 1.*(yoffset+0.001), allmc,       allmcTitle, "f",  0.035, 0.2, yoffset);
@@ -337,7 +346,7 @@ void DrawHistogram(TString  hname,
 
     TAxis* uaxis = (TAxis*)uncertainty->GetXaxis();
     
-    if (xmin > -999 && xmax > -999) uaxis->SetRangeUser(xmin, xmax);
+    uaxis->SetRangeUser(xmin, xmax);
     
     
     uncertainty->Draw("e2");
