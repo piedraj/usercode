@@ -191,8 +191,8 @@ void LatinosTreeScript(Float_t luminosity,
     tree->Add(filesPath + "latino_037_DY50toLLMad.root");
   }
   else if (theSample == "DYtautau") {
-    tree->Add(filesPath + "latino_036_DY10toLLMad.root");  
-    tree->Add(filesPath + "latino_037_DY50toLLMad.root");
+    //    tree->Add(filesPath + "latino_222_DYtt.root");
+    tree->Add("/hadoop/LatinosSkims/ReducedTrees/R52X_S1_V05_S2_V05_S3_V05/ForICHEP2/latino_222_DYtt.root");
   }
   else if (theSample == "WgammaNoStar") {
     tree->Add(filesPath + "latino_085_WgammaToLNuG.root");
@@ -289,6 +289,8 @@ void LatinosTreeScript(Float_t luminosity,
       totalW = 1.0;
     else if (theSample.Contains("WJetsFakes"))
       totalW = fake2W;
+    else if (theSample == "DYtautau")
+      totalW = effW * triggW * baseW;
     else {
       efficiencyW = puWobs * effW * triggW;
       totalW      = baseW * efficiencyW * luminosity;
@@ -297,7 +299,7 @@ void LatinosTreeScript(Float_t luminosity,
 
     // The selection begins here
     //--------------------------------------------------------------------------
-    if (theSample.Contains("DYtautau") && mctruth < 1.5) continue;
+    if (theSample == "DY" && mctruth == 2) continue;
 
 
     if ((SelectedChannel == -1)           ||

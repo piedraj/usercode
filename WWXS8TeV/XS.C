@@ -150,10 +150,13 @@ void XS(Double_t &xsValue,
   Double_t NWj[]       = {hNWj      ->GetBinContent(2), hNWj      ->GetBinError(2), 0.36*hNWj->GetBinContent(2)};
   Double_t NWZ[]       = {hNWZ      ->GetBinContent(2), hNWZ      ->GetBinError(2), 0.00};
   Double_t NZZ[]       = {hNZZ      ->GetBinContent(2), hNZZ      ->GetBinError(2), 0.00};
-  Double_t NDYtautau[] = {hNDYtautau->GetBinContent(2), hNDYtautau->GetBinError(2), 0.00};
+  Double_t NDYtautau[] = {hNDYtautau->GetBinContent(2), hNDYtautau->GetBinError(2), 0.50*hNDYtautau->GetBinContent(2)};  // [1]
   Double_t NWg[]       = {hNWg      ->GetBinContent(2), hNWg      ->GetBinError(2), 0.00};
   Double_t NHWW125[]   = {hNHWW125  ->GetBinContent(2), hNHWW125  ->GetBinError(2), 0.00};
   Double_t NData[]     = {hNData    ->GetBinContent(2), hNData    ->GetBinError(2)};
+
+
+  // [1] Andrea: a normalization uncertainty of 50% has been added on final estimation of dytautau.
 
 
   // Apply Z -> tautau scale factor (1.33 +- 0.266) from TOP-12-007
