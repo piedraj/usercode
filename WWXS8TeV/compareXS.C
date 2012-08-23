@@ -22,11 +22,14 @@ void compareXS()
   Double_t syst7tev_0jet[nchannels] = { 4.11,  4.08,  5.39,  4.46,  4.27};
   Double_t lumi7tev_0jet[nchannels] = { 1.15,  1.14,  1.32,  1.07,  1.16};
 
-  Double_t xs8tev_0jet  [nchannels] = {65.48, 65.90, 55.98, 67.87, 69.11};
+  Double_t xs8tev_0jet  [nchannels] = {65.31, 65.90, 55.98, 67.59, 68.86};
   Double_t stat8tev_0jet[nchannels] = { 2.35,  5.06,  6.37,  3.98,  4.30};
 
-  Double_t xs8tev_1jet  [nchannels] = {52.34, 53.13, 59.63, 58.73, 48.20};
+  Double_t xs8tev_1jet  [nchannels] = {50.17, 53.13, 59.63, 55.97, 44.68};
   Double_t stat8tev_1jet[nchannels] = { 5.02, 12.71, 15.99,  8.00,  8.31};
+
+  Double_t xs8tev_2jet  [nchannels] = {55.87, 31.54, 95.17, 65.82, 50.50};
+  Double_t stat8tev_2jet[nchannels] = {12.14, 30.07, 38.74, 18.85, 19.93};
 
   Double_t xs8tev_incl  [nchannels] = {61.68, 62.55, 56.90, 65.11, 62.66};
   Double_t stat8tev_incl[nchannels] = { 2.21,  4.95,  6.25,  3.68,  3.93};
@@ -34,6 +37,7 @@ void compareXS()
 
   TGraphErrors* g8tev_0jet = new TGraphErrors(nchannels);
   TGraphErrors* g8tev_1jet = new TGraphErrors(nchannels);
+  TGraphErrors* g8tev_2jet = new TGraphErrors(nchannels);
   TGraphErrors* g8tev_incl = new TGraphErrors(nchannels);
 
   
@@ -43,10 +47,12 @@ void compareXS()
 
     g8tev_0jet->SetPoint(i, i, xs8tev_0jet[i]);
     g8tev_1jet->SetPoint(i, i, xs8tev_1jet[i]);
+    g8tev_2jet->SetPoint(i, i, xs8tev_2jet[i]);
     g8tev_incl->SetPoint(i, i, xs8tev_incl[i]);
 
     g8tev_0jet->SetPointError(i, 0.5, stat8tev_0jet[i]);
     g8tev_1jet->SetPointError(i, 0.5, stat8tev_1jet[i]);
+    g8tev_2jet->SetPointError(i, 0.5, stat8tev_2jet[i]);
     g8tev_incl->SetPointError(i, 0.5, stat8tev_incl[i]);
   }
 
@@ -61,7 +67,13 @@ void compareXS()
   g8tev_1jet->SetLineWidth  (2);
   g8tev_1jet->SetMarkerColor(kBlue);
   g8tev_1jet->SetMarkerSize (1.4);
-  g8tev_1jet->SetMarkerStyle(kFullSquare);
+  g8tev_1jet->SetMarkerStyle(kFullTriangleUp);
+
+  g8tev_2jet->SetLineColor  (kGreen+1);
+  g8tev_2jet->SetLineWidth  (2);
+  g8tev_2jet->SetMarkerColor(kGreen+1);
+  g8tev_2jet->SetMarkerSize (1.4);
+  g8tev_2jet->SetMarkerStyle(kFullSquare);
 
   g8tev_incl->SetLineColor  (kGreen+1);
   g8tev_incl->SetLineWidth  (2);
@@ -76,9 +88,10 @@ void compareXS()
   
   TMultiGraph* mg = new TMultiGraph();
 
+  mg->Add(g8tev_2jet);
   mg->Add(g8tev_1jet);
   mg->Add(g8tev_0jet);
-  mg->Add(g8tev_incl);
+  //  mg->Add(g8tev_incl);
 
   mg->Draw("ap");
 
@@ -130,7 +143,8 @@ void compareXS()
   legend->AddEntry(nlo,        " NLO",   "f");
   legend->AddEntry(g8tev_0jet, " 0-jet", "lp");
   legend->AddEntry(g8tev_1jet, " 1-jet", "lp");
-  legend->AddEntry(g8tev_incl, " inclusive", "lp");
+  legend->AddEntry(g8tev_2jet, " 2-jet", "lp");
+  //  legend->AddEntry(g8tev_incl, " inclusive", "lp");
 
 
   // Put everything together
@@ -141,8 +155,8 @@ void compareXS()
   mg    ->Draw("p,same");
 
 
-  mg->SetMaximum(91);
-  mg->SetMinimum(38);
+  mg->SetMaximum(139);
+  mg->SetMinimum(-3);
 
 
   // Additional titles
@@ -156,7 +170,7 @@ void compareXS()
   canvas->Update();
   canvas->GetFrame()->DrawClone();
 
-  canvas->SaveAs("wwxs013.png");
+  canvas->SaveAs("wwxs012.png");
 }
 
 

@@ -74,16 +74,16 @@ Bool_t   _savePlots;
 
 // Scale factors
 //------------------------------------------------------------------------------
-Double_t ttScale[] = {1.10, 1.10, 1.0, 1.10};
-Double_t tWScale[] = {1.10, 1.10, 1.0, 1.10};
-Double_t WWScale[] = {1.14, 0.92, 1.0, 1.08};
-Double_t ZjScale[] = {3.70, 4.20, 1.0, 4.00};
+Double_t ttScale[] = {1.10, 1.10, 1.10, 1.10};
+Double_t tWScale[] = {1.10, 1.10, 1.10, 1.10};
+Double_t WWScale[] = {1.14, 0.92, 1.02, 1.08};
+Double_t ZjScale[] = {3.70, 4.20, 1.80, 4.00};
 
 
 //------------------------------------------------------------------------------
 // drawDistributions
 //------------------------------------------------------------------------------
-void drawDistributions(Int_t    njet       = 3,
+void drawDistributions(Int_t    njet       = 0,
 		       TString  channel    = "All",
 		       Double_t luminosity = 5064,
 		       TString  format     = "pdf",

@@ -1,7 +1,7 @@
 void runLatinosTreeScript(Double_t luminosity    = 5.064,
 			  Int_t    jetChannel    = 0,
-			  TString  flavorChannel = "SF",
-			  TString  theSample     = "TW",
+			  TString  flavorChannel = "All",
+			  TString  theSample     = "WWTo2L2Nu",
 			  Bool_t   verbose       = true)
 {
   gInterpreter->LoadMacro("LatinosTreeScript.C+");

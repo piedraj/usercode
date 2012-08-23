@@ -213,45 +213,50 @@ void LatinosTreeScript(Float_t luminosity,
 
   // Declaration of leaf types
   //----------------------------------------------------------------------------
-  Float_t baseW;       tree->SetBranchAddress("baseW"     , &baseW);
-  Float_t channel;     tree->SetBranchAddress("channel"   , &channel);
-  Float_t chmet;       tree->SetBranchAddress("chmet"     , &chmet);
-  Float_t dphill;      tree->SetBranchAddress("dphill"    , &dphill);
-  Float_t dphilljet;   tree->SetBranchAddress("dphilljet" , &dphilljet);
-  Float_t drll;        tree->SetBranchAddress("drll"      , &drll);
-  Float_t effW;        tree->SetBranchAddress("effW"      , &effW);
-  Float_t jetpt1;      tree->SetBranchAddress("jetpt1"    , &jetpt1);
-  Float_t jetpt2;      tree->SetBranchAddress("jetpt2"    , &jetpt2);
-  Float_t jettche1;    tree->SetBranchAddress("jettche1"  , &jettche1);
-  Float_t jettche2;    tree->SetBranchAddress("jettche2"  , &jettche2);
-  Float_t mctruth;     tree->SetBranchAddress("mctruth"   , &mctruth);
-  Float_t mll;         tree->SetBranchAddress("mll"       , &mll);
-  Float_t mpmet;       tree->SetBranchAddress("mpmet"     , &mpmet); 
-  Float_t mth;         tree->SetBranchAddress("mth"       , &mth);
-  Float_t nbjet;       tree->SetBranchAddress("nbjet"     , &nbjet);
-  Float_t nbjettche;   tree->SetBranchAddress("nbjettche" , &nbjettche);
-  Float_t nextra;      tree->SetBranchAddress("nextra"    , &nextra);
-  Float_t njet;        tree->SetBranchAddress("njet"      , &njet);
-  Float_t nvtx;        tree->SetBranchAddress("nvtx"      , &nvtx);
-  Float_t pchmet;      tree->SetBranchAddress("pchmet"    , &pchmet);
-  Float_t pfmet;       tree->SetBranchAddress("pfmet"     , &pfmet);
-  Float_t ppfmet;      tree->SetBranchAddress("ppfmet"    , &ppfmet);
-  Float_t pt1;         tree->SetBranchAddress("pt1"       , &pt1);
-  Float_t pt2;         tree->SetBranchAddress("pt2"       , &pt2);
-  Float_t ptll;        tree->SetBranchAddress("ptll"      , &ptll);
-  Float_t softtche;    tree->SetBranchAddress("softtche"  , &softtche);
-  Float_t trigger;     tree->SetBranchAddress("trigger"   , &trigger);
-  Float_t triggW;      tree->SetBranchAddress("triggW"    , &triggW);
-  Int_t   bveto;       tree->SetBranchAddress("bveto"     , &bveto);
-  Int_t   bveto_ip;    tree->SetBranchAddress("bveto_ip"  , &bveto_ip);
-  Int_t   bveto_mu;    tree->SetBranchAddress("bveto_mu"  , &bveto_mu);
-  Int_t   bveto_nj30;  tree->SetBranchAddress("bveto_nj30", &bveto_nj30);
-  Int_t   dphiveto;    tree->SetBranchAddress("dphiveto"  , &dphiveto);
-  Int_t   sameflav;    tree->SetBranchAddress("sameflav"  , &sameflav);
-  Int_t   zveto;       tree->SetBranchAddress("zveto"     , &zveto);
-  UInt_t  event;       tree->SetBranchAddress("event"     , &event);
-  UInt_t  lumi;        tree->SetBranchAddress("lumi"      , &lumi);
-  UInt_t  run;         tree->SetBranchAddress("run"       , &run);
+  Float_t baseW;        tree->SetBranchAddress("baseW"       , &baseW);
+  Float_t channel;      tree->SetBranchAddress("channel"     , &channel);
+  Float_t chmet;        tree->SetBranchAddress("chmet"       , &chmet);
+  Float_t dphill;       tree->SetBranchAddress("dphill"      , &dphill);
+  Float_t dphilljet;    tree->SetBranchAddress("dphilljet"   , &dphilljet);
+  Float_t dphilljetjet; tree->SetBranchAddress("dphilljetjet", &dphilljetjet);
+  Float_t drll;         tree->SetBranchAddress("drll"        , &drll);
+  Float_t effW;         tree->SetBranchAddress("effW"        , &effW);
+  Float_t jeteta1;      tree->SetBranchAddress("jeteta1"     , &jeteta1);
+  Float_t jeteta2;      tree->SetBranchAddress("jeteta2"     , &jeteta2);
+  Float_t jeteta3;      tree->SetBranchAddress("jeteta3"     , &jeteta3);
+  Float_t jetpt1;       tree->SetBranchAddress("jetpt1"      , &jetpt1);
+  Float_t jetpt2;       tree->SetBranchAddress("jetpt2"      , &jetpt2);
+  Float_t jetpt3;       tree->SetBranchAddress("jetpt3"      , &jetpt3);
+  Float_t jettche1;     tree->SetBranchAddress("jettche1"    , &jettche1);
+  Float_t jettche2;     tree->SetBranchAddress("jettche2"    , &jettche2);
+  Float_t mctruth;      tree->SetBranchAddress("mctruth"     , &mctruth);
+  Float_t mll;          tree->SetBranchAddress("mll"         , &mll);
+  Float_t mpmet;        tree->SetBranchAddress("mpmet"       , &mpmet); 
+  Float_t mth;          tree->SetBranchAddress("mth"         , &mth);
+  Float_t nbjet;        tree->SetBranchAddress("nbjet"       , &nbjet);
+  Float_t nbjettche;    tree->SetBranchAddress("nbjettche"   , &nbjettche);
+  Float_t nextra;       tree->SetBranchAddress("nextra"      , &nextra);
+  Float_t njet;         tree->SetBranchAddress("njet"        , &njet);
+  Float_t nvtx;         tree->SetBranchAddress("nvtx"        , &nvtx);
+  Float_t pchmet;       tree->SetBranchAddress("pchmet"      , &pchmet);
+  Float_t pfmet;        tree->SetBranchAddress("pfmet"       , &pfmet);
+  Float_t ppfmet;       tree->SetBranchAddress("ppfmet"      , &ppfmet);
+  Float_t pt1;          tree->SetBranchAddress("pt1"         , &pt1);
+  Float_t pt2;          tree->SetBranchAddress("pt2"         , &pt2);
+  Float_t ptll;         tree->SetBranchAddress("ptll"        , &ptll);
+  Float_t softtche;     tree->SetBranchAddress("softtche"    , &softtche);
+  Float_t trigger;      tree->SetBranchAddress("trigger"     , &trigger);
+  Float_t triggW;       tree->SetBranchAddress("triggW"      , &triggW);
+  Int_t   bveto;        tree->SetBranchAddress("bveto"       , &bveto);
+  Int_t   bveto_ip;     tree->SetBranchAddress("bveto_ip"    , &bveto_ip);
+  Int_t   bveto_mu;     tree->SetBranchAddress("bveto_mu"    , &bveto_mu);
+  Int_t   bveto_nj30;   tree->SetBranchAddress("bveto_nj30"  , &bveto_nj30);
+  Int_t   dphiveto;     tree->SetBranchAddress("dphiveto"    , &dphiveto);
+  Int_t   sameflav;     tree->SetBranchAddress("sameflav"    , &sameflav);
+  Int_t   zveto;        tree->SetBranchAddress("zveto"       , &zveto);
+  UInt_t  event;        tree->SetBranchAddress("event"       , &event);
+  UInt_t  lumi;         tree->SetBranchAddress("lumi"        , &lumi);
+  UInt_t  run;          tree->SetBranchAddress("run"         , &run);
 
   Float_t fake2W;
   
@@ -297,9 +302,25 @@ void LatinosTreeScript(Float_t luminosity,
     }
 
 
+    // Help variables
+    //--------------------------------------------------------------------------
+    Int_t dphiv = ((njet <= 1 && dphiveto) || (njet > 1 && dphilljetjet < 165.*TMath::DegToRad()));
+
+    Float_t metvar = (njet <= 1) ? mpmet : pfmet;
+
+    Float_t jetbin = njet;
+	    
+    if (njet == 3) jetbin = 2;
+
+    Int_t vbfsel = ((jetpt3 <= 30 || !(jetpt3 > 30 && ((jeteta1-jeteta3 > 0 && jeteta2-jeteta3 < 0) || (jeteta2-jeteta3 > 0 && jeteta1-jeteta3 < 0)))));
+
+
     // The selection begins here
     //--------------------------------------------------------------------------
     if (theSample == "DY" && mctruth == 2) continue;
+
+    if (trigger !=  1) continue;
+    if (pt2     <= 20) continue;
 
 
     if ((SelectedChannel == -1)           ||
@@ -313,7 +334,7 @@ void LatinosTreeScript(Float_t luminosity,
       // Data-driven methods
       //
       //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-      if (trigger == 1 && pt2 > 20 && mll > 12 && ptll > 45 && nextra == 0 && (dphiveto || !sameflav)) {
+      if (pfmet > 20 && mpmet > 20 && mll > 12 && ptll > 45 && nextra == 0 && (dphiv || !sameflav)) {
 
 
 	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -321,30 +342,31 @@ void LatinosTreeScript(Float_t luminosity,
 	// Z+jets
 	//
 	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-	if (dphiveto && njet == jetChannel && bveto) {
+	if (dphiv && jetbin == jetChannel && bveto_mu && (bveto_ip && (nbjettche == 0 || njet > 3))) {
 	  
-	  if (fabs(mll - ZMASS) < 7.5 && pfmet > 20 && mpmet > 45) {
+	  if (fabs(mll - ZMASS) < 7.5 && metvar > 45) {
 	    hCountedMinvDYStudies->Fill(1, totalW);
 	  }
-	  
 
-	  // Loop over the mpmet bins
+
+	  // Loop over the metvar bins
 	  //--------------------------------------------------------------------
 	  for (size_t mc=0; mc<numberMetCuts; mc ++) {
 	    
-	    if (pfmet > 20 && mpmet > MetCut[mc]) {
+	    if (metvar > MetCut[mc]) {
 	      hMinvDYStudies[mc]->Fill(mll, totalW);    
-	    }
 	    
-	    if (fabs(mll - ZMASS) < 7.5) {
-	      if (pfmet > 20 && mpmet > MetCut[mc]) hNinLooseZevents[mc]->Fill(1,totalW);
-              if (pfmet > 20 && mpmet > MetCut[mc] && mpmet < MetCut[mc+1]) {   
+	      if (fabs(mll - ZMASS) < 7.5) {
+		hNinLooseZevents[mc]->Fill(1,totalW);
+	      }
+	    }
+
+	    if (metvar > MetCut[mc] && metvar < MetCut[mc+1]) {   
+	      if (fabs(mll - ZMASS) < 7.5) {
 		hNinZevents[mc]   ->Fill(  1, totalW);
 		hMassInZevents[mc]->Fill(mll, totalW);
 	      }
-	    }
-	    else if (fabs(mll - ZMASS) > 15.0) {  
-	      if (pfmet > 20 && mpmet > MetCut[mc] && mpmet < MetCut[mc+1]) {
+	      else if (fabs(mll - ZMASS) > 15) {  
 		hNoutZevents[mc]   ->Fill(  1, totalW);
 		hMassOutZevents[mc]->Fill(mll, totalW);
 	      }
@@ -358,18 +380,20 @@ void LatinosTreeScript(Float_t luminosity,
 	// Top
 	//
 	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-	if (zveto && pfmet > 20 && mpmet > (20 + 25*sameflav)) {
+	if (zveto && metvar > (20 + 25*sameflav)) {
 	  
 	  // btag_eff denominator
 	  if ((jetChannel == 0 && njet == 1 && nbjet == 1) ||
-	      (jetChannel == 1 && njet == 2 && jettche2 > 2.1)) {
+	      (jetChannel == 1 && njet == 2 && jettche2 > 2.1) ||
+	      (jetChannel == 2)) {
 
 	    hNTopControlRegion->Fill(1, totalW);
 	    hbTagDisNTopControlRegion->Fill(jettche2, totalW);
 	    
 	    // btag_eff numerator
 	    if ((jetChannel == 0 && !bveto_nj30) ||
-		(jetChannel == 1 && jettche1 > 2.1)) {
+		(jetChannel == 1 && jettche1 > 2.1) ||
+		(jetChannel == 2)) {
 	      
 	      hNTopTaggedTopControlRegion->Fill(1, totalW);
 	      hbTagDisNTopTaggedTopControlRegion->Fill(jettche2, totalW);
@@ -379,10 +403,11 @@ void LatinosTreeScript(Float_t luminosity,
 	
 	// Top-tagged events for ttbar estimation
 	//----------------------------------------------------------------------
-	if (zveto && pfmet > 20 && mpmet > (20 + 25*sameflav)) {
+	if (zveto && metvar > (20 + 25*sameflav)) {
 
 	  if ((jetChannel == 0 && njet == 0 && !bveto) ||
-	      (jetChannel == 1 && njet == 1 && bveto && jettche1 > 2.1)) {
+	      (jetChannel == 1 && njet == 1 && bveto && jettche1 > 2.1) ||
+	      (jetChannel == 2)) {
 	    
 	    hTopTaggedEvents->Fill(1, totalW);
 	    hbTagDisTopTaggedEvents->Fill(jettche2, totalW);
@@ -396,76 +421,73 @@ void LatinosTreeScript(Float_t luminosity,
       // Main analysis
       //
       //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-      if (trigger == 1 && pt2 > 20) {
-	
-	hWTrigger   ->Fill(1, totalW); 
-	hWeffTrigger->Fill(1, efficiencyW);
+      hWTrigger   ->Fill(1, totalW); 
+      hWeffTrigger->Fill(1, efficiencyW);
 
-	if (pfmet > 20 && mpmet > 20) {
+      if (pfmet > 20 && mpmet > 20) {
 	  
-	  hWMetCut->Fill(1, totalW);
-	  hWeffMetCut->Fill(1, efficiencyW);
+	hWMetCut->Fill(1, totalW);
+	hWeffMetCut->Fill(1, efficiencyW);
 	  
-	  if (mll > 12) {
+	if (mll > 12) {
 	    
-	    hWLowMinv->Fill(1, totalW);
-	    hWeffLowMinv->Fill(1, efficiencyW);
+	  hWLowMinv->Fill(1, totalW);
+	  hWeffLowMinv->Fill(1, efficiencyW);
 	    
-	    if (zveto) {
+	  if (zveto) {
 	      
-	      hWZVeto->Fill(1, totalW); 
-	      hWeffZVeto->Fill(1, efficiencyW); 
+	    hWZVeto->Fill(1, totalW); 
+	    hWeffZVeto->Fill(1, efficiencyW); 
 
-	      if (mpmet > (20 + 25*sameflav)){
+	    if (metvar > (20 + 25*sameflav)){
 		
-		hWpMetCut->Fill(1, totalW);
-		hWeffpMetCut->Fill(1, efficiencyW);
+	      hWpMetCut->Fill(1, totalW);
+	      hWeffpMetCut->Fill(1, efficiencyW);
 
-		if (njet == jetChannel) {
+	      if (jetbin == jetChannel) {
 
-		  hWJetVeto->Fill(1, totalW);
-		  hWeffJetVeto->Fill(1, efficiencyW);
+		hWJetVeto->Fill(1, totalW);
+		hWeffJetVeto->Fill(1, efficiencyW);
 
-		  if (dphiveto || !sameflav) {
+		if (dphiv || !sameflav) {
 		    
-		    hWDeltaPhiJet->Fill(1, totalW);
-		    hWeffDeltaPhiJet->Fill(1, efficiencyW);
+		  hWDeltaPhiJet->Fill(1, totalW);
+		  hWeffDeltaPhiJet->Fill(1, efficiencyW);
 
-		    if (bveto_mu) {
+		  if (bveto_mu) {
 		      
-		      hWSoftMuVeto->Fill(1, totalW);
-		      hWeffSoftMuVeto->Fill(1, efficiencyW);
+		    hWSoftMuVeto->Fill(1, totalW);
+		    hWeffSoftMuVeto->Fill(1, efficiencyW);
 		      
-		      if (nextra == 0) {
+		    if (nextra == 0) {
 			
-			hWExtraLepton->Fill(1, totalW);
-			hWeffExtraLepton->Fill(1, efficiencyW);
+		      hWExtraLepton->Fill(1, totalW);
+		      hWeffExtraLepton->Fill(1, efficiencyW);
 			
-			if (ptll > 45) {
+		      if (ptll > 45) {
 			  
-			  hWPtll->Fill(1, totalW);
-			  hWeffPtll->Fill(1, efficiencyW);
+			hWPtll->Fill(1, totalW);
+			hWeffPtll->Fill(1, efficiencyW);
 
-			  if (bveto_ip && nbjettche == 0) {			    
+			if (bveto_ip && (nbjettche == 0 || njet > 3) && (njet <= 1 || vbfsel)) {			    
 			    
-			    hWTopTagging->Fill(1, totalW);
-			    hWeffTopTagging->Fill(1, efficiencyW);
-
-			    hPtLepton1WWLevel      ->Fill(pt1,       totalW);
-			    hPtLepton2WWLevel      ->Fill(pt2,       totalW);
-			    hPtDiLeptonWWLevel     ->Fill(ptll,      totalW);
-			    hMinvWWLevel           ->Fill(mll,       totalW);
-			    hMtWWLevel             ->Fill(mth,       totalW);
-			    hNJets30WWLevel        ->Fill(njet,      totalW);
-			    hpfMetWWLevel          ->Fill(pfmet,     totalW);
-			    hppfMetWWLevel         ->Fill(ppfmet,    totalW);
-			    hchMetWWLevel          ->Fill(chmet,     totalW);
-			    hpchMetWWLevel         ->Fill(pchmet,    totalW);
-			    hpminMetWWLevel        ->Fill(mpmet,     totalW);
-			    hDeltaRLeptonsWWLevel  ->Fill(drll,      totalW);
-			    hDeltaPhiLeptonsWWLevel->Fill(dphill,    totalW);
-			    hDPhiPtllJetWWLevel    ->Fill(dphilljet, totalW);
-			  }
+			  hWTopTagging->Fill(1, totalW);
+			  hWeffTopTagging->Fill(1, efficiencyW);
+			  
+			  hPtLepton1WWLevel      ->Fill(pt1,       totalW);
+			  hPtLepton2WWLevel      ->Fill(pt2,       totalW);
+			  hPtDiLeptonWWLevel     ->Fill(ptll,      totalW);
+			  hMinvWWLevel           ->Fill(mll,       totalW);
+			  hMtWWLevel             ->Fill(mth,       totalW);
+			  hNJets30WWLevel        ->Fill(njet,      totalW);
+			  hpfMetWWLevel          ->Fill(pfmet,     totalW);
+			  hppfMetWWLevel         ->Fill(ppfmet,    totalW);
+			  hchMetWWLevel          ->Fill(chmet,     totalW);
+			  hpchMetWWLevel         ->Fill(pchmet,    totalW);
+			  hpminMetWWLevel        ->Fill(mpmet,     totalW);
+			  hDeltaRLeptonsWWLevel  ->Fill(drll,      totalW);
+			  hDeltaPhiLeptonsWWLevel->Fill(dphill,    totalW);
+			  hDPhiPtllJetWWLevel    ->Fill(dphilljet, totalW);
 			}
 		      }
 		    }
