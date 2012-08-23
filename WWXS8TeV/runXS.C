@@ -213,6 +213,7 @@ void DrawXS(Int_t    ichannel,
 
   TString suffix = (ichannel > -1) ? channel[ichannel] : "";
   
-  canvas->SaveAs("wwxs" + suffix + ".pdf");
-  canvas->SaveAs("wwxs" + suffix + ".png");
+  gSystem->mkdir("png", kTRUE);
+
+  canvas->SaveAs("png/wwxs" + suffix + ".png");
 }

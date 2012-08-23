@@ -227,9 +227,9 @@ void XS(Double_t &xsValue,
   NWW[2] += (NqqWW[2]*NqqWW[0] * NqqWW[2]*NqqWW[0]);
   NWW[2]  = sqrt(NWW[2]) / NWW[0];  // Relative systematic uncertainty
 
-  NWZ[2]   = sqrt(NWZ[2])   * NWZ[0]   / 1e2;  // Absolute systematic uncertainty
-  NZZ[2]   = sqrt(NZZ[2])   * NZZ[0]   / 1e2;  // Absolute systematic uncertainty
-  NWg[2]   = sqrt(NWg[2])   * NWg[0]   / 1e2;  // Absolute systematic uncertainty
+  NWZ  [2] = sqrt(NWZ[2])   * NWZ[0]   / 1e2;  // Absolute systematic uncertainty
+  NZZ  [2] = sqrt(NZZ[2])   * NZZ[0]   / 1e2;  // Absolute systematic uncertainty
+  NWg  [2] = sqrt(NWg[2])   * NWg[0]   / 1e2;  // Absolute systematic uncertainty
   NH125[2] = sqrt(NH125[2]) * NH125[0] / 1e2;  // Absolute systematic uncertainty
 
   Double_t Background = NWj[0] + NWZ[0] + NZZ[0] + NWg[0] + NTop[0] + NDY[0] + NDYtautau[0] + NH125[0];
