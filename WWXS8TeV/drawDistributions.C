@@ -48,17 +48,17 @@ Double_t systError[nProcesses];
 
 systError[iData] = 0.0;
 
-// syst. / yield from SMP-12-013
-systError[itt]    = 19.5 / 131.6;
-systError[itW]    = 19.5 / 131.6;
-systError[iWW]    = 49.3 / 683.6;
-systError[iWZ]    =  2.9 /  27.4;
-systError[iZZ]    =  2.9 /  27.4;
-systError[iWg]    =  4.3 /  13.6;
-systError[iWj]    = 21.6 /  60.0;
-systError[iDY]    =  9.9 /  42.5;
-systError[iDYtau] =  9.9 /  42.5;
-systError[iH125]  =  0.0 / 999.9;
+// syst. / yield for the 0-jet bin
+systError[itt]    = 21.7 / 166.0;
+systError[itW]    = 21.7 / 166.0;
+systError[iWW]    = 67.7 / 939.5;
+systError[iWZ]    =  3.3 /  41.2;
+systError[iZZ]    =  3.3 /  41.2;
+systError[iWg]    =  6.1 /  19.3;
+systError[iWj]    = 36.9 / 102.5;
+systError[iDY]    =  9.8 /  58.2;
+systError[iDYtau] =  9.8 /  58.2;
+systError[iH125]  =  2.7 /  36.1;
 
 
 // Settings
@@ -74,10 +74,10 @@ Bool_t   _savePlots;
 
 // Scale factors
 //------------------------------------------------------------------------------
-Double_t ttScale[] = {1.10, 1.10, 999, 1.10};
-Double_t tWScale[] = {1.10, 1.10, 999, 1.10};
-Double_t WWScale[] = {1.14, 0.92, 999, 1.08};
-Double_t ZjScale[] = {3.70, 4.20, 999, 4.00};
+Double_t ttScale[] = {1.10, 1.10, 1.0, 1.10};
+Double_t tWScale[] = {1.10, 1.10, 1.0, 1.10};
+Double_t WWScale[] = {1.14, 0.92, 1.0, 1.08};
+Double_t ZjScale[] = {3.70, 4.20, 1.0, 4.00};
 
 
 //------------------------------------------------------------------------------
@@ -98,8 +98,6 @@ void drawDistributions(Int_t    njet       = 3,
   _drawRatio  = drawRatio;
   _dataDriven = dataDriven;
   _savePlots  = savePlots;
-
-  if (_njet == 2) return;
 
   gSystem->mkdir(_format, kTRUE);
 
