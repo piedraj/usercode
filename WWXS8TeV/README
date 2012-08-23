@@ -3,13 +3,14 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ./run.sh 0
 ./run.sh 1
+./run.sh 2
 ./inclusive.sh
 
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # 2. Print DY scale, top scale and WW cross section
 #
-#    njet       = {0, 1, 3}
+#    njet       = {0, 1, 2, 3}
 #    ichannel   = {-1, All, SF, OF, MuMu, EE, EMu, MuE}
 #    luminosity = 5064
 #    printLevel = {SILENT, NOTE, DEBUG}

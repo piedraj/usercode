@@ -30,7 +30,10 @@ for CHANNEL in $CHANNELS; do
 
     for SAMPLE in $SAMPLES; do 
 	
-	hadd ${OUTPATH}/${SAMPLE}.root rootfiles/0jet/${CHANNEL}/${SAMPLE}.root rootfiles/1jet/${CHANNEL}/${SAMPLE}.root 
+	hadd ${OUTPATH}/${SAMPLE}.root \
+	    rootfiles/0jet/${CHANNEL}/${SAMPLE}.root \
+	    rootfiles/1jet/${CHANNEL}/${SAMPLE}.root \
+	    rootfiles/2jet/${CHANNEL}/${SAMPLE}.root 
   
     done
 
