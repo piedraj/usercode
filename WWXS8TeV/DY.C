@@ -32,13 +32,13 @@ Double_t errkSF                    (Double_t a,
 Double_t errRFunction              (Double_t Nout,
 				    Double_t Nin);
 
-Double_t RDATAFunction             (Double_t NoutSF,
+Double_t RDataFunction             (Double_t NoutSF,
 				    Double_t NoutOF,
 				    Double_t NinSF,
 				    Double_t NinOF,
 				    Double_t k);
 
-Double_t errRDATAFunction          (Double_t NoutSF,
+Double_t errRDataFunction          (Double_t NoutSF,
 				    Double_t NoutOF,
 				    Double_t NinSF,
 				    Double_t NinOF,
@@ -64,13 +64,13 @@ Double_t errNinEstNoDibosonFunction(Double_t NinDataSF,
 				    Double_t NinZZ);
 
 
-//------------------------------------------------------------------------------
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 //
 // DY
 //
-// channel = SFChannel, MuMuChannel, EEChannel
+// channel = SF, MuMu, EE
 //
-//------------------------------------------------------------------------------
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 void DY(Double_t &yield,
 	Double_t &statError,
 	Double_t &systError,
@@ -82,141 +82,146 @@ void DY(Double_t &yield,
 	Int_t     printLevel,
 	Bool_t    drawR = false)
 {
+  //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  //
   // Input files
-  //----------------------------------------------------------------------------
+  //
+  //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   TString path = Form("%s/%djet/%s/", directory.Data(), njet, channel.Data());
 
-  TFile* inputZSF    = new TFile(path + "DY.root");
+  TFile* inputDYSF   = new TFile(path + "DY.root");
   TFile* inputZZSF   = new TFile(path + "ZZ.root");
   TFile* inputWZSF   = new TFile(path + "WZ.root");
-  TFile* inputDATASF = new TFile(path + "DataRun2012_Total.root");
+  TFile* inputDataSF = new TFile(path + "DataRun2012_Total.root");
 
-  TFile* inputDATAOF    = new TFile(Form("%s/%djet/OF/DataRun2012_Total.root", directory.Data(), njet));
-  TFile* inputZmumuMuMu = new TFile(Form("%s/%djet/MuMu/DY.root",              directory.Data(), njet));
-  TFile* inputZeeEE     = new TFile(Form("%s/%djet/EE/DY.root",                directory.Data(), njet));
+  TFile* inputDataOF = new TFile(Form("%s/%djet/OF/DataRun2012_Total.root", directory.Data(), njet));
+  TFile* inputZmumu  = new TFile(Form("%s/%djet/MuMu/DY.root",              directory.Data(), njet));
+  TFile* inputZee    = new TFile(Form("%s/%djet/EE/DY.root",                directory.Data(), njet));
 
 
-  // Declare histograms vs. mpmet cut
-  //----------------------------------------------------------------------------
+  //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  //
+  // Input histograms
+  //
+  //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   TH1F* hNinZeventsZSF    [numberMetCuts];
-  TH1F* hNinZeventsDATASF [numberMetCuts];
-  TH1F* hNinZeventsDATAOF [numberMetCuts];
+  TH1F* hNinZeventsDataSF [numberMetCuts];
+  TH1F* hNinZeventsDataOF [numberMetCuts];
   TH1F* hNoutZeventsZSF   [numberMetCuts];
-  TH1F* hNoutZeventsDATASF[numberMetCuts];
-  TH1F* hNoutZeventsDATAOF[numberMetCuts];
+  TH1F* hNoutZeventsDataSF[numberMetCuts];
+  TH1F* hNoutZeventsDataOF[numberMetCuts];
 
-
-  // Read histograms vs. mpmet cut
-  //----------------------------------------------------------------------------
   for (UInt_t nC=0; nC<numberMetCuts; nC++) {
-
-    hNinZeventsZSF   [nC] = (TH1F*) inputZSF   ->Get(Form("hNinZevents%.1f", MetCuts[nC]));
-    hNinZeventsDATASF[nC] = (TH1F*) inputDATASF->Get(Form("hNinZevents%.1f", MetCuts[nC]));
-    hNinZeventsDATAOF[nC] = (TH1F*) inputDATAOF->Get(Form("hNinZevents%.1f", MetCuts[nC]));
-
-    hNoutZeventsZSF   [nC] = (TH1F*) inputZSF   ->Get(Form("hNoutZevents%.1f", MetCuts[nC]));     
-    hNoutZeventsDATASF[nC] = (TH1F*) inputDATASF->Get(Form("hNoutZevents%.1f", MetCuts[nC]));
-    hNoutZeventsDATAOF[nC] = (TH1F*) inputDATAOF->Get(Form("hNoutZevents%.1f", MetCuts[nC]));
+    hNinZeventsZSF    [nC] = (TH1F*)inputDYSF  ->Get(Form("hNinZevents%.1f",  MetCuts[nC]));
+    hNinZeventsDataSF [nC] = (TH1F*)inputDataSF->Get(Form("hNinZevents%.1f",  MetCuts[nC]));
+    hNinZeventsDataOF [nC] = (TH1F*)inputDataOF->Get(Form("hNinZevents%.1f",  MetCuts[nC]));
+    hNoutZeventsZSF   [nC] = (TH1F*)inputDYSF  ->Get(Form("hNoutZevents%.1f", MetCuts[nC]));     
+    hNoutZeventsDataSF[nC] = (TH1F*)inputDataSF->Get(Form("hNoutZevents%.1f", MetCuts[nC]));
+    hNoutZeventsDataOF[nC] = (TH1F*)inputDataOF->Get(Form("hNoutZevents%.1f", MetCuts[nC]));
   }
 
 
-  // Read histograms at mpmet > 20 GeV
+  // Histograms at (pfmet > 20 && mpmet > 20)
   //----------------------------------------------------------------------------
-  TH1F* hNinZeventsZmumuMuMu = (TH1F*) inputZmumuMuMu->Get("hNinLooseZevents20.0");
-  TH1F* hNinZeventsZeeEE     = (TH1F*) inputZeeEE    ->Get("hNinLooseZevents20.0");
+  TH1F* hNinZeventsZmumu = (TH1F*)inputZmumu->Get("hNinLooseZevents20.0");
+  TH1F* hNinZeventsZee   = (TH1F*)inputZee  ->Get("hNinLooseZevents20.0");
 
 
-  // Read histograms at analysis level mpmet cut
+  // Histograms at mpmet > 45 for 0/1-jet or pfmet > 45 for 2-jet
   //----------------------------------------------------------------------------
-  TH1F* hExpectedDYSF = (TH1F*) inputZSF   ->Get("hWTopTagging");
-  TH1F* hNinWZSF      = (TH1F*) inputWZSF  ->Get("hCountedMinvDYStudies");
-  TH1F* hNinZZSF      = (TH1F*) inputZZSF  ->Get("hCountedMinvDYStudies");
-  TH1F* hNinDATASF    = (TH1F*) inputDATASF->Get("hCountedMinvDYStudies");
-  TH1F* hNinDATAOF    = (TH1F*) inputDATAOF->Get("hCountedMinvDYStudies");
+  TH1F* hNinWZSF = (TH1F*)inputWZSF->Get("hNinZevents45.0");
+  TH1F* hNinZZSF = (TH1F*)inputZZSF->Get("hNinZevents45.0");
 
 
+  // Histogram at analysis level
+  //----------------------------------------------------------------------------
+  TH1F* hExpectedDYSF = (TH1F*) inputDYSF->Get("hWTopTagging");
+
+
+  //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  //
   // Counters
-  //----------------------------------------------------------------------------
-  Double_t NinSF    [numberMetCuts];
-  Double_t NinSFDATA[numberMetCuts];
-  Double_t NinOFDATA[numberMetCuts];
-
+  //
+  //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  Double_t NinSF     [numberMetCuts];
+  Double_t NinSFData [numberMetCuts];
+  Double_t NinOFData [numberMetCuts];
   Double_t NoutSF    [numberMetCuts];
-  Double_t NoutSFDATA[numberMetCuts];
-  Double_t NoutOFDATA[numberMetCuts];
+  Double_t NoutSFData[numberMetCuts];
+  Double_t NoutOFData[numberMetCuts];
 
-  Double_t NinMuMu = hNinZeventsZmumuMuMu->GetBinContent(2);
-  Double_t NinEE   = hNinZeventsZeeEE    ->GetBinContent(2);
+  for (UInt_t nC=0; nC<numberMetCuts-1; nC++) {
+    NinSF     [nC] = hNinZeventsZSF    [nC]->GetBinContent(2);
+    NinSFData [nC] = hNinZeventsDataSF [nC]->GetBinContent(2);    
+    NinOFData [nC] = hNinZeventsDataOF [nC]->GetBinContent(2);
+    NoutSF    [nC] = hNoutZeventsZSF   [nC]->GetBinContent(2);
+    NoutSFData[nC] = hNoutZeventsDataSF[nC]->GetBinContent(2);    
+    NoutOFData[nC] = hNoutZeventsDataOF[nC]->GetBinContent(2);
+  }
 
-  Double_t NinCountedSFWZ   = hNinWZSF  ->GetBinContent(2);
-  Double_t NinCountedSFZZ   = hNinZZSF  ->GetBinContent(2);
-  Double_t NinCountedSFDATA = hNinDATASF->GetBinContent(2);
-  Double_t NinCountedOFDATA = hNinDATAOF->GetBinContent(2);
+  Double_t NinMuMu = hNinZeventsZmumu->GetBinContent(2);
+  Double_t NinEE   = hNinZeventsZee  ->GetBinContent(2);
+
+  Double_t NinCountedSFWZ   = hNinWZSF->GetBinContent(2);
+  Double_t NinCountedSFZZ   = hNinZZSF->GetBinContent(2);
+  Double_t NinCountedSFData = NinSFData[numberMetCuts-2];
+  Double_t NinCountedOFData = NinOFData[numberMetCuts-2];
 
 
-  // k estimation
-  //----------------------------------------------------------------------------
+  //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  //
+  // k and R estimation
+  //
+  //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   Double_t k    = 0.5 * (sqrt(NinMuMu / NinEE) + sqrt(NinEE / NinMuMu));
   Double_t errk = errkSF(NinMuMu, NinEE);
 
-  if (channel == "MuMuChannel") {
+  if (channel == "MuMu") {
     k    = 0.5 * sqrt(NinMuMu / NinEE);
     errk = errkFunction(NinMuMu, NinEE);
   }
-  else if (channel == "EEChannel") {
+  else if (channel == "EE") {
     k    = 0.5 * sqrt(NinEE / NinMuMu);
     errk = errkFunction(NinEE, NinMuMu);
   }
 
 
-  // R
+  // R estimation
   //----------------------------------------------------------------------------
-  Double_t R   [numberMetCuts];
-  Double_t errR[numberMetCuts];
+  Double_t R       [numberMetCuts];
+  Double_t RData   [numberMetCuts];
+  Double_t errR    [numberMetCuts];
+  Double_t errRData[numberMetCuts];
 
-  Double_t RDATA   [numberMetCuts];
-  Double_t errRDATA[numberMetCuts];
 
-
-  // Loop over the mpmet cuts
+  // Loop over the met cuts
   //----------------------------------------------------------------------------
   for (UInt_t nC=0; nC<numberMetCuts-1; nC++) {
 
-    NinSF    [nC] = hNinZeventsZSF   [nC]->GetBinContent(2);
-    NinSFDATA[nC] = hNinZeventsDATASF[nC]->GetBinContent(2);    
-    NinOFDATA[nC] = hNinZeventsDATAOF[nC]->GetBinContent(2);
-
-    NoutSF    [nC] = hNoutZeventsZSF   [nC]->GetBinContent(2);
-    NoutSFDATA[nC] = hNoutZeventsDATASF[nC]->GetBinContent(2);    
-    NoutOFDATA[nC] = hNoutZeventsDATAOF[nC]->GetBinContent(2);
-
-
-    // R estimation
-    //--------------------------------------------------------------------------
     R   [nC] = NoutSF[nC] / NinSF[nC]; 
     errR[nC] = errRFunction(NoutSF[nC], NinSF[nC]);
 
-    RDATA   [nC] = RDATAFunction   (NoutSFDATA[nC], NoutOFDATA[nC], NinSFDATA[nC], NinOFDATA[nC], k);
-    errRDATA[nC] = errRDATAFunction(NoutSFDATA[nC], NoutOFDATA[nC], NinSFDATA[nC], NinOFDATA[nC], k, errk);
+    RData   [nC] = RDataFunction   (NoutSFData[nC], NoutOFData[nC], NinSFData[nC], NinOFData[nC], k);
+    errRData[nC] = errRDataFunction(NoutSFData[nC], NoutOFData[nC], NinSFData[nC], NinOFData[nC], k, errk);
 
 
-    if (printLevel > 1) {
+    if (printLevel > 2) {
       printf("\n %.0f < mpmet < %.0f GeV\n", MetCuts[nC], MetCuts[nC+1]);
       printf(" -------------------------------------------------\n");
       printf("         N^{MC}_{out,SF}   = %6.1f\n", NoutSF[nC]);
       printf("         N^{MC}_{in, SF}   = %6.1f\n", NinSF[nC]);
-      printf("         N^{data}_{out,SF} = %4.0f\n", NoutSFDATA[nC]);
-      printf("         N^{data}_{out,OF} = %4.0f\n", NoutOFDATA[nC]);
-      printf("         N^{data}_{in, SF} = %4.0f\n", NinSFDATA[nC]);
-      printf("         N^{data}_{in, OF} = %4.0f\n", NinOFDATA[nC]);
+      printf("         N^{data}_{out,SF} = %4.0f\n", NoutSFData[nC]);
+      printf("         N^{data}_{out,OF} = %4.0f\n", NoutOFData[nC]);
+      printf("         N^{data}_{in, SF} = %4.0f\n", NinSFData[nC]);
+      printf("         N^{data}_{in, OF} = %4.0f\n", NinOFData[nC]);
       printf("         k                 = % 5.3f +- %5.3f\n", k,         errk);
       printf("         R^{MC}            = % 5.3f +- %5.3f\n", R[nC],     errR[nC]);
-      printf("         R^{data}          = % 5.3f +- %5.3f\n", RDATA[nC], errRDATA[nC]);
+      printf("         R^{data}          = % 5.3f +- %5.3f\n", RData[nC], errRData[nC]);
     }
   }
 
 
-  // Estimate the R systematic as the maximum difference between the R[mpmet] values
+  // Estimate the R systematic as the difference between R[2] and R[3]
   //----------------------------------------------------------------------------
   Int_t iMaxR = 0; 
   Int_t iMinR = 0; 
@@ -227,38 +232,34 @@ void DY(Double_t &yield,
     if (R[nC] > 0 && R[nC] < R[iMinR]) iMinR = nC;
   }
 
-  Double_t RelDiffR = (R[iMaxR] > 0) ? fabs(R[iMaxR] - R[iMinR]) / R[iMaxR] : -999;
-
-
-  // In the analysis, we use the difference between R[2] and R[3]
-  //----------------------------------------------------------------------------
   Int_t theR = 2;
+  Int_t sysR = 3;
 
-  RelDiffR = (R[theR] > 0) ? fabs(R[theR] - R[numberMetCuts-2]) / R[theR] : -999;
+  Double_t RelDiffR = (R[theR] > 0) ? fabs(R[theR] - R[sysR]) / R[theR] : -999;
 
 
   if (printLevel > 0) {
     printf("\n [%s] R systematic uncertainty\n", channel.Data());
     printf(" -------------------------------------------------\n");
-    printf("         min R              = %5.3f\n",      R[iMinR]);
-    printf("         max R              = %5.3f\n",      R[iMaxR]);
-    printf("         R[%d]               = %5.3f\n",     theR, R[theR]);
-    printf("         R[%d]               = %5.3f\n",     numberMetCuts-2, R[numberMetCuts-2]);
-    printf("         |R[%d]-R[%d]| / R[%d] = %.1f%s\n",  theR, numberMetCuts-2, theR, 1e2*RelDiffR, "%");
+    printf("         min R              = %5.3f\n",     R[iMinR]);
+    printf("         max R              = %5.3f\n",     R[iMaxR]);
+    printf("         R[%d]               = %5.3f\n",    theR, R[theR]);
+    printf("         R[%d]               = %5.3f\n",    sysR, R[sysR]);
+    printf("         |R[%d]-R[%d]| / R[%d] = %.1f%s\n", theR, sysR, theR, 1e2*RelDiffR, "%");
     printf("\n");
   }
 
 
   // Remove WZ and ZZ dibosons
   //----------------------------------------------------------------------------
-  Double_t NinEstSFFinal    = NinCountedSFDATA - k*NinCountedOFDATA;
-  Double_t errNinEstSFFinal = errNinEstFunction(NinCountedSFDATA, NinCountedOFDATA, k, errk);
+  Double_t NinEstSFFinal    = NinCountedSFData - k*NinCountedOFData;
+  Double_t errNinEstSFFinal = errNinEstFunction(NinCountedSFData, NinCountedOFData, k, errk);
 
   Double_t NestSFFinal    = R[theR] * NinEstSFFinal;
   Double_t errNestSFFinal = errNestFunction(NestSFFinal, R[theR], errR[theR], NinEstSFFinal, errNinEstSFFinal);
 
   Double_t NinEstSFNoDibosonFinal    = NinEstSFFinal - NinCountedSFWZ - NinCountedSFZZ;
-  Double_t errNinEstSFNoDibosonFinal = errNinEstNoDibosonFunction(NinCountedSFDATA, k, errk, NinCountedOFDATA, NinCountedSFWZ, NinCountedSFZZ);
+  Double_t errNinEstSFNoDibosonFinal = errNinEstNoDibosonFunction(NinCountedSFData, k, errk, NinCountedOFData, NinCountedSFWZ, NinCountedSFZZ);
 
   Double_t NestSFNoDibosonFinal    = R[theR] * NinEstSFNoDibosonFinal;
   Double_t errNestSFNoDibosonFinal = errNestFunction(NestSFNoDibosonFinal, R[theR], errR[theR], NinEstSFNoDibosonFinal, errNinEstSFNoDibosonFinal);
@@ -271,8 +272,8 @@ void DY(Double_t &yield,
   if (printLevel > 1) {
     printf("\n Analysis results\n");
     printf(" -------------------------------------------------\n");
-    printf("         N^{data}_{in,SF} = %4.0f\n", NinCountedSFDATA);
-    printf("         N^{data}_{in,OF} = %4.0f\n", NinCountedOFDATA);
+    printf("         N^{data}_{in,SF} = %4.0f\n", NinCountedSFData);
+    printf("         N^{data}_{in,OF} = %4.0f\n", NinCountedOFData);
     printf("         k                = %5.3f +- %5.3f\n", k, errk);
     printf("         R[%d]             = %5.3f +- %5.3f\n", theR, R[theR], errR[theR]);
     printf("         N^{WZ}_{in,SF}   = %6.2f +- %6.2f (stat.) +- %6.2f (syst.)\n",
@@ -309,7 +310,7 @@ void DY(Double_t &yield,
     printf(" same flavour  &  %5.3f $\\pm$ %5.3f  &              %4.0f  &  %5.1f $\\pm$ %4.1f  &  %5.1f $\\pm$ %4.1f  &     %4.1f\n\n",
 	 R[theR],
 	   errR[theR],
-	   NinCountedSFDATA,
+	   NinCountedSFData,
 	   yield,
 	   statError,
 	   hExpectedDYSF->GetBinContent(2),
@@ -336,11 +337,11 @@ void DY(Double_t &yield,
       gR->SetPoint     (i, 0.5 * (MetDraw[i+1] + MetDraw[i]),    R[i]);
       gR->SetPointError(i, 0.5 * (MetDraw[i+1] - MetDraw[i]), errR[i]);
 
-      gRdata->SetPoint     (i, 0.5 * (MetDraw[i+1] + MetDraw[i]),    RDATA[i]);
-      gRdata->SetPointError(i, 0.5 * (MetDraw[i+1] - MetDraw[i]), errRDATA[i]);
+      gRdata->SetPoint     (i, 0.5 * (MetDraw[i+1] + MetDraw[i]),    RData[i]);
+      gRdata->SetPointError(i, 0.5 * (MetDraw[i+1] - MetDraw[i]), errRData[i]);
 
       if (absoluteMin > (R[i]     - errR[i]))     absoluteMin = R[i]     - errR[i];
-      if (absoluteMin > (RDATA[i] - errRDATA[i])) absoluteMin = RDATA[i] - errRDATA[i];
+      if (absoluteMin > (RData[i] - errRData[i])) absoluteMin = RData[i] - errRData[i];
     }
     
     if (absoluteMin > 0) absoluteMin = 0;
@@ -386,9 +387,9 @@ void DY(Double_t &yield,
     lmgR->SetTextFont (42);
     lmgR->SetTextSize (0.04);
 
-    if      (channel == "SFChannel")   lmgR->SetHeader("ee + #mu#mu");
-    else if (channel == "EEChannel")   lmgR->SetHeader("ee");
-    else if (channel == "MuMuChannel") lmgR->SetHeader("#mu#mu");
+    if      (channel == "SF")   lmgR->SetHeader("ee + #mu#mu");
+    else if (channel == "EE")   lmgR->SetHeader("ee");
+    else if (channel == "MuMu") lmgR->SetHeader("#mu#mu");
 
     lmgR->Draw("same");
 
@@ -445,9 +446,9 @@ Double_t errRFunction(Double_t Nout, Double_t Nin)
 
 
 //------------------------------------------------------------------------------
-// RDATAFunction
+// RDataFunction
 //------------------------------------------------------------------------------
-Double_t RDATAFunction(Double_t NoutSF,
+Double_t RDataFunction(Double_t NoutSF,
 		       Double_t NoutOF,
 		       Double_t NinSF,
 		       Double_t NinOF,
@@ -460,9 +461,9 @@ Double_t RDATAFunction(Double_t NoutSF,
 
 
 //------------------------------------------------------------------------------
-// errRDATAFunction
+// errRDataFunction
 //------------------------------------------------------------------------------
-Double_t errRDATAFunction(Double_t NoutSF,
+Double_t errRDataFunction(Double_t NoutSF,
 			  Double_t NoutOF,
 			  Double_t NinSF,
 			  Double_t NinOF,
@@ -478,9 +479,9 @@ Double_t errRDATAFunction(Double_t NoutSF,
   Term1 = Term1 / den;
   Term2 = num * Term2 / (den*den);
 
-  Double_t errRDATA = sqrt(Term1*Term1 + Term2*Term2);
+  Double_t errRData = sqrt(Term1*Term1 + Term2*Term2);
 
-  return errRDATA;
+  return errRData;
 }
 
 

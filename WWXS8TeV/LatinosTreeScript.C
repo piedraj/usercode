@@ -83,14 +83,11 @@ void LatinosTreeScript(Float_t luminosity,
 
   // Data-driven methods: Z+jets
   //----------------------------------------------------------------------------
-  TH1F* hCountedMinvDYStudies = new TH1F("hCountedMinvDYStudies", "", 3, 0,3);
-
   TH1F* hNinZevents     [numberMetCuts];
   TH1F* hNoutZevents    [numberMetCuts];
   TH1F* hNinLooseZevents[numberMetCuts];
   TH1F* hMassInZevents  [numberMetCuts];
   TH1F* hMassOutZevents [numberMetCuts];
-  TH1F* hMinvDYStudies  [numberMetCuts];
 
   for (size_t nC=0; nC<numberMetCuts; nC++) {
     hNinZevents     [nC] = new TH1F(Form("hNinZevents%.1f",      MetCut[nC]), "",   3, 0,   3);
@@ -98,7 +95,6 @@ void LatinosTreeScript(Float_t luminosity,
     hNinLooseZevents[nC] = new TH1F(Form("hNinLooseZevents%.1f", MetCut[nC]), "",   3, 0,   3);
     hMassInZevents  [nC] = new TH1F(Form("hMassInZevents%.1f",   MetCut[nC]), "", 200, 0, 200);
     hMassOutZevents [nC] = new TH1F(Form("hMassOutZevents%.1f",  MetCut[nC]), "", 200, 0, 200);
-    hMinvDYStudies  [nC] = new TH1F(Form("hMinvDYStudies%.1f",   MetCut[nC]), "", 200, 0, 200);
   }
 
 
@@ -343,22 +339,14 @@ void LatinosTreeScript(Float_t luminosity,
 	//
 	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	if (dphiv && jetbin == jetChannel && bveto_mu && (bveto_ip && (nbjettche == 0 || njet > 3))) {
-	  
-	  if (fabs(mll - ZMASS) < 7.5 && metvar > 45) {
-	    hCountedMinvDYStudies->Fill(1, totalW);
-	  }
 
 
 	  // Loop over the metvar bins
 	  //--------------------------------------------------------------------
 	  for (size_t mc=0; mc<numberMetCuts; mc ++) {
 	    
-	    if (metvar > MetCut[mc]) {
-	      hMinvDYStudies[mc]->Fill(mll, totalW);    
-	    
-	      if (fabs(mll - ZMASS) < 7.5) {
-		hNinLooseZevents[mc]->Fill(1,totalW);
-	      }
+	    if (metvar > MetCut[mc] && fabs(mll - ZMASS) < 7.5) {
+	      hNinLooseZevents[mc]->Fill(1,totalW);
 	    }
 
 	    if (metvar > MetCut[mc] && metvar < MetCut[mc+1]) {   
@@ -469,7 +457,7 @@ void LatinosTreeScript(Float_t luminosity,
 			hWPtll->Fill(1, totalW);
 			hWeffPtll->Fill(1, efficiencyW);
 
-			if (bveto_ip && (nbjettche == 0 || njet > 3) && (njet <= 1 || vbfsel)) {			    
+			if (bveto_ip && (nbjettche == 0 || njet > 3) && (njet <= 1 || vbfsel)) {
 			    
 			  hWTopTagging->Fill(1, totalW);
 			  hWeffTopTagging->Fill(1, efficiencyW);

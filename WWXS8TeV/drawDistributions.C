@@ -88,7 +88,7 @@ void drawDistributions(Int_t    njet       = 0,
 		       Double_t luminosity = 5064,
 		       TString  format     = "pdf",
 		       Bool_t   drawRatio  = true,
-		       Bool_t   dataDriven = true,
+		       Bool_t   dataDriven = false,
 		       Bool_t   savePlots  = true)
 {
   _channel    = channel;
@@ -113,21 +113,31 @@ void drawDistributions(Int_t    njet       = 0,
     input[ip] = new TFile(path + process[ip] + ".root", "read");
 
 
+  // DY distributions
+  //----------------------------------------------------------------------------
+  if (0) {
+    DrawHistogram("hMassInZevents45.0",  "m_{#font[12]{ll}}", 1, 0, "GeV", 76, 106);
+    DrawHistogram("hMassOutZevents45.0", "m_{#font[12]{ll}}", 5, 0, "GeV");
+  }
+
+
   // Top distributions
   //----------------------------------------------------------------------------
   if (0) {
-    DrawHistogram("hbTagDisNTopTaggedTopControlRegion", "2^{nd} jet TCHE",   5, 1, "NULL", -999, -999, false);
-    DrawHistogram("hbTagDisNTopControlRegion",          "2^{nd} jet TCHE",   5, 1, "NULL", -999, -999, false);
-    DrawHistogram("hbTagDisTopTaggedEvents",            "2^{nd} jet TCHE",   5, 1, "NULL", -999, -999, false);
+    DrawHistogram("hbTagDisNTopTaggedTopControlRegion", "2^{nd} jet TCHE", 5, 1, "NULL", -999, -999, false);
+    DrawHistogram("hbTagDisNTopControlRegion",          "2^{nd} jet TCHE", 5, 1, "NULL", -999, -999, false);
+    DrawHistogram("hbTagDisTopTaggedEvents",            "2^{nd} jet TCHE", 5, 1, "NULL", -999, -999, false);
   }
 
 
   // PAS distributions
   //----------------------------------------------------------------------------
-  DrawHistogram("hPtLepton1WWLevel",  "p_{T}^{max}",           5, 0, "GeV",  0, 160);
-  DrawHistogram("hPtLepton2WWLevel",  "p_{T}^{min}",           5, 0, "GeV", 15,  80);
-  DrawHistogram("hPtDiLeptonWWLevel", "p_{T}^{#font[12]{ll}}", 5, 0, "GeV", 40, 120);
-  DrawHistogram("hMinvWWLevel",       "m_{#font[12]{ll}}",     5, 0, "GeV");
+  if (1) {
+    DrawHistogram("hPtLepton1WWLevel",  "p_{T}^{max}",           5, 0, "GeV",  0, 160);
+    DrawHistogram("hPtLepton2WWLevel",  "p_{T}^{min}",           5, 0, "GeV", 15,  80);
+    DrawHistogram("hPtDiLeptonWWLevel", "p_{T}^{#font[12]{ll}}", 5, 0, "GeV", 40, 120);
+    DrawHistogram("hMinvWWLevel",       "m_{#font[12]{ll}}",     5, 0, "GeV");
+  }
 }
 
 
@@ -350,7 +360,7 @@ void DrawHistogram(TString  hname,
     uncertainty->Draw("e2");
     ratio      ->Draw("ep,same");
 
-    uncertainty->GetYaxis()->SetRangeUser(0, 2);
+    uncertainty->GetYaxis()->SetRangeUser(0, 2.5);
 
     Pad2TAxis(uncertainty, hist[iData]->GetXaxis()->GetTitle(), "data / prediction");
   }
