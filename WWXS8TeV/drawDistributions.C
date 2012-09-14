@@ -86,9 +86,9 @@ Double_t ZjScale[] = {3.70, 4.20, 1.80, 4.00};
 void drawDistributions(Int_t    njet       = 0,
 		       TString  channel    = "All",
 		       Double_t luminosity = 5064,
-		       TString  format     = "pdf",
+		       TString  format     = "png",
 		       Bool_t   drawRatio  = true,
-		       Bool_t   dataDriven = false,
+		       Bool_t   dataDriven = true,
 		       Bool_t   savePlots  = true)
 {
   _channel    = channel;
@@ -107,7 +107,7 @@ void drawDistributions(Int_t    njet       = 0,
 
   // Read input files
   //----------------------------------------------------------------------------
-  TString path = Form("rootfiles/%djet/%s/", _njet, _channel.Data());
+  TString path = Form("rootfiles_santi/rootfiles_noCorrection_jet40/%djet/%s/", _njet, _channel.Data());
 
   for (UInt_t ip=0; ip<nProcesses; ip++)
     input[ip] = new TFile(path + process[ip] + ".root", "read");
@@ -182,6 +182,8 @@ void DrawHistogram(TString  hname,
   //----------------------------------------------------------------------------
   pad1->cd();
 
+  //  pad1->SetLogy();
+
   THStack* hstack = new THStack(hname, hname);
 
   TH1F* hist[nProcesses];
@@ -191,10 +193,11 @@ void DrawHistogram(TString  hname,
     hist[ip] = (TH1F*)input[ip]->Get(hname);
     hist[ip]->SetName(hname + process[ip]);
 
-    if (moveOverflow) MoveOverflowBins(hist[ip], xmin, xmax);
-
     if (ngroup > 0) hist[ip]->Rebin(ngroup);
 
+    if (moveOverflow) MoveOverflowBins  (hist[ip], xmin, xmax);
+    else              ZeroOutOfRangeBins(hist[ip], xmin, xmax);
+    
     if (ip == iData) {
       hist[ip]->SetMarkerStyle(kFullCircle);
     }
@@ -280,17 +283,20 @@ void DrawHistogram(TString  hname,
 
   // Adjust scale
   //----------------------------------------------------------------------------
-  Float_t theMax   = GetMaximumIncludingErrors(hist[iData]);
-  Float_t theMaxMC = GetMaximumIncludingErrors(allmc);
+  Float_t theMax   = GetMaximumIncludingErrors(hist[iData], xmin, xmax);
+  Float_t theMaxMC = GetMaximumIncludingErrors(allmc,       xmin, xmax);
 
   if (theMaxMC > theMax) theMax = theMaxMC;
 
-  if (canvas->GetLogy()) {
-    hist[iData]->SetMaximum(500 * theMax);
+  if (pad1->GetLogy()) {
+
+    theMax = TMath::Power(10, TMath::Log10(theMax) + 2.7);
+
     hist[iData]->SetMinimum(0.05);
-  } else {
-    hist[iData]->SetMaximum(1.55 * theMax);
   }
+  else theMax *= 1.55;
+
+  hist[iData]->SetMaximum(theMax);
 
 
   // Legend
@@ -392,11 +398,20 @@ void DrawHistogram(TString  hname,
 //------------------------------------------------------------------------------
 // GetMaximumIncludingErrors
 //------------------------------------------------------------------------------
-Float_t GetMaximumIncludingErrors(TH1F* h)
+Float_t GetMaximumIncludingErrors(TH1F*    h,
+				  Double_t xmin,
+				  Double_t xmax)
 {
+  UInt_t nbins = h->GetNbinsX();
+
+  TAxis* axis = (TAxis*)h->GetXaxis();
+  
+  Int_t firstBin = (xmin != -999) ? axis->FindBin(xmin) : 1;
+  Int_t lastBin  = (xmax != -999) ? axis->FindBin(xmax) : nbins;
+
   Float_t maxWithErrors = 0;
 
-  for (Int_t i=1; i<=h->GetNbinsX(); i++) {
+  for (Int_t i=firstBin; i<=lastBin; i++) {
 
     Float_t binHeight = h->GetBinContent(i) + h->GetBinError(i);
 
@@ -410,14 +425,16 @@ Float_t GetMaximumIncludingErrors(TH1F* h)
 //------------------------------------------------------------------------------
 // MoveOverflowBins
 //------------------------------------------------------------------------------
-void MoveOverflowBins(TH1* h, Double_t xmin, Double_t xmax) const
+void MoveOverflowBins(TH1* h,
+		      Double_t xmin,
+		      Double_t xmax) const
 {
   UInt_t nbins = h->GetNbinsX();
 
   TAxis* axis = (TAxis*)h->GetXaxis();
   
-  Int_t firstBin = (xmin > -999) ? axis->FindBin(xmin) : 1;
-  Int_t lastBin  = (xmax <  999) ? axis->FindBin(xmax) : nbins;
+  Int_t firstBin = (xmin != -999) ? axis->FindBin(xmin) : 1;
+  Int_t lastBin  = (xmax != -999) ? axis->FindBin(xmax) : nbins;
 
   Double_t firstVal = 0;
   Double_t firstErr = 0;
@@ -451,6 +468,28 @@ void MoveOverflowBins(TH1* h, Double_t xmin, Double_t xmax) const
 
   h->SetBinContent(lastBin, lastVal);
   h->SetBinError  (lastBin, lastErr);
+}
+
+
+//------------------------------------------------------------------------------
+// ZeroOutOfRangeBins
+//------------------------------------------------------------------------------
+void ZeroOutOfRangeBins(TH1* h, Double_t xmin, Double_t xmax) const
+{
+  UInt_t nbins = h->GetNbinsX();
+
+  TAxis* axis = (TAxis*)h->GetXaxis();
+  
+  Int_t firstBin = (xmin != -999) ? axis->FindBin(xmin) : 1;
+  Int_t lastBin  = (xmax != -999) ? axis->FindBin(xmax) : nbins;
+
+  for (UInt_t i=0; i<=nbins+1; i++) {
+
+    if (i < firstBin || i > lastBin) {
+      h->SetBinContent(i, 0);
+      h->SetBinError  (i, 0);
+    }
+  }
 }
 
 
