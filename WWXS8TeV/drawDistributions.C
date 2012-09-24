@@ -70,7 +70,7 @@ TString  _format;
 Bool_t   _drawRatio;
 Bool_t   _dataDriven;
 Bool_t   _savePlots;
-
+Bool_t   _setLogy;
 
 // Scale factors
 //------------------------------------------------------------------------------
@@ -84,12 +84,13 @@ Double_t ZjScale[] = {3.70, 4.20, 1.80, 4.00};
 // drawDistributions
 //------------------------------------------------------------------------------
 void drawDistributions(Int_t    njet       = 0,
-		       TString  channel    = "All",
+		       TString  channel    = "OF",
 		       Double_t luminosity = 5064,
 		       TString  format     = "png",
 		       Bool_t   drawRatio  = true,
 		       Bool_t   dataDriven = true,
-		       Bool_t   savePlots  = true)
+		       Bool_t   savePlots  = true,
+		       Bool_t   setLogy    = false)
 {
   _channel    = channel;
   _njet       = njet;
@@ -98,6 +99,7 @@ void drawDistributions(Int_t    njet       = 0,
   _drawRatio  = drawRatio;
   _dataDriven = dataDriven;
   _savePlots  = savePlots;
+  _setLogy    = setLogy;
 
   gSystem->mkdir(_format, kTRUE);
 
@@ -107,7 +109,7 @@ void drawDistributions(Int_t    njet       = 0,
 
   // Read input files
   //----------------------------------------------------------------------------
-  TString path = Form("rootfiles_santi/rootfiles_noCorrection_jet40/%djet/%s/", _njet, _channel.Data());
+  TString path = Form("rootfiles/rootfiles_noCorrection/%djet/%s/", _njet, _channel.Data());
 
   for (UInt_t ip=0; ip<nProcesses; ip++)
     input[ip] = new TFile(path + process[ip] + ".root", "read");
@@ -182,7 +184,7 @@ void DrawHistogram(TString  hname,
   //----------------------------------------------------------------------------
   pad1->cd();
 
-  //  pad1->SetLogy();
+  pad1->SetLogy(_setLogy);
 
   THStack* hstack = new THStack(hname, hname);
 
@@ -206,7 +208,7 @@ void DrawHistogram(TString  hname,
       hist[ip]->SetFillStyle(1001);
       hist[ip]->SetLineColor(color[ip]);
 
-      if (ip == iH125) hist[ip]->SetFillStyle(3354);
+      //      if (ip == iH125) hist[ip]->SetFillStyle(3354);
 
       if (_dataDriven && ip == itt)    hist[ip]->Scale(ttScale[_njet]);
       if (_dataDriven && ip == itW)    hist[ip]->Scale(tWScale[_njet]);
@@ -278,6 +280,7 @@ void DrawHistogram(TString  hname,
 
   hist[iData]->Draw("ep");
   hstack     ->Draw("hist,same");
+  allmc      ->Draw("e2,same");
   hist[iData]->Draw("ep,same");
 
 
