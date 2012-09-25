@@ -457,9 +457,6 @@ void Top(Double_t &yield,
   topScaleFactor = yield / NTopTotalMC;
 
 
-  printf("\n >>>>>>> WARNING: Top from MC is scaled x 1.1 <<<<<<<\n");
-
-
   Double_t topScaleFactorError = ratioError(yield,
 					    NTopTotalMC,
 					    sqrt(statError*statError + systError*systError),
