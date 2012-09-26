@@ -6,12 +6,13 @@
 #include "Top.C"
 
 
-const Double_t nlo8tev      = 57.25;
-const Double_t nlo8tevPlus  = 4.1 * nlo8tev / 1e2;
-const Double_t nlo8tevMinus = 2.8 * nlo8tev / 1e2;
+const Double_t nlo8tev       = 57.25;  // [pb]
+const Double_t nlo8tevPlus   = 4.1 * nlo8tev / 1e2;
+const Double_t nlo8tevMinus  = 2.8 * nlo8tev / 1e2;
+const Double_t BR_WW_to_lnln = (3 * 0.108) * (3 * 0.108);
 
-const Double_t ggWW_xs = 0.18;
-const Double_t qqWW_xs = 5.81;
+const Double_t ggWW_xs = nlo8tev * BR_WW_to_lnln * 0.03;
+const Double_t qqWW_xs = nlo8tev * BR_WW_to_lnln * 0.97;
 
 const Double_t NTotalggWW =  109987;
 const Double_t NTotalqqWW = 1933235;
@@ -296,8 +297,6 @@ void XS(Double_t &xsValue,
 
   // Estimate WW cross-section
   //----------------------------------------------------------------------------
-  Double_t BR_WW_to_lnln = (3 * 0.108) * (3 * 0.108);
-
   Double_t xs = (NData[0] - Background) / (luminosity * WW_efficiency);
 
   if (!fiducialXS) xs /= BR_WW_to_lnln;
