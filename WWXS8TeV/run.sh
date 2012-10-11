@@ -10,7 +10,7 @@ LUMINOSITY=5.064
 
 NJETS=$1
 
-CHANNELS=" All SF OF EE MuMu EMu MuE "
+CHANNELS=" EE MuMu EMu MuE "
 
 SAMPLES="          \
 ggWWto2L           \
@@ -47,4 +47,45 @@ for CHANNEL in $CHANNELS; do
     hadd ${OUTPATH}/WW.root     ${OUTPATH}/ggWWto2L.root     ${OUTPATH}/WWTo2L2Nu.root 
     hadd ${OUTPATH}/Wgamma.root ${OUTPATH}/WgammaNoStar.root ${OUTPATH}/WgammaStar.root
 
+done
+
+
+# Make the SF, OF and All directories
+PATHSF=rootfiles/${NJETS}jet/SF
+PATHOF=rootfiles/${NJETS}jet/OF
+PATHAll=rootfiles/${NJETS}jet/All
+
+mkdir ${PATHSF}
+mkdir ${PATHOF}
+mkdir ${PATHAll}
+    
+PATHEMu=rootfiles/${NJETS}jet/EMu
+PATHMuE=rootfiles/${NJETS}jet/MuE
+PATHMuMu=rootfiles/${NJETS}jet/MuMu
+PATHEE=rootfiles/${NJETS}jet/EE
+
+ALLSAMPLES="       \
+ggWWto2L           \
+WWTo2L2Nu          \
+WZ                 \
+ZZ                 \
+TTbar              \
+TW                 \
+DY                 \
+WgammaStar         \
+WgammaNoStar       \
+WJetsFakes_Total   \
+DataRun2012_Total  \
+DYtautau           \
+HWW125             \
+WW                 \
+Wgamma             \
+"
+
+for SAMPLE in $ALLSAMPLES; do 
+ 
+    hadd ${PATHSF}/${SAMPLE}.root  ${PATHMuMu}/${SAMPLE}.root ${PATHEE}/${SAMPLE}.root
+    hadd ${PATHOF}/${SAMPLE}.root  ${PATHMuE}/${SAMPLE}.root  ${PATHEMu}/${SAMPLE}.root
+    hadd ${PATHAll}/${SAMPLE}.root ${PATHOF}/${SAMPLE}.root   ${PATHSF}/${SAMPLE}.root
+ 
 done
