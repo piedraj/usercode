@@ -26,11 +26,11 @@ void ratios()
 {
   gStyle->SetEndErrorSize(5);
 
-  Double_t xsValue  [nchannels] = {   54.4,  52.4,  69.9};
-  Double_t statError[nchannels] = {    4.0,   2.0,   2.8};
-  Double_t systError[nchannels] = {    3.9,   4.5,   5.6};
-  Double_t lumiError[nchannels] = {    2.0,   1.2,   3.1};
-  Double_t lumiUsed [nchannels] = {   1.02,  4.92,  3.54};
+  Double_t xsValue  [nchannels] = {   51.9,  52.4,  69.9};  // previous ATLAS 54.4
+  Double_t statError[nchannels] = {    2.0,   2.0,   2.8};  // previous ATLAS  4.0
+  Double_t systError[nchannels] = {    3.9,   4.5,   5.6};  // previous ATLAS  3.9
+  Double_t lumiError[nchannels] = {    2.0,   1.2,   3.1};  // previous ATLAS  2.0
+  Double_t lumiUsed [nchannels] = {    4.6,  4.92,  3.54};  // previous ATLAS  1.02
   Int_t    energy   [nchannels] = {      7,     7,     8};
   TString  label    [nchannels] = {"ATLAS", "CMS", "CMS"};
 
@@ -93,6 +93,19 @@ void ratios()
 
   dummy->Draw();
 
+
+  // Vertical line at 1
+  //----------------------------------------------------------------------------
+  TLine* line = new TLine(1.0, ymin, 1.0, ymax);
+
+  line->SetLineColor(kRed+1);
+  line->SetLineWidth(2);
+
+  line->Draw("same");
+
+
+  // Ratios
+  //----------------------------------------------------------------------------
   gTheo->Draw("p||,same");
   gExp ->Draw("p,same");
 
@@ -119,16 +132,6 @@ void ratios()
   dummy->GetXaxis()->CenterTitle();
   dummy->GetXaxis()->SetTitle("#sigma_{WW}^{exp} / #sigma_{WW}^{theo}");
   dummy->GetYaxis()->SetTitle("");
-
-  
-  // Vertical line at 1
-  //----------------------------------------------------------------------------
-  TLine* line = new TLine(1.0, ymin, 1.0, ymax);
-
-  line->SetLineColor(kRed+1);
-  line->SetLineWidth(2);
-
-  line->Draw("same");
 
 
   // Remove y-axis labels
