@@ -1,0 +1,45 @@
+################################################################################
+#
+# 1. Get the code
+#
+################################################################################
+
+cvs co -d WZXS8TeV       UserCode/piedra/WZXS8TeV
+cvs co -d PAF            UserCode/IGonzalez/ProofAnalysisFramework
+cvs co -d DatasetManager UserCode/IGonzalez/DatasetManager
+
+mv WZXS8TeV/AnalysisWZ.h  PAF/.
+mv WZXS8TeV/AnalysisWZ.C  PAF/.
+mv WZXS8TeV/RunPROOF_WZ.C PAF/.
+mv WZXS8TeV/run.sh        PAF/.
+
+cd PAF/packages
+
+cvs co -d PUWeight UserCode/IFCA-UO/Utils/PUWeight
+
+
+################################################################################
+#
+# 2. Produce the histograms
+#
+################################################################################
+
+cd PAF
+
+source /opt/root/bin/thisroot.sh
+source /nfs/fanae/PoD/PoD_env.sh
+
+./run.sh
+
+
+################################################################################
+#
+# 3. Draw the histograms and measure the WZ cross section
+#
+################################################################################
+
+cd WZXS8TeV
+
+source /opt/root/bin/thisroot.sh
+
+root -l XS.C
