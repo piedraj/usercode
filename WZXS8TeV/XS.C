@@ -116,8 +116,6 @@ void XS(TString  directory  = "Summer12_53X",
 
   TH1::SetDefaultSumw2();
 
-  gSystem->mkdir(_format + "/" + _directory, kTRUE);
-
 
   // Settings
   //----------------------------------------------------------------------------
@@ -126,6 +124,8 @@ void XS(TString  directory  = "Summer12_53X",
   _format     = format;
   _setLogy    = setLogy;
   _dataDriven = (_directory.Contains("Fakes")) ? true : false;
+
+  gSystem->mkdir(_format + "/" + _directory, kTRUE);
 
 
   // Read input files
