@@ -125,7 +125,7 @@ void XS(TString  directory  = "Summer12_53X",
   _luminosity = luminosity;
   _format     = format;
   _setLogy    = setLogy;
-  _dataDriven = (_directory.Contains("MC")) ? false : true;
+  _dataDriven = (_directory.Contains("Fakes")) ? true : false;
 
 
   // Read input files
