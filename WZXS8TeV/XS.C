@@ -5,37 +5,39 @@
 #include "TLatex.h"
 #include "TSystem.h"
 #include "TTree.h"
+#include <vector>
 
 
 const UInt_t nChannels = 4;
 
-enum {iMMM, iEEE, iMME, iEEM};
+enum {MMM, EEE, MME, EEM};
 
 TString sChannel[] = {"MMM", "EEE", "MME", "EEM"};
 
 
 const UInt_t nCuts = 2;
 
-enum {iZCandidate, iWCandidate};
+enum {ZCandidate, WCandidate};
 
 TString sCut[] = {"ZCandidate", "WCandidate"};
 
 
-const UInt_t nProcesses = 11;
+const UInt_t nProcesses = 13;
 
 enum {
-  iData,
-  iFakes,
-  iZJets,
-  iTW,
-  iTbarW,
-  iTTbar,
-  //  iWJets,
-  iZZ,
-  iWW,
-  iWgammaToLNuG,
-  iZGToLL,
-  iWZTo3LNu
+  Data,
+  Fakes,
+  ZJets_Madgraph,
+  TW,
+  TbarW,
+  TTbar_Madgraph,
+  TTbar_Powheg_2L,
+  WJets_Madgraph,
+  ZZ,
+  WW,
+  WgammaToLNuG,
+  ZgammaToLLG,
+  WZTo3LNu
 };
 
 
@@ -44,110 +46,109 @@ TFile* input[nProcesses];
 
 TString process[nProcesses];
 
-process[iData]         = "Data";
-process[iFakes]        = "Fakes";
-process[iZJets]        = "ZJets_Madgraph";
-process[iTW]           = "TW";
-process[iTbarW]        = "TbarW";
-process[iTTbar]        = "TTbar_Madgraph";
-//process[iWJets]        = "WJets_Madgraph";
-process[iZZ]           = "ZZ";
-process[iWW]           = "WW";
-process[iWgammaToLNuG] = "WgammaToLNuG";
-process[iZGToLL]       = "ZgammaToLLG";
-process[iWZTo3LNu]     = "WZTo3LNu";
+process[Data]            = "Data";
+process[Fakes]           = "Fakes";
+process[ZJets_Madgraph]  = "ZJets_Madgraph";
+process[TW]              = "TW";
+process[TbarW]           = "TbarW";
+process[TTbar_Madgraph]  = "TTbar_Madgraph";
+process[TTbar_Powheg_2L] = "TTbar_Powheg_2L";
+process[WJets_Madgraph]  = "WJets_Madgraph";
+process[ZZ]              = "ZZ";
+process[WW]              = "WW";
+process[WgammaToLNuG]    = "WgammaToLNuG";
+process[ZgammaToLLG]     = "ZgammaToLLG";
+process[WZTo3LNu]        = "WZTo3LNu";
 
 
 Color_t color[nProcesses];
 
-color[iData]         = kBlack;
-color[iFakes]        = kAzure-7;
-color[iZJets]        = kGreen+2;
-color[iTW]           = kYellow;
-color[iTbarW]        = kYellow;
-color[iTTbar]        = kYellow;
-//color[iWJets]        = kGray+1;
-color[iZZ]           = kRed+3;
-color[iWW]           = kAzure-9;
-color[iWgammaToLNuG] = kAzure-2;
-color[iZGToLL]       = kAzure-2;
-color[iWZTo3LNu]     = kOrange-2;
+color[Data]            = kBlack;
+color[WW]              = kRed+3;
+color[ZZ]              = kRed+3;
+color[WgammaToLNuG]    = kRed+3;
+color[ZgammaToLLG]     = kRed+3;
+color[TW]              = kAzure-9;
+color[TbarW]           = kAzure-9;
+color[TTbar_Madgraph]  = kAzure-9;
+color[TTbar_Powheg_2L] = kAzure-9;
+color[Fakes]           = kGray+1;
+color[WJets_Madgraph]  = kGreen+2;
+color[ZJets_Madgraph]  = kGreen+2;
+color[WZTo3LNu]        = kOrange-2;
 
 
 Double_t systError[nProcesses];
 
-systError[iData]         = 0.0;
-systError[iFakes]        = 0.0 / 1e2;
-systError[iZJets]        = 0.0 / 1e2;
-systError[iTW]           = 0.0 / 1e2;
-systError[iTbarW]        = 0.0 / 1e2;
-systError[iTTbar]        = 0.0 / 1e2;
-//systError[iWJets]        = 0.0 / 1e2;
-systError[iZZ]           = 0.0 / 1e2;
-systError[iWW]           = 0.0 / 1e2;
-systError[iWgammaToLNuG] = 0.0 / 1e2;
-systError[iZGToLL]       = 0.0 / 1e2;
-systError[iWZTo3LNu]     = 0.0 / 1e2;
+systError[Data]            = 0.0;
+systError[Fakes]           = 0.0 / 1e2;
+systError[ZJets_Madgraph]  = 0.0 / 1e2;
+systError[TW]              = 0.0 / 1e2;
+systError[TbarW]           = 0.0 / 1e2;
+systError[TTbar_Madgraph]  = 0.0 / 1e2;
+systError[TTbar_Powheg_2L] = 0.0 / 1e2;
+systError[WJets_Madgraph]  = 0.0 / 1e2;
+systError[ZZ]              = 0.0 / 1e2;
+systError[WW]              = 0.0 / 1e2;
+systError[WgammaToLNuG]    = 0.0 / 1e2;
+systError[ZgammaToLLG]     = 0.0 / 1e2;
+systError[WZTo3LNu]        = 0.0 / 1e2;
 
 
 // Settings
 //------------------------------------------------------------------------------
-TString  _directory;
-Double_t _luminosity;
-TString  _format;
-Bool_t   _setLogy;
-Bool_t   _dataDriven;
-Int_t    _verbosity = 1;
-Double_t _yoffset   = 0.048;
+Bool_t   _setLogy    = false;
+Double_t _luminosity = 12103.3;
+Double_t _yoffset    = 0.048;
+Int_t    _verbosity  = 2;
+TString  _directory  = "Summer12_53X";
+TString  _format     = "png";
+
+
+vector<UInt_t> vprocess;
 
 
 //------------------------------------------------------------------------------
 // XS
 //------------------------------------------------------------------------------
-void XS(TString  directory  = "Summer12_53X",
-	Double_t luminosity = 12103.3,
-	TString  format     = "png",
-	Bool_t   setLogy    = false)
+void XS()
 {
   gInterpreter->ExecuteMacro("HiggsPaperStyle.C");
 
   gStyle->SetHatchesLineWidth(1.00);
   gStyle->SetHatchesSpacing  (0.55);
 
+  gSystem->mkdir(_format + "/" + _directory, kTRUE);
+
   TH1::SetDefaultSumw2();
 
 
-  // Settings
-  //----------------------------------------------------------------------------
-  _directory  = directory,
-  _luminosity = luminosity;
-  _format     = format;
-  _setLogy    = setLogy;
-  _dataDriven = (_directory.Contains("Fakes")) ? true : false;
-
-  gSystem->mkdir(_format + "/" + _directory, kTRUE);
+  vprocess.clear();
+  vprocess.push_back(Data);
+  vprocess.push_back(WW);               // VV
+  vprocess.push_back(ZZ);               // VV
+  vprocess.push_back(WgammaToLNuG);     // VV
+  vprocess.push_back(ZgammaToLLG);      // VV
+  vprocess.push_back(TW);               // top
+  vprocess.push_back(TbarW);            // top
+  vprocess.push_back(TTbar_Madgraph);   // top
+  //  vprocess.push_back(TTbar_Powheg_2L);  // top
+  //  vprocess.push_back(Fakes);            // data-driven
+  vprocess.push_back(WJets_Madgraph);   // V + jets
+  vprocess.push_back(ZJets_Madgraph);   // V + jets
+  vprocess.push_back(WZTo3LNu);         // WZ
 
 
   // Read input files
   //----------------------------------------------------------------------------
   TString path = Form("/nfs/fanae/user/piedra/work/WZXS8TeV/rootfiles/%s/",
-		      _directory.Data());
+  		      _directory.Data());
 
-  for (UInt_t ip=0; ip<nProcesses; ip++) {
- 
-    if (_dataDriven) {
-      if (
-	  ip == iTW
-	  || ip == iTbarW
-	  || ip == iTTbar
-	  || ip == iZJets
-	  //	  || ip == iWJets
-	  ) continue;
-    } else {
-      if (ip == iFakes) continue;
-    }
+  for (UInt_t i=0; i<vprocess.size(); i++) {
 
-    input[ip] = new TFile(path + process[ip] + ".root");
+    UInt_t j = vprocess.at(i);
+
+    input[j] = new TFile(path + process[j] + ".root");
   }
 
 
@@ -159,10 +160,10 @@ void XS(TString  directory  = "Summer12_53X",
 
     for (UInt_t j=0; j<nCuts; j++) {
 	
-      if (j == iZCandidate) continue;
-	
+      if (j == ZCandidate) continue;
+      
       TString suffix = "_" + sChannel[i] + "_" + sCut[j];
-	
+      
       DrawHistogram("hMET"      + suffix, "E_{T}^{miss}",       4, 0, "GeV");
       DrawHistogram("hInvMassZ" + suffix, "m_{#font[12]{ll}}", -1, 0, "GeV", 70, 112);
     }
@@ -188,34 +189,30 @@ void MeasureTheCrossSection(TString channel = "MMM")
   Double_t ndata       = 0;
   Double_t nsignal     = 0;
   Double_t nbackground = 0;
+  Double_t nTTbar      = 0;
 
 
   // Read the histograms
   //----------------------------------------------------------------------------
-  for (UInt_t ip=0; ip<nProcesses; ip++) {
+  TString hname = "hCounter_" + channel + "_WCandidate";
 
-    if (_dataDriven) {
-      if (
-	  ip == iTW
-	  || ip == iTbarW
-	  || ip == iTTbar
-	  || ip == iZJets
-	  //	  || ip == iWJets
-	  ) continue;
-    } else {
-      if (ip == iFakes) continue;
-    }
+  for (UInt_t i=0; i<vprocess.size(); i++) {
 
-    TH1F* dummy = (TH1F*)input[ip]->Get("hCounter_" + channel + "_WCandidate");
+    UInt_t j = vprocess.at(i);
 
-    if (ip == iData)
+    TH1F* dummy = (TH1F*)input[j]->Get(hname);
+
+    if (j == Data)
       ndata = dummy->Integral();
-    else if (ip == iWZTo3LNu) {
+    else if (j == WZTo3LNu) {
       nsignal = dummy->Integral();
       nWZ     = dummy->GetEntries();
     }
-    else
+    else {
       nbackground += dummy->Integral();
+      if (j == TTbar_Madgraph || j == TTbar_Powheg_2L)
+	nTTbar = dummy->Integral();
+    }
   }
 
 
@@ -225,6 +222,11 @@ void MeasureTheCrossSection(TString channel = "MMM")
 
   Double_t xs   = (ndata - nbackground) / (_luminosity * efficiency * WZ23lnu);
   Double_t xsmc =               nsignal / (_luminosity * efficiency * WZ23lnu);
+
+  if (_verbosity > 0) {
+    printf("\n");
+    printf("                          ---------- %s ---------- ", channel.Data());
+  }
 
   if (_verbosity > 2) {
     printf("\n");
@@ -245,12 +247,13 @@ void MeasureTheCrossSection(TString channel = "MMM")
     printf("                                ndata = %.0f\n", ndata);
     printf("                          nbackground = %.1f\n", nbackground);
     printf("                              nsignal = %.1f\n", nsignal);
+    printf("                               nTTbar = %.1f\n", nTTbar);
   }
 
   if (_verbosity > 0) {
     printf("\n");
-    printf("                     measured xs(%s) = %.2f pb\n", channel.Data(), xs);
-    printf("                     measured xs(%s) = %.2f pb (signal from MC)\n", channel.Data(), xsmc);
+    printf("                          measured xs = %.2f pb\n", xs);
+    printf("                          measured xs = %.2f pb (signal from MC)\n", xsmc);
     printf("                               NLO xs = %.2f pb (not corrected for phase space)\n", xsWplusZ+xsWminusZ);
     printf("\n");
   }
@@ -299,45 +302,35 @@ void DrawHistogram(TString  hname,
 
   TH1F* hist[nProcesses];
 
-  for (UInt_t ip=0; ip<nProcesses; ip++) {
+  for (UInt_t i=0; i<vprocess.size(); i++) {
 
-    if (_dataDriven) {
-      if (
-	  ip == iTW
-	  || ip == iTbarW
-	  || ip == iTTbar
-	  || ip == iZJets
-	  //	  || ip == iWJets
-	  ) continue;
-    } else {
-      if (ip == iFakes) continue;
-    }
+    UInt_t j = vprocess.at(i);
 
-    hist[ip] = (TH1F*)input[ip]->Get(hname);
-    hist[ip]->SetName(hname + process[ip]);
+    hist[j] = (TH1F*)input[j]->Get(hname);
+    hist[j]->SetName(hname + process[j]);
 
-    if (ngroup > 0) hist[ip]->Rebin(ngroup);
+    if (ngroup > 0) hist[j]->Rebin(ngroup);
 
-    if (moveOverflow) MoveOverflowBins  (hist[ip], xmin, xmax);
-    else              ZeroOutOfRangeBins(hist[ip], xmin, xmax);
+    if (moveOverflow) MoveOverflowBins  (hist[j], xmin, xmax);
+    else              ZeroOutOfRangeBins(hist[j], xmin, xmax);
     
-    if (ip == iData) {
-      hist[ip]->SetMarkerStyle(kFullCircle);
-      hist[ip]->SetTitle("");
+    if (j == Data) {
+      hist[j]->SetMarkerStyle(kFullCircle);
+      hist[j]->SetTitle("");
     }
     else {
-      hist[ip]->SetFillColor(color[ip]);
-      hist[ip]->SetFillStyle(1001);
-      hist[ip]->SetLineColor(color[ip]);
+      hist[j]->SetFillColor(color[j]);
+      hist[j]->SetFillStyle(1001);
+      hist[j]->SetLineColor(color[j]);
 
-      hstack->Add(hist[ip]);
+      hstack->Add(hist[j]);
     }
   }
 
 
   // All MC
   //----------------------------------------------------------------------------
-  TH1F* allmc = (TH1F*)hist[iData]->Clone("allmc");
+  TH1F* allmc = (TH1F*)hist[Data]->Clone("allmc");
 
   allmc->SetFillColor  (kGray+2);
   allmc->SetFillStyle  (   3345);
@@ -350,29 +343,17 @@ void DrawHistogram(TString  hname,
     Double_t binValue = 0;
     Double_t binError = 0;
 
-    for (UInt_t ip=0; ip<nProcesses; ip++) {
+    for (UInt_t i=0; i<vprocess.size(); i++) {
 
-      if (ip == iData) continue;
+      UInt_t j = vprocess.at(i);
 
-      if (_dataDriven) {
-	if (
-	    ip == iTW
-	    || ip == iTbarW
-	    || ip == iTTbar
-	    || ip == iZJets
-	    //	    || ip == iWJets
-	    ) continue;
-      } else {
-	if (ip == iFakes) continue;
-      }
+      if (j == Data) continue;
 
-      Double_t binContent = hist[ip]->GetBinContent(ibin);
+      Double_t binContent = hist[j]->GetBinContent(ibin);
       
       binValue += binContent;
-      binError += (hist[ip]->GetBinError(ibin) * hist[ip]->GetBinError(ibin));
-
-      if (_dataDriven)
-	binError += (systError[ip]*binContent * systError[ip]*binContent);
+      binError += (hist[j]->GetBinError(ibin) * hist[j]->GetBinError(ibin));
+      binError += (systError[j]*binContent * systError[j]*binContent);
     }
     
     binError = sqrt(binError);
@@ -384,13 +365,13 @@ void DrawHistogram(TString  hname,
 
   // Axis labels
   //----------------------------------------------------------------------------
-  TAxis* xaxis = hist[iData]->GetXaxis();
-  TAxis* yaxis = hist[iData]->GetYaxis();
+  TAxis* xaxis = hist[Data]->GetXaxis();
+  TAxis* yaxis = hist[Data]->GetYaxis();
 
   TString ytitle = Form("entries / %s.%df", "%", precision);
 
   xaxis->SetTitle(xtitle);
-  yaxis->SetTitle(Form(ytitle.Data(), hist[iData]->GetBinWidth(0)));
+  yaxis->SetTitle(Form(ytitle.Data(), hist[Data]->GetBinWidth(0)));
   yaxis->SetTitleOffset(1.6);
 
   if (!units.Contains("NULL")) {
@@ -404,16 +385,16 @@ void DrawHistogram(TString  hname,
   //----------------------------------------------------------------------------
   xaxis->SetRangeUser(xmin, xmax);
 
-  hist[iData]->Draw("ep");
-  hstack     ->Draw("hist,same");
-  //  allmc      ->Draw("e2,same");
-  hist[iData]->Draw("ep,same");
+  hist[Data]->Draw("ep");
+  hstack    ->Draw("hist,same");
+  //  allmc     ->Draw("e2,same");
+  hist[Data]->Draw("ep,same");
 
 
   // Adjust scale
   //----------------------------------------------------------------------------
-  Float_t theMax   = GetMaximumIncludingErrors(hist[iData], xmin, xmax);
-  Float_t theMaxMC = GetMaximumIncludingErrors(allmc,       xmin, xmax);
+  Float_t theMax   = GetMaximumIncludingErrors(hist[Data], xmin, xmax);
+  Float_t theMaxMC = GetMaximumIncludingErrors(allmc,      xmin, xmax);
 
   if (theMaxMC > theMax) theMax = theMaxMC;
 
@@ -421,32 +402,43 @@ void DrawHistogram(TString  hname,
 
     theMax = TMath::Power(10, TMath::Log10(theMax) + 4);
 
-    hist[iData]->SetMinimum(0.01);
+    hist[Data]->SetMinimum(0.01);
   }
-  else theMax *= 1.45;
+  else theMax *= 1.3;
 
-  hist[iData]->SetMaximum(theMax);
+  hist[Data]->SetMaximum(theMax);
 
 
   // Legend
   //----------------------------------------------------------------------------
-  Double_t x0    = 0.23;
-  Double_t y0    = 0.74;
+  Double_t x0    = 0.700;
+  Double_t y0    = 0.834;
   Double_t delta = _yoffset + 0.001;
 
-  DrawLegend(x0,        y0 + 2.*delta, hist[iData],     " data",    "lp");
-  DrawLegend(x0,        y0 + 1.*delta, hist[iWZTo3LNu], " WZ",      "f");
-  DrawLegend(x0 + 0.22, y0 + 2.*delta, hist[iWW],       " WW",      "f");
-  DrawLegend(x0 + 0.22, y0 + 1.*delta, hist[iZGToLL],   " V#gamma", "f");
-  DrawLegend(x0 + 0.22, y0 + 0.*delta, hist[iZZ],       " ZZ",      "f");
+  Bool_t drawFakes    = false;
+  UInt_t TTbar_sample = TTbar_Madgraph;
 
-  if (_dataDriven)
-    DrawLegend(x0, y0 + 0.*delta, hist[iFakes], " data-driven", "f");
-  else {
-    DrawLegend(x0,        y0 + 0.*delta, hist[iTTbar], " top",      "f");
-    DrawLegend(x0,        y0 - 1.*delta, hist[iZJets], " Z + jets", "f");
-    //    DrawLegend(x0 + 0.22, y0 - 1.*delta, hist[iWJets], " W + jets", "f");
+  for (UInt_t i=0; i<vprocess.size(); i++) {
+
+    UInt_t j = vprocess.at(i);
+
+    if (j == Fakes) drawFakes = true;
+
+    if (j == TTbar_Powheg_2L) TTbar_sample = TTbar_Powheg_2L;
   }
+
+  DrawLegend(x0, y0,            hist[Data],     " data", "lp");
+  DrawLegend(x0, y0 - 1.*delta, hist[WZTo3LNu], " WZ",   "f");
+  DrawLegend(x0, y0 - 2.*delta, hist[ZZ],       " VV",   "f");
+
+  if (drawFakes) {
+    DrawLegend(x0, y0 - 3.*delta, hist[Fakes], " data-driven", "f");
+  }
+  else {
+    DrawLegend(x0, y0 - 3.*delta, hist[ZJets_Madgraph], " V + jets", "f");
+    DrawLegend(x0, y0 - 4.*delta, hist[TTbar_sample],   " top",      "f");
+  }
+
 
 
   // CMS titles
@@ -467,7 +459,7 @@ void DrawHistogram(TString  hname,
   //----------------------------------------------------------------------------
   pad2->cd();
     
-  TH1F* ratio       = hist[iData]->Clone("ratio");
+  TH1F* ratio       = hist[Data]->Clone("ratio");
   TH1F* uncertainty = allmc->Clone("uncertainty");
 
   for (UInt_t ibin=1; ibin<=ratio->GetNbinsX(); ibin++) {
@@ -508,7 +500,7 @@ void DrawHistogram(TString  hname,
 
   hdeviations->SetName("hdeviations_" + hname);
 
-  for (Int_t i=1; i<=ratio->GetNbinsX(); i++)
+  for (UInt_t i=1; i<=ratio->GetNbinsX(); i++)
     if (ratio->GetBinContent(i) > 0) hdeviations->Fill(ratio->GetBinContent(i));
 
   hdeviations->Draw("hist");
@@ -523,9 +515,9 @@ void DrawHistogram(TString  hname,
 
   // Save
   //----------------------------------------------------------------------------
-  pad2->cd(); SetAxis(uncertainty, hist[iData]->GetXaxis()->GetTitle(), "data / prediction", 0.10, 0.8);
-  pad1->cd(); SetAxis(hist[iData], "", hist[iData]->GetYaxis()->GetTitle(),                  0.05, 1.6);
-  pad3->cd(); SetAxis(hdeviations, "data / prediction", "entries / bin",                     0.10, 0.8);
+  pad2->cd(); SetAxis(uncertainty, hist[Data]->GetXaxis()->GetTitle(), "data / prediction", 0.10, 0.8);
+  pad1->cd(); SetAxis(hist[Data], "", hist[Data]->GetYaxis()->GetTitle(),                   0.05, 1.6);
+  pad3->cd(); SetAxis(hdeviations, "data / prediction", "entries / bin",                    0.10, 0.8);
 
   canvas->cd();
 
