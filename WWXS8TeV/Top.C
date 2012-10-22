@@ -451,7 +451,7 @@ void Top(Double_t &yield,
 
   // Save the result
   //----------------------------------------------------------------------------
-  yield          = (useDataDriven) ? NTopEstimatedDataFinal_fraction : 1.1 * NTopTotalMC;
+  yield          = (useDataDriven) ? NTopEstimatedDataFinal_fraction : NTopTotalMC;
   statError      = errNTopEstimatedDataFinal_fraction;
   systError      = errtotal_syst;
   topScaleFactor = yield / NTopTotalMC;
