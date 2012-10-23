@@ -1,7 +1,7 @@
 #include "TCanvas.h"
 #include "TFile.h"
-#include "THStack.h"
 #include "TH1.h"
+#include "THStack.h"
 #include "TLatex.h"
 #include "TSystem.h"
 #include "TTree.h"
@@ -115,8 +115,8 @@ void XS()
 {
   gInterpreter->ExecuteMacro("HiggsPaperStyle.C");
 
-  gStyle->SetHatchesLineWidth(1.00);
-  gStyle->SetHatchesSpacing  (0.55);
+  gStyle->SetHatchesLineWidth(1.0);
+  gStyle->SetHatchesSpacing  (0.7);
 
   gSystem->mkdir(_format + "/" + _directory, kTRUE);
 
@@ -176,8 +176,11 @@ void XS()
 //------------------------------------------------------------------------------
 void MeasureTheCrossSection(TString channel = "MMM")
 {
-  Double_t xsWplusZ    = 14.48;  // pb
-  Double_t xsWminusZ   = 8.40;   // pb
+  Double_t xsWplusZ_nlo  = 14.48;  // pb (arXiv:1105.0020v1)
+  Double_t xsWminusZ_nlo =  8.40;  // pb (arXiv:1105.0020v1)
+  Double_t xsWplusZ      = 13.89;  // pb (MCFM with 71 < mZ < 111 GeV)
+  Double_t xsWminusZ     =  8.06;  // pb (MCFM with 71 < mZ < 111 GeV)
+
   Double_t W2e         = 0.1075;
   Double_t W2m         = 0.1057;
   Double_t W2tau       = 0.1125;
@@ -254,7 +257,8 @@ void MeasureTheCrossSection(TString channel = "MMM")
     printf("\n");
     printf("                          measured xs = %.2f pb\n", xs);
     printf("                          measured xs = %.2f pb (signal from MC)\n", xsmc);
-    printf("                               NLO xs = %.2f pb (not corrected for phase space)\n", xsWplusZ+xsWminusZ);
+    printf("                               NLO xs = %.2f pb (MCFM with 71 < mZ < 111 GeV)\n", xsWplusZ     + xsWminusZ);
+    printf("                               NLO xs = %.2f pb (arXiv:1105.0020v1)\n",           xsWplusZ_nlo + xsWminusZ_nlo);
     printf("\n");
   }
 }
@@ -387,7 +391,7 @@ void DrawHistogram(TString  hname,
 
   hist[Data]->Draw("ep");
   hstack    ->Draw("hist,same");
-  //  allmc     ->Draw("e2,same");
+  allmc     ->Draw("e2,same");
   hist[Data]->Draw("ep,same");
 
 
@@ -427,18 +431,21 @@ void DrawHistogram(TString  hname,
     if (j == TTbar_Powheg_2L) TTbar_sample = TTbar_Powheg_2L;
   }
 
-  DrawLegend(x0, y0,            hist[Data],     " data", "lp");
-  DrawLegend(x0, y0 - 1.*delta, hist[WZTo3LNu], " WZ",   "f");
-  DrawLegend(x0, y0 - 2.*delta, hist[ZZ],       " VV",   "f");
+  Double_t ndelta = 0;
+  
+  DrawLegend(x0, y0 - ndelta, hist[Data],     " data", "lp"); ndelta += delta;
+  DrawLegend(x0, y0 - ndelta, hist[WZTo3LNu], " WZ",   "f");  ndelta += delta;
+  DrawLegend(x0, y0 - ndelta, hist[ZZ],       " VV",   "f");  ndelta += delta;
 
   if (drawFakes) {
-    DrawLegend(x0, y0 - 3.*delta, hist[Fakes], " data-driven", "f");
+    DrawLegend(x0, y0 - ndelta, hist[Fakes], " data-driven", "f"); ndelta += delta;
   }
   else {
-    DrawLegend(x0, y0 - 3.*delta, hist[ZJets_Madgraph], " V + jets", "f");
-    DrawLegend(x0, y0 - 4.*delta, hist[TTbar_sample],   " top",      "f");
+    DrawLegend(x0, y0 - ndelta, hist[ZJets_Madgraph], " V + jets", "f"); ndelta += delta;
+    DrawLegend(x0, y0 - ndelta, hist[TTbar_sample],   " top",      "f"); ndelta += delta;
   }
 
+  DrawLegend(x0, y0 - ndelta, allmc, " #sigma_{stat}", "f"); ndelta += delta;
 
 
   // CMS titles
@@ -451,7 +458,7 @@ void DrawHistogram(TString  hname,
   if (hname.Contains("EEM")) leftTitle = "ee#mu";
 
   DrawTLatex(0.185, 0.975, 0.05, 13, leftTitle.Data());
-  DrawTLatex(0.940, 0.983, 0.05, 33, Form("L = %.3f fb^{-1}", _luminosity/1e3));
+  DrawTLatex(0.940, 0.983, 0.05, 33, Form("#sqrt{s} = 8 TeV, L = %.1f fb^{-1}", _luminosity/1e3));
 
 
   //----------------------------------------------------------------------------
@@ -510,7 +517,7 @@ void DrawHistogram(TString  hname,
   hdeviations->SetLineColor(0);
   hdeviations->SetLineWidth(0);
 
-  DrawTLatex(0.22, 0.89, 0.1, 13, Form("#mu = %.2f", hdeviations->GetMean()));
+  //  DrawTLatex(0.22, 0.89, 0.1, 13, Form("#mu = %.2f", hdeviations->GetMean()));
 
 
   // Save
