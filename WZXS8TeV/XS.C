@@ -116,8 +116,8 @@ systError[WZTo3LNu]        = 0.0 / 1e2;
 Bool_t   _setLogy    = false;
 Double_t _luminosity = 12103.3;
 Double_t _yoffset    = 0.048;
-Int_t    _verbosity  = 1;
-TString  _directory  = "MC_Summer12_53X";
+Int_t    _verbosity  = 2;
+TString  _directory  = "Summer12_53X";
 TString  _format     = "png";
 
 
@@ -227,6 +227,27 @@ void MeasureTheCrossSection(TString channel = "MMM")
   Double_t xs = (ndata - nbackground) / (_luminosity * efficiency * WZ23lnu);
 
 
+  // Relative errors
+  //----------------------------------------------------------------------------
+  Double_t xsRelativeErrorBackground = 0.0;
+  Double_t xsRelativeErrorEfficiency = 0.0;
+
+  Double_t xsRelativeErrorSyst = 0;
+  xsRelativeErrorSyst += (xsRelativeErrorBackground * xsRelativeErrorBackground);
+  xsRelativeErrorSyst += (xsRelativeErrorEfficiency * xsRelativeErrorEfficiency);
+  xsRelativeErrorSyst = sqrt(xsRelativeErrorSyst);
+
+  Double_t xsRelativeErrorStat = 1e2 * sqrt(ndata) / (ndata - nbackground);
+  Double_t xsRelativeErrorLumi = 4.4;
+
+
+  // Absolute errors
+  //----------------------------------------------------------------------------
+  Double_t xsErrorSyst = xs * xsRelativeErrorSyst / 1e2;  // pb
+  Double_t xsErrorStat = xs * xsRelativeErrorStat / 1e2;  // pb
+  Double_t xsErrorLumi = xs * xsRelativeErrorLumi / 1e2;  // pb
+
+
   // Print the results
   //----------------------------------------------------------------------------
   if (_verbosity > 0) {
@@ -258,7 +279,7 @@ void MeasureTheCrossSection(TString channel = "MMM")
 
   if (_verbosity > 0) {
     printf("\n");
-    printf("                         measured xs = %.2f pb\n", xs);
+    printf("                         measured xs = %.2f +- %.2f (stat) +- %.2f (lumi) pb\n", xs, xsErrorStat, xsErrorLumi);
     printf("                              NLO xs = %.2f pb (MCFM with 71 < mZ < 111 GeV)\n", xsWplusZ + xsWminusZ);
     printf("\n");
   }
