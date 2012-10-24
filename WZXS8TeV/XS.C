@@ -8,6 +8,22 @@
 #include <vector>
 
 
+// Input parameters for the WZ cross section
+//------------------------------------------------------------------------------
+const Double_t xsWplusZ_nlo  = 14.48;  // pb (arXiv:1105.0020v1)
+const Double_t xsWminusZ_nlo =  8.40;  // pb (arXiv:1105.0020v1)
+const Double_t xsWplusZ      = 13.89;  // pb (MCFM with 71 < mZ < 111 GeV)
+const Double_t xsWminusZ     =  8.06;  // pb (MCFM with 71 < mZ < 111 GeV)
+
+const Double_t W2e         = 0.1075;
+const Double_t W2m         = 0.1057;
+const Double_t W2tau       = 0.1125;
+const Double_t Z2ll        = 0.033658;
+const Double_t WZ23lnu     = 3 * Z2ll * (W2e + W2m + W2tau);
+const Double_t ngenWZ      = 2017979;
+const Double_t ngenWZphase = 1449067;  // (71 < mZ < 111 GeV)
+
+
 const UInt_t nChannels = 4;
 
 enum {MMM, EEE, MME, EEM};
@@ -100,8 +116,8 @@ systError[WZTo3LNu]        = 0.0 / 1e2;
 Bool_t   _setLogy    = false;
 Double_t _luminosity = 12103.3;
 Double_t _yoffset    = 0.048;
-Int_t    _verbosity  = 2;
-TString  _directory  = "Summer12_53X";
+Int_t    _verbosity  = 1;
+TString  _directory  = "MC_Summer12_53X";
 TString  _format     = "png";
 
 
@@ -176,27 +192,12 @@ void XS()
 //------------------------------------------------------------------------------
 void MeasureTheCrossSection(TString channel = "MMM")
 {
-  Double_t xsWplusZ_nlo  = 14.48;  // pb (arXiv:1105.0020v1)
-  Double_t xsWminusZ_nlo =  8.40;  // pb (arXiv:1105.0020v1)
-  Double_t xsWplusZ      = 13.89;  // pb (MCFM with 71 < mZ < 111 GeV)
-  Double_t xsWminusZ     =  8.06;  // pb (MCFM with 71 < mZ < 111 GeV)
-
-  Double_t W2e         = 0.1075;
-  Double_t W2m         = 0.1057;
-  Double_t W2tau       = 0.1125;
-  Double_t Z2ll        = 0.033658;
-  Double_t WZ23lnu     = 3 * Z2ll * (W2e + W2m + W2tau);
-  Double_t ngenWZ      = 2017979;
-  Double_t phase       = 0.72;
   Double_t nWZ         = 0;
   Double_t ndata       = 0;
   Double_t nsignal     = 0;
   Double_t nbackground = 0;
   Double_t nTTbar      = 0;
 
-
-  // Read the histograms
-  //----------------------------------------------------------------------------
   TString hname = "hCounter_" + channel + "_WCandidate";
 
   for (UInt_t i=0; i<vprocess.size(); i++) {
@@ -221,11 +222,13 @@ void MeasureTheCrossSection(TString channel = "MMM")
 
   // Estimate the cross section
   //----------------------------------------------------------------------------
-  Double_t efficiency = nWZ / (ngenWZ * phase);
+  Double_t efficiency = nWZ / ngenWZphase;
 
-  Double_t xs   = (ndata - nbackground) / (_luminosity * efficiency * WZ23lnu);
-  Double_t xsmc =               nsignal / (_luminosity * efficiency * WZ23lnu);
+  Double_t xs = (ndata - nbackground) / (_luminosity * efficiency * WZ23lnu);
 
+
+  // Print the results
+  //----------------------------------------------------------------------------
   if (_verbosity > 0) {
     printf("\n");
     printf("                          ---------- %s ---------- ", channel.Data());
@@ -233,32 +236,30 @@ void MeasureTheCrossSection(TString channel = "MMM")
 
   if (_verbosity > 2) {
     printf("\n");
-    printf("                     BR(W  -> e   nu) = %5.2f %s\n", 1e2 * W2e,     "%");
-    printf("                     BR(W  -> mu  nu) = %5.2f %s\n", 1e2 * W2m,     "%");
-    printf("                     BR(W  -> tau nu) = %5.2f %s\n", 1e2 * W2tau,   "%");
-    printf("                     BR(Z  -> ll)     = %7.4f %s\n", 1e2 * Z2ll,    "%");
-    printf("                     BR(WZ -> 3l nu)  = %5.2f %s\n", 1e2 * WZ23lnu, "%");
-    printf("                           luminosity = %.1f pb\n", _luminosity);
-    printf("               number of generated WZ = %.0f\n", ngenWZ);
-    printf(" fraction in phase space [71,111] GeV = %.2f\n", phase);
+    printf("                    BR(W  -> e   nu) = %5.2f %s\n", 1e2 * W2e,     "%");
+    printf("                    BR(W  -> mu  nu) = %5.2f %s\n", 1e2 * W2m,     "%");
+    printf("                    BR(W  -> tau nu) = %5.2f %s\n", 1e2 * W2tau,   "%");
+    printf("                    BR(Z  -> ll)     = %7.4f %s\n", 1e2 * Z2ll,    "%");
+    printf("                    BR(WZ -> 3l nu)  = %5.2f %s\n", 1e2 * WZ23lnu, "%");
+    printf("                          luminosity = %.1f pb\n", _luminosity);
+    printf("                        generated WZ = %.0f\n", ngenWZ);
+    printf(" generated WZ with 71 < mZ < 111 GeV = %.0f (%.0f %s)\n", ngenWZphase, 1e2 * ngenWZphase / ngenWZ, "%");
   }
 
   if (_verbosity > 1) {
     printf("\n");
-    printf("                number of selected WZ = %.0f\n", nWZ);
-    printf("                        WZ efficiency = %.2f %s\n", 1e2 * efficiency, "%");
-    printf("                                ndata = %.0f\n", ndata);
-    printf("                          nbackground = %.1f\n", nbackground);
-    printf("                              nsignal = %.1f\n", nsignal);
-    printf("                               nTTbar = %.1f\n", nTTbar);
+    printf("               number of selected WZ = %.0f\n", nWZ);
+    printf("                       WZ efficiency = %.2f %s\n", 1e2 * efficiency, "%");
+    printf("                               ndata = %.0f\n", ndata);
+    printf("                         nbackground = %.1f\n", nbackground);
+    printf("                             nsignal = %.1f\n", nsignal);
+    printf("                              nTTbar = %.1f\n", nTTbar);
   }
 
   if (_verbosity > 0) {
     printf("\n");
-    printf("                          measured xs = %.2f pb\n", xs);
-    printf("                          measured xs = %.2f pb (signal from MC)\n", xsmc);
-    printf("                               NLO xs = %.2f pb (MCFM with 71 < mZ < 111 GeV)\n", xsWplusZ     + xsWminusZ);
-    printf("                               NLO xs = %.2f pb (arXiv:1105.0020v1)\n",           xsWplusZ_nlo + xsWminusZ_nlo);
+    printf("                         measured xs = %.2f pb\n", xs);
+    printf("                              NLO xs = %.2f pb (MCFM with 71 < mZ < 111 GeV)\n", xsWplusZ + xsWminusZ);
     printf("\n");
   }
 }

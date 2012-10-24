@@ -21,6 +21,8 @@ void AnalysisWZ::Initialise()
 
   // Histograms
   //----------------------------------------------------------------------------
+  TH1::SetDefaultSumw2();
+
   for (UInt_t i=0; i<nChannels; i++) {
     for (UInt_t j=0; j<nCuts; j++) {
 
