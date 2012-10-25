@@ -147,6 +147,8 @@ vector<UInt_t> vprocess;
 //------------------------------------------------------------------------------
 void XS(Int_t channel = MMM)
 {
+  if (channel < 0 || channel >= nChannels) return; 
+
   if (channel == EEE || channel == EEM) process[Data] += "DoubleElectron";
   if (channel == MMM || channel == MME) process[Data] += "DoubleMu";
 
