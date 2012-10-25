@@ -49,14 +49,15 @@ void RunPROOF_WZ(TString  sampleName = "WZTo3LNu",
   //----------------------------------------------------------------------------
   TString dataPath = "/hadoop";
 
-  if (sampleName.Contains("Data")) {
-
+  if (sampleName.Contains("Data_DoubleElectron")) {
     gPAFOptions->dataFiles.push_back(dataPath + "/MC_Summer12_53X/Tree_DoubleElectronA_892_0.root");
     gPAFOptions->dataFiles.push_back(dataPath + "/MC_Summer12_53X/Tree_DoubleElectronB_4404_0.root");
     gPAFOptions->dataFiles.push_back(dataPath + "/MC_Summer12_53X/Tree_DoubleElectronB_4404_1.root");
     gPAFOptions->dataFiles.push_back(dataPath + "/MC_Summer12_53X/Tree_DoubleElectronC_6807_0.root");
     gPAFOptions->dataFiles.push_back(dataPath + "/MC_Summer12_53X/Tree_DoubleElectronC_6807_1.root");
     gPAFOptions->dataFiles.push_back(dataPath + "/MC_Summer12_53X/Tree_DoubleElectronC_6807_2.root");
+  }
+  else if (sampleName.Contains("Data_DoubleMu")) {
     gPAFOptions->dataFiles.push_back(dataPath + "/MC_Summer12_53X/Tree_DoubleMuA_892_0.root");
     gPAFOptions->dataFiles.push_back(dataPath + "/MC_Summer12_53X/Tree_DoubleMuB_4404_0.root");
     gPAFOptions->dataFiles.push_back(dataPath + "/MC_Summer12_53X/Tree_DoubleMuB_4404_1.root");

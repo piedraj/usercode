@@ -31,11 +31,29 @@ enum {MMM, EEE, MME, EEM};
 TString sChannel[] = {"MMM", "EEE", "MME", "EEM"};
 
 
-const UInt_t nCuts = 2;
+const UInt_t nCuts = 8;
 
-enum {ZCandidate, WCandidate};
+enum {
+  NoCuts,
+  LeptonSelection,
+  ThreeLeptons,
+  Trigger,
+  LeadingLepton,
+  ZCandidate,
+  WCandidate,
+  MetCut
+};
 
-TString sCut[] = {"ZCandidate", "WCandidate"};
+TString sCut[] = {
+  "NoCuts",
+  "LeptonSelection",
+  "ThreeLeptons",
+  "Trigger",
+  "LeadingLepton",
+  "ZCandidate",
+  "WCandidate",
+  "MetCut"
+};
 
 
 const UInt_t nProcesses = 13;
@@ -62,7 +80,7 @@ TFile* input[nProcesses];
 
 TString process[nProcesses];
 
-process[Data]            = "Data";
+process[Data]            = "Data_";
 process[Fakes]           = "Fakes";
 process[ZJets_Madgraph]  = "ZJets_Madgraph";
 process[TW]              = "TW";
@@ -116,7 +134,7 @@ systError[WZTo3LNu]        = 0.0 / 1e2;
 Bool_t   _setLogy    = false;
 Double_t _luminosity = 12103.3;
 Double_t _yoffset    = 0.048;
-Int_t    _verbosity  = 2;
+Int_t    _verbosity  = 1;
 TString  _directory  = "Summer12_53X";
 TString  _format     = "png";
 
@@ -127,13 +145,16 @@ vector<UInt_t> vprocess;
 //------------------------------------------------------------------------------
 // XS
 //------------------------------------------------------------------------------
-void XS()
+void XS(Int_t channel = MMM)
 {
+  if (channel == EEE || channel == EEM) process[Data] += "DoubleElectron";
+  if (channel == MMM || channel == MME) process[Data] += "DoubleMu";
+
   gInterpreter->ExecuteMacro("HiggsPaperStyle.C");
 
   gStyle->SetHatchesLineWidth(1.0);
   gStyle->SetHatchesSpacing  (0.7);
-
+  
   gSystem->mkdir(_format + "/" + _directory, kTRUE);
 
   TH1::SetDefaultSumw2();
@@ -170,20 +191,18 @@ void XS()
 
   // Do the work
   //----------------------------------------------------------------------------
-  for (UInt_t i=0; i<nChannels; i++) {
+  MeasureTheCrossSection(sChannel[channel]);
 
-    MeasureTheCrossSection(sChannel[i]);
+  if (channel == MMM)
+    DrawHistogram("hNPV_MMM_NoCuts", "number of primary vertices", -1, 0, "NULL", 0, 30, false);
 
-    for (UInt_t j=0; j<nCuts; j++) {
-	
-      if (j == ZCandidate) continue;
-      
-      TString suffix = "_" + sChannel[i] + "_" + sCut[j];
-      
-      DrawHistogram("hMET"      + suffix, "E_{T}^{miss}",       4, 0, "GeV");
-      DrawHistogram("hInvMassZ" + suffix, "m_{#font[12]{ll}}", -1, 0, "GeV", 70, 112);
-    }
-  }
+  TString suffix = "_" + sChannel[channel] + "_" + sCut[MetCut];
+
+  DrawHistogram("hMET"        + suffix, "E_{T}^{miss}",        5, 0, "GeV");
+  DrawHistogram("hPtZLepton1" + suffix, "p_{T}^{Z lepton 1}",  5, 0, "GeV");
+  DrawHistogram("hPtZLepton2" + suffix, "p_{T}^{Z lepton 2}",  5, 0, "GeV");
+  DrawHistogram("hPtWLepton"  + suffix, "p_{T}^{W lepton}",    5, 0, "GeV");
+  DrawHistogram("hInvMassZ"   + suffix, "m_{#font[12]{ll}}",  -1, 0, "GeV", 70, 112);
 }
 
 
@@ -198,7 +217,7 @@ void MeasureTheCrossSection(TString channel = "MMM")
   Double_t nbackground = 0;
   Double_t nTTbar      = 0;
 
-  TString hname = "hCounter_" + channel + "_WCandidate";
+  TString hname = "hCounter_" + channel + "_MetCut";
 
   for (UInt_t i=0; i<vprocess.size(); i++) {
 
@@ -324,6 +343,8 @@ void DrawHistogram(TString  hname,
   
   pad1->SetLogy(_setLogy);
 
+  Double_t mcIntegral = 0;
+
   THStack* hstack = new THStack(hname, hname);
 
   TH1F* hist[nProcesses];
@@ -345,11 +366,28 @@ void DrawHistogram(TString  hname,
       hist[j]->SetTitle("");
     }
     else {
+
+      mcIntegral += hist[j]->Integral();
+
       hist[j]->SetFillColor(color[j]);
       hist[j]->SetFillStyle(1001);
       hist[j]->SetLineColor(color[j]);
 
       hstack->Add(hist[j]);
+    }
+  }
+
+
+  // Normalize MC to data
+  //----------------------------------------------------------------------------
+  if (hname.Contains("hNPV") && !hname.Contains("MetCut")) {
+  
+    for (UInt_t i=0; i<vprocess.size(); i++) {
+
+      UInt_t j = vprocess.at(i);
+      
+      if (j != Data && mcIntegral > 0)
+	hist[j]->Scale(hist[Data]->Integral() / mcIntegral);
     }
   }
 
@@ -478,6 +516,8 @@ void DrawHistogram(TString  hname,
   if (hname.Contains("EEE")) leftTitle = "eee";
   if (hname.Contains("MME")) leftTitle = "#mu#mue";
   if (hname.Contains("EEM")) leftTitle = "ee#mu";
+
+  if (hname.Contains("NPV") && hname.Contains("NoCuts")) leftTitle = "";
 
   DrawTLatex(0.185, 0.975, 0.05, 13, leftTitle.Data());
   DrawTLatex(0.940, 0.983, 0.05, 33, Form("#sqrt{s} = 8 TeV, L = %.1f fb^{-1}", _luminosity/1e3));

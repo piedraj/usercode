@@ -28,8 +28,12 @@ void AnalysisWZ::Initialise()
 
       TString suffix = "_" + sChannel[i] + "_" + sCut[j];
 
-      hCounter   [i][j] = CreateH1F(TString("hCounter"    + suffix), "",   3, 0,   3);
-      hMET       [i][j] = CreateH1F(TString("hMET"        + suffix), "", 200, 0, 200);
+      hCounter[i][j] = CreateH1F(TString("hCounter" + suffix), "",   3, 0,   3);
+      hNPV    [i][j] = CreateH1F(TString("hNPV"     + suffix), "",  60, 0,  60);
+      hMET    [i][j] = CreateH1F(TString("hMET"     + suffix), "", 200, 0, 200);
+
+      if (j != ZCandidate && j != WCandidate && j != MetCut) continue;
+
       hPtZLepton1[i][j] = CreateH1F(TString("hPtZLepton1" + suffix), "", 200, 0, 200);
       hPtZLepton2[i][j] = CreateH1F(TString("hPtZLepton2" + suffix), "", 200, 0, 200);
       hPtWLepton [i][j] = CreateH1F(TString("hPtWLepton"  + suffix), "", 200, 0, 200);    
@@ -64,8 +68,10 @@ void AnalysisWZ::InsideLoop()
   nSelElec        =  0;
   theChannel      = -1;
 
+  FillHistogramsAtCut(MMM, NoCuts);
 
-  // Take pythia samples up to mll<50, then complete with madgraph
+
+  // When reading the ZJets_Madgraph sample, require two leptons
   //----------------------------------------------------------------------------
   if (!IsGenAccepted()) return;
 
@@ -75,15 +81,25 @@ void AnalysisWZ::InsideLoop()
   GetSelectedMuon();
   GetSelectedElec();
 
+  if ((nSelMuon + nSelElec) < 2) return;
+
+  FillHistogramsAtCut(MMM, LeptonSelection);
+
+
   if ((nSelMuon + nSelElec) != 3) return;
 
-  if      (nSelMuon == 3) theChannel = iMMM;
-  else if (nSelElec == 3) theChannel = iEEE;
-  else if (nSelMuon == 2) theChannel = iMME;
-  else if (nSelElec == 2) theChannel = iEEM;
+  if      (nSelMuon == 3) theChannel = MMM;
+  else if (nSelElec == 3) theChannel = EEE;
+  else if (nSelMuon == 2) theChannel = MME;
+  else if (nSelElec == 2) theChannel = EEM;
 
-  if ((theChannel == iMMM || theChannel == iMME) && !T_passTriggerDoubleMu) return;
-  if ((theChannel == iEEE || theChannel == iEEM) && !T_passTriggerDoubleEl) return;
+  FillHistogramsAtCut(theChannel, ThreeLeptons);
+
+
+  if ((theChannel == MMM || theChannel == MME) && !T_passTriggerDoubleMu) return;
+  if ((theChannel == EEE || theChannel == EEM) && !T_passTriggerDoubleEl) return;
+
+  FillHistogramsAtCut(theChannel, Trigger);
 
 
   for (UInt_t i=0; i<(nSelMuon + nSelElec); i++) {
@@ -99,6 +115,8 @@ void AnalysisWZ::InsideLoop()
   }
 
   if (leadingLeptonPt <= 20) return;
+
+  FillHistogramsAtCut(theChannel, LeadingLepton);
 
 
   // Z candidate
@@ -154,7 +172,7 @@ void AnalysisWZ::InsideLoop()
 
   if (dileptonInvMass < 71) return;
 
-  FillHistogramsAtCut(theChannel, iZCandidate);
+  FillHistogramsAtCut(theChannel, ZCandidate);
 
 
   // W candidate
@@ -169,10 +187,12 @@ void AnalysisWZ::InsideLoop()
       
   if ((nSelMuon == 2 || nSelElec == 3) && (dR1 < 0.1 || dR2 < 0.1)) return;
 
+  FillHistogramsAtCut(theChannel, WCandidate);
+
+
   if (T_METPF_ET <= 30) return;
 
-  
-  FillHistogramsAtCut(theChannel, iWCandidate);
+  FillHistogramsAtCut(theChannel, MetCut);
 }
 
 
@@ -325,14 +345,26 @@ Double_t AnalysisWZ::SelectedElecPt(UInt_t iElec, Int_t  iVertex)
 //------------------------------------------------------------------------------
 void AnalysisWZ::FillHistogramsAtCut(UInt_t iChannel, UInt_t iCut)
 {
-  Double_t invMass = (ZLepton1 + ZLepton2).M();
+  hCounter[iChannel][iCut]->Fill(1,                  weight);
+  hNPV    [iChannel][iCut]->Fill(T_Vertex_z->size(), weight);
+  hMET    [iChannel][iCut]->Fill(T_METPF_ET,         weight);
+
+  if (iCut == ZCandidate || iCut == WCandidate || iCut == MetCut) {
+
+    Double_t invMass = (ZLepton1 + ZLepton2).M();
+
+    Double_t pt1, pt2;
+
+    if (ZLepton1.Pt() > ZLepton2.Pt())
+      {pt1 = ZLepton1.Pt(); pt2 = ZLepton2.Pt();}
+    else
+      {pt1 = ZLepton2.Pt(); pt2 = ZLepton1.Pt();}
   
-  hCounter   [iChannel][iCut]->Fill(1,             weight);
-  hMET       [iChannel][iCut]->Fill(T_METPF_ET,    weight);
-  hPtZLepton1[iChannel][iCut]->Fill(ZLepton1.Pt(), weight);
-  hPtZLepton2[iChannel][iCut]->Fill(ZLepton2.Pt(), weight);
-  hPtWLepton [iChannel][iCut]->Fill(WLepton.Pt(),  weight);
-  hInvMassZ  [iChannel][iCut]->Fill(invMass,       weight);
+    hPtZLepton1[iChannel][iCut]->Fill(pt1,          weight);
+    hPtZLepton2[iChannel][iCut]->Fill(pt2,          weight);
+    hPtWLepton [iChannel][iCut]->Fill(WLepton.Pt(), weight);
+    hInvMassZ  [iChannel][iCut]->Fill(invMass,      weight);
+  }
 }
 
 

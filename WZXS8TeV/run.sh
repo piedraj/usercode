@@ -1,7 +1,8 @@
 
  ./resetproof.sh
 
- root -l -b -q RunPROOF_WZ.C\(\"Data\"\)
+ root -l -b -q RunPROOF_WZ.C\(\"Data_DoubleElectron\"\)
+ root -l -b -q RunPROOF_WZ.C\(\"Data_DoubleMu\"\)
 #root -l -b -q RunPROOF_WZ.C\(\"Fakes\"\)
  root -l -b -q RunPROOF_WZ.C\(\"ZJets_Madgraph\"\)
  root -l -b -q RunPROOF_WZ.C\(\"TW\"\)

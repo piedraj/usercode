@@ -18,16 +18,34 @@ const Double_t Z_MASS = 91.1876;  // GeV
 
 const UInt_t nChannels = 4;
 
-enum {iMMM, iEEE, iMME, iEEM};
+enum {MMM, EEE, MME, EEM};
 
 TString sChannel[] = {"MMM", "EEE", "MME", "EEM"};
 
 
-const UInt_t nCuts = 2;
+const UInt_t nCuts = 8;
 
-enum {iZCandidate, iWCandidate};
+enum {
+  NoCuts,
+  LeptonSelection,
+  ThreeLeptons,
+  Trigger,
+  LeadingLepton,
+  ZCandidate,
+  WCandidate,
+  MetCut
+};
 
-TString sCut[] = {"ZCandidate", "WCandidate"};
+TString sCut[] = {
+  "NoCuts",
+  "LeptonSelection",
+  "ThreeLeptons",
+  "Trigger",
+  "LeadingLepton",
+  "ZCandidate",
+  "WCandidate",
+  "MetCut"
+};
 
 
 // Forward declaration
@@ -72,6 +90,7 @@ class AnalysisWZ: public CMSAnalysisSelectorMiniTrees
   // Histograms
   //----------------------------------------------------------------------------
   TH1F*                       hCounter   [nChannels][nCuts];
+  TH1F*                       hNPV       [nChannels][nCuts];
   TH1F*                       hMET       [nChannels][nCuts];
   TH1F*                       hPtZLepton1[nChannels][nCuts];
   TH1F*                       hPtZLepton2[nChannels][nCuts];

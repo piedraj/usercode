@@ -9,9 +9,12 @@ const Double_t xsWminusZ =  8.06;  // pb
 
 const UInt_t nchannels = 4;
 
-Double_t xs         [nchannels] = {      26.25, 21.91,     24.14,   24.41};
-Double_t xsErrorStat[nchannels] = {       1.59,  1.91,      1.80,    1.82};
-Double_t xsErrorLumi[nchannels] = {       1.15,  0.96,      1.06,    1.07};
+
+// TTbar_Madgraph
+//------------------------------------------------------------------------------
+Double_t xs         [nchannels] = {      26.25, 21.79,     22.15,   22.99};
+Double_t xsErrorStat[nchannels] = {       1.59,  1.91,      1.75,    1.77};
+Double_t xsErrorLumi[nchannels] = {       1.15,  0.96,      0.97,    1.01};
 TString  label      [nchannels] = {"#mu#mu#mu", "eee", "#mu#mue", "ee#mu"};
 
 
