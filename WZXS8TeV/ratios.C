@@ -1,34 +1,35 @@
-//------------------------------------------------------------------------------
-//
-// MCFM with 71 < mZ < 111 GeV
-//
-//------------------------------------------------------------------------------
-const Double_t xsWplusZ  = 13.89;  // pb
-const Double_t xsWminusZ =  8.06;  // pb
-
-
 const UInt_t nchannels = 4;
 
 
-// TTbar_Madgraph
+Double_t xs7tev         [nchannels] = {      19.5,   23.3,      19.7,    18.1};
+Double_t xs7tevErrorStat[nchannels] = {       2.2,    3.4,       2.5,     2.7};
+Double_t xs7tevErrorLumi[nchannels] = {       0.5,    0.5,       0.5,     0.4};
+Double_t xs8tev         [nchannels] = {      26.2,   21.8,      22.2,    23.0};
+Double_t xs8tevErrorStat[nchannels] = {       1.6,    1.9,       1.8,     1.8};
+Double_t xs8tevErrorLumi[nchannels] = {       1.2,    1.0,       1.0,     1.0};
+TString  label          [nchannels] = {"#mu#mu#mu", "eee", "#mu#mue", "ee#mu"};
+
+
+// Settings
 //------------------------------------------------------------------------------
-Double_t xs         [nchannels] = {      26.25, 21.79,     22.15,   22.99};
-Double_t xsErrorStat[nchannels] = {       1.59,  1.91,      1.75,    1.77};
-Double_t xsErrorLumi[nchannels] = {       1.15,  0.96,      0.97,    1.01};
-TString  label      [nchannels] = {"#mu#mu#mu", "eee", "#mu#mue", "ee#mu"};
+TString _directory = "Summer12_53X";
+TString _format    = "png";
 
 
-Double_t luminosity = 12103.3;  // pb
-TString  format     = "png";
-
-
-void ratios()
+//------------------------------------------------------------------------------
+// ratios
+//------------------------------------------------------------------------------
+void ratios(Int_t ecm = 8)
 {
+  Double_t luminosity = (ecm == 8) ? 12103 : 4920;  // pb-1
+  Double_t xsWplusZ   = (ecm == 8) ?  13.9 : 11.4;  // pb
+  Double_t xsWminusZ  = (ecm == 8) ?   8.1 :  6.4;  // pb
+
   gInterpreter->ExecuteMacro("HiggsPaperStyle.C");
 
   gStyle->SetEndErrorSize(5);
 
-  gSystem->mkdir(format, kTRUE);
+  gSystem->mkdir(_format + "/" + _directory, kTRUE);
 
 
   // Loop
@@ -38,18 +39,22 @@ void ratios()
 
   for (UInt_t i=0; i<nchannels; i++) {
 
-    Double_t f = xs[i] / (xsWplusZ + xsWminusZ);
+    Double_t xs          = (ecm == 8) ? xs8tev         [i] : xs7tev         [i];
+    Double_t xsErrorStat = (ecm == 8) ? xs8tevErrorStat[i] : xs7tevErrorStat[i];
+    Double_t xsErrorLumi = (ecm == 8) ? xs8tevErrorLumi[i] : xs7tevErrorLumi[i];
+
+    Double_t f = xs / (xsWplusZ + xsWminusZ);
 
     Double_t error = 0;
-    error += (xsErrorStat[i] * xsErrorStat[i]);
-    error += (xsErrorLumi[i] * xsErrorLumi[i]);
+    error += (xsErrorStat * xsErrorStat);
+    error += (xsErrorLumi * xsErrorLumi);
     error = sqrt(error);
 
     gStat->SetPoint(i, f, i+1);
     gLumi->SetPoint(i, f, i+1);
 
-    gStat->SetPointError(i, f * xsErrorStat[i] / xs[i], 0.0);
-    gLumi->SetPointError(i, f *          error / xs[i], 0.0);
+    gStat->SetPointError(i, f * xsErrorStat / xs, 0.0);
+    gLumi->SetPointError(i, f *       error / xs, 0.0);
   }
 
 
@@ -71,8 +76,11 @@ void ratios()
 
   canvas->SetLeftMargin(canvas->GetRightMargin());
 
-  Double_t xmin = 0.75;
-  Double_t xmax = 2.00;
+  //  Double_t xmin = 0.75;
+  //  Double_t xmax = 2.00;
+  //  Double_t ymin = 0.50;
+  Double_t xmin = 0.6;
+  Double_t xmax = 2.6;
   Double_t ymin = 0.50;
   Double_t ymax = nchannels + ymin;
   
@@ -104,17 +112,17 @@ void ratios()
     Double_t x = gStat->GetX()[i];
     Double_t y = gStat->GetY()[i];
 
-    DrawTLatex(xmin+0.03, y, 0.035, 12, Form("%s", label[i].Data()));
+    DrawTLatex(xmin+0.05, y, 0.035, 12, Form("%s", label[i].Data()));
 
     Double_t statError  = gStat->GetErrorX(i);
     Double_t totalError = gLumi->GetErrorX(i);
     Double_t lumiError  = sqrt(totalError*totalError - statError*statError);
 
-    DrawTLatex(xmax-0.03, y, 0.035, 32, Form("%.2f #pm %.2f (stat) #pm %.2f (lumi)",
+    DrawTLatex(xmax-0.05, y, 0.035, 32, Form("%.2f #pm %.2f (stat) #pm %.2f (lumi)",
 					     x, statError, lumiError));
   }
 
-  DrawTLatex(0.940, 0.983, 0.05, 33, Form("#sqrt{s} = 8 TeV, L = %.1f fb^{-1}", luminosity/1e3), true);
+  DrawTLatex(0.940, 0.983, 0.05, 33, Form("#sqrt{s} = %d TeV, L = %.1f fb^{-1}", ecm, luminosity/1e3), true);
 
   dummy->GetXaxis()->CenterTitle();
   dummy->GetXaxis()->SetTitleOffset(1.4);
@@ -135,7 +143,11 @@ void ratios()
   canvas->GetFrame()->DrawClone();
   canvas->RedrawAxis();
 
-  canvas->SaveAs(format + "/ratios." + format);
+  canvas->SaveAs(Form("%s/%s/ratios%dtev.%s",
+		      _format.Data(),
+		      _directory.Data(),
+		      ecm,
+		      _format.Data()));
 }
 
 

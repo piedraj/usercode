@@ -31,28 +31,18 @@ enum {MMM, EEE, MME, EEM};
 TString sChannel[] = {"MMM", "EEE", "MME", "EEM"};
 
 
-const UInt_t nCuts = 8;
+const UInt_t nCuts = 3;
 
 enum {
-  NoCuts,
-  LeptonSelection,
-  ThreeLeptons,
-  Trigger,
-  LeadingLepton,
+  PreSelection,
   ZCandidate,
-  WCandidate,
-  MetCut
+  WCandidate
 };
 
 TString sCut[] = {
-  "NoCuts",
-  "LeptonSelection",
-  "ThreeLeptons",
-  "Trigger",
-  "LeadingLepton",
+  "PreSelection",
   "ZCandidate",
-  "WCandidate",
-  "MetCut"
+  "WCandidate"
 };
 
 
@@ -134,7 +124,7 @@ systError[WZTo3LNu]        = 0.0 / 1e2;
 Bool_t   _setLogy    = false;
 Double_t _luminosity = 12103.3;
 Double_t _yoffset    = 0.048;
-Int_t    _verbosity  = 1;
+Int_t    _verbosity  = 2;
 TString  _directory  = "Summer12_53X";
 TString  _format     = "png";
 
@@ -195,16 +185,14 @@ void XS(Int_t channel = MMM)
   //----------------------------------------------------------------------------
   MeasureTheCrossSection(sChannel[channel]);
 
-  if (channel == MMM)
-    DrawHistogram("hNPV_MMM_NoCuts", "number of primary vertices", -1, 0, "NULL", 0, 30, false);
+  TString suffix = "_" + sChannel[channel] + "_" + sCut[WCandidate];
 
-  TString suffix = "_" + sChannel[channel] + "_" + sCut[MetCut];
-
-  DrawHistogram("hMET"        + suffix, "E_{T}^{miss}",        5, 0, "GeV");
-  DrawHistogram("hPtZLepton1" + suffix, "p_{T}^{Z lepton 1}",  5, 0, "GeV");
-  DrawHistogram("hPtZLepton2" + suffix, "p_{T}^{Z lepton 2}",  5, 0, "GeV");
-  DrawHistogram("hPtWLepton"  + suffix, "p_{T}^{W lepton}",    5, 0, "GeV");
-  DrawHistogram("hInvMassZ"   + suffix, "m_{#font[12]{ll}}",  -1, 0, "GeV", 70, 112);
+  DrawHistogram("hNPV"        + suffix, "number of primary vertices", -1, 0, "NULL", 0, 30, false);
+  DrawHistogram("hMET"        + suffix, "E_{T}^{miss}",                5, 0, "GeV");
+  DrawHistogram("hPtZLepton1" + suffix, "p_{T}^{Z leading lepton}",    5, 0, "GeV");
+  DrawHistogram("hPtZLepton2" + suffix, "p_{T}^{Z trailing lepton}",   5, 0, "GeV",  0, 100);
+  DrawHistogram("hPtWLepton"  + suffix, "p_{T}^{W lepton}",            5, 0, "GeV");
+  DrawHistogram("hInvMassZ"   + suffix, "m_{#font[12]{ll}}",           2, 0, "GeV", 70, 112);
 }
 
 
@@ -219,7 +207,7 @@ void MeasureTheCrossSection(TString channel = "MMM")
   Double_t nbackground = 0;
   Double_t nTTbar      = 0;
 
-  TString hname = "hCounter_" + channel + "_MetCut";
+  TString hname = "hCounter_" + channel + "_WCandidate";
 
   for (UInt_t i=0; i<vprocess.size(); i++) {
 
@@ -292,10 +280,11 @@ void MeasureTheCrossSection(TString channel = "MMM")
     printf("\n");
     printf("               number of selected WZ = %.0f\n", nWZ);
     printf("                       WZ efficiency = %.2f %s\n", 1e2 * efficiency, "%");
-    printf("                               ndata = %.0f\n", ndata);
-    printf("                         nbackground = %.1f\n", nbackground);
-    printf("                             nsignal = %.1f\n", nsignal);
-    printf("                              nTTbar = %.1f\n", nTTbar);
+    printf("                         nbackground = %5.1f +- %4.1f\n", nbackground,       sqrt(nbackground));
+    printf("                               ndata = %5.1f +- %4.1f\n", ndata,             sqrt(ndata));
+    printf("                 ndata - nbackground = %5.1f +- %4.1f\n", ndata-nbackground, sqrt(ndata+nbackground));
+    printf("                             nsignal = %5.1f +- %4.1f\n", nsignal,           sqrt(nsignal));
+    printf("                              nTTbar = %5.1f +- %4.1f\n", nTTbar,            sqrt(nTTbar));
   }
 
   if (_verbosity > 0) {
@@ -382,7 +371,7 @@ void DrawHistogram(TString  hname,
 
   // Normalize MC to data
   //----------------------------------------------------------------------------
-  if (hname.Contains("hNPV") && !hname.Contains("MetCut")) {
+  if (hname.Contains("hNPV") && !hname.Contains("WCandidate")) {
   
     for (UInt_t i=0; i<vprocess.size(); i++) {
 

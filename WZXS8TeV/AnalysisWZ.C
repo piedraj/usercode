@@ -32,7 +32,7 @@ void AnalysisWZ::Initialise()
       hNPV    [i][j] = CreateH1F(TString("hNPV"     + suffix), "",  60, 0,  60);
       hMET    [i][j] = CreateH1F(TString("hMET"     + suffix), "", 200, 0, 200);
 
-      if (j != ZCandidate && j != WCandidate && j != MetCut) continue;
+      if (j == PreSelection) continue;
 
       hPtZLepton1[i][j] = CreateH1F(TString("hPtZLepton1" + suffix), "", 200, 0, 200);
       hPtZLepton2[i][j] = CreateH1F(TString("hPtZLepton2" + suffix), "", 200, 0, 200);
@@ -62,29 +62,21 @@ void AnalysisWZ::InsideLoop()
   Muons.clear();
   Electrons.clear();
 
-  leadingLeptonPt =  0;
   dileptonInvMass =  0;
   nSelMuon        =  0;
   nSelElec        =  0;
   theChannel      = -1;
 
-  FillHistogramsAtCut(MMM, NoCuts);
-
 
   // When reading the ZJets_Madgraph sample, require two leptons
   //----------------------------------------------------------------------------
-  if (!IsGenAccepted()) return;
+  if (sampleName == "ZJets_Madgraph" && !IsGenAccepted()) return;
 
 
   // Preselection
   //----------------------------------------------------------------------------
   GetSelectedMuon();
   GetSelectedElec();
-
-  if ((nSelMuon + nSelElec) < 2) return;
-
-  FillHistogramsAtCut(MMM, LeptonSelection);
-
 
   if ((nSelMuon + nSelElec) != 3) return;
 
@@ -93,30 +85,21 @@ void AnalysisWZ::InsideLoop()
   else if (nSelMuon == 2) theChannel = MME;
   else if (nSelElec == 2) theChannel = EEM;
 
-  FillHistogramsAtCut(theChannel, ThreeLeptons);
-
-
   if ((theChannel == MMM || theChannel == MME) && !T_passTriggerDoubleMu) return;
   if ((theChannel == EEE || theChannel == EEM) && !T_passTriggerDoubleEl) return;
 
-  FillHistogramsAtCut(theChannel, Trigger);
-
+  Int_t numberOfHighPtLeptons = 0;
 
   for (UInt_t i=0; i<(nSelMuon + nSelElec); i++) {
 
-    if (i < nSelElec) {
-      if (Electrons[i].Pt() > leadingLeptonPt)
-	leadingLeptonPt = Electrons[i].Pt();
-    }
-    else {
-      if (Muons[i-nSelElec].Pt() > leadingLeptonPt)
-	leadingLeptonPt = Muons[i-nSelElec].Pt();
-    }
+    Double_t leptonPt = (i < nSelElec) ? Electrons[i].Pt() : Muons[i-nSelElec].Pt();
+
+    if (leptonPt > 20) numberOfHighPtLeptons++;
   }
 
-  if (leadingLeptonPt <= 20) return;
+  if (numberOfHighPtLeptons < 2) return;
 
-  FillHistogramsAtCut(theChannel, LeadingLepton);
+  FillHistogramsAtCut(theChannel, PreSelection);
 
 
   // Z candidate
@@ -187,12 +170,10 @@ void AnalysisWZ::InsideLoop()
       
   if ((nSelMuon == 2 || nSelElec == 3) && (dR1 < 0.1 || dR2 < 0.1)) return;
 
-  FillHistogramsAtCut(theChannel, WCandidate);
-
 
   if (T_METPF_ET <= 30) return;
 
-  FillHistogramsAtCut(theChannel, MetCut);
+  FillHistogramsAtCut(theChannel, WCandidate);
 }
 
 
@@ -215,13 +196,10 @@ Bool_t AnalysisWZ::IsGenAccepted()
 {
   Bool_t pass = true;
 
-  if (sampleName == "ZJets_Madgraph") {
+  UInt_t nMuon = T_Gen_MuonSt3_PID->size();
+  UInt_t nElec = T_Gen_ElecSt3_PID->size();
 
-    UInt_t nMuon = T_Gen_MuonSt3_PID->size();
-    UInt_t nElec = T_Gen_ElecSt3_PID->size();
-
-    if (nMuon != 2 && nElec != 2) pass = false;
-  }
+  if (nMuon != 2 && nElec != 2) pass = false;
   
   return pass;
 }
@@ -230,15 +208,11 @@ Bool_t AnalysisWZ::IsGenAccepted()
 //------------------------------------------------------------------------------
 // SelectedMuonPt
 //------------------------------------------------------------------------------
-Double_t AnalysisWZ::SelectedMuonPt(UInt_t iMuon, Int_t  iVertex)
+Double_t AnalysisWZ::SelectedMuonPt(UInt_t iMuon)
 {
   Double_t muonPt = -999;
 
-  if (iVertex < 0) return muonPt;
-
-  Bool_t pass = true;
-
-  pass &= (fabs(T_Muon_vz->at(iMuon) - T_Vertex_z->at(iVertex)) < 1);
+  Bool_t pass = (fabs(T_Muon_vz->at(iMuon) - T_Vertex_z->at(0)) < 1);
 
   TLorentzVector Muon(T_Muon_Px    ->at(iMuon),
 		      T_Muon_Py    ->at(iMuon),
@@ -275,15 +249,11 @@ Double_t AnalysisWZ::SelectedMuonPt(UInt_t iMuon, Int_t  iVertex)
 //------------------------------------------------------------------------------
 // SelectedElecPt
 //------------------------------------------------------------------------------
-Double_t AnalysisWZ::SelectedElecPt(UInt_t iElec, Int_t  iVertex)
+Double_t AnalysisWZ::SelectedElecPt(UInt_t iElec)
 {
   Double_t electronPt = -999;
 
-  if (iVertex < 0) return electronPt;
-
-  Bool_t pass = true;
-
-  pass &= (fabs(T_Elec_vz->at(iElec) - T_Vertex_z->at(iVertex)) < 1);
+  Bool_t pass = (fabs(T_Elec_vz->at(iElec) - T_Vertex_z->at(0)) < 1);
 	   
   TLorentzVector Elec(T_Elec_Px    ->at(iElec),
 		      T_Elec_Py    ->at(iElec),
@@ -349,22 +319,21 @@ void AnalysisWZ::FillHistogramsAtCut(UInt_t iChannel, UInt_t iCut)
   hNPV    [iChannel][iCut]->Fill(T_Vertex_z->size(), weight);
   hMET    [iChannel][iCut]->Fill(T_METPF_ET,         weight);
 
-  if (iCut == ZCandidate || iCut == WCandidate || iCut == MetCut) {
+  if (iCut == PreSelection) return;
 
-    Double_t invMass = (ZLepton1 + ZLepton2).M();
+  Double_t invMass = (ZLepton1 + ZLepton2).M();
 
-    Double_t pt1, pt2;
+  Double_t pt1, pt2;
 
-    if (ZLepton1.Pt() > ZLepton2.Pt())
-      {pt1 = ZLepton1.Pt(); pt2 = ZLepton2.Pt();}
-    else
-      {pt1 = ZLepton2.Pt(); pt2 = ZLepton1.Pt();}
+  if (ZLepton1.Pt() > ZLepton2.Pt())
+    {pt1 = ZLepton1.Pt(); pt2 = ZLepton2.Pt();}
+  else
+    {pt1 = ZLepton2.Pt(); pt2 = ZLepton1.Pt();}
   
-    hPtZLepton1[iChannel][iCut]->Fill(pt1,          weight);
-    hPtZLepton2[iChannel][iCut]->Fill(pt2,          weight);
-    hPtWLepton [iChannel][iCut]->Fill(WLepton.Pt(), weight);
-    hInvMassZ  [iChannel][iCut]->Fill(invMass,      weight);
-  }
+  hPtZLepton1[iChannel][iCut]->Fill(pt1,          weight);
+  hPtZLepton2[iChannel][iCut]->Fill(pt2,          weight);
+  hPtWLepton [iChannel][iCut]->Fill(WLepton.Pt(), weight);
+  hInvMassZ  [iChannel][iCut]->Fill(invMass,      weight);
 }
 
 
@@ -377,7 +346,7 @@ void AnalysisWZ::GetSelectedMuon()
 
   for (UInt_t i=0; i<muonSize; i++) {
 
-    if (SelectedMuonPt(i, 0) > 10) {
+    if (SelectedMuonPt(i) > 10) {
 
       Muons_Charge.push_back(T_Muon_Charge->at(i));
 
@@ -403,7 +372,7 @@ void AnalysisWZ::GetSelectedElec()
   
   for (UInt_t i=0; i<elecSize; i++) {
 
-    if (SelectedElecPt(i, 0) > 10) {
+    if (SelectedElecPt(i) > 10) {
 	
       Electrons_Charge.push_back(T_Elec_Charge->at(i));
 	

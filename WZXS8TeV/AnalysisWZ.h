@@ -23,28 +23,18 @@ enum {MMM, EEE, MME, EEM};
 TString sChannel[] = {"MMM", "EEE", "MME", "EEM"};
 
 
-const UInt_t nCuts = 8;
+const UInt_t nCuts = 3;
 
 enum {
-  NoCuts,
-  LeptonSelection,
-  ThreeLeptons,
-  Trigger,
-  LeadingLepton,
+  PreSelection,
   ZCandidate,
-  WCandidate,
-  MetCut
+  WCandidate
 };
 
 TString sCut[] = {
-  "NoCuts",
-  "LeptonSelection",
-  "ThreeLeptons",
-  "Trigger",
-  "LeadingLepton",
+  "PreSelection",
   "ZCandidate",
-  "WCandidate",
-  "MetCut"
+  "WCandidate"
 };
 
 
@@ -72,14 +62,11 @@ class AnalysisWZ: public CMSAnalysisSelectorMiniTrees
   void     GetParameters      ();
   Bool_t   IsGenAccepted      ();
 
-  Double_t SelectedMuonPt     (UInt_t   iMuon,
-			       Int_t    iVertex);
+  Double_t SelectedMuonPt     (UInt_t iMuon);
+  Double_t SelectedElecPt     (UInt_t iElec);
 
-  Double_t SelectedElecPt     (UInt_t   iElec,
-			       Int_t    iVertex);
-
-  void     FillHistogramsAtCut(UInt_t   iChannel,
-			       UInt_t   iCut);
+  void     FillHistogramsAtCut(UInt_t iChannel,
+			       UInt_t iCut);
 				   
   void     GetSelectedMuon    ();
   void     GetSelectedElec    ();
@@ -120,7 +107,6 @@ class AnalysisWZ: public CMSAnalysisSelectorMiniTrees
   TLorentzVector              ZLepton2;
   TLorentzVector              WLepton;
 
-  Double_t                    leadingLeptonPt;
   Double_t                    dileptonInvMass;
   UInt_t                      nSelMuon;
   UInt_t                      nSelElec;
