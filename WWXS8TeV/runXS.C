@@ -35,7 +35,7 @@ enum {SILENT, NOTE, DEBUG};
 //------------------------------------------------------------------------------
 void runXS(Int_t    njet          = 0,
 	   Int_t    ichannel      = All,
-	   Double_t luminosity    = 5064,
+	   Double_t luminosity    = 12103,
 	   Int_t    printLevel    = NOTE,
 	   Bool_t   useDataDriven = true,  // false => DY and Top from MC
 	   Bool_t   drawTheXS     = false,

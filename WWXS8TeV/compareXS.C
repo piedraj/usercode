@@ -1,22 +1,43 @@
-const Double_t nlo7tev      = 47.04;  // [pb]
-const Double_t nlo7tevPlus  = 4.3 * nlo7tev / 1e2;
-const Double_t nlo7tevMinus = 3.2 * nlo7tev / 1e2;
+//------------------------------------------------------------------------------
+//
+// Vector boson pair production at the LHC, arXiv:1105.0020
+//
+// All cross sections are in pb, unless stated otherwise.
+//
+//------------------------------------------------------------------------------
+const Double_t WplusZ_xs7tev_nlo            = 11.88;
+const Double_t WplusZ_xs7tev_nlo_upperError = 5.5 * WplusZ_xs7tev_nlo / 1e2;
+const Double_t WplusZ_xs7tev_nlo_lowerError = 4.2 * WplusZ_xs7tev_nlo / 1e2;
 
-const Double_t nlo8tev      = 57.25;  // [pb]
-const Double_t nlo8tevPlus  = 4.1 * nlo8tev / 1e2;
-const Double_t nlo8tevMinus = 2.8 * nlo8tev / 1e2;
+const Double_t WminusZ_xs7tev_nlo            = 6.69;
+const Double_t WminusZ_xs7tev_nlo_upperError = 5.6 * WplusZ_xs7tev_nlo / 1e2;
+const Double_t WminusZ_xs7tev_nlo_lowerError = 4.3 * WplusZ_xs7tev_nlo / 1e2;
+
+const Double_t WW_xs7tev_nlo            = 47.04;
+const Double_t WW_xs7tev_nlo_upperError = 4.3 * WW_xs7tev_nlo / 1e2;
+const Double_t WW_xs7tev_nlo_lowerError = 3.2 * WW_xs7tev_nlo / 1e2;
+
+const Double_t WW_xs8tev_nlo            = 57.25;
+const Double_t WW_xs8tev_nlo_upperError = 4.1 * WW_xs8tev_nlo / 1e2;
+const Double_t WW_xs8tev_nlo_lowerError = 2.8 * WW_xs8tev_nlo / 1e2;
 
 
+//------------------------------------------------------------------------------
+//
+// compareXS
+//
+//------------------------------------------------------------------------------
 const UInt_t nchannels = 5;
 
-TString channelLabel[] = {"all", "#mu#mu", "ee", "e#mu", "#mue"};
+TString channelLabel[nchannels] = {"all", "#mu#mu", "ee", "e#mu", "#mue"};
 
 
-Double_t luminosity = 5.064;  // [fb-1]
-
-
-void compareXS()
+void compareXS(Int_t energy = 7)
 {
+  Double_t luminosity = 5.064;
+
+  if (energy == 7) luminosity = 4.92;
+
   Double_t xs7tev_0jet  [nchannels] = {52.37, 51.88, 60.19, 48.76, 52.60};
   Double_t stat7tev_0jet[nchannels] = { 1.99,  3.96,  5.66,  3.43,  3.67};
   Double_t syst7tev_0jet[nchannels] = { 4.11,  4.08,  5.39,  4.46,  4.27};
@@ -35,30 +56,49 @@ void compareXS()
   Double_t stat8tev_incl[nchannels] = { 2.21,  4.95,  6.25,  3.68,  3.93};
 
 
+  // Loop
+  //----------------------------------------------------------------------------
+  Double_t absoluteMax = -999;
+
+  TGraphErrors* g7tev_0jet = new TGraphErrors(nchannels);
   TGraphErrors* g8tev_0jet = new TGraphErrors(nchannels);
   TGraphErrors* g8tev_1jet = new TGraphErrors(nchannels);
   TGraphErrors* g8tev_2jet = new TGraphErrors(nchannels);
   TGraphErrors* g8tev_incl = new TGraphErrors(nchannels);
 
-  
-  // Loop
-  //----------------------------------------------------------------------------
   for (UInt_t i=0; i<nchannels; i++) {
 
+    g7tev_0jet->SetPoint(i, i, xs7tev_0jet[i]);
     g8tev_0jet->SetPoint(i, i, xs8tev_0jet[i]);
     g8tev_1jet->SetPoint(i, i, xs8tev_1jet[i]);
     g8tev_2jet->SetPoint(i, i, xs8tev_2jet[i]);
     g8tev_incl->SetPoint(i, i, xs8tev_incl[i]);
 
+    g7tev_0jet->SetPointError(i, 0.5, stat7tev_0jet[i]);
     g8tev_0jet->SetPointError(i, 0.5, stat8tev_0jet[i]);
     g8tev_1jet->SetPointError(i, 0.5, stat8tev_1jet[i]);
     g8tev_2jet->SetPointError(i, 0.5, stat8tev_2jet[i]);
     g8tev_incl->SetPointError(i, 0.5, stat8tev_incl[i]);
+
+    if (energy == 7) {
+      if (absoluteMax < xs7tev_0jet[i] + stat7tev_0jet[i])
+	absoluteMax = xs7tev_0jet[i] + stat7tev_0jet[i];
+    }
+    else if (energy == 8) {
+      if (absoluteMax < xs8tev_0jet[i] + stat8tev_0jet[i])
+	absoluteMax = xs8tev_0jet[i] + stat8tev_0jet[i];
+      if (absoluteMax < xs8tev_1jet[i] + stat8tev_1jet[i])
+	absoluteMax = xs8tev_1jet[i] + stat8tev_1jet[i];
+    }
   }
 
 
   // Cosmetics
   //----------------------------------------------------------------------------
+  g7tev_0jet->SetLineWidth  (2);
+  g7tev_0jet->SetMarkerSize (1.4);
+  g7tev_0jet->SetMarkerStyle(kFullCircle);
+
   g8tev_0jet->SetLineWidth  (2);
   g8tev_0jet->SetMarkerSize (1.4);
   g8tev_0jet->SetMarkerStyle(kFullCircle);
@@ -88,12 +128,19 @@ void compareXS()
   
   TMultiGraph* mg = new TMultiGraph();
 
-  mg->Add(g8tev_2jet);
-  mg->Add(g8tev_1jet);
-  mg->Add(g8tev_0jet);
-  //  mg->Add(g8tev_incl);
+  if (energy == 7) {
+    mg->Add(g7tev_0jet);
+  }
+  else if (energy == 8) {
+    mg->Add(g8tev_1jet);
+    mg->Add(g8tev_0jet);
+  }
 
   mg->Draw("ap");
+
+  mg->SetMaximum(1.15 * absoluteMax);
+
+  if (energy == 7) mg->SetMinimum(41);
 
   mg->GetYaxis()->SetTitle("#sigma_{WW} (pb)");
   mg->GetYaxis()->SetTitleOffset(1.5);
@@ -106,7 +153,7 @@ void compareXS()
   xaxis->SetLabelSize(0.07);
 
   for (UInt_t i=0; i<nchannels; i++)
-    xaxis->SetBinLabel(xaxis->FindBin(i), channelLabel[i].Data());
+    xaxis->SetBinLabel(xaxis->FindBin(i), AlignLabel(channelLabel[i]));
 
   xaxis->CenterLabels();
   xaxis->LabelsOption("h");
@@ -114,63 +161,50 @@ void compareXS()
 
   // NLO WW cross-section
   //----------------------------------------------------------------------------
-  TH1F* nlo = new TH1F("nlo", "nlo", nchannels, canvas->GetUxmin(), canvas->GetUxmax());
+  TH1F* nlo;
+  
+  if (energy == 7) {
 
-  for(UInt_t i=0; i<=nchannels; i++) {
-    nlo->SetBinContent(i, nlo8tev + 0.5 * (nlo8tevPlus - nlo8tevMinus));
-    nlo->SetBinError  (i,           0.5 * (nlo8tevPlus + nlo8tevMinus));
+    TH1F* wz = DrawBand(68.89 - 17.81, 8.71, 8.71, "wz", kGreen-10, 3375, kGreen+1, 1, 2);
+    
+    nlo = DrawBand(WW_xs7tev_nlo, WW_xs7tev_nlo_upperError, WW_xs7tev_nlo_lowerError);
   }
-
-  nlo->SetLineColor  (0);
-  nlo->SetFillColor  (kRed+1);
-  nlo->SetFillStyle  (3354);
-  nlo->SetMarkerColor(0);
-
-  TLine* line = new TLine(canvas->GetUxmin(), nlo8tev, canvas->GetUxmax(), nlo8tev);
-
-  line->SetLineColor(kRed+1);
-  line->SetLineWidth(2);
+  else if (energy == 8)
+    nlo = DrawBand(WW_xs8tev_nlo, WW_xs8tev_nlo_upperError, WW_xs8tev_nlo_lowerError);
 
 
   // Legend
   //----------------------------------------------------------------------------
-  TLegend* legend = new TLegend(0.223, 0.673, 0.467, 0.895);
+  Double_t x0 = 0.22; 
+  Double_t y0 = 0.84;
 
-  legend->SetFillColor(0);
-  legend->SetTextFont (42);
-  legend->SetTextSize (0.035);
+  DrawTLegend(x0, y0, nlo, " NLO", "f");
 
-  legend->AddEntry(nlo,        " NLO",   "f");
-  legend->AddEntry(g8tev_0jet, " 0-jet", "lp");
-  legend->AddEntry(g8tev_1jet, " 1-jet", "lp");
-  legend->AddEntry(g8tev_2jet, " 2-jet", "lp");
-  //  legend->AddEntry(g8tev_incl, " inclusive", "lp");
-
-
-  // Put everything together
-  //----------------------------------------------------------------------------
-  legend->Draw("same");
-  nlo   ->Draw("e2,same");
-  line  ->Draw("same");
-  mg    ->Draw("p,same");
-
-
-  mg->SetMaximum(139);
-  mg->SetMinimum(-3);
+  if (energy == 7) {
+    DrawTLegend(x0, y0 - 1.* 0.053, g7tev_0jet, " 0-jet",           "lp");
+    DrawTLegend(x0, y0 - 2.* 0.053, wz,         " WZ+WW - WZ(NLO)", "f");
+  }
+  else if (energy == 8) {
+    DrawTLegend(x0, y0 - 1.* 0.053, g8tev_0jet, " 0-jet", "lp");
+    DrawTLegend(x0, y0 - 2.* 0.053, g8tev_1jet, " 1-jet", "lp");
+  }
 
 
   // Additional titles
   //----------------------------------------------------------------------------
   DrawTLatex(0.185, 0.970, 0.04, 13, "CMS preliminary");
-  DrawTLatex(0.940, 0.978, 0.04, 33, Form("#sqrt{s} = 8 TeV, L = %.3f fb^{-1}", luminosity));
+  DrawTLatex(0.940, 0.978, 0.04, 33, Form("#sqrt{s} = %d TeV, L = %.3f fb^{-1}",
+					  energy, luminosity));
 
 
   // And save it
   //----------------------------------------------------------------------------
+  mg->Draw("p,same");
+
   canvas->Update();
   canvas->GetFrame()->DrawClone();
 
-  canvas->SaveAs("wwxs012.png");
+  canvas->SaveAs("xs.png");
 }
 
 
@@ -192,4 +226,87 @@ void DrawTLatex(Double_t    x,
   tl->SetTextSize (tsize);
 
   tl->Draw("same");
+}
+
+
+//------------------------------------------------------------------------------
+// AlignLabel
+//------------------------------------------------------------------------------
+const char* AlignLabel(TString label)
+{
+  const char* patch = "#color[0]{l}";
+
+  const char* result = Form("%s%s%s", patch, label.Data(), patch);
+
+  return result;
+}
+
+
+//------------------------------------------------------------------------------
+// DrawBand
+//------------------------------------------------------------------------------
+TH1F* DrawBand(Double_t centralValue,
+	       Double_t upperError,
+	       Double_t lowerError,
+	       TString  name   = "hist",
+	       Color_t  hcolor = kRed+1,
+	       Style_t  hstyle = 3354,
+	       Color_t  lcolor = kRed+1,
+	       Style_t  lstyle = 1,
+	       Width_t  lwidth = 2)
+{
+  TH1F* hist = new TH1F(name, "", nchannels, gPad->GetUxmin(), gPad->GetUxmax());
+
+  for (UInt_t i=0; i<=nchannels; i++) {
+    hist->SetBinContent(i, centralValue + 0.5 * (upperError - lowerError));
+    hist->SetBinError  (i,                0.5 * (upperError + lowerError));
+  }
+
+  hist->SetLineColor  (0);
+  hist->SetFillColor  (hcolor);
+  hist->SetFillStyle  (hstyle);
+  hist->SetMarkerColor(hcolor);
+
+  hist->Draw("e2,same");
+
+  TLine* line = new TLine(gPad->GetUxmin(), centralValue,
+			  gPad->GetUxmax(), centralValue);
+
+  line->SetLineColor(lcolor);
+  line->SetLineStyle(lstyle);
+  line->SetLineWidth(lwidth);
+
+  line->Draw("same");
+
+  return hist;
+}
+
+
+//------------------------------------------------------------------------------
+// DrawTLegend
+//------------------------------------------------------------------------------
+TLegend* DrawTLegend(Float_t  x1,
+		     Float_t  y1,
+		     TObject* obj,
+		     TString  label,
+		     TString  option,
+		     Float_t  tsize   = 0.04,
+		     Float_t  xoffset = 0.22,
+		     Float_t  yoffset = 0.05)
+{
+  TLegend* legend = new TLegend(x1,
+				y1,
+				x1 + xoffset,
+				y1 + yoffset);
+  
+  legend->SetBorderSize(    0);
+  legend->SetFillColor (    0);
+  legend->SetTextAlign (   12);
+  legend->SetTextFont  (   42);
+  legend->SetTextSize  (tsize);
+
+  legend->AddEntry(obj, label.Data(), option.Data());
+  legend->Draw();
+
+  return legend;
 }

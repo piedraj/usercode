@@ -6,7 +6,7 @@ if [ $# -lt 1 ]; then
 fi
 
 
-LUMINOSITY=5.064
+LUMINOSITY=12.103
 
 NJETS=$1
 

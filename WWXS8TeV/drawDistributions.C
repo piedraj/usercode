@@ -84,7 +84,7 @@ Double_t ZjScale[] = {3.70, 4.20, 1.80, 4.00};
 // drawDistributions
 //------------------------------------------------------------------------------
 void drawDistributions(Int_t    njet       = 0,
-		       TString  channel    = "OF",
+		       TString  channel    = "SF",
 		       Double_t luminosity = 5064,
 		       TString  format     = "png",
 		       Bool_t   drawRatio  = true,

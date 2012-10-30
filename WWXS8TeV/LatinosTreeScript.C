@@ -114,93 +114,69 @@ void LatinosTreeScript(Float_t luminosity,
   //----------------------------------------------------------------------------
   TString filesPath;
 
-  if (runAtOviedo) filesPath = "/hadoop/LatinosSkims/ReducedTrees/R52X_S1_V05_S2_V05_S3_V05/TightTight_JEC2012/";
+  if (runAtOviedo) filesPath = "/hadoop/LatinosSkims/ReducedTrees/R53X_S1_V06_S2_V07_S3_V07/";
   if (runAtIfca)   filesPath = "/gpfs/csic_projects/cms/data/LatinosSkims/ReducedTrees/R52X_S1_V05_S2_V05_S3_V05/ForICHEP2/";
 
   TChain* tree = new TChain("latino", "latino");
 
   if (theSample == "DataRun2012_Total") {
-    tree->Add(filesPath + "latino_100_SingleElectron2012A.root");
-    tree->Add(filesPath + "latino_101_SingleMuon2012A.root");
-    tree->Add(filesPath + "latino_102_DoubleElectron2012A.root");
-    tree->Add(filesPath + "latino_103_DoubleMuon2012A.root");
-    tree->Add(filesPath + "latino_104_MuEG2012A.root");
-    tree->Add(filesPath + "latino_200_SingleElectron2012B.root");
-    tree->Add(filesPath + "latino_201_SingleMuon2012B.root");
-    tree->Add(filesPath + "latino_202_DoubleElectron2012B.root");
-    tree->Add(filesPath + "latino_203_DoubleMuon2012B.root");
-    tree->Add(filesPath + "latino_220_SingleElectron2012B.root");
-    tree->Add(filesPath + "latino_221_SingleMuon2012B.root");
-    tree->Add(filesPath + "latino_222_DoubleElectron2012B.root");
-    tree->Add(filesPath + "latino_223_DoubleMuon2012B.root");
-    tree->Add(filesPath + "latino_230_SingleElectron2012B.root");
-    tree->Add(filesPath + "latino_224_MuEG2012B.root");
-    tree->Add(filesPath + "latino_231_SingleMuon2012B.root");
-    tree->Add(filesPath + "latino_232_DoubleElectron2012B.root");
-    tree->Add(filesPath + "latino_233_DoubleMuon2012B.root");
-    tree->Add(filesPath + "latino_234_MuEG2012B.root");
-    tree->Add(filesPath + "latino_240_SingleElectron2012B.root");
-    tree->Add(filesPath + "latino_241_SingleMuon2012B.root");
-    tree->Add(filesPath + "latino_242_DoubleElectron2012B.root");
-    tree->Add(filesPath + "latino_243_DoubleMuon2012B.root");
-    tree->Add(filesPath + "latino_244_MuEG2012B.root");
-    tree->Add(filesPath + "latino_204_MuEG2012B.root");
+    tree->Add(filesPath +"Data_TightTight/latino_RunA_892pbinv.root");
+    tree->Add(filesPath +"Data_TightTight/latino_RunB_4404pbinv.root");
+    tree->Add(filesPath +"Data_TightTight/latino_RunC_6807pbinv.root");
   }
   else if (theSample == "WJetsFakes_Total") {
-    tree->Add(filesPath + "latino_step3_10X_LooseLoose_JEC2012.root"); 
-    tree->Add(filesPath + "latino_step3_20X_LooseLoose_JEC2012.root");
-    tree->Add(filesPath + "latino_step3_22X_LooseLoose_JEC2012.root");
-    tree->Add(filesPath + "latino_step3_23X_LooseLoose_JEC2012.root");
-    tree->Add(filesPath + "latino_step3_24X_LooseLoose_JEC2012.root");
+    tree->Add(filesPath +"Data_LooseLoose/latino_RunA_892pbinv_LooseLoose.root");
+    tree->Add(filesPath +"Data_LooseLoose/latino_RunB_4404pbinv_LooseLoose.root");
+    tree->Add(filesPath +"Data_LooseLoose/latino_RunC_6807pbinv_LooseLoose.root");
   }
   else if (theSample == "ggWWto2L") {
-    tree->Add(filesPath + "latino_001_GluGluToWWTo4L.root");
+    tree->Add(filesPath + "MC_TightTight/latino_001_GluGluToWWTo4L.root");
   }
   else if (theSample == "WWTo2L2Nu") {
-    tree->Add(filesPath + "latino_000_WWJets2LMad.root");
+    tree->Add(filesPath + "MC_TightTight/latino_000_WWJets2LMad.root");
   }
   else if (theSample == "WZ") {
-    tree->Add(filesPath + "latino_074_WZJetsMad.root");
-    tree->Add(filesPath + "latino_078_WZTo2L2QMad.root");
+    tree->Add(filesPath + "MC_TightTight/latino_074_WZJetsMad.root");
+    tree->Add(filesPath + "MC_TightTight/latino_078_WZTo2L2QMad.root");
   }
   else if (theSample == "ZZ") {
-    tree->Add(filesPath + "latino_075_ZZJetsMad.root");
-    tree->Add(filesPath + "latino_079_ZZTo2L2QMad.root"); 
+    tree->Add(filesPath + "MC_TightTight/latino_075_ZZJetsMad.root");
+    tree->Add(filesPath + "MC_TightTight/latino_079_ZZTo2L2QMad.root"); 
   }
   else if (theSample == "TTbar") {
-    tree->Add(filesPath + "latino_019_TTTo2L2Nu2B.root");
+    tree->Add(filesPath + "MC_TightTight/latino_019_TTTo2L2Nu2B.root");
   }
   else if (theSample == "TW") {
-    tree->Add(filesPath + "latino_011_TtWFullDR.root");
-    tree->Add(filesPath + "latino_012_TbartWFullDR.root");
+    tree->Add(filesPath + "MC_TightTight/latino_011_TtWFullDR.root");
+    tree->Add(filesPath + "MC_TightTight/latino_012_TbartWFullDR.root");
   }
   else if (theSample == "Top") {
-    tree->Add(filesPath + "latino_019_TTTo2L2Nu2B.root");
-    tree->Add(filesPath + "latino_011_TtWFullDR.root");
-    tree->Add(filesPath + "latino_012_TbartWFullDR.root");
+    tree->Add(filesPath + "MC_TightTight/latino_019_TTTo2L2Nu2B.root");
+    tree->Add(filesPath + "MC_TightTight/latino_011_TtWFullDR.root");
+    tree->Add(filesPath + "MC_TightTight/latino_012_TbartWFullDR.root");
   }
   else if (theSample == "WJets") {
     tree->Add(filesPath + "latino_178_WJetsToLNuMad.root");
   }
   else if (theSample == "DY") {
-    tree->Add(filesPath + "latino_036_DY10toLLMad.root");
-    tree->Add(filesPath + "latino_037_DY50toLLMad.root");
+    tree->Add(filesPath + "MC_TightTight/latino_036_DY10toLLMad.root");
+    tree->Add(filesPath + "MC_TightTight/latino_037_DY50toLLMad.root");
   }
   else if (theSample == "DYtautau") {
-    //    tree->Add(filesPath + "latino_222_DYtt.root");
-    tree->Add("/hadoop/LatinosSkims/ReducedTrees/R52X_S1_V05_S2_V05_S3_V05/ForICHEP2/latino_222_DYtt.root");
+    tree->Add(filesPath + "MC_TightTight/latino_DYtt_12.1fb.root");
+    tree->Add(filesPath + "latino_086_ZgammaToLLuG.root");
   }
   else if (theSample == "WgammaNoStar") {
-    tree->Add(filesPath + "latino_085_WgammaToLNuG.root");
+    tree->Add(filesPath + "MC_TightTight/latino_085_WgammaToLNuG.root");
   }
   else if (theSample == "WgammaStar") {
-    tree->Add(filesPath + "latino_082_WGstarToElNuMad.root");
-    tree->Add(filesPath + "latino_083_WGstarToMuNuMad.root");
-    tree->Add(filesPath + "latino_084_WGstarToTauNuMad.root");
+    tree->Add(filesPath + "MC_TightTight/latino_082_WGstarToElNuMad.root");
+    tree->Add(filesPath + "MC_TightTight/latino_083_WGstarToMuNuMad.root");
+    tree->Add(filesPath + "MC_TightTight/latino_084_WGstarToTauNuMad.root");
   }
   else if (theSample == "HWW125") { 
-    tree->Add(filesPath + "latino_1125_ggToH125toWWTo2LAndTau2Nu.root");
-    tree->Add(filesPath + "latino_2125_vbfToH125toWWTo2LAndTau2Nu.root");
+    tree->Add(filesPath + "MC_TightTight/latino_1125_ggToH125toWWTo2LAndTau2Nu.root");
+    tree->Add(filesPath + "MC_TightTight/latino_2125_vbfToH125toWWTo2LAndTau2Nu.root");
   }
   else {
     return;
@@ -212,6 +188,7 @@ void LatinosTreeScript(Float_t luminosity,
   Float_t baseW;        tree->SetBranchAddress("baseW"       , &baseW);
   Float_t channel;      tree->SetBranchAddress("channel"     , &channel);
   Float_t chmet;        tree->SetBranchAddress("chmet"       , &chmet);
+  Float_t dataset;      tree->SetBranchAddress("dataset"     , &dataset);
   Float_t dphill;       tree->SetBranchAddress("dphill"      , &dphill);
   Float_t dphilljet;    tree->SetBranchAddress("dphilljet"   , &dphilljet);
   Float_t dphilljetjet; tree->SetBranchAddress("dphilljetjet", &dphilljetjet);
@@ -254,15 +231,15 @@ void LatinosTreeScript(Float_t luminosity,
   UInt_t  lumi;         tree->SetBranchAddress("lumi"        , &lumi);
   UInt_t  run;          tree->SetBranchAddress("run"         , &run);
 
-  Float_t fake2W;
+  Float_t fakeW;
   
   if (theSample.Contains("WJetsFakes"))
-    tree->SetBranchAddress("fake2W" , &fake2W);
+    tree->SetBranchAddress("fakeW", &fakeW);
 
-  Float_t puWobs;
-
+  Float_t puW60ABC;
+  
   if (!theSample.Contains("WJetsFakes") && !theSample.Contains("Data"))
-    tree->SetBranchAddress("puWobs", &puWobs);
+    tree->SetBranchAddress("puW60ABC", &puW60ABC);
 
 
   // Set the channel
@@ -289,12 +266,10 @@ void LatinosTreeScript(Float_t luminosity,
     if (theSample.Contains("Data"))
       totalW = 1.0;
     else if (theSample.Contains("WJetsFakes"))
-      totalW = fake2W;
-    else if (theSample == "DYtautau")
-      totalW = effW * triggW * baseW;
+      totalW = fakeW;
     else {
-      efficiencyW = puWobs * effW * triggW;
-      totalW      = baseW * efficiencyW * luminosity;
+      efficiencyW = puW60ABC * effW * triggW;
+      totalW      = (1 + 0.6 * (dataset >= 82 && dataset <= 84)) * baseW * efficiencyW * luminosity;
     }
 
 
@@ -314,15 +289,12 @@ void LatinosTreeScript(Float_t luminosity,
     // The selection begins here
     //--------------------------------------------------------------------------
     if (theSample == "DY" && mctruth == 2) continue;
-
+    
     if (trigger !=  1) continue;
     if (pt2     <= 20) continue;
 
 
-    if ((SelectedChannel == -1)           ||
-	(channel == SelectedChannel)      ||
-	(flavorChannel == "OF" && !sameflav) ||
-	(flavorChannel == "SF" &&  sameflav)) {
+    if ((SelectedChannel == -1) || (channel == SelectedChannel)) {
 
 
       //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

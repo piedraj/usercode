@@ -54,6 +54,10 @@ void XS(Double_t &xsValue,
 {
   TString dyChannel = "SF";
 
+  printf("\n");
+  printf("   WWFull xs = %.2f pb;   WWto2L xs = %.2f pb\n", nlo8tev, nlo8tev*BR_WW_to_lnln);
+  printf(" qqWWFull xs = %.2f pb; qqWWto2L xs = %.2f pb\n", nlo8tev*0.97, nlo8tev*0.97*BR_WW_to_lnln);
+
   if (channel.Contains("EE"))   dyChannel = "EE";
   if (channel.Contains("MuMu")) dyChannel = "MuMu";
 
