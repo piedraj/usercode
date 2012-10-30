@@ -212,19 +212,20 @@ Double_t AnalysisWZ::SelectedMuonPt(UInt_t iMuon)
 {
   Double_t muonPt = -999;
 
-  Bool_t pass = (fabs(T_Muon_vz->at(iMuon) - T_Vertex_z->at(0)) < 1);
+  Bool_t pass = (fabs(T_Muon_vz->at(iMuon) - T_Vertex_z->at(0)) < 0.5);
 
   TLorentzVector Muon(T_Muon_Px    ->at(iMuon),
 		      T_Muon_Py    ->at(iMuon),
 		      T_Muon_Pz    ->at(iMuon),
 		      T_Muon_Energy->at(iMuon));
 
-  Double_t relIso = 0.0;
+  Double_t neutralIso = 0.0;
 
-  relIso += T_Muon_chargedHadronIsoR03->at(iMuon);
-  relIso += T_Muon_neutralHadronIsoR03->at(iMuon);
-  relIso += T_Muon_photonIsoR03->at(iMuon);
-  relIso /= Muon.Pt();
+  neutralIso += T_Muon_neutralHadronIsoR04->at(iMuon);
+  neutralIso += T_Muon_photonIsoR04->at(iMuon);
+  neutralIso -= (0.5 * T_Muon_sumPUPtR04->at(iMuon));
+
+  Double_t relIso = (T_Muon_chargedHadronIsoR04->at(iMuon) + neutralIso) / Muon.Pt();
 
   pass &= (relIso < 0.2);
 
@@ -259,21 +260,21 @@ Double_t AnalysisWZ::SelectedElecPt(UInt_t iElec)
 		      T_Elec_Py    ->at(iElec),
 		      T_Elec_Pz    ->at(iElec),
 		      T_Elec_Energy->at(iElec));
-  
-  Double_t relIso = 0.0;
 
-  relIso += T_Elec_chargedHadronIso->at(iElec);
-  relIso += T_Elec_neutralHadronIso->at(iElec);
-  relIso += T_Elec_photonIso->at(iElec);
-  relIso /= Elec.Pt(); 
+  Double_t neutralIso = 0.0;
 
-  pass &= (relIso < 0.17);
+  neutralIso += T_Elec_neutralHadronIso->at(iElec);
+  neutralIso += T_Elec_photonIso->at(iElec);
+  neutralIso -= (0.5 * T_Elec_puChargedHadronIso->at(iElec));
+  neutralIso  = max(0.0, neutralIso);
+
+  Double_t relIso = (T_Elec_chargedHadronIso->at(iElec) + neutralIso) / Elec.Pt();
+
+  pass &= (relIso < 0.15);
 
   pass &= (T_Elec_passConversionVeto->at(iElec));
-  pass &= (T_Elec_isEcalDriven      ->at(iElec));
 
-  pass &= (T_Elec_MVA  ->at(iElec) > -0.1);
-  pass &= (T_Elec_SC_Et->at(iElec) >   15);
+  pass &= (T_Elec_MVA->at(iElec) > -0.1);
 
   pass &= (fabs(T_Elec_IPwrtPV->at(iElec)) < 0.04);
 
@@ -290,7 +291,7 @@ Double_t AnalysisWZ::SelectedElecPt(UInt_t iElec)
   
   for (UInt_t j=0; j<T_Muon_Energy->size(); j++) {
     
-    if ((T_Muon_IsGlobalMuon->at(j) || T_Muon_IsAllTrackerMuons->at(j))) { 
+    if (T_Muon_IsGlobalMuon->at(j)) { 
 	  
       TVector3 vMuon(T_Muon_Px->at(j),
 		     T_Muon_Py->at(j),
