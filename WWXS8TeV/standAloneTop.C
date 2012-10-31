@@ -2,7 +2,10 @@
 #include "Top.C"
 
 
-TString directory = "rootfiles";
+TString directory = "rootfiles_noCorrection";
+//TString directory = "rootfiles_type1";
+//TString directory = "rootfiles_type1_xy";
+//TString directory = "rootfiles_type1_xy_smear";
 
 
 //------------------------------------------------------------------------------

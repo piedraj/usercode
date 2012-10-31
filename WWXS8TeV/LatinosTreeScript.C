@@ -155,16 +155,13 @@ void LatinosTreeScript(Float_t luminosity,
     tree->Add(filesPath + "MC_TightTight/latino_011_TtWFullDR.root");
     tree->Add(filesPath + "MC_TightTight/latino_012_TbartWFullDR.root");
   }
-  else if (theSample == "WJets") {
-    tree->Add(filesPath + "latino_178_WJetsToLNuMad.root");
-  }
   else if (theSample == "DY") {
     tree->Add(filesPath + "MC_TightTight/latino_036_DY10toLLMad.root");
     tree->Add(filesPath + "MC_TightTight/latino_037_DY50toLLMad.root");
   }
   else if (theSample == "DYtautau") {
     tree->Add(filesPath + "MC_TightTight/latino_DYtt_12.1fb.root");
-    tree->Add(filesPath + "latino_086_ZgammaToLLuG.root");
+    tree->Add(filesPath + "MC_TightTight/latino_086_ZgammaToLLuG.root");
   }
   else if (theSample == "WgammaNoStar") {
     tree->Add(filesPath + "MC_TightTight/latino_085_WgammaToLNuG.root");
