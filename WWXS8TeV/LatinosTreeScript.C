@@ -282,14 +282,17 @@ void LatinosTreeScript(Float_t luminosity,
 
     Int_t vbfsel = ((jetpt3 <= 30 || !(jetpt3 > 30 && ((jeteta1-jeteta3 > 0 && jeteta2-jeteta3 < 0) || (jeteta2-jeteta3 > 0 && jeteta1-jeteta3 < 0)))));
 
+    Int_t wgstar = (dataset != 82 || (chmet < (0.75*pt1 + 100) && chmet < (0.75*jetpt1 + 100)));
+
 
     // The selection begins here
     //--------------------------------------------------------------------------
-    if (theSample == "DY" && mctruth == 2) continue;
+    if ((dataset == 36 || dataset == 37) && mctruth == 2) continue;
+
+    if (dataset == 86 && (flavorChannel == "MuMu" || flavorChannel == "EE")) continue;
     
     if (trigger !=  1) continue;
     if (pt2     <= 20) continue;
-
 
     if ((SelectedChannel == -1) || (channel == SelectedChannel)) {
 
@@ -381,7 +384,7 @@ void LatinosTreeScript(Float_t luminosity,
       hWTrigger   ->Fill(1, totalW); 
       hWeffTrigger->Fill(1, efficiencyW);
 
-      if (pfmet > 20 && mpmet > 20) {
+      if (pfmet > 20 && mpmet > 20 && wgstar) {
 	  
 	hWMetCut->Fill(1, totalW);
 	hWeffMetCut->Fill(1, efficiencyW);
