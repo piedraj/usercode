@@ -135,8 +135,10 @@ vector<UInt_t> vprocess;
 //------------------------------------------------------------------------------
 // XS
 //------------------------------------------------------------------------------
-void XS(Int_t channel = MMM)
+void XS(Int_t channel = MMM, Bool_t readWH = false)
 {
+  if (readWH) _directory += "/WH";
+
   if (channel < 0 || channel >= nChannels) return; 
 
   if (channel == EEE || channel == EEM) process[Data] += "DoubleElectron";
@@ -186,7 +188,7 @@ void XS(Int_t channel = MMM)
   MeasureTheCrossSection(sChannel[channel]);
 
   TString suffix = "_" + sChannel[channel] + "_" + sCut[WCandidate];
-
+  
   DrawHistogram("hNPV"        + suffix, "number of primary vertices", -1, 0, "NULL", 0, 30, false);
   DrawHistogram("hMET"        + suffix, "E_{T}^{miss}",                5, 0, "GeV");
   DrawHistogram("hPtZLepton1" + suffix, "p_{T}^{Z leading lepton}",    5, 0, "GeV");

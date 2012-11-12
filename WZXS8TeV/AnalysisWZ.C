@@ -50,7 +50,7 @@ void AnalysisWZ::InsideLoop()
 {
   weight = fWeight;
 
-  if (!sampleName.Contains("Data"))
+  if (!sample.Contains("Data"))
     weight *= fPUWeight->GetWeight((Int_t)T_Event_nTruePU);
 
 
@@ -70,7 +70,7 @@ void AnalysisWZ::InsideLoop()
 
   // When reading the ZJets_Madgraph sample, require two leptons
   //----------------------------------------------------------------------------
-  if (sampleName == "ZJets_Madgraph" && !IsGenAccepted()) return;
+  if (sample == "ZJets_Madgraph" && !IsGenAccepted()) return;
 
 
   // Preselection
@@ -80,13 +80,13 @@ void AnalysisWZ::InsideLoop()
 
   if ((nSelMuon + nSelElec) != 3) return;
 
+  if (nSelMuon >= 2 && !T_passTriggerDoubleMu && sample.Contains("Data")) return;
+  if (nSelElec >= 2 && !T_passTriggerDoubleEl && sample.Contains("Data")) return;
+
   if      (nSelMuon == 3) theChannel = MMM;
   else if (nSelElec == 3) theChannel = EEE;
   else if (nSelMuon == 2) theChannel = MME;
   else if (nSelElec == 2) theChannel = EEM;
-
-  if ((theChannel == MMM || theChannel == MME) && !T_passTriggerDoubleMu) return;
-  if ((theChannel == EEE || theChannel == EEM) && !T_passTriggerDoubleEl) return;
 
   Int_t numberOfHighPtLeptons = 0;
 
@@ -182,7 +182,8 @@ void AnalysisWZ::InsideLoop()
 //------------------------------------------------------------------------------
 void AnalysisWZ::GetParameters()
 {
-  sampleName = GetInputParameters()->TheNamedString("sampleName");
+  folder = GetInputParameters()->TheNamedString("folder");
+  sample = GetInputParameters()->TheNamedString("sample");
 
   GetInputParameters()->TheNamedDouble("weight",     fWeight);
   GetInputParameters()->TheNamedDouble("luminosity", luminosity);

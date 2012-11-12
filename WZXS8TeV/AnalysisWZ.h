@@ -87,7 +87,8 @@ class AnalysisWZ: public CMSAnalysisSelectorMiniTrees
 
   // Input parameters
   //----------------------------------------------------------------------------
-  TString                     sampleName;
+  TString                     folder;
+  TString                     sample;
   TString                     fileSuffix;
   Double_t                    weight;
   Double_t                    fWeight;

@@ -12,14 +12,15 @@
 #include "scripts/PAFUtils.C"
 
 
-TProof*  proof          = 0;
 Double_t G_Event_Weight = 1;
 Double_t G_Event_Lumi   = 12103.3;  // pb
+TProof*  proof          = 0;
 
 
-void RunPROOF_WZ(TString  sampleName = "WZTo3LNu",
-		 TString  selector   = "AnalysisWZ",
-		 Long64_t nEvents    = -1)
+void RunPROOF_WZ(TString  sample   = "WZTo3LNu",
+		 TString  selector = "AnalysisWZ",
+		 TString  folder   = ".",
+		 Long64_t nEvents  = -1)
 {
   // PROOF mode
   //----------------------------------------------------------------------------
@@ -49,37 +50,27 @@ void RunPROOF_WZ(TString  sampleName = "WZTo3LNu",
   //----------------------------------------------------------------------------
   TString dataPath = "/hadoop";
 
-  if (sampleName.Contains("Data_DoubleElectron")) {
-    gPAFOptions->dataFiles.push_back(dataPath + "/MC_Summer12_53X/Tree_DoubleElectronA_892_0.root");
-    gPAFOptions->dataFiles.push_back(dataPath + "/MC_Summer12_53X/Tree_DoubleElectronB_4404_0.root");
-    gPAFOptions->dataFiles.push_back(dataPath + "/MC_Summer12_53X/Tree_DoubleElectronB_4404_1.root");
-    gPAFOptions->dataFiles.push_back(dataPath + "/MC_Summer12_53X/Tree_DoubleElectronC_6807_0.root");
-    gPAFOptions->dataFiles.push_back(dataPath + "/MC_Summer12_53X/Tree_DoubleElectronC_6807_1.root");
-    gPAFOptions->dataFiles.push_back(dataPath + "/MC_Summer12_53X/Tree_DoubleElectronC_6807_2.root");
+  if (sample.Contains("Data_DoubleElectron")) {
+    gPAFOptions->dataFiles.push_back(dataPath + "/MC_Summer12_53X/" + folder + "/Tree_DoubleElectronA_892_*.root");
+    gPAFOptions->dataFiles.push_back(dataPath + "/MC_Summer12_53X/" + folder + "/Tree_DoubleElectronB_4404_*.root");
+    gPAFOptions->dataFiles.push_back(dataPath + "/MC_Summer12_53X/" + folder + "/Tree_DoubleElectronC_6807_*.root");
   }
-  else if (sampleName.Contains("Data_DoubleMu")) {
-    gPAFOptions->dataFiles.push_back(dataPath + "/MC_Summer12_53X/Tree_DoubleMuA_892_0.root");
-    gPAFOptions->dataFiles.push_back(dataPath + "/MC_Summer12_53X/Tree_DoubleMuB_4404_0.root");
-    gPAFOptions->dataFiles.push_back(dataPath + "/MC_Summer12_53X/Tree_DoubleMuB_4404_1.root");
-    gPAFOptions->dataFiles.push_back(dataPath + "/MC_Summer12_53X/Tree_DoubleMuB_4404_2.root");
-    gPAFOptions->dataFiles.push_back(dataPath + "/MC_Summer12_53X/Tree_DoubleMuB_4404_3.root");
-    gPAFOptions->dataFiles.push_back(dataPath + "/MC_Summer12_53X/Tree_DoubleMuC_6807_0.root");
-    gPAFOptions->dataFiles.push_back(dataPath + "/MC_Summer12_53X/Tree_DoubleMuC_6807_1.root");
-    gPAFOptions->dataFiles.push_back(dataPath + "/MC_Summer12_53X/Tree_DoubleMuC_6807_2.root");
-    gPAFOptions->dataFiles.push_back(dataPath + "/MC_Summer12_53X/Tree_DoubleMuC_6807_3.root");
-    gPAFOptions->dataFiles.push_back(dataPath + "/MC_Summer12_53X/Tree_DoubleMuC_6807_4.root");
+  else if (sample.Contains("Data_DoubleMu")) {
+    gPAFOptions->dataFiles.push_back(dataPath + "/MC_Summer12_53X/" + folder + "/Tree_DoubleMuA_892_*.root");
+    gPAFOptions->dataFiles.push_back(dataPath + "/MC_Summer12_53X/" + folder + "/Tree_DoubleMuB_4404_*.root");
+    gPAFOptions->dataFiles.push_back(dataPath + "/MC_Summer12_53X/" + folder + "/Tree_DoubleMuC_6807_*.root");
   }
   else {
 
     gROOT->LoadMacro("../DatasetManager/DatasetManager.C+");
 
-    DatasetManager* dm = new DatasetManager("Summer12_53X");
+    DatasetManager* dm = new DatasetManager("Summer12_53X", folder);
 
     // Use this if you know that the information on the google doc table has
     // changed and you need to update the information
     dm->RedownloadFiles();
 
-    dm->LoadDataset(sampleName);  // Load information about a given dataset
+    dm->LoadDataset(sample);  // Load information about a given dataset
     
     G_Event_Weight = dm->GetCrossSection() * G_Event_Lumi / dm->GetEventsInTheSample();
 
@@ -97,11 +88,11 @@ void RunPROOF_WZ(TString  sampleName = "WZTo3LNu",
 
   // Output file name
   //----------------------------------------------------------------------------
-  TString outputDir = "../WZXS8TeV/rootfiles/Summer12_53X";
+  TString outputDir = "../WZXS8TeV/rootfiles/Summer12_53X/" + folder;
 
   gSystem->mkdir(outputDir, kTRUE);
 
-  TString outputFile = outputDir + "/" + sampleName + ".root";
+  TString outputFile = outputDir + "/" + sample + ".root";
   
   gPAFOptions->outputFile = outputFile;
 
@@ -110,7 +101,8 @@ void RunPROOF_WZ(TString  sampleName = "WZTo3LNu",
   //----------------------------------------------------------------------------
   gPAFOptions->inputParameters = new InputParameters();
 
-  gPAFOptions->inputParameters->SetNamedString("sampleName", sampleName.Data());
+  gPAFOptions->inputParameters->SetNamedString("folder",     folder.Data());
+  gPAFOptions->inputParameters->SetNamedString("sample",     sample.Data());
   gPAFOptions->inputParameters->SetNamedDouble("weight",     G_Event_Weight);
   gPAFOptions->inputParameters->SetNamedDouble("luminosity", G_Event_Lumi);
 
