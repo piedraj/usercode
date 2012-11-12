@@ -68,11 +68,6 @@ void AnalysisWZ::InsideLoop()
   theChannel      = -1;
 
 
-  // When reading the ZJets_Madgraph sample, require two leptons
-  //----------------------------------------------------------------------------
-  if (sample == "ZJets_Madgraph" && !IsGenAccepted()) return;
-
-
   // Preselection
   //----------------------------------------------------------------------------
   GetSelectedMuon();
@@ -168,7 +163,7 @@ void AnalysisWZ::InsideLoop()
   Double_t dR1 = WLepton.DeltaR(ZLepton1);
   Double_t dR2 = WLepton.DeltaR(ZLepton2);
       
-  if ((nSelMuon == 2 || nSelElec == 3) && (dR1 < 0.1 || dR2 < 0.1)) return;
+  if ((nSelElec == 1 || nSelElec == 3) && (dR1 < 0.1 || dR2 < 0.1)) return;
 
 
   if (T_METPF_ET <= 30) return;
@@ -187,22 +182,6 @@ void AnalysisWZ::GetParameters()
 
   GetInputParameters()->TheNamedDouble("weight",     fWeight);
   GetInputParameters()->TheNamedDouble("luminosity", luminosity);
-}
-
-
-//------------------------------------------------------------------------------
-// IsGenAccepted
-//------------------------------------------------------------------------------
-Bool_t AnalysisWZ::IsGenAccepted()
-{
-  Bool_t pass = true;
-
-  UInt_t nMuon = T_Gen_MuonSt3_PID->size();
-  UInt_t nElec = T_Gen_ElecSt3_PID->size();
-
-  if (nMuon != 2 && nElec != 2) pass = false;
-  
-  return pass;
 }
 
 
@@ -313,33 +292,6 @@ Double_t AnalysisWZ::SelectedElecPt(UInt_t iElec)
 
 
 //------------------------------------------------------------------------------
-// FillHistogramsAtCut
-//------------------------------------------------------------------------------
-void AnalysisWZ::FillHistogramsAtCut(UInt_t iChannel, UInt_t iCut)
-{
-  hCounter[iChannel][iCut]->Fill(1,                  weight);
-  hNPV    [iChannel][iCut]->Fill(T_Vertex_z->size(), weight);
-  hMET    [iChannel][iCut]->Fill(T_METPF_ET,         weight);
-
-  if (iCut == PreSelection) return;
-
-  Double_t invMass = (ZLepton1 + ZLepton2).M();
-
-  Double_t pt1, pt2;
-
-  if (ZLepton1.Pt() > ZLepton2.Pt())
-    {pt1 = ZLepton1.Pt(); pt2 = ZLepton2.Pt();}
-  else
-    {pt1 = ZLepton2.Pt(); pt2 = ZLepton1.Pt();}
-  
-  hPtZLepton1[iChannel][iCut]->Fill(pt1,          weight);
-  hPtZLepton2[iChannel][iCut]->Fill(pt2,          weight);
-  hPtWLepton [iChannel][iCut]->Fill(WLepton.Pt(), weight);
-  hInvMassZ  [iChannel][iCut]->Fill(invMass,      weight);
-}
-
-
-//------------------------------------------------------------------------------
 // GetSelectedMuon
 //------------------------------------------------------------------------------
 void AnalysisWZ::GetSelectedMuon()
@@ -388,6 +340,33 @@ void AnalysisWZ::GetSelectedElec()
   }
 
   nSelElec = Electrons.size();
+}
+
+
+//------------------------------------------------------------------------------
+// FillHistogramsAtCut
+//------------------------------------------------------------------------------
+void AnalysisWZ::FillHistogramsAtCut(UInt_t iChannel, UInt_t iCut)
+{
+  hCounter[iChannel][iCut]->Fill(1,                  weight);
+  hNPV    [iChannel][iCut]->Fill(T_Vertex_z->size(), weight);
+  hMET    [iChannel][iCut]->Fill(T_METPF_ET,         weight);
+
+  if (iCut == PreSelection) return;
+
+  Double_t invMass = (ZLepton1 + ZLepton2).M();
+
+  Double_t pt1, pt2;
+
+  if (ZLepton1.Pt() > ZLepton2.Pt())
+    {pt1 = ZLepton1.Pt(); pt2 = ZLepton2.Pt();}
+  else
+    {pt1 = ZLepton2.Pt(); pt2 = ZLepton1.Pt();}
+  
+  hPtZLepton1[iChannel][iCut]->Fill(pt1,          weight);
+  hPtZLepton2[iChannel][iCut]->Fill(pt2,          weight);
+  hPtWLepton [iChannel][iCut]->Fill(WLepton.Pt(), weight);
+  hInvMassZ  [iChannel][iCut]->Fill(invMass,      weight);
 }
 
 

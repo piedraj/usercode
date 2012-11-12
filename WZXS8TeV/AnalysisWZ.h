@@ -60,16 +60,15 @@ class AnalysisWZ: public CMSAnalysisSelectorMiniTrees
   // My member functions
   //----------------------------------------------------------------------------
   void     GetParameters      ();
-  Bool_t   IsGenAccepted      ();
 
   Double_t SelectedMuonPt     (UInt_t iMuon);
   Double_t SelectedElecPt     (UInt_t iElec);
+			   
+  void     GetSelectedMuon    ();
+  void     GetSelectedElec    ();
 
   void     FillHistogramsAtCut(UInt_t iChannel,
 			       UInt_t iCut);
-				   
-  void     GetSelectedMuon    ();
-  void     GetSelectedElec    ();
 
 
  public:
