@@ -1,0 +1,46 @@
+################################################################################
+#
+# 1. Get the code
+#
+################################################################################
+
+cvs co -d WWXS8TeV_TopTrees UserCode/piedra/WWXS8TeV_TopTrees
+cvs co -d PAF               UserCode/IGonzalez/ProofAnalysisFramework
+cvs co -d DatasetManager    UserCode/IGonzalez/DatasetManager
+
+mv WWXS8TeV_TopTrees/AnalysisWW.h  PAF/.
+mv WWXS8TeV_TopTrees/AnalysisWW.C  PAF/.
+mv WWXS8TeV_TopTrees/RunPROOF_WW.C PAF/.
+mv WWXS8TeV_TopTrees/runWW.sh      PAF/.
+
+cd PAF/packages
+
+cvs co -d PUWeight UserCode/IFCA-UO/Utils/PUWeight
+
+
+################################################################################
+#
+# 2. Produce the histograms
+#
+################################################################################
+
+cd PAF
+
+source /opt/root/bin/thisroot.sh
+source /nfs/fanae/PoD/PoD_env.sh
+
+./runWW.sh
+
+
+################################################################################
+#
+# 3. Draw the histograms and measure the WW cross section
+#
+################################################################################
+
+cd WWXS8TeV_TopTrees
+
+source /opt/root/bin/thisroot.sh
+
+root -l XS.C
+
