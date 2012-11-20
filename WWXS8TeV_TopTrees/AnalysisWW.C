@@ -45,15 +45,9 @@ void AnalysisWW::Initialise()
 //------------------------------------------------------------------------------
 void AnalysisWW::InsideLoop()
 {
-  efficiency_weight = 1.0;
-  pu_weight         = 1.0;
-  total_weight      = xs_weight;
+  pu_weight = (sample.Contains("Data")) ? 1.0 : fPUWeight->GetWeight((Int_t)T_Event_nTruePU);
 
-  if (!sample.Contains("Data"))
-    pu_weight = fPUWeight->GetWeight((Int_t)T_Event_nTruePU);
-
-  efficiency_weight *= pu_weight;
-  total_weight      *= pu_weight;
+  efficiency_weight = pu_weight;
 
 
   // Reset data members
@@ -164,6 +158,16 @@ void AnalysisWW::InsideLoop()
   else if (channel == EE   && !T_passTriggerDoubleEl) return;
   else if (channel == EMu  && !T_passTriggerElMu)     return;
   else if (channel == MuE  && !T_passTriggerElMu)     return;
+
+
+  // Apply lepton scale factors
+  //----------------------------------------------------------------------------
+  if (!sample.Contains("Data")) {
+    if      (channel == MuMu) efficiency_weight *= SFmumu;
+    else if (channel == EE)   efficiency_weight *= SFee;
+    else if (channel == EMu)  efficiency_weight *= SFmue;
+    else if (channel == MuE)  efficiency_weight *= SFmue;
+  }
 
   FillHistogramsAtCut(channel, TwoLeptons);
 
@@ -453,12 +457,12 @@ Bool_t AnalysisWW::PassesDPhillJet(Double_t ptMin, Double_t etaMax)
 void AnalysisWW::FillHistogramsAtCut(UInt_t iChannel, UInt_t iCut)
 {
   hCounterEff[iChannel][iCut]->Fill(1,                       efficiency_weight);
-  hCounter   [iChannel][iCut]->Fill(1,                       total_weight);
-  hNPV       [iChannel][iCut]->Fill(T_Vertex_z->size(),      total_weight);
-  hMET       [iChannel][iCut]->Fill(T_METPF_ET,              total_weight);
-  hPtLepton1 [iChannel][iCut]->Fill(Lepton1.Pt(),            total_weight);
-  hPtLepton2 [iChannel][iCut]->Fill(Lepton2.Pt(),            total_weight);
-  hMll       [iChannel][iCut]->Fill((Lepton1 + Lepton2).M(), total_weight);
+  hCounter   [iChannel][iCut]->Fill(1,                       efficiency_weight * xs_weight);
+  hNPV       [iChannel][iCut]->Fill(T_Vertex_z->size(),      efficiency_weight * xs_weight);
+  hMET       [iChannel][iCut]->Fill(T_METPF_ET,              efficiency_weight * xs_weight);
+  hPtLepton1 [iChannel][iCut]->Fill(Lepton1.Pt(),            efficiency_weight * xs_weight);
+  hPtLepton2 [iChannel][iCut]->Fill(Lepton2.Pt(),            efficiency_weight * xs_weight);
+  hMll       [iChannel][iCut]->Fill((Lepton1 + Lepton2).M(), efficiency_weight * xs_weight);
 }
 
 

@@ -126,7 +126,7 @@ void XS(Int_t channel = MuMu)
 {
   if (channel < 0 || channel >= nChannels) return; 
 
-  if (channel == MuMu) process[Data] += "DoubleMuon";
+  if (channel == MuMu) process[Data] += "DoubleMu";
   if (channel == EE)   process[Data] += "DoubleElectron";
   if (channel == EMu)  process[Data] += "MuEG";
   if (channel == MuE)  process[Data] += "MuEG";
@@ -174,13 +174,13 @@ void XS(Int_t channel = MuMu)
   //----------------------------------------------------------------------------
   MeasureTheCrossSection(sChannel[channel]);
 
-  //  TString suffix = "_" + sChannel[channel] + "_" + sCut[WWLevel];
-  //  
-  //  DrawHistogram("hNPV"       + suffix, "number of primary vertices", -1, 0, "NULL", 0, 30, false);
-  //  DrawHistogram("hMET"       + suffix, "E_{T}^{miss}",                5, 0, "GeV");
-  //  DrawHistogram("hPtLepton1" + suffix, "p_{T}^{leading lepton}",      5, 0, "GeV");
-  //  DrawHistogram("hPtLepton2" + suffix, "p_{T}^{trailing lepton}",     5, 0, "GeV",  0, 100);
-  //  DrawHistogram("hMll"       + suffix, "m_{#font[12]{ll}}",           5, 0, "GeV");
+  TString suffix = "_" + sChannel[channel] + "_" + sCut[WWLevel];
+    
+  DrawHistogram("hNPV"       + suffix, "number of primary vertices", -1, 0, "NULL", 0, 30, false);
+  DrawHistogram("hMET"       + suffix, "E_{T}^{miss}",                5, 0, "GeV");
+  DrawHistogram("hPtLepton1" + suffix, "p_{T}^{leading lepton}",      5, 0, "GeV");
+  DrawHistogram("hPtLepton2" + suffix, "p_{T}^{trailing lepton}",     5, 0, "GeV",  0, 100);
+  DrawHistogram("hMll"       + suffix, "m_{#font[12]{ll}}",           5, 0, "GeV");
 }
 
 

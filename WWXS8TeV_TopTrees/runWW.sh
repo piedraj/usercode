@@ -16,5 +16,4 @@
  root -l -b -q RunPROOF_WW.C\(\"Data_DoubleElectron\"\)
  root -l -b -q RunPROOF_WW.C\(\"Data_DoubleMu\"\)
  root -l -b -q RunPROOF_WW.C\(\"Data_MuEG\"\)
-#root -l -b -q RunPROOF_WW.C\(\"Fakes\"\)
 

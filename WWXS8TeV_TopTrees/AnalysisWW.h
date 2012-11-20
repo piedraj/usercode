@@ -14,6 +14,23 @@
 #include <vector>
 
 
+// Lepton scale factors
+//------------------------------------------------------------------------------
+// 30-10-2012
+const Double_t SF_trigger_mumu = 0.965;  // +- 0.0102;
+const Double_t SF_trigger_ee   = 0.962;  // +- 0.0130;
+const Double_t SF_trigger_mue  = 0.943;  // +- 0.0120;
+
+// 02-11-2012
+const Double_t SF_IDISO_mumu = 0.997; // +- 0.0009;
+const Double_t SF_IDISO_ee   = 0.975; // +- 0.0006;
+const Double_t SF_IDISO_mue  = 0.986; // +- 0.0007;
+
+const Double_t SFmumu = SF_trigger_mumu * SF_IDISO_mumu;
+const Double_t SFee   = SF_trigger_ee   * SF_IDISO_ee;
+const Double_t SFmue  = SF_trigger_mue  * SF_IDISO_mue;
+
+
 const Double_t Z_MASS = 91.1876;  // GeV
 
 const UInt_t nChannels = 4;
@@ -97,7 +114,6 @@ class AnalysisWW: public CMSAnalysisSelectorMiniTrees
   TString                     fileSuffix;
   Double_t                    efficiency_weight;
   Double_t                    pu_weight;
-  Double_t                    total_weight;
   Double_t                    xs_weight;
   Double_t                    luminosity;
   PUWeight*                   fPUWeight;
