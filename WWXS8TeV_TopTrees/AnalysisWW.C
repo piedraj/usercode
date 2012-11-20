@@ -183,18 +183,18 @@ void AnalysisWW::InsideLoop()
   Double_t ptll   = (Lepton1 + Lepton2).Pt();
 
   Bool_t sameflav = (channel == MuMu || channel == EE);
-  Bool_t zveto    = (fabs(mll - Z_MASS) > 15 && sameflav);
+  Bool_t zveto    = (fabs(mll - Z_MASS) > 15 || !sameflav);
 
   if (mll > 12) {
 
     if (zveto) {
 
       if (metvar > (20 + 25*sameflav)) {
-  
+
 	if (njet == 0) {
 
 	  if (dphiv || !sameflav) {
-	    
+
 	    if (ptll > 45) {
 
 	      if (nbjettche == 0) {
