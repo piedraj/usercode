@@ -203,11 +203,12 @@ void XS(Int_t channel = MMM, Bool_t readWH = false)
 //------------------------------------------------------------------------------
 void MeasureTheCrossSection(TString channel = "MMM")
 {
-  Double_t nWZ         = 0;
   Double_t ndata       = 0;
   Double_t nsignal     = 0;
   Double_t nbackground = 0;
   Double_t nTTbar      = 0;
+
+  Double_t nWZ = ((TH1F*)input[WZTo3LNu]->Get("hCounterEff_" + channel + "_WCandidate"))->Integral();
 
   TString hname = "hCounter_" + channel + "_WCandidate";
 
@@ -217,11 +218,11 @@ void MeasureTheCrossSection(TString channel = "MMM")
 
     TH1F* dummy = (TH1F*)input[j]->Get(hname);
 
-    if (j == Data)
+    if (j == Data) {
       ndata = dummy->Integral();
+    }
     else if (j == WZTo3LNu) {
       nsignal = dummy->Integral();
-      nWZ     = dummy->GetEntries();
     }
     else {
       nbackground += dummy->Integral();

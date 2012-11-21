@@ -28,9 +28,10 @@ void AnalysisWZ::Initialise()
 
       TString suffix = "_" + sChannel[i] + "_" + sCut[j];
 
-      hCounter[i][j] = CreateH1F(TString("hCounter" + suffix), "",   3, 0,   3);
-      hNPV    [i][j] = CreateH1F(TString("hNPV"     + suffix), "",  60, 0,  60);
-      hMET    [i][j] = CreateH1F(TString("hMET"     + suffix), "", 200, 0, 200);
+      hCounterEff[i][j] = CreateH1F(TString("hCounterEff" + suffix), "",   3, 0,   3);
+      hCounter   [i][j] = CreateH1F(TString("hCounter"    + suffix), "",   3, 0,   3);
+      hNPV       [i][j] = CreateH1F(TString("hNPV"        + suffix), "",  60, 0,  60);
+      hMET       [i][j] = CreateH1F(TString("hMET"        + suffix), "", 200, 0, 200);
 
       if (j == PreSelection) continue;
 
@@ -48,10 +49,9 @@ void AnalysisWZ::Initialise()
 //------------------------------------------------------------------------------
 void AnalysisWZ::InsideLoop()
 {
-  weight = fWeight;
+  pu_weight = (sample.Contains("Data")) ? 1.0 : fPUWeight->GetWeight((Int_t)T_Event_nTruePU);
 
-  if (!sample.Contains("Data"))
-    weight *= fPUWeight->GetWeight((Int_t)T_Event_nTruePU);
+  efficiency_weight = pu_weight;
 
 
   // Reset data members
@@ -70,18 +70,30 @@ void AnalysisWZ::InsideLoop()
 
   // Preselection
   //----------------------------------------------------------------------------
-  GetSelectedMuon();
-  GetSelectedElec();
+  GetSelectedMuons    (10);
+  GetSelectedElectrons(10);
 
   if ((nSelMuon + nSelElec) != 3) return;
-
-  if (nSelMuon >= 2 && !T_passTriggerDoubleMu && sample.Contains("Data")) return;
-  if (nSelElec >= 2 && !T_passTriggerDoubleEl && sample.Contains("Data")) return;
 
   if      (nSelMuon == 3) theChannel = MMM;
   else if (nSelElec == 3) theChannel = EEE;
   else if (nSelMuon == 2) theChannel = MME;
   else if (nSelElec == 2) theChannel = EEM;
+
+
+  // Trigger
+  //----------------------------------------------------------------------------
+  if (nSelMuon >= 2 && !T_passTriggerDoubleMu) return;
+  if (nSelElec >= 2 && !T_passTriggerDoubleEl) return;
+
+
+  // Apply lepton scale factors
+  //----------------------------------------------------------------------------
+  if (!sample.Contains("Data")) {
+    if (nSelMuon >= 2) efficiency_weight *= SFmumu;
+    if (nSelElec >= 2) efficiency_weight *= SFee;
+  }
+
 
   Int_t numberOfHighPtLeptons = 0;
 
@@ -180,7 +192,7 @@ void AnalysisWZ::GetParameters()
   folder = GetInputParameters()->TheNamedString("folder");
   sample = GetInputParameters()->TheNamedString("sample");
 
-  GetInputParameters()->TheNamedDouble("weight",     fWeight);
+  GetInputParameters()->TheNamedDouble("xs_weight",  xs_weight);
   GetInputParameters()->TheNamedDouble("luminosity", luminosity);
 }
 
@@ -228,9 +240,9 @@ Double_t AnalysisWZ::SelectedMuonPt(UInt_t iMuon)
 
 
 //------------------------------------------------------------------------------
-// SelectedElecPt
+// SelectedElectronPt
 //------------------------------------------------------------------------------
-Double_t AnalysisWZ::SelectedElecPt(UInt_t iElec)
+Double_t AnalysisWZ::SelectedElectronPt(UInt_t iElec)
 {
   Double_t electronPt = -999;
 
@@ -269,7 +281,7 @@ Double_t AnalysisWZ::SelectedElecPt(UInt_t iElec)
 		 T_Elec_Py->at(iElec),
 		 T_Elec_Pz->at(iElec)); 
   
-  for (UInt_t j=0; j<T_Muon_Energy->size(); j++) {
+  for (UInt_t j=0; j<T_Muon_Px->size(); j++) {
     
     if (T_Muon_IsGlobalMuon->at(j)) { 
 	  
@@ -292,15 +304,15 @@ Double_t AnalysisWZ::SelectedElecPt(UInt_t iElec)
 
 
 //------------------------------------------------------------------------------
-// GetSelectedMuon
+// GetSelectedMuons
 //------------------------------------------------------------------------------
-void AnalysisWZ::GetSelectedMuon()
+void AnalysisWZ::GetSelectedMuons(Double_t ptMin)
 {
-  UInt_t muonSize = T_Muon_Energy->size();
+  UInt_t muonSize = T_Muon_Px->size();
 
   for (UInt_t i=0; i<muonSize; i++) {
 
-    if (SelectedMuonPt(i) > 10) {
+    if (SelectedMuonPt(i) > ptMin) {
 
       Muons_Charge.push_back(T_Muon_Charge->at(i));
 
@@ -318,15 +330,15 @@ void AnalysisWZ::GetSelectedMuon()
 
 
 //------------------------------------------------------------------------------
-// GetSelectedElec
+// GetSelectedElectrons
 //------------------------------------------------------------------------------
-void AnalysisWZ::GetSelectedElec()
+void AnalysisWZ::GetSelectedElectrons(Double_t ptMin)
 {
-  UInt_t elecSize = T_Elec_Energy->size();
+  UInt_t elecSize = T_Elec_Px->size();
   
   for (UInt_t i=0; i<elecSize; i++) {
 
-    if (SelectedElecPt(i) > 10) {
+    if (SelectedElectronPt(i) > ptMin) {
 	
       Electrons_Charge.push_back(T_Elec_Charge->at(i));
 	
@@ -348,9 +360,10 @@ void AnalysisWZ::GetSelectedElec()
 //------------------------------------------------------------------------------
 void AnalysisWZ::FillHistogramsAtCut(UInt_t iChannel, UInt_t iCut)
 {
-  hCounter[iChannel][iCut]->Fill(1,                  weight);
-  hNPV    [iChannel][iCut]->Fill(T_Vertex_z->size(), weight);
-  hMET    [iChannel][iCut]->Fill(T_METPF_ET,         weight);
+  hCounterEff[iChannel][iCut]->Fill(1,                  efficiency_weight);
+  hCounter   [iChannel][iCut]->Fill(1,                  efficiency_weight * xs_weight);
+  hNPV       [iChannel][iCut]->Fill(T_Vertex_z->size(), efficiency_weight * xs_weight);
+  hMET       [iChannel][iCut]->Fill(T_METPF_ET,         efficiency_weight * xs_weight);
 
   if (iCut == PreSelection) return;
 
@@ -363,10 +376,10 @@ void AnalysisWZ::FillHistogramsAtCut(UInt_t iChannel, UInt_t iCut)
   else
     {pt1 = ZLepton2.Pt(); pt2 = ZLepton1.Pt();}
   
-  hPtZLepton1[iChannel][iCut]->Fill(pt1,          weight);
-  hPtZLepton2[iChannel][iCut]->Fill(pt2,          weight);
-  hPtWLepton [iChannel][iCut]->Fill(WLepton.Pt(), weight);
-  hInvMassZ  [iChannel][iCut]->Fill(invMass,      weight);
+  hPtZLepton1[iChannel][iCut]->Fill(pt1,          efficiency_weight * xs_weight);
+  hPtZLepton2[iChannel][iCut]->Fill(pt2,          efficiency_weight * xs_weight);
+  hPtWLepton [iChannel][iCut]->Fill(WLepton.Pt(), efficiency_weight * xs_weight);
+  hInvMassZ  [iChannel][iCut]->Fill(invMass,      efficiency_weight * xs_weight);
 }
 
 

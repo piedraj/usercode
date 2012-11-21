@@ -51,14 +51,24 @@ void RunPROOF_WZ(TString  sample   = "WZTo3LNu",
   TString dataPath = "/hadoop";
 
   if (sample.Contains("Data_DoubleElectron")) {
-    gPAFOptions->dataFiles.push_back(dataPath + "/MC_Summer12_53X/" + folder + "/Tree_DoubleElectronA_892_*.root");
-    gPAFOptions->dataFiles.push_back(dataPath + "/MC_Summer12_53X/" + folder + "/Tree_DoubleElectronB_4404_*.root");
-    gPAFOptions->dataFiles.push_back(dataPath + "/MC_Summer12_53X/" + folder + "/Tree_DoubleElectronC_6807_*.root");
+    gPAFOptions->dataFiles.push_back(dataPath + "/MC_Summer12_53X/" + folder + "/Tree_DoubleElectronA_892_0.root");
+    gPAFOptions->dataFiles.push_back(dataPath + "/MC_Summer12_53X/" + folder + "/Tree_DoubleElectronB_4404_0.root");
+    gPAFOptions->dataFiles.push_back(dataPath + "/MC_Summer12_53X/" + folder + "/Tree_DoubleElectronB_4404_1.root");
+    gPAFOptions->dataFiles.push_back(dataPath + "/MC_Summer12_53X/" + folder + "/Tree_DoubleElectronC_6807_0.root");
+    gPAFOptions->dataFiles.push_back(dataPath + "/MC_Summer12_53X/" + folder + "/Tree_DoubleElectronC_6807_1.root");
+    gPAFOptions->dataFiles.push_back(dataPath + "/MC_Summer12_53X/" + folder + "/Tree_DoubleElectronC_6807_2.root");
   }
   else if (sample.Contains("Data_DoubleMu")) {
-    gPAFOptions->dataFiles.push_back(dataPath + "/MC_Summer12_53X/" + folder + "/Tree_DoubleMuA_892_*.root");
-    gPAFOptions->dataFiles.push_back(dataPath + "/MC_Summer12_53X/" + folder + "/Tree_DoubleMuB_4404_*.root");
-    gPAFOptions->dataFiles.push_back(dataPath + "/MC_Summer12_53X/" + folder + "/Tree_DoubleMuC_6807_*.root");
+    gPAFOptions->dataFiles.push_back(dataPath + "/MC_Summer12_53X/" + folder + "/Tree_DoubleMuA_892_0.root");
+    gPAFOptions->dataFiles.push_back(dataPath + "/MC_Summer12_53X/" + folder + "/Tree_DoubleMuB_4404_0.root");
+    gPAFOptions->dataFiles.push_back(dataPath + "/MC_Summer12_53X/" + folder + "/Tree_DoubleMuB_4404_1.root");
+    gPAFOptions->dataFiles.push_back(dataPath + "/MC_Summer12_53X/" + folder + "/Tree_DoubleMuB_4404_2.root");
+    gPAFOptions->dataFiles.push_back(dataPath + "/MC_Summer12_53X/" + folder + "/Tree_DoubleMuB_4404_3.root");
+    gPAFOptions->dataFiles.push_back(dataPath + "/MC_Summer12_53X/" + folder + "/Tree_DoubleMuC_6807_0.root");
+    gPAFOptions->dataFiles.push_back(dataPath + "/MC_Summer12_53X/" + folder + "/Tree_DoubleMuC_6807_1.root");
+    gPAFOptions->dataFiles.push_back(dataPath + "/MC_Summer12_53X/" + folder + "/Tree_DoubleMuC_6807_2.root");
+    gPAFOptions->dataFiles.push_back(dataPath + "/MC_Summer12_53X/" + folder + "/Tree_DoubleMuC_6807_3.root");
+    gPAFOptions->dataFiles.push_back(dataPath + "/MC_Summer12_53X/" + folder + "/Tree_DoubleMuC_6807_4.root");
   }
   else {
 
@@ -103,7 +113,7 @@ void RunPROOF_WZ(TString  sample   = "WZTo3LNu",
 
   gPAFOptions->inputParameters->SetNamedString("folder",     folder.Data());
   gPAFOptions->inputParameters->SetNamedString("sample",     sample.Data());
-  gPAFOptions->inputParameters->SetNamedDouble("weight",     G_Event_Weight);
+  gPAFOptions->inputParameters->SetNamedDouble("xs_weight",  G_Event_Weight);
   gPAFOptions->inputParameters->SetNamedDouble("luminosity", G_Event_Lumi);
 
 
