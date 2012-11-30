@@ -90,8 +90,10 @@ void AnalysisWZ::InsideLoop()
   // Apply lepton scale factors
   //----------------------------------------------------------------------------
   if (!sample.Contains("Data")) {
-    if (nSelMuon >= 2) efficiency_weight *= SFmumu;
-    if (nSelElec >= 2) efficiency_weight *= SFee;
+    if      (theChannel == MMM) efficiency_weight *= (SF_Trigger_MM * SF_Global_MMM);
+    else if (theChannel == EEE) efficiency_weight *= (SF_Trigger_EE * SF_Global_EEE);
+    else if (theChannel == MME) efficiency_weight *= (SF_Trigger_MM * SF_Global_MME);
+    else if (theChannel == EEM) efficiency_weight *= (SF_Trigger_EE * SF_Global_EEM);
   }
 
 
@@ -172,10 +174,8 @@ void AnalysisWZ::InsideLoop()
 
   if (WLepton.Pt() <= 20) return;
   
-  Double_t dR1 = WLepton.DeltaR(ZLepton1);
-  Double_t dR2 = WLepton.DeltaR(ZLepton2);
-      
-  if ((nSelElec == 1 || nSelElec == 3) && (dR1 < 0.1 || dR2 < 0.1)) return;
+  if (WLepton.DeltaR(ZLepton1) < 0.1) return;
+  if (WLepton.DeltaR(ZLepton2) < 0.1) return;
 
 
   if (T_METPF_ET <= 30) return;

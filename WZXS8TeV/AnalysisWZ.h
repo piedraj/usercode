@@ -16,19 +16,19 @@
 
 // Lepton scale factors
 //------------------------------------------------------------------------------
-// 30-10-2012
-const Double_t SF_trigger_mumu = 0.965;  // +- 0.0102;
-const Double_t SF_trigger_ee   = 0.962;  // +- 0.0130;
-const Double_t SF_trigger_mue  = 0.943;  // +- 0.0120;
+// From Javier Brochero, 30-10-2012
+const Double_t SF_Trigger_MM = 0.965;  // +- 0.0102;
+const Double_t SF_Trigger_EE = 0.962;  // +- 0.0130;
+const Double_t SF_Trigger_ME = 0.943;  // +- 0.0120;
 
-// 02-11-2012
-const Double_t SF_IDISO_mumu = 0.997;  // +- 0.0009;
-const Double_t SF_IDISO_ee   = 0.975;  // +- 0.0006;
-const Double_t SF_IDISO_mue  = 0.986;  // +- 0.0007;
+// From Carmen Diez, 02-11-2012
+const Double_t SF_Global_M = 0.9985;  // +- 0.0006;
+const Double_t SF_Global_E = 0.9850;  // +- 0.0003;
 
-const Double_t SFmumu = SF_trigger_mumu * SF_IDISO_mumu;
-const Double_t SFee   = SF_trigger_ee   * SF_IDISO_ee;
-const Double_t SFmue  = SF_trigger_mue  * SF_IDISO_mue;
+const Double_t SF_Global_MMM = SF_Global_M * SF_Global_M * SF_Global_M;
+const Double_t SF_Global_EEE = SF_Global_E * SF_Global_E * SF_Global_E;
+const Double_t SF_Global_MME = SF_Global_M * SF_Global_M * SF_Global_E;
+const Double_t SF_Global_EEM = SF_Global_E * SF_Global_E * SF_Global_M;
 
 
 const Double_t Z_MASS = 91.1876;  // GeV
