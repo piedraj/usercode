@@ -19,6 +19,18 @@ void AnalysisWZ::Initialise()
   fPUWeight = new PUWeight(luminosity, Summer12_53X, "2012"); 
 
 
+  // Counters
+  //----------------------------------------------------------------------------
+  for (UInt_t i=0; i<nChannels; i++) {
+    for (UInt_t j=0; j<nCounters; j++) {
+
+      TString cname = Form("counter%d%d", i, j);
+
+      counter[i][j] = InitCounterUI(cname, cname, 0);
+    }
+  }
+
+
   // Histograms
   //----------------------------------------------------------------------------
   TH1::SetDefaultSumw2();
@@ -49,7 +61,18 @@ void AnalysisWZ::Initialise()
 //------------------------------------------------------------------------------
 void AnalysisWZ::InsideLoop()
 {
-  pu_weight = (sample.Contains("Data")) ? 1.0 : fPUWeight->GetWeight((Int_t)T_Event_nTruePU);
+  UInt_t cutCounter = 0;
+
+  (*counter[MMM][cutCounter])++;
+  (*counter[EEE][cutCounter])++;
+  (*counter[MME][cutCounter])++;
+  (*counter[EEM][cutCounter])++;
+
+  cutCounter++;
+
+  isData = (sample.Contains("DoubleElectron") || sample.Contains("DoubleMu")) ? 1 : 0;
+
+  pu_weight = (isData) ? 1.0 : fPUWeight->GetWeight((Int_t)T_Event_nTruePU);
 
   efficiency_weight = pu_weight;
 
@@ -70,8 +93,8 @@ void AnalysisWZ::InsideLoop()
 
   // Preselection
   //----------------------------------------------------------------------------
-  GetSelectedMuons    (10);
-  GetSelectedElectrons(10);
+  GetSelectedMuons    (10, 2.4);
+  GetSelectedElectrons(10, 2.5);
 
   if ((nSelMuon + nSelElec) != 3) return;
 
@@ -80,21 +103,27 @@ void AnalysisWZ::InsideLoop()
   else if (nSelMuon == 2) theChannel = MME;
   else if (nSelElec == 2) theChannel = EEM;
 
+  (*counter[theChannel][cutCounter++])++;
+
 
   // Trigger
   //----------------------------------------------------------------------------
-  if (nSelMuon >= 2 && !T_passTriggerDoubleMu) return;
-  if (nSelElec >= 2 && !T_passTriggerDoubleEl) return;
+  if (isData) {
+    if (nSelMuon >= 2 && !T_passTriggerDoubleMu) return;
+    if (nSelElec >= 2 && !T_passTriggerDoubleEl) return;
+  }
+
+  (*counter[theChannel][cutCounter++])++;
 
 
   // Apply lepton scale factors
   //----------------------------------------------------------------------------
-  if (!sample.Contains("Data")) {
-    if      (theChannel == MMM) efficiency_weight *= (SF_Trigger_MM * SF_Global_MMM);
-    else if (theChannel == EEE) efficiency_weight *= (SF_Trigger_EE * SF_Global_EEE);
-    else if (theChannel == MME) efficiency_weight *= (SF_Trigger_MM * SF_Global_MME);
-    else if (theChannel == EEM) efficiency_weight *= (SF_Trigger_EE * SF_Global_EEM);
-  }
+  //  if (!isData) {
+  //    if      (theChannel == MMM) efficiency_weight *= (SF_Trigger_MM * SF_Global_MMM);
+  //    else if (theChannel == EEE) efficiency_weight *= (SF_Trigger_EE * SF_Global_EEE);
+  //    else if (theChannel == MME) efficiency_weight *= (SF_Trigger_MM * SF_Global_MME);
+  //    else if (theChannel == EEM) efficiency_weight *= (SF_Trigger_EE * SF_Global_EEM);
+  //  }
 
 
   Int_t numberOfHighPtLeptons = 0;
@@ -107,6 +136,8 @@ void AnalysisWZ::InsideLoop()
   }
 
   if (numberOfHighPtLeptons < 2) return;
+
+  (*counter[theChannel][cutCounter++])++;
 
   FillHistogramsAtCut(theChannel, PreSelection);
 
@@ -164,6 +195,8 @@ void AnalysisWZ::InsideLoop()
 
   if (dileptonInvMass < 71) return;
 
+  (*counter[theChannel][cutCounter++])++;
+
   FillHistogramsAtCut(theChannel, ZCandidate);
 
 
@@ -173,14 +206,109 @@ void AnalysisWZ::InsideLoop()
   else if (nSelMuon == 2) WLepton = Electrons[0];
 
   if (WLepton.Pt() <= 20) return;
-  
+
+  (*counter[theChannel][cutCounter++])++;
+
+
   if (WLepton.DeltaR(ZLepton1) < 0.1) return;
   if (WLepton.DeltaR(ZLepton2) < 0.1) return;
 
+  (*counter[theChannel][cutCounter++])++;
 
-  if (T_METPF_ET <= 30) return;
+
+  if (T_METPFTypeI_ET <= 30) return;
+
+  (*counter[theChannel][cutCounter++])++;
 
   FillHistogramsAtCut(theChannel, WCandidate);
+}
+
+
+//------------------------------------------------------------------------------
+// SetDataMembersAtTermination
+//------------------------------------------------------------------------------
+void AnalysisWZ::SetDataMembersAtTermination()
+{
+  for (UInt_t i=0; i<nChannels; i++) {
+    for (UInt_t j=0; j<nCounters; j++) {
+      counter[i][j] = (TCounterUI*)FindOutput(Form("counter%d%d", i, j));
+    }
+  }
+}
+
+
+//------------------------------------------------------------------------------
+// Summary
+//------------------------------------------------------------------------------
+void AnalysisWZ::Summary()
+{
+  GetParameters();
+
+  TString cutName[nCounters] =
+    {
+      "all input events",
+      "three tight leptons with pt > 10 GeV",
+      "trigger",
+      "pt1, pt2 > 20 GeV",
+      "71 < mZ < 111 GeV",
+      "W lepton pt > 20 GeV",
+      "DeltaR(W lepton, Z leptons) > 0.1",
+      "MET > 30 GeV"
+    };
+
+  ofstream outputfile;
+
+  outputfile.open(Form("%s/%s.txt", directory.Data(), sample.Data()));
+
+  outputfile << Form("\n %57s results with %7.1f pb\n", sample.Data(), luminosity);
+
+  outputfile << Form("\n %36s  %10s %10s %10s %10s\n",
+		     " ",
+		     sChannel[0].Data(),
+		     sChannel[1].Data(),
+		     sChannel[2].Data(),
+		     sChannel[3].Data());
+
+  for (UInt_t i=0; i<nCounters; i++) {
+    
+    outputfile << Form(" %36s:", cutName[i].Data());
+
+    for (UInt_t j=0; j<nChannels; j++)
+      outputfile << Form(" %10d", counter[j][i]->GetValue());
+
+    outputfile << "\n";
+  }
+
+  outputfile << "\n";
+
+
+  // MC only
+  //----------------------------------------------------------------------------
+  if (!isData) {
+
+    outputfile << Form(" %71s: %.6f\n", "xs * luminosity / nevents", xs_weight);
+
+    outputfile << Form("\n %36s  %10s %10s %10s %10s\n",
+		       " ",
+		       sChannel[0].Data(),
+		       sChannel[1].Data(),
+		       sChannel[2].Data(),
+		       sChannel[3].Data());
+
+    for (UInt_t i=0; i<nCounters; i++) {
+      
+      outputfile << Form(" %36s:", cutName[i].Data());
+
+      for (UInt_t j=0; j<nChannels; j++)
+	outputfile << Form(" %10.0f", counter[j][i]->GetValue() * xs_weight);
+      
+      outputfile << "\n";
+    }
+
+    outputfile << "\n";
+  }
+
+  outputfile.close();
 }
 
 
@@ -189,8 +317,8 @@ void AnalysisWZ::InsideLoop()
 //------------------------------------------------------------------------------
 void AnalysisWZ::GetParameters()
 {
-  folder = GetInputParameters()->TheNamedString("folder");
-  sample = GetInputParameters()->TheNamedString("sample");
+  directory = GetInputParameters()->TheNamedString("directory");
+  sample    = GetInputParameters()->TheNamedString("sample");
 
   GetInputParameters()->TheNamedDouble("xs_weight",  xs_weight);
   GetInputParameters()->TheNamedDouble("luminosity", luminosity);
@@ -198,44 +326,153 @@ void AnalysisWZ::GetParameters()
 
 
 //------------------------------------------------------------------------------
-// SelectedMuonPt
+// ElectronBDT
 //------------------------------------------------------------------------------
-Double_t AnalysisWZ::SelectedMuonPt(UInt_t iMuon)
+Bool_t AnalysisWZ::ElectronBDT(UInt_t iElec)
 {
-  Double_t muonPt = -999;
+  Double_t eta = fabs(T_Elec_SC_Eta->at(iElec));
+	
+  Double_t mvaCut = 999;
 
-  Bool_t pass = (fabs(T_Muon_vz->at(iMuon) - T_Vertex_z->at(0)) < 0.5);
+  if (T_Elec_Pt->at(iElec) < 20)
+    {
+      if      (eta <= 0.8)                {mvaCut = 0.00;}
+      else if (eta > 0.8 && eta <= 1.479) {mvaCut = 0.10;}
+      else if (eta > 1.479)               {mvaCut = 0.62;}
+    }
+  else
+    {
+      if      (eta <= 0.8)                 {mvaCut = 0.94;}
+      else if (eta > 0.8 && eta <= 1.479 ) {mvaCut = 0.85;}
+      else if (eta > 1.479 )               {mvaCut = 0.92;}
+    }
 
-  TLorentzVector Muon(T_Muon_Px    ->at(iMuon),
-		      T_Muon_Py    ->at(iMuon),
-		      T_Muon_Pz    ->at(iMuon),
-		      T_Muon_Energy->at(iMuon));
+  return (T_Elec_MVA->at(iElec) > mvaCut);
+}
 
-  Double_t neutralIso = 0.0;
 
-  neutralIso += T_Muon_neutralHadronIsoR04->at(iMuon);
-  neutralIso += T_Muon_photonIsoR04->at(iMuon);
-  neutralIso -= (0.5 * T_Muon_sumPUPtR04->at(iMuon));
+//------------------------------------------------------------------------------
+// ElectronID
+//------------------------------------------------------------------------------
+Bool_t AnalysisWZ::ElectronID(UInt_t iElec)
+{
+  Double_t sigmaietaieta = T_Elec_sigmaIetaIeta->at(iElec);
+  Double_t deltaPhiIn    = T_Elec_deltaPhiIn   ->at(iElec);
+  Double_t deltaEtaIn    = T_Elec_deltaEtaIn   ->at(iElec);
+  Double_t HtoE          = T_Elec_HtoE         ->at(iElec);
+  Double_t pt            = T_Elec_Pt           ->at(iElec);
+  Double_t trkIso03      = T_Elec_dr03TkSumPt  ->at(iElec);
+  Double_t hadIso03      = T_Elec_dr03HcalSumEt->at(iElec);
+  Double_t emIso03       = T_Elec_dr03EcalSumEt->at(iElec);
+  Double_t max_emIso03   = std::max(emIso03-1.0, 0.0);
 
-  Double_t relIso = (T_Muon_chargedHadronIsoR04->at(iMuon) + neutralIso) / Muon.Pt();
+  Bool_t pass = false;
+	
+  if (fabs(T_Elec_SC_Eta->at(iElec)) < 1.479)
+    {
+      pass = sigmaietaieta < 0.01
+	&& fabs(deltaPhiIn)  < 0.15
+	&& fabs(deltaEtaIn)  < 0.007
+	&& HtoE              < 0.12
+	// Isolation
+	&& trkIso03    / pt  < 0.2
+	&& max_emIso03 / pt  < 0.2
+	&& hadIso03    / pt  < 0.2;
+    }
+  else
+    {
+      pass = sigmaietaieta < 0.03
+	&& fabs(deltaPhiIn)  < 0.1
+	&& fabs(deltaEtaIn)  < 0.009
+	&& HtoE              < 0.1
+	// Isolation
+	&& trkIso03 / pt     < 0.2
+	&& emIso03  / pt     < 0.2
+	&& hadIso03 / pt     < 0.2;
+    }
 
-  pass &= (relIso < 0.2);
+  pass &= T_Elec_passConversionVeto->at(iElec);
 
-  pass &= (T_Muon_IsAllTrackerMuons->at(iMuon));
-  pass &= (T_Muon_IsGMPTMuons      ->at(iMuon)); 
-  pass &= (T_Muon_IsGlobalMuon     ->at(iMuon));
+  pass &= (T_Elec_nHits->at(iElec) <= 0);
 
-  pass &= (T_Muon_NormChi2GTrk   ->at(iMuon) < 10);
-  pass &= (T_Muon_NValidHitsInTrk->at(iMuon) > 10);
-  pass &= (T_Muon_NValidHitsSATrk->at(iMuon) >  0);
+  return pass;
+}
 
-  pass &= (fabs(T_Muon_IPAbsGTrack->at(iMuon)) < 0.02);
 
-  pass &= (fabs(Muon.Eta()) < 2.4);
+//------------------------------------------------------------------------------
+// ElectronCloseToPV
+//------------------------------------------------------------------------------
+Bool_t AnalysisWZ::ElectronCloseToPV(UInt_t iElec) 
+{
+  Bool_t pass = true;
 
-  if (pass) muonPt = Muon.Pt();
+  pass &= (fabs(T_Elec_dzPVBiasedPV->at(iElec)) <= 0.10);
+  pass &= (fabs(T_Elec_IP2DBiasedPV->at(iElec)) <= 0.02);
 
-  return muonPt;
+  return pass;
+}
+
+
+//------------------------------------------------------------------------------
+// ElectronIsolation
+//------------------------------------------------------------------------------
+Bool_t AnalysisWZ::ElectronIsolation(UInt_t iElec) 
+{
+  return (T_Elec_pfComb->at(iElec) < 0.15);
+}
+
+
+//------------------------------------------------------------------------------
+// MuonID
+//------------------------------------------------------------------------------
+Bool_t AnalysisWZ::MuonID(UInt_t iMuon)
+{
+  Double_t ptResolution = T_Muon_deltaPt->at(iMuon) / T_Muon_Pt->at(iMuon);
+
+  Bool_t passcutsforGlb = T_Muon_IsGlobalMuon->at(iMuon);
+
+  passcutsforGlb &= (T_Muon_NormChi2GTrk->at(iMuon) < 10);
+  passcutsforGlb &= (T_Muon_NumOfMatches->at(iMuon) >  1);
+	
+  Bool_t passcutsforSA = T_Muon_IsAllTrackerMuons->at(iMuon);
+
+  passcutsforSA &= T_Muon_IsTMLastStationTight->at(iMuon);
+
+  Bool_t pass = (passcutsforGlb || passcutsforSA);
+	
+  pass &= (fabs(ptResolution) < 0.1);
+	
+  pass &= T_Muon_isPFMuon->at(iMuon);
+
+  pass &= (T_Muon_NLayers->at(iMuon) > 5);
+
+  return pass;
+}
+
+
+//------------------------------------------------------------------------------
+// MuonCloseToPV
+//------------------------------------------------------------------------------
+Bool_t AnalysisWZ::MuonCloseToPV(UInt_t iMuon)
+{
+  Bool_t pass = (fabs(T_Muon_dzPVBiasedPV->at(iMuon)) <= 0.1);
+
+  Double_t MaxMuIP = (T_Muon_Pt->at(iMuon) < 20) ? 0.01 : 0.02;
+
+  pass &= (fabs(T_Muon_IP2DBiasedPV->at(iMuon)) <= MaxMuIP);
+
+  return pass;
+}
+
+
+//------------------------------------------------------------------------------
+// MuonIsolation
+//------------------------------------------------------------------------------
+Bool_t AnalysisWZ::MuonIsolation(UInt_t iMuon) 
+{
+  Double_t isoCut = (fabs(T_Muon_Eta->at(iMuon)) < 1.479) ? 0.82 : 0.86;
+		
+  return (T_Muon_MVARings->at(iMuon) >= isoCut);
 }
 
 
@@ -244,114 +481,83 @@ Double_t AnalysisWZ::SelectedMuonPt(UInt_t iMuon)
 //------------------------------------------------------------------------------
 Double_t AnalysisWZ::SelectedElectronPt(UInt_t iElec)
 {
-  Double_t electronPt = -999;
+  Bool_t pass = true;
 
-  Bool_t pass = (fabs(T_Elec_vz->at(iElec) - T_Vertex_z->at(0)) < 1);
-	   
-  TLorentzVector Elec(T_Elec_Px    ->at(iElec),
-		      T_Elec_Py    ->at(iElec),
-		      T_Elec_Pz    ->at(iElec),
-		      T_Elec_Energy->at(iElec));
+  pass &= ElectronBDT      (iElec);
+  pass &= ElectronID       (iElec);
+  pass &= ElectronCloseToPV(iElec);
+  pass &= ElectronIsolation(iElec);
 
-  Double_t neutralIso = 0.0;
-
-  neutralIso += T_Elec_neutralHadronIso->at(iElec);
-  neutralIso += T_Elec_photonIso->at(iElec);
-  neutralIso -= (0.5 * T_Elec_puChargedHadronIso->at(iElec));
-  neutralIso  = max(0.0, neutralIso);
-
-  Double_t relIso = (T_Elec_chargedHadronIso->at(iElec) + neutralIso) / Elec.Pt();
-
-  pass &= (relIso < 0.15);
-
-  pass &= (T_Elec_passConversionVeto->at(iElec));
-
-  pass &= (T_Elec_MVA->at(iElec) > -0.1);
-
-  pass &= (fabs(T_Elec_IPwrtPV->at(iElec)) < 0.04);
-
-  pass &= (fabs(Elec.Eta()) < 2.5);
-
-
-  // Remove electrons close to GlobalMuons
-  //----------------------------------------------------------------------------
-  Double_t minDeltaR = 999;	
-
-  TVector3 vElec(T_Elec_Px->at(iElec),
-		 T_Elec_Py->at(iElec),
-		 T_Elec_Pz->at(iElec)); 
-  
-  for (UInt_t j=0; j<T_Muon_Px->size(); j++) {
-    
-    if (T_Muon_IsGlobalMuon->at(j)) { 
-	  
-      TVector3 vMuon(T_Muon_Px->at(j),
-		     T_Muon_Py->at(j),
-		     T_Muon_Pz->at(j));
-	  
-      Double_t deltaR = vElec.DeltaR(vMuon);
-
-      if (deltaR < minDeltaR) minDeltaR = deltaR;
-    }
-  }  
-      
-  pass &= (minDeltaR > 0.1);
-	
-  if (pass) electronPt = Elec.Pt();
+  Double_t electronPt = (pass) ? T_Elec_Pt->at(iElec) : -999;
 
   return electronPt;
 }
 
 
 //------------------------------------------------------------------------------
-// GetSelectedMuons
+// SelectedMuonPt
 //------------------------------------------------------------------------------
-void AnalysisWZ::GetSelectedMuons(Double_t ptMin)
+Double_t AnalysisWZ::SelectedMuonPt(UInt_t iMuon)
 {
-  UInt_t muonSize = T_Muon_Px->size();
+  Bool_t pass = true;
 
-  for (UInt_t i=0; i<muonSize; i++) {
+  pass &= MuonID       (iMuon);
+  pass &= MuonCloseToPV(iMuon);
+  pass &= MuonIsolation(iMuon);
 
-    if (SelectedMuonPt(i) > ptMin) {
+  Double_t muonPt = (pass) ? T_Muon_Pt->at(iMuon) : -999;
 
-      Muons_Charge.push_back(T_Muon_Charge->at(i));
-
-      TLorentzVector Muon(T_Muon_Px    ->at(i),
-			  T_Muon_Py    ->at(i),
-			  T_Muon_Pz    ->at(i),
-			  T_Muon_Energy->at(i));
-
-      Muons.push_back(Muon);
-    }
-  }
-
-  nSelMuon = Muons.size();
+  return muonPt;
 }
 
 
 //------------------------------------------------------------------------------
 // GetSelectedElectrons
 //------------------------------------------------------------------------------
-void AnalysisWZ::GetSelectedElectrons(Double_t ptMin)
+void AnalysisWZ::GetSelectedElectrons(Double_t ptMin, Double_t etaMax)
 {
-  UInt_t elecSize = T_Elec_Px->size();
-  
-  for (UInt_t i=0; i<elecSize; i++) {
+  for (UInt_t i=0; i<T_Elec_Px->size(); i++) {
 
-    if (SelectedElectronPt(i) > ptMin) {
+    if (SelectedElectronPt(i) <= ptMin)  continue;
+
+    if (fabs(T_Elec_SC_Eta->at(i)) >= etaMax) continue;
 	
-      Electrons_Charge.push_back(T_Elec_Charge->at(i));
+    Electrons_Charge.push_back(T_Elec_Charge->at(i));
 	
-      TLorentzVector Elec(T_Elec_Px    ->at(i),
-			  T_Elec_Py    ->at(i),
-			  T_Elec_Pz    ->at(i),
-			  T_Elec_Energy->at(i));
+    TLorentzVector Elec(T_Elec_Px    ->at(i),
+			T_Elec_Py    ->at(i),
+			T_Elec_Pz    ->at(i),
+			T_Elec_Energy->at(i));
 	
-      Electrons.push_back(Elec);
-    }
+    Electrons.push_back(Elec);
   }
 
   nSelElec = Electrons.size();
+}
+
+
+//------------------------------------------------------------------------------
+// GetSelectedMuons
+//------------------------------------------------------------------------------
+void AnalysisWZ::GetSelectedMuons(Double_t ptMin, Double_t etaMax)
+{
+  for (UInt_t i=0; i<T_Muon_Px->size(); i++) {
+
+    if (SelectedMuonPt(i) <= ptMin) continue;
+
+    if (fabs(T_Muon_Eta->at(i)) >= etaMax) continue;
+
+    Muons_Charge.push_back(T_Muon_Charge->at(i));
+
+    TLorentzVector Muon(T_Muon_Px    ->at(i),
+			T_Muon_Py    ->at(i),
+			T_Muon_Pz    ->at(i),
+			T_Muon_Energy->at(i));
+
+    Muons.push_back(Muon);
+  }
+
+  nSelMuon = Muons.size();
 }
 
 
@@ -381,7 +587,3 @@ void AnalysisWZ::FillHistogramsAtCut(UInt_t iChannel, UInt_t iCut)
   hPtWLepton [iChannel][iCut]->Fill(WLepton.Pt(), efficiency_weight * xs_weight);
   hInvMassZ  [iChannel][iCut]->Fill(invMass,      efficiency_weight * xs_weight);
 }
-
-
-void AnalysisWZ::SetDataMembersAtTermination() {}
-void AnalysisWZ::Summary() {}

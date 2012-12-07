@@ -4,9 +4,9 @@ const UInt_t nchannels = 4;
 Double_t xs7tev         [nchannels] = {      19.5,   23.3,      19.7,    18.1};
 Double_t xs7tevErrorStat[nchannels] = {       2.2,    3.4,       2.5,     2.7};
 Double_t xs7tevErrorLumi[nchannels] = {       0.5,    0.5,       0.5,     0.4};
-Double_t xs8tev         [nchannels] = {      27.6,   29.3,      27.3,    26.0};
-Double_t xs8tevErrorStat[nchannels] = {       1.7,    2.1,       1.9,     1.9};
-Double_t xs8tevErrorLumi[nchannels] = {       1.2,    1.3,       1.2,     1.1};
+Double_t xs8tev         [nchannels] = {      27.7,   23.2,      23.6,    22.5};
+Double_t xs8tevErrorStat[nchannels] = {       1.6,    2.1,       1.8,     1.8};
+Double_t xs8tevErrorLumi[nchannels] = {       1.2,    1.0,       1.0,     1.0};
 TString  label          [nchannels] = {"#mu#mu#mu", "eee", "#mu#mue", "ee#mu"};
 
 

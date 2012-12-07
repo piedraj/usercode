@@ -14,14 +14,15 @@
 #include <vector>
 
 
-// Lepton scale factors
+const UInt_t nCounters = 8;
+
+
+// Lepton (top) scale factors
 //------------------------------------------------------------------------------
-// From Javier Brochero, 30-10-2012
 const Double_t SF_Trigger_MM = 0.965;  // +- 0.0102;
 const Double_t SF_Trigger_EE = 0.962;  // +- 0.0130;
 const Double_t SF_Trigger_ME = 0.943;  // +- 0.0120;
 
-// From Carmen Diez, 02-11-2012
 const Double_t SF_Global_M = 0.9985;  // +- 0.0006;
 const Double_t SF_Global_E = 0.9850;  // +- 0.0003;
 
@@ -78,14 +79,20 @@ class AnalysisWZ: public CMSAnalysisSelectorMiniTrees
   //----------------------------------------------------------------------------
   void     GetParameters       ();
 
-  Double_t SelectedMuonPt      (UInt_t iMuon);
+  Bool_t   ElectronBDT         (UInt_t   iElec);
+  Bool_t   ElectronID          (UInt_t   iElec);
+  Bool_t   ElectronCloseToPV   (UInt_t   iElec);
+  Bool_t   ElectronIsolation   (UInt_t   iElec);
 
-  Double_t SelectedElectronPt  (UInt_t iElec);
+  Bool_t   MuonID              (UInt_t   iMuon);
+  Bool_t   MuonCloseToPV       (UInt_t   iMuon);
+  Bool_t   MuonIsolation       (UInt_t   iMuon);
 
-			   
-  void     GetSelectedMuons    (Double_t ptMin);
+  Double_t SelectedElectronPt  (UInt_t   iElec);
+  Double_t SelectedMuonPt      (UInt_t   iMuon);
 
-  void     GetSelectedElectrons(Double_t ptMin);
+  void     GetSelectedElectrons(Double_t ptMin, Double_t etaMax);
+  void     GetSelectedMuons    (Double_t ptMin, Double_t etaMax);
 
   void     FillHistogramsAtCut (UInt_t   iChannel,
 				UInt_t   iCut);
@@ -107,7 +114,7 @@ class AnalysisWZ: public CMSAnalysisSelectorMiniTrees
 
   // Input parameters
   //----------------------------------------------------------------------------
-  TString                     folder;
+  TString                     directory;
   TString                     sample;
   TString                     fileSuffix;
   Double_t                    efficiency_weight;
@@ -115,6 +122,8 @@ class AnalysisWZ: public CMSAnalysisSelectorMiniTrees
   Double_t                    xs_weight;
   Double_t                    luminosity;
   PUWeight*                   fPUWeight;
+
+  TCounterUI*                 counter[nChannels][nCounters];
 
 
   // Data members
@@ -129,6 +138,7 @@ class AnalysisWZ: public CMSAnalysisSelectorMiniTrees
   TLorentzVector              ZLepton2;
   TLorentzVector              WLepton;
 
+  Bool_t                      isData;
   Double_t                    dileptonInvMass;
   UInt_t                      nSelMuon;
   UInt_t                      nSelElec;

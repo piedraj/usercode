@@ -15,12 +15,11 @@
 Double_t G_Event_Weight = 1;
 Double_t G_Event_Lumi   = 12103.3;  // pb
 TProof*  proof          = 0;
+TString  dataPath       = "/hadoop";
 
 
-void RunPROOF_WZ(TString  sample   = "WZTo3LNu",
-		 TString  selector = "AnalysisWZ",
-		 TString  folder   = ".",
-		 Long64_t nEvents  = -1)
+void RunPROOF_WZ(TString  sample  = "DoubleMu",
+		 Long64_t nEvents = -1)
 {
   // PROOF mode
   //----------------------------------------------------------------------------
@@ -48,40 +47,24 @@ void RunPROOF_WZ(TString  sample   = "WZTo3LNu",
   
   // Read input files
   //----------------------------------------------------------------------------
-  TString dataPath = "/hadoop";
+  gROOT->LoadMacro("../DatasetManager/DatasetManager.C+");
 
-  if (sample.Contains("Data_DoubleElectron")) {
-    gPAFOptions->dataFiles.push_back(dataPath + "/MC_Summer12_53X/" + folder + "/Tree_DoubleElectronA_892_0.root");
-    gPAFOptions->dataFiles.push_back(dataPath + "/MC_Summer12_53X/" + folder + "/Tree_DoubleElectronB_4404_0.root");
-    gPAFOptions->dataFiles.push_back(dataPath + "/MC_Summer12_53X/" + folder + "/Tree_DoubleElectronB_4404_1.root");
-    gPAFOptions->dataFiles.push_back(dataPath + "/MC_Summer12_53X/" + folder + "/Tree_DoubleElectronC_6807_0.root");
-    gPAFOptions->dataFiles.push_back(dataPath + "/MC_Summer12_53X/" + folder + "/Tree_DoubleElectronC_6807_1.root");
-    gPAFOptions->dataFiles.push_back(dataPath + "/MC_Summer12_53X/" + folder + "/Tree_DoubleElectronC_6807_2.root");
-  }
-  else if (sample.Contains("Data_DoubleMu")) {
-    gPAFOptions->dataFiles.push_back(dataPath + "/MC_Summer12_53X/" + folder + "/Tree_DoubleMuA_892_0.root");
-    gPAFOptions->dataFiles.push_back(dataPath + "/MC_Summer12_53X/" + folder + "/Tree_DoubleMuB_4404_0.root");
-    gPAFOptions->dataFiles.push_back(dataPath + "/MC_Summer12_53X/" + folder + "/Tree_DoubleMuB_4404_1.root");
-    gPAFOptions->dataFiles.push_back(dataPath + "/MC_Summer12_53X/" + folder + "/Tree_DoubleMuB_4404_2.root");
-    gPAFOptions->dataFiles.push_back(dataPath + "/MC_Summer12_53X/" + folder + "/Tree_DoubleMuB_4404_3.root");
-    gPAFOptions->dataFiles.push_back(dataPath + "/MC_Summer12_53X/" + folder + "/Tree_DoubleMuC_6807_0.root");
-    gPAFOptions->dataFiles.push_back(dataPath + "/MC_Summer12_53X/" + folder + "/Tree_DoubleMuC_6807_1.root");
-    gPAFOptions->dataFiles.push_back(dataPath + "/MC_Summer12_53X/" + folder + "/Tree_DoubleMuC_6807_2.root");
-    gPAFOptions->dataFiles.push_back(dataPath + "/MC_Summer12_53X/" + folder + "/Tree_DoubleMuC_6807_3.root");
-    gPAFOptions->dataFiles.push_back(dataPath + "/MC_Summer12_53X/" + folder + "/Tree_DoubleMuC_6807_4.root");
+  if (sample.Contains("DoubleElectron") || sample.Contains("DoubleMu")) {
+
+    gPAFOptions->dataFiles = GetRealDataFiles("MC_Summer12_53X/WH", sample.Data());
   }
   else {
 
-    gROOT->LoadMacro("../DatasetManager/DatasetManager.C+");
-
-    DatasetManager* dm = new DatasetManager("Summer12_53X", folder);
+    DatasetManager* dm = new DatasetManager("Summer12_53X", "WH");
 
     // Use this if you know that the information on the google doc table has
     // changed and you need to update the information
     dm->RedownloadFiles();
 
-    dm->LoadDataset(sample);  // Load information about a given dataset
-    
+    dm->LoadDataset(sample);
+
+    gPAFOptions->dataFiles = dm->GetFiles();
+
     G_Event_Weight = dm->GetCrossSection() * G_Event_Lumi / dm->GetEventsInTheSample();
 
     cout << endl;
@@ -91,14 +74,12 @@ void RunPROOF_WZ(TString  sample   = "WZTo3LNu",
     cout << " base file name = " << dm->GetBaseFileName()      << endl;
     cout << "         weight = " << G_Event_Weight             << endl;
     cout << endl;
-
-    gPAFOptions->dataFiles = dm->GetFiles();
   }
 
 
   // Output file name
   //----------------------------------------------------------------------------
-  TString outputDir = "../WZXS8TeV/rootfiles/Summer12_53X/" + folder;
+  TString outputDir = "../WZXS8TeV/results/Summer12_53X/WH";
 
   gSystem->mkdir(outputDir, kTRUE);
 
@@ -111,7 +92,7 @@ void RunPROOF_WZ(TString  sample   = "WZTo3LNu",
   //----------------------------------------------------------------------------
   gPAFOptions->inputParameters = new InputParameters();
 
-  gPAFOptions->inputParameters->SetNamedString("folder",     folder.Data());
+  gPAFOptions->inputParameters->SetNamedString("directory",  outputDir.Data());
   gPAFOptions->inputParameters->SetNamedString("sample",     sample.Data());
   gPAFOptions->inputParameters->SetNamedDouble("xs_weight",  G_Event_Weight);
   gPAFOptions->inputParameters->SetNamedDouble("luminosity", G_Event_Lumi);
@@ -124,7 +105,7 @@ void RunPROOF_WZ(TString  sample   = "WZTo3LNu",
   
   // Name of analysis class
   //----------------------------------------------------------------------------
-  gPAFOptions->myAnalysis = selector.Data();
+  gPAFOptions->myAnalysis = "AnalysisWZ";
 
 
   // Additional packages to be uploaded to PROOF
@@ -149,4 +130,72 @@ void RunPROOF_WZ(TString  sample   = "WZTo3LNu",
   //----------------------------------------------------------------------------
   if (!RunAnalysis())
     cerr << " ERROR: There was a problem running the analysis" << endl;
+}
+
+
+//------------------------------------------------------------------------------
+// GetRealDataFiles
+//------------------------------------------------------------------------------
+vector<TString> GetRealDataFiles(const char* relativepath,
+				 const char* filebasename)
+{
+  vector<TString> theFiles;
+
+  TString basefile(filebasename);
+
+  TString fullpath = dataPath + "/" + relativepath;
+
+  TString command("ls ");
+
+  command += 
+    fullpath + "/Tree_" + basefile + "A_892.root " +
+    fullpath + "/Tree_" + basefile + "A_892_[0-9].root " +
+    fullpath + "/Tree_" + basefile + "A_892_[0-9][0-9].root " +
+    fullpath + "/Tree_" + basefile + "B_4404.root " +
+    fullpath + "/Tree_" + basefile + "B_4404_[0-9].root " +
+    fullpath + "/Tree_" + basefile + "B_4404_[0-9][0-9].root " +
+    fullpath + "/Tree_" + basefile + "C_6807.root " +
+    fullpath + "/Tree_" + basefile + "C_6807_[0-9].root " +
+    fullpath + "/Tree_" + basefile + "C_6807_[0-9][0-9].root";
+
+  command += " 2> /dev/null";
+
+  TString result;
+
+  FILE* pipe = gSystem->OpenPipe(command, "r");
+
+  if (!pipe) {
+    cerr << "ERROR: in RunPROOF_WZ::GetRealDataFiles. Cannot run command \""
+	 << command << "\"" << endl;
+  }
+  else {
+    TString line;
+    while (line.Gets(pipe)) {
+      if (result != "")
+	result += "\n";
+      result += line;
+    }
+  
+    gSystem->ClosePipe(pipe);
+  }
+
+  if (result != "") {
+    TObjArray* filesfound = result.Tokenize(TString('\n'));
+    if (!filesfound)
+      cerr << "ERROR: Could not parse output while finding files" << endl;
+    else {
+      for (int i=0; i<filesfound->GetEntries(); i++) {
+	
+	theFiles.push_back(filesfound->At(i)->GetName());
+      }
+      filesfound->Clear();
+
+      delete filesfound;
+    }
+  }
+
+  if (theFiles.size() == 0)
+    cerr << "ERROR: Could not find data!" << endl;
+
+  return theFiles;
 }
