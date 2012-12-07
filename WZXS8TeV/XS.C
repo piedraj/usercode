@@ -7,6 +7,7 @@
 #include "TLatex.h"
 #include "TLegend.h"
 #include "TMath.h"
+#include "TROOT.h"
 #include "TStyle.h"
 #include "TSystem.h"
 #include "TTree.h"
@@ -127,9 +128,12 @@ TLegend* DrawLegend               (Float_t     x1,
 //------------------------------------------------------------------------------
 // XS
 //------------------------------------------------------------------------------
-void XS(UInt_t channel = MMM)
+void XS(UInt_t channel = MMM,
+	Bool_t batch   = false)
 {
   if (channel >= nChannels) return; 
+
+  gROOT->SetBatch(batch);
 
   SetParameters(channel);
 

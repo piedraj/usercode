@@ -108,10 +108,8 @@ void AnalysisWZ::InsideLoop()
 
   // Trigger
   //----------------------------------------------------------------------------
-  if (isData) {
-    if (nSelMuon >= 2 && !T_passTriggerDoubleMu) return;
-    if (nSelElec >= 2 && !T_passTriggerDoubleEl) return;
-  }
+  if (sample.Contains("DoubleMu")       && (!T_passTriggerDoubleMu || nSelMuon < 2)) return;
+  if (sample.Contains("DoubleElectron") && (!T_passTriggerDoubleEl || nSelElec < 2)) return;
 
   (*counter[theChannel][cutCounter++])++;
 
@@ -284,7 +282,7 @@ void AnalysisWZ::Summary()
 
   // MC only
   //----------------------------------------------------------------------------
-  if (!isData) {
+  if (!sample.Contains("DoubleElectron") && !sample.Contains("DoubleMu")) {
 
     outputfile << Form(" %71s: %.6f\n", "xs * luminosity / nevents", xs_weight);
 
