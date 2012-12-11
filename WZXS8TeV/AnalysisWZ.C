@@ -19,18 +19,6 @@ void AnalysisWZ::Initialise()
   fPUWeight = new PUWeight(luminosity, Summer12_53X, "2012"); 
 
 
-  // Counters
-  //----------------------------------------------------------------------------
-  for (UInt_t i=0; i<nChannels; i++) {
-    for (UInt_t j=0; j<nCounters; j++) {
-
-      TString cname = Form("counter%d%d", i, j);
-
-      counter[i][j] = InitCounterUI(cname, cname, 0);
-    }
-  }
-
-
   // Histograms
   //----------------------------------------------------------------------------
   TH1::SetDefaultSumw2();
@@ -45,7 +33,7 @@ void AnalysisWZ::Initialise()
       hNPV       [i][j] = CreateH1F(TString("hNPV"        + suffix), "",  60, 0,  60);
       hMET       [i][j] = CreateH1F(TString("hMET"        + suffix), "", 200, 0, 200);
 
-      if (j == PreSelection) continue;
+      if (j < HasWCandidate) continue;
 
       hPtZLepton1[i][j] = CreateH1F(TString("hPtZLepton1" + suffix), "", 200, 0, 200);
       hPtZLepton2[i][j] = CreateH1F(TString("hPtZLepton2" + suffix), "", 200, 0, 200);
@@ -61,24 +49,12 @@ void AnalysisWZ::Initialise()
 //------------------------------------------------------------------------------
 void AnalysisWZ::InsideLoop()
 {
-  UInt_t cutCounter = 0;
-
-  (*counter[MMM][cutCounter])++;
-  (*counter[EEE][cutCounter])++;
-  (*counter[MME][cutCounter])++;
-  (*counter[EEM][cutCounter])++;
-
-  cutCounter++;
-
   isData = (sample.Contains("DoubleElectron") || sample.Contains("DoubleMu")) ? 1 : 0;
 
   pu_weight = (isData) ? 1.0 : fPUWeight->GetWeight((Int_t)T_Event_nTruePU);
 
   efficiency_weight = pu_weight;
 
-
-  // Reset data members
-  //----------------------------------------------------------------------------
   Muons_Charge.clear();
   Electrons_Charge.clear();
 
@@ -91,56 +67,78 @@ void AnalysisWZ::InsideLoop()
   theChannel      = -1;
 
 
-  // Preselection
+  // AllEvents
+  //----------------------------------------------------------------------------
+  FillHistogramsAtCut(MMM, AllEvents);
+  FillHistogramsAtCut(EEE, AllEvents);
+  FillHistogramsAtCut(MME, AllEvents);
+  FillHistogramsAtCut(EEM, AllEvents);
+
+
+  // HLT
+  //----------------------------------------------------------------------------
+  if (sample.Contains("DoubleMu")       && !T_passTriggerDoubleMu) return;
+  if (sample.Contains("DoubleElectron") && !T_passTriggerDoubleEl) return;
+
+  FillHistogramsAtCut(MMM, HLT);
+  FillHistogramsAtCut(EEE, HLT);
+  FillHistogramsAtCut(MME, HLT);
+  FillHistogramsAtCut(EEM, HLT);
+
+
+  // Has2IsoGoodLeptons
   //----------------------------------------------------------------------------
   GetSelectedMuons    (10, 2.4);
   GetSelectedElectrons(10, 2.5);
 
+  if ((nSelMuon + nSelElec) < 2) return;
+
+  FillHistogramsAtCut(MMM, Has2IsoGoodLeptons);
+  FillHistogramsAtCut(EEE, Has2IsoGoodLeptons);
+  FillHistogramsAtCut(MME, Has2IsoGoodLeptons);
+  FillHistogramsAtCut(EEM, Has2IsoGoodLeptons);
+
+
+  // Exactly3Leptons
+  //----------------------------------------------------------------------------
   if ((nSelMuon + nSelElec) != 3) return;
+
+  if (sample.Contains("DoubleMu")       && nSelMuon < 2) return;
+  if (sample.Contains("DoubleElectron") && nSelElec < 2) return;
 
   if      (nSelMuon == 3) theChannel = MMM;
   else if (nSelElec == 3) theChannel = EEE;
   else if (nSelMuon == 2) theChannel = MME;
   else if (nSelElec == 2) theChannel = EEM;
 
-  (*counter[theChannel][cutCounter++])++;
-
-
-  // Trigger
-  //----------------------------------------------------------------------------
-  if (sample.Contains("DoubleMu")       && (!T_passTriggerDoubleMu || nSelMuon < 2)) return;
-  if (sample.Contains("DoubleElectron") && (!T_passTriggerDoubleEl || nSelElec < 2)) return;
-
-  (*counter[theChannel][cutCounter++])++;
-
 
   // Apply lepton scale factors
   //----------------------------------------------------------------------------
-  //  if (!isData) {
-  //    if      (theChannel == MMM) efficiency_weight *= (SF_Trigger_MM * SF_Global_MMM);
-  //    else if (theChannel == EEE) efficiency_weight *= (SF_Trigger_EE * SF_Global_EEE);
-  //    else if (theChannel == MME) efficiency_weight *= (SF_Trigger_MM * SF_Global_MME);
-  //    else if (theChannel == EEM) efficiency_weight *= (SF_Trigger_EE * SF_Global_EEM);
-  //  }
-
-
-  Int_t numberOfHighPtLeptons = 0;
-
-  for (UInt_t i=0; i<(nSelMuon + nSelElec); i++) {
-
-    Double_t leptonPt = (i < nSelElec) ? Electrons[i].Pt() : Muons[i-nSelElec].Pt();
-
-    if (leptonPt > 20) numberOfHighPtLeptons++;
+  if (0) {
+    if      (theChannel == MMM) efficiency_weight *= (SF_Trigger_MM * SF_Global_MMM);
+    else if (theChannel == EEE) efficiency_weight *= (SF_Trigger_EE * SF_Global_EEE);
+    else if (theChannel == MME) efficiency_weight *= (SF_Trigger_MM * SF_Global_MME);
+    else if (theChannel == EEM) efficiency_weight *= (SF_Trigger_EE * SF_Global_EEM);
   }
 
-  if (numberOfHighPtLeptons < 2) return;
 
-  (*counter[theChannel][cutCounter++])++;
+  // Require at least two leptons with pt > 20 GeV, one of them in the Z
+  //----------------------------------------------------------------------------
+  UInt_t nHighPtElec = 0;
+  UInt_t nHighPtMuon = 0;
 
-  FillHistogramsAtCut(theChannel, PreSelection);
+  for (UInt_t i=0; i<nSelElec; i++) if (Electrons[i].Pt() > 20) nHighPtElec++;
+  for (UInt_t i=0; i<nSelMuon; i++) if (Muons    [i].Pt() > 20) nHighPtMuon++;
+
+  if ((nHighPtElec + nHighPtMuon) < 2) return;
+
+  if (nSelMuon >= 2 && nHighPtMuon < 1) return;
+  if (nSelElec >= 2 && nHighPtElec < 1) return;
+
+  FillHistogramsAtCut(theChannel, Exactly3Leptons);
 
 
-  // Z candidate
+  // HasZCandidate
   //----------------------------------------------------------------------------
   if (nSelElec >= 2) {
     for (UInt_t i=0; i<nSelElec; i++) {
@@ -193,32 +191,27 @@ void AnalysisWZ::InsideLoop()
 
   if (dileptonInvMass < 71) return;
 
-  (*counter[theChannel][cutCounter++])++;
-
-  FillHistogramsAtCut(theChannel, ZCandidate);
+  FillHistogramsAtCut(theChannel, HasZCandidate);
 
 
-  // W candidate
+  // HasWCandidate
   //----------------------------------------------------------------------------
   if      (nSelElec == 2) WLepton = Muons[0];
   else if (nSelMuon == 2) WLepton = Electrons[0];
 
   if (WLepton.Pt() <= 20) return;
 
-  (*counter[theChannel][cutCounter++])++;
-
-
   if (WLepton.DeltaR(ZLepton1) < 0.1) return;
   if (WLepton.DeltaR(ZLepton2) < 0.1) return;
 
-  (*counter[theChannel][cutCounter++])++;
+  FillHistogramsAtCut(theChannel, HasWCandidate);
 
 
+  // MET
+  //----------------------------------------------------------------------------
   if (T_METPFTypeI_ET <= 30) return;
 
-  (*counter[theChannel][cutCounter++])++;
-
-  FillHistogramsAtCut(theChannel, WCandidate);
+  FillHistogramsAtCut(theChannel, MET);
 }
 
 
@@ -228,8 +221,11 @@ void AnalysisWZ::InsideLoop()
 void AnalysisWZ::SetDataMembersAtTermination()
 {
   for (UInt_t i=0; i<nChannels; i++) {
-    for (UInt_t j=0; j<nCounters; j++) {
-      counter[i][j] = (TCounterUI*)FindOutput(Form("counter%d%d", i, j));
+    for (UInt_t j=0; j<nCuts; j++) {
+
+      TString suffix = "_" + sChannel[i] + "_" + sCut[j];
+
+      hCounter[i][j] = (TH1F*)FindOutput(TString("hCounter" + suffix));
     }
   }
 }
@@ -242,69 +238,53 @@ void AnalysisWZ::Summary()
 {
   GetParameters();
 
-  TString cutName[nCounters] =
-    {
-      "all input events",
-      "three tight leptons with pt > 10 GeV",
-      "trigger",
-      "pt1, pt2 > 20 GeV",
-      "71 < mZ < 111 GeV",
-      "W lepton pt > 20 GeV",
-      "DeltaR(W lepton, Z leptons) > 0.1",
-      "MET > 30 GeV"
-    };
-
   ofstream outputfile;
 
   outputfile.open(Form("%s/%s.txt", directory.Data(), sample.Data()));
 
-  outputfile << Form("\n %57s results with %7.1f pb\n", sample.Data(), luminosity);
+  outputfile << Form("\n %39s results with %7.1f pb\n", sample.Data(), luminosity);
 
-  outputfile << Form("\n %36s  %10s %10s %10s %10s\n",
+  outputfile << Form("\n %18s  %10s %10s %10s %10s\n",
 		     " ",
 		     sChannel[0].Data(),
 		     sChannel[1].Data(),
 		     sChannel[2].Data(),
 		     sChannel[3].Data());
 
-  for (UInt_t i=0; i<nCounters; i++) {
+  for (UInt_t i=0; i<nCuts; i++) {
     
-    outputfile << Form(" %36s:", cutName[i].Data());
+    outputfile << Form(" %18s:", sCut[i].Data());
 
     for (UInt_t j=0; j<nChannels; j++)
-      outputfile << Form(" %10d", counter[j][i]->GetValue());
+      outputfile << Form(" %10.0f", hCounter[j][i]->GetEntries());
 
     outputfile << "\n";
   }
-
-  outputfile << "\n";
 
 
   // MC only
   //----------------------------------------------------------------------------
   if (!sample.Contains("DoubleElectron") && !sample.Contains("DoubleMu")) {
 
-    outputfile << Form(" %71s: %.6f\n", "xs * luminosity / nevents", xs_weight);
-
-    outputfile << Form("\n %36s  %10s %10s %10s %10s\n",
+    outputfile << Form("\n %18s  %10s %10s %10s %10s\n",
 		       " ",
 		       sChannel[0].Data(),
 		       sChannel[1].Data(),
 		       sChannel[2].Data(),
 		       sChannel[3].Data());
 
-    for (UInt_t i=0; i<nCounters; i++) {
+    for (UInt_t i=0; i<nCuts; i++) {
       
-      outputfile << Form(" %36s:", cutName[i].Data());
+      outputfile << Form(" %18s:", sCut[i].Data());
 
       for (UInt_t j=0; j<nChannels; j++)
-	outputfile << Form(" %10.0f", counter[j][i]->GetValue() * xs_weight);
+	outputfile << Form(" %10.0f", hCounter[j][i]->Integral());
       
       outputfile << "\n";
     }
-
-    outputfile << "\n";
   }
+
+  outputfile << "\n";
 
   outputfile.close();
 }
@@ -468,8 +448,20 @@ Bool_t AnalysisWZ::MuonCloseToPV(UInt_t iMuon)
 //------------------------------------------------------------------------------
 Bool_t AnalysisWZ::MuonIsolation(UInt_t iMuon) 
 {
-  Double_t isoCut = (fabs(T_Muon_Eta->at(iMuon)) < 1.479) ? 0.82 : 0.86;
-		
+  Double_t mueta = T_Muon_Eta->at(iMuon);
+  Double_t mupt  = T_Muon_Pt ->at(iMuon);
+
+  Double_t isoCut = false;
+
+  if (mupt <= 20) {
+    if  (fabs(mueta) < 1.479) isoCut = 0.82;
+    else                      isoCut = 0.86;
+  }
+  else {
+    if  (fabs(mueta) < 1.479) isoCut = 0.86;
+    else                      isoCut = 0.82;
+  }
+
   return (T_Muon_MVARings->at(iMuon) >= isoCut);
 }
 
@@ -567,9 +559,9 @@ void AnalysisWZ::FillHistogramsAtCut(UInt_t iChannel, UInt_t iCut)
   hCounterEff[iChannel][iCut]->Fill(1,                  efficiency_weight);
   hCounter   [iChannel][iCut]->Fill(1,                  efficiency_weight * xs_weight);
   hNPV       [iChannel][iCut]->Fill(T_Vertex_z->size(), efficiency_weight * xs_weight);
-  hMET       [iChannel][iCut]->Fill(T_METPF_ET,         efficiency_weight * xs_weight);
+  hMET       [iChannel][iCut]->Fill(T_METPFTypeI_ET,    efficiency_weight * xs_weight);
 
-  if (iCut == PreSelection) return;
+  if (iCut < HasWCandidate) return;
 
   Double_t invMass = (ZLepton1 + ZLepton2).M();
 

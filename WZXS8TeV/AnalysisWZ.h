@@ -14,9 +14,6 @@
 #include <vector>
 
 
-const UInt_t nCounters = 8;
-
-
 // Lepton (top) scale factors
 //------------------------------------------------------------------------------
 const Double_t SF_Trigger_MM = 0.965;  // +- 0.0102;
@@ -41,18 +38,26 @@ enum {MMM, EEE, MME, EEM};
 TString sChannel[] = {"MMM", "EEE", "MME", "EEM"};
 
 
-const UInt_t nCuts = 3;
+const UInt_t nCuts = 7;
 
 enum {
-  PreSelection,
-  ZCandidate,
-  WCandidate
+  AllEvents,
+  HLT,
+  Has2IsoGoodLeptons,
+  Exactly3Leptons,
+  HasZCandidate,
+  HasWCandidate,
+  MET
 };
 
 TString sCut[] = {
-  "PreSelection",
-  "ZCandidate",
-  "WCandidate"
+  "AllEvents",
+  "HLT",
+  "Has2IsoGoodLeptons",
+  "Exactly3Leptons",
+  "HasZCandidate",
+  "HasWCandidate",
+  "MET"
 };
 
 
@@ -122,8 +127,6 @@ class AnalysisWZ: public CMSAnalysisSelectorMiniTrees
   Double_t                    xs_weight;
   Double_t                    luminosity;
   PUWeight*                   fPUWeight;
-
-  TCounterUI*                 counter[nChannels][nCounters];
 
 
   // Data members

@@ -33,12 +33,20 @@ const Double_t ngenWZphase = 1449067;  // (71 < mZ < 111 GeV)
 // Data members
 //------------------------------------------------------------------------------
 const UInt_t nChannels  =  4;
-const UInt_t nCuts      =  3;
+const UInt_t nCuts      =  7;
 const UInt_t nProcesses = 13;
 
 enum {MMM, EEE, MME, EEM};
 
-enum {PreSelection, ZCandidate, WCandidate};
+enum {
+  AllEvents,
+  HLT,
+  Has2IsoGoodLeptons,
+  Exactly3Leptons,
+  HasZCandidate,
+  HasWCandidate,
+  MET
+};
 
 enum {
   Data,
@@ -139,7 +147,7 @@ void XS(UInt_t channel = MMM,
 
   MeasureTheCrossSection(channel);
 
-  TString suffix = "_" + sChannel[channel] + "_" + sCut[WCandidate];
+  TString suffix = "_" + sChannel[channel] + "_" + sCut[MET];
   
   DrawHistogram("hNPV"        + suffix, "number of primary vertices", -1, 0, "NULL", 0, 30, false);
   DrawHistogram("hMET"        + suffix, "E_{T}^{miss}",                5, 0, "GeV");
@@ -160,9 +168,9 @@ void MeasureTheCrossSection(UInt_t channel)
   Double_t nbackground = 0;
   Double_t nTTbar      = 0;
 
-  Double_t nWZ = ((TH1F*)input[WZTo3LNu]->Get("hCounterEff_" + sChannel[channel] + "_WCandidate"))->Integral();
+  Double_t nWZ = ((TH1F*)input[WZTo3LNu]->Get("hCounterEff_" + sChannel[channel] + "_MET"))->Integral();
 
-  TString hname = "hCounter_" + sChannel[channel] + "_WCandidate";
+  TString hname = "hCounter_" + sChannel[channel] + "_MET";
 
   for (UInt_t i=0; i<vprocess.size(); i++) {
 
@@ -326,7 +334,7 @@ void DrawHistogram(TString  hname,
 
   // Normalize MC to data
   //----------------------------------------------------------------------------
-  if (hname.Contains("hNPV") && !hname.Contains("WCandidate")) {
+  if (hname.Contains("hNPV") && !hname.Contains("MET")) {
   
     for (UInt_t i=0; i<vprocess.size(); i++) {
 
@@ -725,9 +733,13 @@ void SetParameters(UInt_t channel)
   sChannel[MME] = "MME";
   sChannel[EEM] = "EEM";
 
-  sCut[PreSelection] = "PreSelection";
-  sCut[ZCandidate]   = "ZCandidate";
-  sCut[WCandidate]   = "WCandidate";
+  sCut[AllEvents]          = "AllEvents";
+  sCut[HLT]                = "HLT";
+  sCut[Has2IsoGoodLeptons] = "Has2IsoGoodLeptons";
+  sCut[Exactly3Leptons]    = "Exactly3Leptons";
+  sCut[HasZCandidate]      = "HasZCandidate";
+  sCut[HasWCandidate]      = "HasWCandidate";
+  sCut[MET]                = "MET";
 
   process[Data]            = "Double";
   process[ZJets_Madgraph]  = "ZJets_Madgraph";
