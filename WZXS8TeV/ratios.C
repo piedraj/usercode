@@ -1,19 +1,22 @@
-const UInt_t nchannels = 4;
+const UInt_t nchannels = 5;
 
 
-Double_t xs7tev         [nchannels] = {      19.5,   23.3,      19.7,    18.1};
-Double_t xs7tevErrorStat[nchannels] = {       2.2,    3.4,       2.5,     2.7};
-Double_t xs7tevErrorLumi[nchannels] = {       0.5,    0.5,       0.5,     0.4};
-Double_t xs8tev         [nchannels] = {      28.2,   23.2,      23.2,    22.6};
-Double_t xs8tevErrorStat[nchannels] = {       1.6,    2.1,       1.8,     1.8};
-Double_t xs8tevErrorLumi[nchannels] = {       1.2,    1.0,       1.0,     1.0};
-TString  label          [nchannels] = {"#mu#mu#mu", "eee", "#mu#mue", "ee#mu"};
+Double_t xs7tev         [nchannels] = {18.8907, 19.474, 22.436, 16.974, 18.737};
+Double_t xs7tevErrorStat[nchannels] = { 1.2036,  2.188,  2.991,  2.122,  2.584};
+Double_t xs7tevErrorSyst[nchannels] = { 0.6947,  0.732,  0.966,  0.661,  0.729};
+Double_t xs7tevErrorLumi[nchannels] = { 0.4396,  0.457,  0.512,  0.394,  0.438};
+
+Double_t xs8tev         [nchannels] = {999, 28.2, 23.1, 23.2, 22.8};
+Double_t xs8tevErrorStat[nchannels] = {999,  1.6,  2.1,  1.8,  1.8};
+Double_t xs8tevErrorSyst[nchannels] = {999,  0.0,  0.0,  0.0,  0.0};
+Double_t xs8tevErrorLumi[nchannels] = {999,  1.2,  1.0,  1.0,  1.0};
+
+TString label[nchannels] = {"inclusive", "#mu#mu#mu", "eee", "#mu#mue", "ee#mu"};
 
 
 // Settings
 //------------------------------------------------------------------------------
-TString _directory = "Summer12_53X";
-TString _format    = "png";
+TString _format = "png";
 
 
 //------------------------------------------------------------------------------
@@ -29,32 +32,41 @@ void ratios(Int_t ecm = 8)
 
   gStyle->SetEndErrorSize(5);
 
-  gSystem->mkdir(_format + "/" + _directory, kTRUE);
+  gSystem->mkdir(_format, kTRUE);
 
 
   // Loop
   //----------------------------------------------------------------------------
+  Inclusive(ecm);
+
   TGraphErrors* gStat = new TGraphErrors(nchannels);
+  TGraphErrors* gSyst = new TGraphErrors(nchannels);
   TGraphErrors* gLumi = new TGraphErrors(nchannels);
 
   for (UInt_t i=0; i<nchannels; i++) {
 
     Double_t xs          = (ecm == 8) ? xs8tev         [i] : xs7tev         [i];
     Double_t xsErrorStat = (ecm == 8) ? xs8tevErrorStat[i] : xs7tevErrorStat[i];
+    Double_t xsErrorSyst = (ecm == 8) ? xs8tevErrorSyst[i] : xs7tevErrorSyst[i];
     Double_t xsErrorLumi = (ecm == 8) ? xs8tevErrorLumi[i] : xs7tevErrorLumi[i];
 
     Double_t f = xs / (xsWplusZ + xsWminusZ);
 
-    Double_t error = 0;
-    error += (xsErrorStat * xsErrorStat);
-    error += (xsErrorLumi * xsErrorLumi);
-    error = sqrt(error);
+    Double_t errorSquared = (xsErrorStat * xsErrorStat);
+
+    gStat->SetPointError(i, f * sqrt(errorSquared) / xs, 0.0);
+
+    errorSquared += (xsErrorSyst * xsErrorSyst);
+
+    gSyst->SetPointError(i, f * sqrt(errorSquared) / xs, 0.0);
+
+    errorSquared += (xsErrorLumi * xsErrorLumi);
+
+    gLumi->SetPointError(i, f * sqrt(errorSquared) / xs, 0.0);
 
     gStat->SetPoint(i, f, i+1);
+    gSyst->SetPoint(i, f, i+1);
     gLumi->SetPoint(i, f, i+1);
-
-    gStat->SetPointError(i, f * xsErrorStat / xs, 0.0);
-    gLumi->SetPointError(i, f *       error / xs, 0.0);
   }
 
 
@@ -64,6 +76,11 @@ void ratios(Int_t ecm = 8)
   gStat->SetMarkerSize (1.3);
   gStat->SetMarkerStyle(kFullCircle);
 
+  gSyst->SetLineColor  (kRed);
+  gSyst->SetLineWidth  (2);
+  gSyst->SetMarkerSize (1.3);
+  gSyst->SetMarkerStyle(kFullCircle);
+
   gLumi->SetLineColor  (kBlue);
   gLumi->SetLineWidth  (2);
   gLumi->SetMarkerSize (1.3);
@@ -72,19 +89,18 @@ void ratios(Int_t ecm = 8)
 
   // Draw
   //----------------------------------------------------------------------------
-  TCanvas* canvas = new TCanvas();
+  TCanvas* canvas = new TCanvas(Form("canvas%d", ecm), Form("canvas%d", ecm));
 
   canvas->SetLeftMargin(canvas->GetRightMargin());
 
-  //  Double_t xmin = 0.75;
-  //  Double_t xmax = 2.00;
-  //  Double_t ymin = 0.50;
   Double_t xmin = 0.6;
-  Double_t xmax = 2.6;
+  Double_t xmax = 2.2;
   Double_t ymin = 0.50;
   Double_t ymax = nchannels + ymin;
   
-  TH2F* dummy = new TH2F("dummy", "", 100, xmin, xmax, 100, ymin, ymax);
+  TH2F* dummy = new TH2F(Form("dummy%d", ecm), "",
+			 100, xmin, xmax,
+			 100, ymin, ymax);
 
   dummy->Draw();
 
@@ -93,7 +109,6 @@ void ratios(Int_t ecm = 8)
   //----------------------------------------------------------------------------
   TLine* line = new TLine(1.0, ymin, 1.0, ymax);
 
-  line->SetLineColor(kRed+1);
   line->SetLineWidth(2);
 
   line->Draw("same");
@@ -102,6 +117,7 @@ void ratios(Int_t ecm = 8)
   // Ratios
   //----------------------------------------------------------------------------
   gLumi->Draw("p||,same");
+  gSyst->Draw("p||,same");
   gStat->Draw("p,same");
 
 
@@ -115,14 +131,19 @@ void ratios(Int_t ecm = 8)
     DrawTLatex(xmin+0.05, y, 0.035, 12, Form("%s", label[i].Data()));
 
     Double_t statError  = gStat->GetErrorX(i);
-    Double_t totalError = gLumi->GetErrorX(i);
-    Double_t lumiError  = sqrt(totalError*totalError - statError*statError);
+    Double_t systError  = gSyst->GetErrorX(i);
+    Double_t lumiError  = gLumi->GetErrorX(i);
 
-    DrawTLatex(xmax-0.05, y, 0.035, 32, Form("%.2f #pm %.2f (stat) #pm %.2f (lumi)",
-					     x, statError, lumiError));
+    lumiError = sqrt(lumiError*lumiError - systError*systError);
+
+    systError = sqrt(systError*systError - statError*statError);
+
+    DrawTLatex(xmax-0.05, y, 0.035, 32, Form("%.2f #pm %.2f #pm %.2f #pm %.2f",
+					     x, statError, systError, lumiError));
   }
 
-  DrawTLatex(0.940, 0.983, 0.05, 33, Form("#sqrt{s} = %d TeV, L = %.1f fb^{-1}", ecm, luminosity/1e3), true);
+  DrawTLatex(0.940, 0.983, 0.05, 33,
+	     Form("#sqrt{s} = %d TeV, L = %.1f fb^{-1}", ecm, luminosity/1e3), true);
 
   dummy->GetXaxis()->CenterTitle();
   dummy->GetXaxis()->SetTitleOffset(1.4);
@@ -143,9 +164,8 @@ void ratios(Int_t ecm = 8)
   canvas->GetFrame()->DrawClone();
   canvas->RedrawAxis();
 
-  canvas->SaveAs(Form("%s/%s/ratios%dtev.%s",
+  canvas->SaveAs(Form("%s/ratios%dtev.%s",
 		      _format.Data(),
-		      _directory.Data(),
 		      ecm,
 		      _format.Data()));
 }
@@ -169,4 +189,48 @@ void DrawTLatex(Double_t    x,
   tl->SetTextSize ( tsize);
 
   tl->Draw("same");
+}
+
+
+//------------------------------------------------------------------------------
+// Inclusive
+//------------------------------------------------------------------------------
+void Inclusive(Int_t ecm)
+{
+  if (ecm == 7) return;
+
+  Double_t x     = 0;
+  Double_t stat  = 0;
+  Double_t syst  = 0;
+  Double_t lumi  = 0;
+  Double_t total = 0;
+
+  for (UInt_t i=1; i<nchannels; i++) {
+
+    Double_t xs          = (ecm == 8) ? xs8tev         [i] : xs7tev         [i];
+    Double_t xsErrorStat = (ecm == 8) ? xs8tevErrorStat[i] : xs7tevErrorStat[i];
+    Double_t xsErrorSyst = (ecm == 8) ? xs8tevErrorSyst[i] : xs7tevErrorSyst[i];
+    Double_t xsErrorLumi = (ecm == 8) ? xs8tevErrorLumi[i] : xs7tevErrorLumi[i];
+
+    Double_t xsErrorTotal = 0;
+
+    xsErrorTotal += (xsErrorStat * xsErrorStat);
+    xsErrorTotal += (xsErrorSyst * xsErrorSyst);
+    xsErrorTotal += (xsErrorLumi * xsErrorLumi);
+
+    xsErrorTotal = sqrt(xsErrorTotal);
+
+    x += (xs8tev[i] / xsErrorTotal / xsErrorTotal);
+
+    stat  += (1. / xsErrorStat  / xsErrorStat);
+    syst  += (1. / xsErrorSyst  / xsErrorSyst);
+    lumi  += (1. / xsErrorLumi  / xsErrorLumi);
+    total += (1. / xsErrorTotal / xsErrorTotal);
+  }
+
+  xs8tev[0] = x / sqrt(total);
+
+  xs8tevErrorStat[0] = 1. / sqrt(stat);
+  xs8tevErrorSyst[0] = 1. / sqrt(syst);
+  xs8tevErrorLumi[0] = 1. / sqrt(lumi);
 }

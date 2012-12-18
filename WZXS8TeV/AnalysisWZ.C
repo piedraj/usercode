@@ -28,17 +28,20 @@ void AnalysisWZ::Initialise()
 
       TString suffix = "_" + sChannel[i] + "_" + sCut[j];
 
-      hCounterEff[i][j] = CreateH1F(TString("hCounterEff" + suffix), "",   3, 0,   3);
-      hCounter   [i][j] = CreateH1F(TString("hCounter"    + suffix), "",   3, 0,   3);
-      hNPV       [i][j] = CreateH1F(TString("hNPV"        + suffix), "",  60, 0,  60);
-      hMET       [i][j] = CreateH1F(TString("hMET"        + suffix), "", 200, 0, 200);
+      hCounterRaw[i][j] = CreateH1D(TString("hCounterRaw" + suffix), "",   3, 0,   3);
+      hCounterPU [i][j] = CreateH1D(TString("hCounterPU"  + suffix), "",   3, 0,   3);
+      hCounterEff[i][j] = CreateH1D(TString("hCounterEff" + suffix), "",   3, 0,   3);
+      hCounter   [i][j] = CreateH1D(TString("hCounter"    + suffix), "",   3, 0,   3);
+
+      hNPV[i][j] = CreateH1D(TString("hNPV" + suffix), "",  60, 0,  60);
+      hMET[i][j] = CreateH1D(TString("hMET" + suffix), "", 200, 0, 200);
 
       if (j < HasWCandidate) continue;
 
-      hPtZLepton1[i][j] = CreateH1F(TString("hPtZLepton1" + suffix), "", 200, 0, 200);
-      hPtZLepton2[i][j] = CreateH1F(TString("hPtZLepton2" + suffix), "", 200, 0, 200);
-      hPtWLepton [i][j] = CreateH1F(TString("hPtWLepton"  + suffix), "", 200, 0, 200);    
-      hInvMassZ  [i][j] = CreateH1F(TString("hInvMassZ"   + suffix), "", 200, 0, 200);
+      hPtZLepton1[i][j] = CreateH1D(TString("hPtZLepton1" + suffix), "", 200, 0, 200);
+      hPtZLepton2[i][j] = CreateH1D(TString("hPtZLepton2" + suffix), "", 200, 0, 200);
+      hPtWLepton [i][j] = CreateH1D(TString("hPtWLepton"  + suffix), "", 200, 0, 200);    
+      hInvMassZ  [i][j] = CreateH1D(TString("hInvMassZ"   + suffix), "", 200, 0, 200);
     }
   }
 }
@@ -69,10 +72,7 @@ void AnalysisWZ::InsideLoop()
 
   // AllEvents
   //----------------------------------------------------------------------------
-  FillHistogramsAtCut(MMM, AllEvents);
-  FillHistogramsAtCut(EEE, AllEvents);
-  FillHistogramsAtCut(MME, AllEvents);
-  FillHistogramsAtCut(EEM, AllEvents);
+  if (!FillCounters(999, 999, AllEvents)) return;
 
 
   // HLT
@@ -80,23 +80,95 @@ void AnalysisWZ::InsideLoop()
   if (sample.Contains("DoubleMu")       && !T_passTriggerDoubleMu) return;
   if (sample.Contains("DoubleElectron") && !T_passTriggerDoubleEl) return;
 
-  FillHistogramsAtCut(MMM, HLT);
-  FillHistogramsAtCut(EEE, HLT);
-  FillHistogramsAtCut(MME, HLT);
-  FillHistogramsAtCut(EEM, HLT);
+  if (!FillCounters(999, 999, HLT)) return;
 
 
-  // Has2IsoGoodLeptons
+  // Loop over muons
   //----------------------------------------------------------------------------
-  GetSelectedMuons    (10, 2.4);
-  GetSelectedElectrons(10, 2.5);
+  UInt_t countMuons    = 0;
+  UInt_t countPVMuons  = 0;
+  UInt_t countIsoMuons = 0;
 
-  if ((nSelMuon + nSelElec) < 2) return;
+  for (UInt_t i=0; i<T_Muon_Px->size(); i++) {
 
-  FillHistogramsAtCut(MMM, Has2IsoGoodLeptons);
-  FillHistogramsAtCut(EEE, Has2IsoGoodLeptons);
-  FillHistogramsAtCut(MME, Has2IsoGoodLeptons);
-  FillHistogramsAtCut(EEM, Has2IsoGoodLeptons);
+    TLorentzVector Muon(T_Muon_Px->at(i),
+			T_Muon_Py->at(i),
+			T_Muon_Pz->at(i),
+			T_Muon_Energy->at(i));
+
+    if (Muon.Pt() <= 10) continue;
+
+    if (fabs(Muon.Eta()) >= 2.4) continue;
+
+    Bool_t isnotglobal = ( T_Muon_IsAllStandAloneMuons->at(i)
+			   && !T_Muon_IsGlobalMuon->at(i)
+			   && !T_Muon_IsAllTrackerMuons->at(i) );
+
+    if (isnotglobal) continue;
+
+    countMuons++;
+
+    if (!MuonCloseToPV(i)) continue;
+
+    countPVMuons++;
+
+    if (!MuonIsolation(i)) continue;
+
+    countIsoMuons++;
+
+    if (!MuonID(i)) continue;
+
+    Muons_Charge.push_back(T_Muon_Charge->at(i));
+
+    Muons.push_back(Muon);
+  }
+
+  nSelMuon = Muons.size();
+
+
+  // Loop over electrons
+  //----------------------------------------------------------------------------
+  UInt_t countElectrons    = 0;
+  UInt_t countPVElectrons  = 0;
+  UInt_t countIsoElectrons = 0;
+
+  for (UInt_t i=0; i<T_Elec_Px->size(); i++) {
+
+    TLorentzVector Elec(T_Elec_Px->at(i),
+			T_Elec_Py->at(i),
+			T_Elec_Pz->at(i),
+			T_Elec_Energy->at(i));
+
+    if (Elec.Pt() <= 10) continue;
+
+    if (fabs(Elec.Eta()) >= 2.5) continue;
+
+    if (!ElectronID(i)) continue;
+
+    countElectrons++;
+
+    if (!ElectronCloseToPV(i)) continue;
+
+    countPVElectrons++;
+
+    if (!ElectronIsolation(i)) continue;
+
+    if (!ElectronBDT(i)) continue;
+    
+    countIsoElectrons++;
+
+    Electrons_Charge.push_back(T_Elec_Charge->at(i));
+	
+    Electrons.push_back(Elec);
+  }
+
+  nSelElec = Electrons.size();
+
+
+  if (!FillCounters(countElectrons,    countMuons,    Has2Leptons))        return;
+  if (!FillCounters(countPVElectrons,  countPVMuons,  Has2PVLeptons))      return;
+  if (!FillCounters(countIsoElectrons, countIsoMuons, Has2IsoLeptons))     return;
+  if (!FillCounters(nSelElec,          nSelMuon,      Has2IsoGoodLeptons)) return;
 
 
   // Exactly3Leptons
@@ -135,7 +207,7 @@ void AnalysisWZ::InsideLoop()
   if (nSelMuon >= 2 && nHighPtMuon < 1) return;
   if (nSelElec >= 2 && nHighPtElec < 1) return;
 
-  FillHistogramsAtCut(theChannel, Exactly3Leptons);
+  FillHistograms(theChannel, Exactly3Leptons);
 
 
   // HasZCandidate
@@ -191,7 +263,7 @@ void AnalysisWZ::InsideLoop()
 
   if (dileptonInvMass < 71) return;
 
-  FillHistogramsAtCut(theChannel, HasZCandidate);
+  FillHistograms(theChannel, HasZCandidate);
 
 
   // HasWCandidate
@@ -204,14 +276,14 @@ void AnalysisWZ::InsideLoop()
   if (WLepton.DeltaR(ZLepton1) < 0.1) return;
   if (WLepton.DeltaR(ZLepton2) < 0.1) return;
 
-  FillHistogramsAtCut(theChannel, HasWCandidate);
+  FillHistograms(theChannel, HasWCandidate);
 
 
   // MET
   //----------------------------------------------------------------------------
   if (T_METPFTypeI_ET <= 30) return;
 
-  FillHistogramsAtCut(theChannel, MET);
+  FillHistograms(theChannel, MET);
 }
 
 
@@ -225,7 +297,10 @@ void AnalysisWZ::SetDataMembersAtTermination()
 
       TString suffix = "_" + sChannel[i] + "_" + sCut[j];
 
-      hCounter[i][j] = (TH1F*)FindOutput(TString("hCounter" + suffix));
+      hCounterRaw[i][j] = (TH1D*)FindOutput(TString("hCounterRaw" + suffix));
+      hCounterPU [i][j] = (TH1D*)FindOutput(TString("hCounterPU"  + suffix));
+      hCounterEff[i][j] = (TH1D*)FindOutput(TString("hCounterEff" + suffix));
+      hCounter   [i][j] = (TH1D*)FindOutput(TString("hCounter"    + suffix));
     }
   }
 }
@@ -256,7 +331,7 @@ void AnalysisWZ::Summary()
     outputfile << Form(" %18s:", sCut[i].Data());
 
     for (UInt_t j=0; j<nChannels; j++)
-      outputfile << Form(" %10.0f", hCounter[j][i]->GetEntries());
+      outputfile << Form(" %11.1f", hCounterPU[j][i]->Integral());
 
     outputfile << "\n";
   }
@@ -417,7 +492,7 @@ Bool_t AnalysisWZ::MuonID(UInt_t iMuon)
   passcutsforSA &= T_Muon_IsTMLastStationTight->at(iMuon);
 
   Bool_t pass = (passcutsforGlb || passcutsforSA);
-	
+
   pass &= (fabs(ptResolution) < 0.1);
 	
   pass &= T_Muon_isPFMuon->at(iMuon);
@@ -453,113 +528,65 @@ Bool_t AnalysisWZ::MuonIsolation(UInt_t iMuon)
 
   Double_t isoCut = false;
 
-  if (mupt <= 20) {
-    if  (fabs(mueta) < 1.479) isoCut = 0.82;
-    else                      isoCut = 0.86;
-  }
-  else {
-    if  (fabs(mueta) < 1.479) isoCut = 0.86;
-    else                      isoCut = 0.82;
-  }
+  if (mupt <= 20)
+    {
+      if  (fabs(mueta) < 1.479) isoCut = 0.82;
+      else                      isoCut = 0.86;
+    }
+  else
+    {
+      if  (fabs(mueta) < 1.479) isoCut = 0.86;
+      else                      isoCut = 0.82;
+    }
 
   return (T_Muon_MVARings->at(iMuon) >= isoCut);
 }
 
 
 //------------------------------------------------------------------------------
-// SelectedElectronPt
+// FillChannelCounters
 //------------------------------------------------------------------------------
-Double_t AnalysisWZ::SelectedElectronPt(UInt_t iElec)
+void AnalysisWZ::FillChannelCounters(UInt_t iChannel, UInt_t iCut)
 {
-  Bool_t pass = true;
-
-  pass &= ElectronBDT      (iElec);
-  pass &= ElectronID       (iElec);
-  pass &= ElectronCloseToPV(iElec);
-  pass &= ElectronIsolation(iElec);
-
-  Double_t electronPt = (pass) ? T_Elec_Pt->at(iElec) : -999;
-
-  return electronPt;
+  hCounterRaw[iChannel][iCut]->Fill(1);
+  hCounterPU [iChannel][iCut]->Fill(1, pu_weight);
+  hCounterEff[iChannel][iCut]->Fill(1, efficiency_weight);
+  hCounter   [iChannel][iCut]->Fill(1, efficiency_weight * xs_weight);
 }
 
 
 //------------------------------------------------------------------------------
-// SelectedMuonPt
+// FillCounters
 //------------------------------------------------------------------------------
-Double_t AnalysisWZ::SelectedMuonPt(UInt_t iMuon)
+Bool_t AnalysisWZ::FillCounters(UInt_t nElec, UInt_t nMuon, UInt_t iCut)
 {
-  Bool_t pass = true;
+  if (nElec < 2 && nMuon < 2 && (nElec + nMuon) < 2) return false;
 
-  pass &= MuonID       (iMuon);
-  pass &= MuonCloseToPV(iMuon);
-  pass &= MuonIsolation(iMuon);
+  if (nElec >= 2) FillChannelCounters(EEE, iCut);
 
-  Double_t muonPt = (pass) ? T_Muon_Pt->at(iMuon) : -999;
+  if (nMuon >= 2) FillChannelCounters(MMM, iCut);
 
-  return muonPt;
+  if (nElec + nMuon >= 2)
+    {
+      FillChannelCounters(EEM, iCut);
+      FillChannelCounters(MME, iCut);
+    }
+
+  return true;
 }
 
 
 //------------------------------------------------------------------------------
-// GetSelectedElectrons
+// FillHistograms
 //------------------------------------------------------------------------------
-void AnalysisWZ::GetSelectedElectrons(Double_t ptMin, Double_t etaMax)
+void AnalysisWZ::FillHistograms(UInt_t iChannel, UInt_t iCut)
 {
-  for (UInt_t i=0; i<T_Elec_Px->size(); i++) {
+  FillChannelCounters(iChannel, iCut);
 
-    if (SelectedElectronPt(i) <= ptMin)  continue;
+  Double_t hweight = efficiency_weight * xs_weight;
 
-    if (fabs(T_Elec_SC_Eta->at(i)) >= etaMax) continue;
-	
-    Electrons_Charge.push_back(T_Elec_Charge->at(i));
-	
-    TLorentzVector Elec(T_Elec_Px    ->at(i),
-			T_Elec_Py    ->at(i),
-			T_Elec_Pz    ->at(i),
-			T_Elec_Energy->at(i));
-	
-    Electrons.push_back(Elec);
-  }
-
-  nSelElec = Electrons.size();
-}
-
-
-//------------------------------------------------------------------------------
-// GetSelectedMuons
-//------------------------------------------------------------------------------
-void AnalysisWZ::GetSelectedMuons(Double_t ptMin, Double_t etaMax)
-{
-  for (UInt_t i=0; i<T_Muon_Px->size(); i++) {
-
-    if (SelectedMuonPt(i) <= ptMin) continue;
-
-    if (fabs(T_Muon_Eta->at(i)) >= etaMax) continue;
-
-    Muons_Charge.push_back(T_Muon_Charge->at(i));
-
-    TLorentzVector Muon(T_Muon_Px    ->at(i),
-			T_Muon_Py    ->at(i),
-			T_Muon_Pz    ->at(i),
-			T_Muon_Energy->at(i));
-
-    Muons.push_back(Muon);
-  }
-
-  nSelMuon = Muons.size();
-}
-
-
-//------------------------------------------------------------------------------
-// FillHistogramsAtCut
-//------------------------------------------------------------------------------
-void AnalysisWZ::FillHistogramsAtCut(UInt_t iChannel, UInt_t iCut)
-{
-  hCounterEff[iChannel][iCut]->Fill(1,                  efficiency_weight);
-  hCounter   [iChannel][iCut]->Fill(1,                  efficiency_weight * xs_weight);
-  hNPV       [iChannel][iCut]->Fill(T_Vertex_z->size(), efficiency_weight * xs_weight);
-  hMET       [iChannel][iCut]->Fill(T_METPFTypeI_ET,    efficiency_weight * xs_weight);
+  hNPV[iChannel][iCut]->Fill(T_Vertex_z->size(), hweight);
+  hMET[iChannel][iCut]->Fill(T_METPFTypeI_ET,    hweight);
 
   if (iCut < HasWCandidate) return;
 
@@ -568,12 +595,16 @@ void AnalysisWZ::FillHistogramsAtCut(UInt_t iChannel, UInt_t iCut)
   Double_t pt1, pt2;
 
   if (ZLepton1.Pt() > ZLepton2.Pt())
-    {pt1 = ZLepton1.Pt(); pt2 = ZLepton2.Pt();}
+    {
+      pt1 = ZLepton1.Pt(); pt2 = ZLepton2.Pt();
+    }
   else
-    {pt1 = ZLepton2.Pt(); pt2 = ZLepton1.Pt();}
+    {
+      pt1 = ZLepton2.Pt(); pt2 = ZLepton1.Pt();
+    }
   
-  hPtZLepton1[iChannel][iCut]->Fill(pt1,          efficiency_weight * xs_weight);
-  hPtZLepton2[iChannel][iCut]->Fill(pt2,          efficiency_weight * xs_weight);
-  hPtWLepton [iChannel][iCut]->Fill(WLepton.Pt(), efficiency_weight * xs_weight);
-  hInvMassZ  [iChannel][iCut]->Fill(invMass,      efficiency_weight * xs_weight);
+  hPtZLepton1[iChannel][iCut]->Fill(pt1,          hweight);
+  hPtZLepton2[iChannel][iCut]->Fill(pt2,          hweight);
+  hPtWLepton [iChannel][iCut]->Fill(WLepton.Pt(), hweight);
+  hInvMassZ  [iChannel][iCut]->Fill(invMass,      hweight);
 }

@@ -19,7 +19,8 @@ TString  dataPath       = "/hadoop";
 
 
 void RunPROOF_WZ(TString  sample  = "DoubleMu",
-		 Long64_t nEvents = -1)
+		 Long64_t nEvents = -1,
+		 Bool_t   update  = true)
 {
   // PROOF mode
   //----------------------------------------------------------------------------
@@ -57,9 +58,7 @@ void RunPROOF_WZ(TString  sample  = "DoubleMu",
 
     DatasetManager* dm = new DatasetManager("Summer12_53X", "WH");
 
-    // Use this if you know that the information on the google doc table has
-    // changed and you need to update the information
-    dm->RedownloadFiles();
+    if (update) dm->RedownloadFiles();
 
     dm->LoadDataset(sample);
 

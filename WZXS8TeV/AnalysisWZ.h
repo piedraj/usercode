@@ -38,11 +38,14 @@ enum {MMM, EEE, MME, EEM};
 TString sChannel[] = {"MMM", "EEE", "MME", "EEM"};
 
 
-const UInt_t nCuts = 7;
+const UInt_t nCuts = 10;
 
 enum {
   AllEvents,
   HLT,
+  Has2Leptons,
+  Has2PVLeptons,
+  Has2IsoLeptons,
   Has2IsoGoodLeptons,
   Exactly3Leptons,
   HasZCandidate,
@@ -53,6 +56,9 @@ enum {
 TString sCut[] = {
   "AllEvents",
   "HLT",
+  "Has2Leptons",
+  "Has2PVLeptons",
+  "Has2IsoLeptons",
   "Has2IsoGoodLeptons",
   "Exactly3Leptons",
   "HasZCandidate",
@@ -82,39 +88,43 @@ class AnalysisWZ: public CMSAnalysisSelectorMiniTrees
 
   // My member functions
   //----------------------------------------------------------------------------
-  void     GetParameters       ();
+  void     GetParameters    ();
+			    
+  Bool_t   ElectronBDT        (UInt_t iElec);
+  Bool_t   ElectronID         (UInt_t iElec);
+  Bool_t   ElectronCloseToPV  (UInt_t iElec);
+  Bool_t   ElectronIsolation  (UInt_t iElec);
+			    	      
+  Bool_t   MuonID             (UInt_t iMuon);
+  Bool_t   MuonCloseToPV      (UInt_t iMuon);
+  Bool_t   MuonIsolation      (UInt_t iMuon);
+  
+  void     FillChannelCounters(UInt_t iChannel,
+			       UInt_t iCut);
 
-  Bool_t   ElectronBDT         (UInt_t   iElec);
-  Bool_t   ElectronID          (UInt_t   iElec);
-  Bool_t   ElectronCloseToPV   (UInt_t   iElec);
-  Bool_t   ElectronIsolation   (UInt_t   iElec);
+  Bool_t   FillCounters       (UInt_t nElec,
+			       UInt_t nMuon,
+			       UInt_t iCut);
 
-  Bool_t   MuonID              (UInt_t   iMuon);
-  Bool_t   MuonCloseToPV       (UInt_t   iMuon);
-  Bool_t   MuonIsolation       (UInt_t   iMuon);
-
-  Double_t SelectedElectronPt  (UInt_t   iElec);
-  Double_t SelectedMuonPt      (UInt_t   iMuon);
-
-  void     GetSelectedElectrons(Double_t ptMin, Double_t etaMax);
-  void     GetSelectedMuons    (Double_t ptMin, Double_t etaMax);
-
-  void     FillHistogramsAtCut (UInt_t   iChannel,
-				UInt_t   iCut);
+  void     FillHistograms     (UInt_t iChannel,
+			       UInt_t iCut);
 
 
  public:
   
   // Histograms
   //----------------------------------------------------------------------------
-  TH1F*                       hCounterEff[nChannels][nCuts];
-  TH1F*                       hCounter   [nChannels][nCuts];
-  TH1F*                       hNPV       [nChannels][nCuts];
-  TH1F*                       hMET       [nChannels][nCuts];
-  TH1F*                       hPtZLepton1[nChannels][nCuts];
-  TH1F*                       hPtZLepton2[nChannels][nCuts];
-  TH1F*                       hPtWLepton [nChannels][nCuts];
-  TH1F*                       hInvMassZ  [nChannels][nCuts];
+  TH1D*                       hCounterRaw[nChannels][nCuts];
+  TH1D*                       hCounterPU [nChannels][nCuts];
+  TH1D*                       hCounterEff[nChannels][nCuts];
+  TH1D*                       hCounter   [nChannels][nCuts];
+
+  TH1D*                       hNPV       [nChannels][nCuts];
+  TH1D*                       hMET       [nChannels][nCuts];
+  TH1D*                       hPtZLepton1[nChannels][nCuts];
+  TH1D*                       hPtZLepton2[nChannels][nCuts];
+  TH1D*                       hPtWLepton [nChannels][nCuts];
+  TH1D*                       hInvMassZ  [nChannels][nCuts];
 
 
   // Input parameters
