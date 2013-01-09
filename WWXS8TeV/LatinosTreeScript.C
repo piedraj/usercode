@@ -81,6 +81,24 @@ void LatinosTreeScript(Float_t luminosity,
   TH1F* hDPhiPtllJetWWLevel     = new TH1F("hDPhiPtllJetWWLevel",     "",  32, 0, 3.2);
 
 
+  // TwoLeptons level histograms
+  //----------------------------------------------------------------------------
+  TH1F* hPtLepton1TwoLeptonsLevel       = new TH1F("hPtLepton1TwoLeptonsLevel",       "", 200, 0, 200);
+  TH1F* hPtLepton2TwoLeptonsLevel       = new TH1F("hPtLepton2TwoLeptonsLevel",       "", 200, 0, 200);
+  TH1F* hPtDiLeptonTwoLeptonsLevel      = new TH1F("hPtDiLeptonTwoLeptonsLevel",      "", 200, 0, 200);
+  TH1F* hMinvTwoLeptonsLevel            = new TH1F("hMinvTwoLeptonsLevel",            "", 200, 0, 200);
+  TH1F* hMtTwoLeptonsLevel              = new TH1F("hMtTwoLeptonsLevel",              "", 250, 0, 250);
+  TH1F* hNJets30TwoLeptonsLevel         = new TH1F("hNJetsPF30TwoLeptonsLevel",       "",  10, 0,  10);
+  TH1F* hpfMetTwoLeptonsLevel           = new TH1F("hpfMetTwoLeptonsLevel",           "", 150, 0, 150);
+  TH1F* hppfMetTwoLeptonsLevel          = new TH1F("hppfMetTwoLeptonsLevel",          "", 150, 0, 150);
+  TH1F* hchMetTwoLeptonsLevel           = new TH1F("hchMetTwoLeptonsLevel",           "", 150, 0, 150);
+  TH1F* hpchMetTwoLeptonsLevel          = new TH1F("hpchMetTwoLeptonsLevel",          "", 150, 0, 150);
+  TH1F* hpminMetTwoLeptonsLevel         = new TH1F("hpminMetTwoLeptonsLevel",         "", 150, 0, 150);
+  TH1F* hDeltaRLeptonsTwoLeptonsLevel   = new TH1F("hDeltaRLeptonsTwoLeptonsLevel",   "",  50, 0,   5);
+  TH1F* hDeltaPhiLeptonsTwoLeptonsLevel = new TH1F("hDeltaPhiLeptonsTwoLeptonsLevel", "",  32, 0, 3.2);
+  TH1F* hDPhiPtllJetTwoLeptonsLevel     = new TH1F("hDPhiPtllJetTwoLeptonsLevel",     "",  32, 0, 3.2);
+
+
   // Data-driven methods: Z+jets
   //----------------------------------------------------------------------------
   TH1F* hNinZevents     [numberMetCuts];
@@ -114,66 +132,70 @@ void LatinosTreeScript(Float_t luminosity,
   //----------------------------------------------------------------------------
   TString filesPath;
 
-  if (runAtOviedo) filesPath = "/hadoop/LatinosSkims/ReducedTrees/R53X_S1_V06_S2_V07_S3_V07/";
+  if (runAtOviedo) filesPath = " /hadoop/LatinosSkims/ReducedTrees/R53X_S1_V08_S2_V09_S3_V13/";
   if (runAtIfca)   filesPath = "/gpfs/csic_projects/cms/data/LatinosSkims/ReducedTrees/R52X_S1_V05_S2_V05_S3_V05/ForICHEP2/";
 
   TChain* tree = new TChain("latino", "latino");
 
   if (theSample == "DataRun2012_Total") {
-    tree->Add(filesPath +"Data_TightTight/latino_RunA_892pbinv.root");
-    tree->Add(filesPath +"Data_TightTight/latino_RunB_4404pbinv.root");
-    tree->Add(filesPath +"Data_TightTight/latino_RunC_6807pbinv.root");
+    tree->Add(filesPath + "Data_TightTight/2L/latino_RunA_892pbinv.root");
+    tree->Add(filesPath + "Data_TightTight/2L/latino_RunB_4404pbinv.root");
+    tree->Add(filesPath + "Data_TightTight/2L/latino_RunC_7032pbinv.root");
+    tree->Add(filesPath + "Data_TightTight/2L/latino_RunD_7274pbinv.root");
   }
   else if (theSample == "WJetsFakes_Total") {
-    tree->Add(filesPath +"Data_LooseLoose/latino_RunA_892pbinv_LooseLoose.root");
-    tree->Add(filesPath +"Data_LooseLoose/latino_RunB_4404pbinv_LooseLoose.root");
-    tree->Add(filesPath +"Data_LooseLoose/latino_RunC_6807pbinv_LooseLoose.root");
+    tree->Add(filesPath + "/Data_LooseLoose_fakeW/4L/latino_RunA_892pbinv_LooseLoose.root");
+    tree->Add(filesPath + "/Data_LooseLoose_fakeW/4L/latino_RunB_4404pbinv_LooseLoose.root");
+    tree->Add(filesPath + "/Data_LooseLoose_fakeW/4L/latino_RunC_7032pbinv_LooseLoose.root");
+    tree->Add(filesPath + "/Data_LooseLoose_fakeW/4L/latino_RunD_7274pbinv_LooseLoose.root");
   }
   else if (theSample == "ggWWto2L") {
-    tree->Add(filesPath + "MC_TightTight/latino_001_GluGluToWWTo4L.root");
+    tree->Add(filesPath + "MC_TightTight/2L/latino_001_GluGluToWWTo4L.root");
   }
   else if (theSample == "WWTo2L2Nu") {
-    tree->Add(filesPath + "MC_TightTight/latino_000_WWJets2LMad.root");
+    tree->Add(filesPath + "MC_TightTight/2L/latino_000_WWJets2LMad.root");
   }
   else if (theSample == "WZ") {
-    tree->Add(filesPath + "MC_TightTight/latino_074_WZJetsMad.root");
-    tree->Add(filesPath + "MC_TightTight/latino_078_WZTo2L2QMad.root");
+    tree->Add(filesPath + "MC_TightTight/2L/latino_074_WZJetsMad.root");
+    tree->Add(filesPath + "MC_TightTight/2L/latino_078_WZTo2L2QMad.root");
   }
   else if (theSample == "ZZ") {
-    tree->Add(filesPath + "MC_TightTight/latino_075_ZZJetsMad.root");
-    tree->Add(filesPath + "MC_TightTight/latino_079_ZZTo2L2QMad.root"); 
+    tree->Add(filesPath + "MC_TightTight/2L/latino_075_ZZJetsMad.root");
+    tree->Add(filesPath + "MC_TightTight/2L/latino_079_ZZTo2L2QMad.root"); 
   }
   else if (theSample == "TTbar") {
-    tree->Add(filesPath + "MC_TightTight/latino_019_TTTo2L2Nu2B.root");
+    tree->Add(filesPath + "MC_TightTight/2L/latino_019_TTTo2L2Nu2B.root");
   }
   else if (theSample == "TW") {
-    tree->Add(filesPath + "MC_TightTight/latino_011_TtWFullDR.root");
-    tree->Add(filesPath + "MC_TightTight/latino_012_TbartWFullDR.root");
+    tree->Add(filesPath + "MC_TightTight/2L/latino_011_TtWFullDR.root");
+    tree->Add(filesPath + "MC_TightTight/2L/latino_012_TbartWFullDR.root");
   }
   else if (theSample == "Top") {
-    tree->Add(filesPath + "MC_TightTight/latino_019_TTTo2L2Nu2B.root");
-    tree->Add(filesPath + "MC_TightTight/latino_011_TtWFullDR.root");
-    tree->Add(filesPath + "MC_TightTight/latino_012_TbartWFullDR.root");
+    tree->Add(filesPath + "MC_TightTight/2L/latino_019_TTTo2L2Nu2B.root");
+    tree->Add(filesPath + "MC_TightTight/2L/latino_011_TtWFullDR.root");
+    tree->Add(filesPath + "MC_TightTight/2L/latino_012_TbartWFullDR.root");
   }
   else if (theSample == "DY") {
-    tree->Add(filesPath + "MC_TightTight/latino_036_DY10toLLMad.root");
-    tree->Add(filesPath + "MC_TightTight/latino_037_DY50toLLMad.root");
+    tree->Add(filesPath + "MC_TightTight/2L/latino_036_DY10toLLMad.root");
+    tree->Add(filesPath + "MC_TightTight/2L/latino_037_DY50toLLMad.root");
   }
   else if (theSample == "DYtautau") {
-    tree->Add(filesPath + "MC_TightTight/latino_DYtt_12.1fb.root");
-    tree->Add(filesPath + "MC_TightTight/latino_086_ZgammaToLLuG.root");
+    tree->Add("/hadoop/LatinosSkims/ReducedTrees/R53X_S1_V06_S2_V07_S3_V07/MC_TightTight/latino_DYtt_12.1fb.root");
+    tree->Add(filesPath + "MC_TightTight/2L/latino_086_ZgammaToLLuG.root");
   }
   else if (theSample == "WgammaNoStar") {
-    tree->Add(filesPath + "MC_TightTight/latino_085_WgammaToLNuG.root");
+    tree->Add(filesPath + "MC_TightTight/2L/latino_085_WgammaToLNuG.root");
+    tree->Add(filesPath + "MC_TightTight/2L/latino_008_GamGamWW.root");
+
   }
   else if (theSample == "WgammaStar") {
-    tree->Add(filesPath + "MC_TightTight/latino_082_WGstarToElNuMad.root");
-    tree->Add(filesPath + "MC_TightTight/latino_083_WGstarToMuNuMad.root");
-    tree->Add(filesPath + "MC_TightTight/latino_084_WGstarToTauNuMad.root");
+    tree->Add(filesPath + "MC_TightTight/2L/latino_082_WGstarToElNuMad.root");
+    tree->Add(filesPath + "MC_TightTight/2L/latino_083_WGstarToMuNuMad.root");
+    tree->Add(filesPath + "MC_TightTight/2L/latino_084_WGstarToTauNuMad.root");
   }
   else if (theSample == "HWW125") { 
-    tree->Add(filesPath + "MC_TightTight/latino_1125_ggToH125toWWTo2LAndTau2Nu.root");
-    tree->Add(filesPath + "MC_TightTight/latino_2125_vbfToH125toWWTo2LAndTau2Nu.root");
+    tree->Add(filesPath + "MC_TightTight/2L/latino_1125_ggToH125toWWTo2LAndTau2Nu.root");
+    tree->Add(filesPath + "MC_TightTight/2L/latino_2125_vbfToH125toWWTo2LAndTau2Nu.root");
   }
   else {
     return;
@@ -213,6 +235,8 @@ void LatinosTreeScript(Float_t luminosity,
   Float_t ppfmet;       tree->SetBranchAddress("ppfmet"      , &ppfmet);
   Float_t pt1;          tree->SetBranchAddress("pt1"         , &pt1);
   Float_t pt2;          tree->SetBranchAddress("pt2"         , &pt2);
+  Float_t ch1;          tree->SetBranchAddress("ch1"         , &ch1);
+  Float_t ch2;          tree->SetBranchAddress("ch2"         , &ch2);
   Float_t ptll;         tree->SetBranchAddress("ptll"        , &ptll);
   Float_t softtche;     tree->SetBranchAddress("softtche"    , &softtche);
   Float_t trigger;      tree->SetBranchAddress("trigger"     , &trigger);
@@ -233,10 +257,10 @@ void LatinosTreeScript(Float_t luminosity,
   if (theSample.Contains("WJetsFakes"))
     tree->SetBranchAddress("fakeW", &fakeW);
 
-  Float_t puW60ABC;
+  Float_t puW;
   
   if (!theSample.Contains("WJetsFakes") && !theSample.Contains("Data"))
-    tree->SetBranchAddress("puW60ABC", &puW60ABC);
+    tree->SetBranchAddress("puW", &puW);
 
 
   // Set the channel
@@ -265,9 +289,11 @@ void LatinosTreeScript(Float_t luminosity,
     else if (theSample.Contains("WJetsFakes"))
       totalW = fakeW;
     else {
-      efficiencyW = puW60ABC * effW * triggW;
+      efficiencyW = puW * effW * triggW;
       totalW      = (1 + 0.6 * (dataset >= 82 && dataset <= 84)) * baseW * efficiencyW * luminosity;
     }
+
+    if (theSample.Contains("DYtautau") && dataset != 86) totalW *= (19.4/12.1);
 
 
     // Help variables
@@ -282,17 +308,15 @@ void LatinosTreeScript(Float_t luminosity,
 
     Int_t vbfsel = ((jetpt3 <= 30 || !(jetpt3 > 30 && ((jeteta1-jeteta3 > 0 && jeteta2-jeteta3 < 0) || (jeteta2-jeteta3 > 0 && jeteta1-jeteta3 < 0)))));
 
-    Int_t wgstar = (dataset != 82 || (chmet < (0.75*pt1 + 100) && chmet < (0.75*jetpt1 + 100)));
-
 
     // The selection begins here
     //--------------------------------------------------------------------------
-    if ((dataset == 36 || dataset == 37) && mctruth == 2) continue;
-
+    if (theSample == "DY" && mctruth == 2) continue;
+    if (run == 201191) continue;
+    if (trigger != 1) continue;
+    if (pt2 <= 20) continue;
+    if (ch1*ch2 > 0) continue;
     if (dataset == 86 && (flavorChannel == "MuMu" || flavorChannel == "EE")) continue;
-    
-    if (trigger !=  1) continue;
-    if (pt2     <= 20) continue;
 
     if ((SelectedChannel == -1) || (channel == SelectedChannel)) {
 
@@ -383,16 +407,31 @@ void LatinosTreeScript(Float_t luminosity,
       //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
       hWTrigger   ->Fill(1, totalW); 
       hWeffTrigger->Fill(1, efficiencyW);
-
-      if (pfmet > 20 && mpmet > 20 && wgstar) {
+      
+      if (pfmet > 20 && mpmet > 20 && (dataset != 82 || (chmet < (0.75*pt1+100) && chmet < (0.75*jetpt1+100)))) {
 	  
 	hWMetCut->Fill(1, totalW);
 	hWeffMetCut->Fill(1, efficiencyW);
-	  
+	
 	if (mll > 12) {
 	    
 	  hWLowMinv->Fill(1, totalW);
 	  hWeffLowMinv->Fill(1, efficiencyW);
+
+	  hPtLepton1TwoLeptonsLevel      ->Fill(pt1,       totalW);
+	  hPtLepton2TwoLeptonsLevel      ->Fill(pt2,       totalW);
+	  hPtDiLeptonTwoLeptonsLevel     ->Fill(ptll,      totalW);
+	  hMinvTwoLeptonsLevel           ->Fill(mll,       totalW);
+	  hMtTwoLeptonsLevel             ->Fill(mth,       totalW);
+	  hNJets30TwoLeptonsLevel        ->Fill(njet,      totalW);
+	  hpfMetTwoLeptonsLevel          ->Fill(pfmet,     totalW);
+	  hppfMetTwoLeptonsLevel         ->Fill(ppfmet,    totalW);
+	  hchMetTwoLeptonsLevel          ->Fill(chmet,     totalW);
+	  hpchMetTwoLeptonsLevel         ->Fill(pchmet,    totalW);
+	  hpminMetTwoLeptonsLevel        ->Fill(mpmet,     totalW);
+	  hDeltaRLeptonsTwoLeptonsLevel  ->Fill(drll,      totalW);
+	  hDeltaPhiLeptonsTwoLeptonsLevel->Fill(dphill,    totalW);
+	  hDPhiPtllJetTwoLeptonsLevel    ->Fill(dphilljet, totalW);
 	    
 	  if (zveto) {
 	      
