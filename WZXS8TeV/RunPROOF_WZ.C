@@ -13,7 +13,7 @@
 
 
 Double_t G_Event_Weight = 1;
-Double_t G_Event_Lumi   = 12103.3;  // pb
+Double_t G_Event_Lumi   = 19468.3;  // pb
 TProof*  proof          = 0;
 TString  dataPath       = "/hadoop";
 
@@ -155,7 +155,12 @@ vector<TString> GetRealDataFiles(const char* relativepath,
     fullpath + "/Tree_" + basefile + "B_4404_[0-9][0-9].root " +
     fullpath + "/Tree_" + basefile + "C_6807.root " +
     fullpath + "/Tree_" + basefile + "C_6807_[0-9].root " +
-    fullpath + "/Tree_" + basefile + "C_6807_[0-9][0-9].root";
+    fullpath + "/Tree_" + basefile + "C_6807_[0-9][0-9].root " +
+    fullpath + "/Tree_" + basefile + "C_91.root " +
+    fullpath + "/Tree_" + basefile + "C_ReReco11Dec_134.root " +
+    fullpath + "/Tree_" + basefile + "D_7274.root " +
+    fullpath + "/Tree_" + basefile + "D_7274_[0-9].root " +
+    fullpath + "/Tree_" + basefile + "D_7274_[0-9][0-9].root";
 
   command += " 2> /dev/null";
 
