@@ -70,6 +70,11 @@ void AnalysisWZ::InsideLoop()
   theChannel      = -1;
 
 
+  // Accept only WZ events inside the Z window
+  //----------------------------------------------------------------------
+  if (sample.Contains("WZTo3LNu") && !isSignalMCInsideZmassRange(71,111)) return;
+
+
   // AllEvents
   //----------------------------------------------------------------------------
   if (!FillCounters(999, 999, AllEvents)) return;
@@ -182,16 +187,6 @@ void AnalysisWZ::InsideLoop()
   else if (nSelElec == 3) theChannel = EEE;
   else if (nSelMuon == 2) theChannel = MME;
   else if (nSelElec == 2) theChannel = EEM;
-
-
-  // Apply lepton scale factors
-  //----------------------------------------------------------------------------
-  if (0) {
-    if      (theChannel == MMM) efficiency_weight *= (SF_Trigger_MM * SF_Global_MMM);
-    else if (theChannel == EEE) efficiency_weight *= (SF_Trigger_EE * SF_Global_EEE);
-    else if (theChannel == MME) efficiency_weight *= (SF_Trigger_MM * SF_Global_MME);
-    else if (theChannel == EEM) efficiency_weight *= (SF_Trigger_EE * SF_Global_EEM);
-  }
 
 
   // Require at least two leptons with pt > 20 GeV, one of them in the Z
@@ -375,6 +370,11 @@ void AnalysisWZ::GetParameters()
 
   GetInputParameters()->TheNamedDouble("xs_weight",  xs_weight);
   GetInputParameters()->TheNamedDouble("luminosity", luminosity);
+  
+  if (sample.Contains("WZTo3LNu"))
+    {
+      xs_weight = (xsWplusZ + xsWminusZ) * WZ23lnu * luminosity / ngenWZphase;
+    }
 }
 
 
@@ -607,4 +607,105 @@ void AnalysisWZ::FillHistograms(UInt_t iChannel, UInt_t iCut)
   hPtZLepton2[iChannel][iCut]->Fill(pt2,          hweight);
   hPtWLepton [iChannel][iCut]->Fill(WLepton.Pt(), hweight);
   hInvMassZ  [iChannel][iCut]->Fill(invMass,      hweight);
+}
+
+
+//------------------------------------------------------------------------------
+// isSignalMCInsideZmassRange
+//------------------------------------------------------------------------------
+const bool AnalysisWZ::isSignalMCInsideZmassRange(const float & masslow,
+						  const float & masshigh) const
+{
+  float masszcand = 0.0;
+
+  const unsigned int ntauSt3  = T_Gen_TauSt3_PID ->size();
+  const unsigned int nmuonSt3 = T_Gen_MuonSt3_PID->size();
+  const unsigned int nelecSt3 = T_Gen_ElecSt3_PID->size();
+
+  if (ntauSt3 >= 2)
+    {
+      std::vector<std::pair<int,TLorentzVector> > precand;
+
+      for (unsigned int i=0; i<ntauSt3; ++i)
+	{
+	  TLorentzVector Tau(T_Gen_TauSt3_Px->at(i),
+			     T_Gen_TauSt3_Py->at(i),
+			     T_Gen_TauSt3_Pz->at(i),
+			     T_Gen_TauSt3_Energy->at(i));
+	  
+	  precand.push_back(std::pair<int, TLorentzVector>(T_Gen_TauSt3_PID->at(i), Tau));
+	}
+      
+
+      // Construct the Z candidate
+      //------------------------------------------------------------------------
+      for (unsigned int j=0; j<precand.size(); ++j)
+	{
+	  for (unsigned int i=j+1; i<precand.size(); ++i)
+	    {
+	      if (precand[j].first/precand[i].first == 1) continue;
+
+	      float thismass = (precand[j].second + precand[i].second).M();
+	      
+	      if (fabs(masszcand - Z_MASS) > (thismass - Z_MASS)) masszcand = thismass;
+	    }
+	}
+      
+    }
+  else if (nmuonSt3 >= 2)
+    {
+      std::vector<TLorentzVector> zcand;
+
+      for (unsigned int i=0; i<nmuonSt3; ++i)
+	{
+	  if (abs(T_Gen_Muon_MPID->at(i)) == 23) // PID Z == 23
+	    {
+	      zcand.push_back(TLorentzVector(T_Gen_Muon_Px->at(i),
+					     T_Gen_Muon_Py->at(i),
+					     T_Gen_Muon_Pz->at(i),
+					     T_Gen_Muon_Energy->at(i)));
+	    }
+	}
+
+      if (zcand.size() == 2)
+	{
+	  TLorentzVector prov(zcand[0] + zcand[1]);
+
+	  masszcand = prov.M();
+	}
+    }
+  else if (nelecSt3 >= 2)
+    {
+      std::vector<TLorentzVector> zcand;
+
+      for(unsigned int i=0; i<nelecSt3; ++i)
+	{
+	  if(abs(T_Gen_Elec_MPID->at(i)) == 23)
+	    {
+	      zcand.push_back(TLorentzVector(T_Gen_Elec_Px->at(i),
+					     T_Gen_Elec_Py->at(i),
+					     T_Gen_Elec_Pz->at(i),
+					     T_Gen_Elec_Energy->at(i)));
+	    }
+	}
+      
+      if (zcand.size() == 2)
+	{
+	  TLorentzVector prov(zcand[0] + zcand[1]);
+
+	  masszcand = prov.M();
+	}
+    }
+  
+
+  // Accepting only generated events inside the range
+  //----------------------------------------------------------------------------
+  bool ispass = true;
+
+  if (masszcand < masslow || masszcand > masshigh)
+    {
+      ispass = false;
+    }
+  
+  return ispass;
 }

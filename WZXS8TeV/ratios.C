@@ -1,15 +1,14 @@
 const UInt_t nchannels = 5;
 
-
 Double_t xs7tev         [nchannels] = {18.8907, 19.474, 22.436, 16.974, 18.737};
 Double_t xs7tevErrorStat[nchannels] = { 1.2036,  2.188,  2.991,  2.122,  2.584};
 Double_t xs7tevErrorSyst[nchannels] = { 0.6947,  0.732,  0.966,  0.661,  0.729};
 Double_t xs7tevErrorLumi[nchannels] = { 0.4396,  0.457,  0.512,  0.394,  0.438};
 
-Double_t xs8tev         [nchannels] = {999, 27.5, 23.5, 24.9, 22.9};
-Double_t xs8tevErrorStat[nchannels] = {999,  1.3,  1.7,  1.4,  1.4};
+Double_t xs8tev         [nchannels] = {999, 29.3, 25.1, 23.6, 23.5};
+Double_t xs8tevErrorStat[nchannels] = {999,  1.7,  2.2,  1.8,  1.9};
 Double_t xs8tevErrorSyst[nchannels] = {999,  0.0,  0.0,  0.0,  0.0};
-Double_t xs8tevErrorLumi[nchannels] = {999,  1.2,  1.0,  1.1,  1.0};
+Double_t xs8tevErrorLumi[nchannels] = {999,  1.3,  1.1,  1.0,  1.0};
 
 TString label[nchannels] = {"inclusive", "#mu#mu#mu", "eee", "#mu#mue", "ee#mu"};
 
@@ -24,7 +23,8 @@ TString _format = "png";
 //------------------------------------------------------------------------------
 void ratios(Int_t ecm = 8)
 {
-  Double_t luminosity = (ecm == 8) ? 19602 : 4920;  // pb-1
+  //  Double_t luminosity = (ecm == 8) ? 19602 : 4920;  // pb-1
+  Double_t luminosity = (ecm == 8) ? 12103 : 4920;  // pb-1
   Double_t xsWplusZ   = (ecm == 8) ?  13.9 : 11.4;  // pb
   Double_t xsWminusZ  = (ecm == 8) ?   8.1 :  6.4;  // pb
 
@@ -228,7 +228,7 @@ void Inclusive(Int_t ecm)
     total += (1. / xsErrorTotal / xsErrorTotal);
   }
 
-  xs8tev[0] = x / sqrt(total);
+  xs8tev[0] = x / total;
 
   xs8tevErrorStat[0] = 1. / sqrt(stat);
   xs8tevErrorSyst[0] = 1. / sqrt(syst);

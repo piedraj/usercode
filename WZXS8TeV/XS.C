@@ -784,7 +784,8 @@ void SetParameters(UInt_t channel)
   systError[WZTo3LNu]        = 0.0 / 1e2;
 
   _setLogy    = false;
-  _luminosity = 19602.0;  // 19468.3 for PU
+  _luminosity = 12103.3;  // 12103.3 for PU
+  //  _luminosity = 19602.0;  // 19468.3 for PU
   _yoffset    = 0.048;
   _verbosity  = 3;
   _directory  = "Summer12_53X/WH";

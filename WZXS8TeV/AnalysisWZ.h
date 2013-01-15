@@ -14,19 +14,20 @@
 #include <vector>
 
 
-// Lepton (top) scale factors
+// Input parameters for the WZ cross section
 //------------------------------------------------------------------------------
-const Double_t SF_Trigger_MM = 0.965;  // +- 0.0102;
-const Double_t SF_Trigger_EE = 0.962;  // +- 0.0130;
-const Double_t SF_Trigger_ME = 0.943;  // +- 0.0120;
+const Double_t xsWplusZ_nlo  = 14.48;  // pb (arXiv:1105.0020v1)
+const Double_t xsWminusZ_nlo =  8.40;  // pb (arXiv:1105.0020v1)
+const Double_t xsWplusZ      = 13.89;  // pb (MCFM with 71 < mZ < 111 GeV)
+const Double_t xsWminusZ     =  8.06;  // pb (MCFM with 71 < mZ < 111 GeV)
 
-const Double_t SF_Global_M = 0.9985;  // +- 0.0006;
-const Double_t SF_Global_E = 0.9850;  // +- 0.0003;
-
-const Double_t SF_Global_MMM = SF_Global_M * SF_Global_M * SF_Global_M;
-const Double_t SF_Global_EEE = SF_Global_E * SF_Global_E * SF_Global_E;
-const Double_t SF_Global_MME = SF_Global_M * SF_Global_M * SF_Global_E;
-const Double_t SF_Global_EEM = SF_Global_E * SF_Global_E * SF_Global_M;
+const Double_t W2e         = 0.1075;
+const Double_t W2m         = 0.1057;
+const Double_t W2tau       = 0.1125;
+const Double_t Z2ll        = 0.033658;
+const Double_t WZ23lnu     = 3 * Z2ll * (W2e + W2m + W2tau);
+const Double_t ngenWZ      = 2017979;
+const Double_t ngenWZphase = 1449067;  // (71 < mZ < 111 GeV)
 
 
 const Double_t Z_MASS = 91.1876;  // GeV
@@ -36,6 +37,8 @@ const UInt_t nChannels = 4;
 enum {MMM, EEE, MME, EEM};
 
 TString sChannel[] = {"MMM", "EEE", "MME", "EEM"};
+
+enum {iMuon, iElectron};
 
 
 const UInt_t nCuts = 10;
@@ -88,26 +91,29 @@ class AnalysisWZ: public CMSAnalysisSelectorMiniTrees
 
   // My member functions
   //----------------------------------------------------------------------------
-  void     GetParameters    ();
+  void       GetParameters    ();
 			    
-  Bool_t   ElectronBDT        (UInt_t iElec);
-  Bool_t   ElectronID         (UInt_t iElec);
-  Bool_t   ElectronCloseToPV  (UInt_t iElec);
-  Bool_t   ElectronIsolation  (UInt_t iElec);
+  Bool_t     ElectronBDT               (UInt_t iElec);
+  Bool_t     ElectronID                (UInt_t iElec);
+  Bool_t     ElectronCloseToPV         (UInt_t iElec);
+  Bool_t     ElectronIsolation         (UInt_t iElec);
 			    	      
-  Bool_t   MuonID             (UInt_t iMuon);
-  Bool_t   MuonCloseToPV      (UInt_t iMuon);
-  Bool_t   MuonIsolation      (UInt_t iMuon);
+  Bool_t     MuonID                    (UInt_t iMuon);
+  Bool_t     MuonCloseToPV             (UInt_t iMuon);
+  Bool_t     MuonIsolation             (UInt_t iMuon);
   
-  void     FillChannelCounters(UInt_t iChannel,
-			       UInt_t iCut);
+  void       FillChannelCounters       (UInt_t iChannel,
+				        UInt_t iCut);
 
-  Bool_t   FillCounters       (UInt_t nElec,
-			       UInt_t nMuon,
-			       UInt_t iCut);
+  Bool_t     FillCounters              (UInt_t nElec,
+				        UInt_t nMuon,
+				        UInt_t iCut);
 
-  void     FillHistograms     (UInt_t iChannel,
-			       UInt_t iCut);
+  void       FillHistograms            (UInt_t iChannel,
+				        UInt_t iCut);
+
+  const bool isSignalMCInsideZmassRange(const float & masslow,
+					const float & masshigh) const;
 
 
  public:
