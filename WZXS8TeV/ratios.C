@@ -1,9 +1,9 @@
 const UInt_t nchannels = 5;
 
-Double_t xs7tev         [nchannels] = {18.8907, 19.474, 22.436, 16.974, 18.737};
-Double_t xs7tevErrorStat[nchannels] = { 1.2036,  2.188,  2.991,  2.122,  2.584};
-Double_t xs7tevErrorSyst[nchannels] = { 0.6947,  0.732,  0.966,  0.661,  0.729};
-Double_t xs7tevErrorLumi[nchannels] = { 0.4396,  0.457,  0.512,  0.394,  0.438};
+Double_t xs7tev         [nchannels] = {19.32, 19.81, 22.81, 18.57, 18.95};
+Double_t xs7tevErrorStat[nchannels] = { 1.22,  2.20,  2.99,  2.32,  2.61};
+Double_t xs7tevErrorSyst[nchannels] = { 0.71,  0.74,  0.98,  0.71,  0.72};
+Double_t xs7tevErrorLumi[nchannels] = { 0.45,  0.47,  0.52,  0.43,  0.44};
 
 Double_t xs8tev         [nchannels] = {999, 29.3, 25.1, 23.6, 23.5};
 Double_t xs8tevErrorStat[nchannels] = {999,  1.7,  2.2,  1.8,  1.9};
