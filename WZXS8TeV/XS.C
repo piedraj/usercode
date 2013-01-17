@@ -154,7 +154,7 @@ void XS(UInt_t channel = MMM,
   DrawHistogram("hPtZLepton1" + suffix, "p_{T}^{Z leading lepton}",    5, 0, "GeV");
   DrawHistogram("hPtZLepton2" + suffix, "p_{T}^{Z trailing lepton}",   5, 0, "GeV",  0, 100);
   DrawHistogram("hPtWLepton"  + suffix, "p_{T}^{W lepton}",            5, 0, "GeV");
-  DrawHistogram("hInvMassZ"   + suffix, "m_{#font[12]{ll}}",           2, 0, "GeV", 70, 112);
+  DrawHistogram("hInvMassZ"   + suffix, "m_{#font[12]{ll}}",           2, 0, "GeV");
 }
 
 

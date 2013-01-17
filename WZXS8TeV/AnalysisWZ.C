@@ -28,20 +28,20 @@ void AnalysisWZ::Initialise()
 
       TString suffix = "_" + sChannel[i] + "_" + sCut[j];
 
-      hCounterRaw[i][j] = CreateH1D(TString("hCounterRaw" + suffix), "",   3, 0,   3);
-      hCounterPU [i][j] = CreateH1D(TString("hCounterPU"  + suffix), "",   3, 0,   3);
-      hCounterEff[i][j] = CreateH1D(TString("hCounterEff" + suffix), "",   3, 0,   3);
-      hCounter   [i][j] = CreateH1D(TString("hCounter"    + suffix), "",   3, 0,   3);
+      hCounterRaw[i][j] = CreateH1D(TString("hCounterRaw" + suffix), "", 3, 0, 3);
+      hCounterPU [i][j] = CreateH1D(TString("hCounterPU"  + suffix), "", 3, 0, 3);
+      hCounterEff[i][j] = CreateH1D(TString("hCounterEff" + suffix), "", 3, 0, 3);
+      hCounter   [i][j] = CreateH1D(TString("hCounter"    + suffix), "", 3, 0, 3);
 
       hNPV[i][j] = CreateH1D(TString("hNPV" + suffix), "",  60, 0,  60);
       hMET[i][j] = CreateH1D(TString("hMET" + suffix), "", 200, 0, 200);
 
       if (j < HasWCandidate) continue;
 
-      hPtZLepton1[i][j] = CreateH1D(TString("hPtZLepton1" + suffix), "", 200, 0, 200);
-      hPtZLepton2[i][j] = CreateH1D(TString("hPtZLepton2" + suffix), "", 200, 0, 200);
-      hPtWLepton [i][j] = CreateH1D(TString("hPtWLepton"  + suffix), "", 200, 0, 200);    
-      hInvMassZ  [i][j] = CreateH1D(TString("hInvMassZ"   + suffix), "", 200, 0, 200);
+      hPtZLepton1[i][j] = CreateH1D(TString("hPtZLepton1" + suffix), "", 200,  0, 200);
+      hPtZLepton2[i][j] = CreateH1D(TString("hPtZLepton2" + suffix), "", 200,  0, 200);
+      hPtWLepton [i][j] = CreateH1D(TString("hPtWLepton"  + suffix), "", 200,  0, 200);    
+      hInvMassZ  [i][j] = CreateH1D(TString("hInvMassZ"   + suffix), "",  80, 71, 111);
     }
   }
 }
