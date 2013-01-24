@@ -180,13 +180,12 @@ void LatinosTreeScript(Float_t luminosity,
     tree->Add(filesPath + "MC_TightTight/2L/latino_037_DY50toLLMad.root");
   }
   else if (theSample == "DYtautau") {
-    tree->Add("/hadoop/LatinosSkims/ReducedTrees/R53X_S1_V06_S2_V07_S3_V07/MC_TightTight/latino_DYtt_12.1fb.root");
-    tree->Add(filesPath + "MC_TightTight/2L/latino_086_ZgammaToLLuG.root");
+    tree->Add(filesPath +"MC_TightTight/4L/latino_DYtt_12.1fb.root");
+    tree->Add(filesPath +"MC_TightTight/2L/latino_086_ZgammaToLLuG.root");
   }
   else if (theSample == "WgammaNoStar") {
     tree->Add(filesPath + "MC_TightTight/2L/latino_085_WgammaToLNuG.root");
     tree->Add(filesPath + "MC_TightTight/2L/latino_008_GamGamWW.root");
-
   }
   else if (theSample == "WgammaStar") {
     tree->Add(filesPath + "MC_TightTight/2L/latino_082_WGstarToElNuMad.root");
@@ -292,8 +291,6 @@ void LatinosTreeScript(Float_t luminosity,
       efficiencyW = puW * effW * triggW;
       totalW      = (1 + 0.6 * (dataset >= 82 && dataset <= 84)) * baseW * efficiencyW * luminosity;
     }
-
-    if (theSample.Contains("DYtautau") && dataset != 86) totalW *= (19.4/12.1);
 
 
     // Help variables
