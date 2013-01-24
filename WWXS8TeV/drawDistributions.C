@@ -109,7 +109,7 @@ void drawDistributions(Int_t    njet       = 0,
 
   // Read input files
   //----------------------------------------------------------------------------
-  TString path = Form("rootfiles/%djet/%s/", _njet, _channel.Data());
+  TString path = Form("~lara/public/rootfilesMoriond/%djet/%s/", _njet, _channel.Data());
 
   for (UInt_t ip=0; ip<nProcesses; ip++)
     input[ip] = new TFile(path + process[ip] + ".root", "read");
@@ -196,10 +196,10 @@ void DrawHistogram(TString  hname,
     hist[ip]->SetName(hname + process[ip]);
 
     if (ngroup > 0) hist[ip]->Rebin(ngroup);
-
+    
     if (moveOverflow) MoveOverflowBins  (hist[ip], xmin, xmax);
     else              ZeroOutOfRangeBins(hist[ip], xmin, xmax);
-    
+
     if (ip == iData) {
       hist[ip]->SetMarkerStyle(kFullCircle);
     }
@@ -207,8 +207,6 @@ void DrawHistogram(TString  hname,
       hist[ip]->SetFillColor(color[ip]);
       hist[ip]->SetFillStyle(1001);
       hist[ip]->SetLineColor(color[ip]);
-
-      //      if (ip == iH125) hist[ip]->SetFillStyle(3354);
 
       if (_dataDriven && ip == itt)    hist[ip]->Scale(ttScale[_njet]);
       if (_dataDriven && ip == itW)    hist[ip]->Scale(tWScale[_njet]);
@@ -410,7 +408,7 @@ Float_t GetMaximumIncludingErrors(TH1F*    h,
   TAxis* axis = (TAxis*)h->GetXaxis();
   
   Int_t firstBin = (xmin != -999) ? axis->FindBin(xmin) : 1;
-  Int_t lastBin  = (xmax != -999) ? axis->FindBin(xmax) : nbins;
+  Int_t lastBin  = (xmax !=  999) ? axis->FindBin(xmax) : nbins;
 
   Float_t maxWithErrors = 0;
 
@@ -437,7 +435,7 @@ void MoveOverflowBins(TH1* h,
   TAxis* axis = (TAxis*)h->GetXaxis();
   
   Int_t firstBin = (xmin != -999) ? axis->FindBin(xmin) : 1;
-  Int_t lastBin  = (xmax != -999) ? axis->FindBin(xmax) : nbins;
+  Int_t lastBin  = (xmax !=  999) ? axis->FindBin(xmax) : nbins;
 
   Double_t firstVal = 0;
   Double_t firstErr = 0;
@@ -484,7 +482,7 @@ void ZeroOutOfRangeBins(TH1* h, Double_t xmin, Double_t xmax) const
   TAxis* axis = (TAxis*)h->GetXaxis();
   
   Int_t firstBin = (xmin != -999) ? axis->FindBin(xmin) : 1;
-  Int_t lastBin  = (xmax != -999) ? axis->FindBin(xmax) : nbins;
+  Int_t lastBin  = (xmax !=  999) ? axis->FindBin(xmax) : nbins;
 
   for (UInt_t i=0; i<=nbins+1; i++) {
 
