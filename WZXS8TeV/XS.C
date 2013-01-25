@@ -164,7 +164,7 @@ void XS(UInt_t channel = EEE,
   DrawHistogram("hPtLepton3"    + suffix, "p_{T}^{third lepton}",  5, 0, "GeV");
   DrawHistogram("hInvMass2Lep1" + suffix, "m_{#font[12]{ll}}",     2, 0, "GeV", 60, 120);
   DrawHistogram("hInvMass2Lep2" + suffix, "m_{#font[12]{ll}}^{second combination}",   2, 0, "GeV");
-  DrawHistogram("hInvMass3Lep"  + suffix, "m_{#font[12]{3l}}",     2, 0, "GeV");
+  DrawHistogram("hInvMass3Lep"  + suffix, "m_{#font[12]{3l}}",     5, 0, "GeV",  0, 600);
 
   if (cut < HasWCandidate) return;
 
