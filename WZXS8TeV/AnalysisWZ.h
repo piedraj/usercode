@@ -9,6 +9,7 @@
 #include "TLorentzVector.h"
 #include "TVector3.h"
 
+#include <algorithm>
 #include <fstream>
 #include <iostream>
 #include <vector>
@@ -127,6 +128,11 @@ class AnalysisWZ: public CMSAnalysisSelectorMiniTrees
 
   TH1D*                       hNPV       [nChannels][nCuts];
   TH1D*                       hMET       [nChannels][nCuts];
+  TH1D*                       hSumCharges[nChannels][nCuts];
+  TH1D*                       hPtLepton1 [nChannels][nCuts];
+  TH1D*                       hPtLepton2 [nChannels][nCuts];
+  TH1D*                       hPtLepton3 [nChannels][nCuts];
+
   TH1D*                       hPtZLepton1[nChannels][nCuts];
   TH1D*                       hPtZLepton2[nChannels][nCuts];
   TH1D*                       hPtWLepton [nChannels][nCuts];

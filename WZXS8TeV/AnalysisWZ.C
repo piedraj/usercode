@@ -36,6 +36,13 @@ void AnalysisWZ::Initialise()
       hNPV[i][j] = CreateH1D(TString("hNPV" + suffix), "",  60, 0,  60);
       hMET[i][j] = CreateH1D(TString("hMET" + suffix), "", 200, 0, 200);
 
+      if (j < Exactly3Leptons) continue;
+
+      hSumCharges[i][j] = CreateH1D(TString("hSumCharges" + suffix), "",   7, -3,   4);
+      hPtLepton1 [i][j] = CreateH1D(TString("hPtLepton1"  + suffix), "", 200,  0, 200);
+      hPtLepton2 [i][j] = CreateH1D(TString("hPtLepton2"  + suffix), "", 200,  0, 200);
+      hPtLepton3 [i][j] = CreateH1D(TString("hPtLepton3"  + suffix), "", 200,  0, 200);    
+
       if (j < HasWCandidate) continue;
 
       hPtZLepton1[i][j] = CreateH1D(TString("hPtZLepton1" + suffix), "", 200,  0, 200);
@@ -587,6 +594,54 @@ void AnalysisWZ::FillHistograms(UInt_t iChannel, UInt_t iCut)
 
   hNPV[iChannel][iCut]->Fill(T_Vertex_z->size(), hweight);
   hMET[iChannel][iCut]->Fill(T_METPFTypeI_ET,    hweight);
+
+  if (iCut < Exactly3Leptons) return;
+
+  Double_t sumCharges = -999;
+
+  std::vector<Double_t> ptLeptons;
+
+  ptLeptons.clear();
+
+  if (theChannel == MMM)
+    {
+      sumCharges = Muons_Charge[0] + Muons_Charge[1] + Muons_Charge[2];
+
+      ptLeptons.push_back(Muons[0].Pt());
+      ptLeptons.push_back(Muons[1].Pt());
+      ptLeptons.push_back(Muons[2].Pt());
+    }
+  else if (theChannel == MME)
+    {
+      sumCharges = Muons_Charge[0] + Muons_Charge[1] + Electrons_Charge[0];
+
+      ptLeptons.push_back(Muons[0].Pt());
+      ptLeptons.push_back(Muons[1].Pt());
+      ptLeptons.push_back(Electrons[0].Pt());
+    }
+  else if (theChannel == EEM)
+    {
+      sumCharges = Muons_Charge[0] + Electrons_Charge[0] + Electrons_Charge[1];
+
+      ptLeptons.push_back(Muons[0].Pt());
+      ptLeptons.push_back(Electrons[0].Pt());
+      ptLeptons.push_back(Electrons[1].Pt());
+    }
+  else if (theChannel == EEE)
+    {
+      sumCharges = Electrons_Charge[0] + Electrons_Charge[1] + Electrons_Charge[2];
+
+      ptLeptons.push_back(Electrons[0].Pt());
+      ptLeptons.push_back(Electrons[1].Pt());
+      ptLeptons.push_back(Electrons[2].Pt());
+    }
+
+  std::sort(ptLeptons.begin(), ptLeptons.end(), std::greater<Double_t>());
+
+  hSumCharges[iChannel][iCut]->Fill(sumCharges,   hweight);
+  hPtLepton1 [iChannel][iCut]->Fill(ptLeptons[0], hweight);
+  hPtLepton2 [iChannel][iCut]->Fill(ptLeptons[1], hweight);
+  hPtLepton3 [iChannel][iCut]->Fill(ptLeptons[2], hweight);
 
   if (iCut < HasWCandidate) return;
 

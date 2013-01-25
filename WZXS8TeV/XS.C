@@ -128,7 +128,7 @@ TLegend* DrawLegend               (Float_t     x1,
 				   TH1*        hist,
 				   TString     label,
 				   TString     option,
-				   Float_t     tsize   = 0.035,
+				   Float_t     tsize   = 0.03,
 				   Float_t     xoffset = 0.200,
 				   Float_t     yoffset = _yoffset);
 
@@ -136,7 +136,8 @@ TLegend* DrawLegend               (Float_t     x1,
 //------------------------------------------------------------------------------
 // XS
 //------------------------------------------------------------------------------
-void XS(UInt_t channel = MMM,
+void XS(UInt_t channel = EEE,
+	UInt_t cut     = Exactly3Leptons,
 	Bool_t batch   = false)
 {
   if (channel >= nChannels) return; 
@@ -145,16 +146,25 @@ void XS(UInt_t channel = MMM,
 
   SetParameters(channel);
 
-  MeasureTheCrossSection(channel);
+  if (cut == MET) MeasureTheCrossSection(channel);
 
-  TString suffix = "_" + sChannel[channel] + "_" + sCut[MET];
+  TString suffix = "_" + sChannel[channel] + "_" + sCut[cut];
   
-  DrawHistogram("hNPV"        + suffix, "number of primary vertices", -1, 0, "NULL", 0, 30, false);
-  DrawHistogram("hMET"        + suffix, "E_{T}^{miss}",                5, 0, "GeV");
-  DrawHistogram("hPtZLepton1" + suffix, "p_{T}^{Z leading lepton}",    5, 0, "GeV");
-  DrawHistogram("hPtZLepton2" + suffix, "p_{T}^{Z trailing lepton}",   5, 0, "GeV",  0, 100);
-  DrawHistogram("hPtWLepton"  + suffix, "p_{T}^{W lepton}",            5, 0, "GeV");
-  DrawHistogram("hInvMassZ"   + suffix, "m_{#font[12]{ll}}",           2, 0, "GeV");
+  DrawHistogram("hNPV" + suffix, "number of primary vertices", -1, 0, "NULL", 0, 30, false);
+  DrawHistogram("hMET" + suffix, "E_{T}^{miss}",                5, 0, "GeV");
+
+  if (cut < Exactly3Leptons) return;
+
+  DrawHistogram("hPtLepton1" + suffix, "p_{T}^{first lepton}",  5, 0, "GeV");
+  DrawHistogram("hPtLepton2" + suffix, "p_{T}^{second lepton}", 5, 0, "GeV");
+  DrawHistogram("hPtLepton3" + suffix, "p_{T}^{third lepton}",  5, 0, "GeV");
+
+  if (cut < HasWCandidate) return;
+
+  DrawHistogram("hPtZLepton1" + suffix, "p_{T}^{Z leading lepton}",  5, 0, "GeV");
+  DrawHistogram("hPtZLepton2" + suffix, "p_{T}^{Z trailing lepton}", 5, 0, "GeV", 0, 100);
+  DrawHistogram("hPtWLepton"  + suffix, "p_{T}^{W lepton}",          5, 0, "GeV");
+  DrawHistogram("hInvMassZ"   + suffix, "m_{#font[12]{ll}}",         2, 0, "GeV");
 }
 
 
@@ -334,16 +344,16 @@ void DrawHistogram(TString  hname,
 
   // Normalize MC to data
   //----------------------------------------------------------------------------
-  if (hname.Contains("hNPV") && !hname.Contains("MET")) {
-  
-    for (UInt_t i=0; i<vprocess.size(); i++) {
-
-      UInt_t j = vprocess.at(i);
-      
-      if (j != Data && mcIntegral > 0)
-	hist[j]->Scale(hist[Data]->Integral() / mcIntegral);
-    }
-  }
+  //  if (hname.Contains("hNPV") && !hname.Contains("MET")) {
+  //  
+  //    for (UInt_t i=0; i<vprocess.size(); i++) {
+  //
+  //      UInt_t j = vprocess.at(i);
+  //      
+  //      if (j != Data && mcIntegral > 0)
+  //	hist[j]->Scale(hist[Data]->Integral() / mcIntegral);
+  //    }
+  //  }
 
 
   // All MC
@@ -422,24 +432,35 @@ void DrawHistogram(TString  hname,
 
     hist[Data]->SetMinimum(0.01);
   }
-  else theMax *= 1.3;
+  else theMax *= 1.4;
 
   hist[Data]->SetMaximum(theMax);
 
 
   // Legend
   //----------------------------------------------------------------------------
-  Double_t x0     = 0.700;
+  Double_t x0     = 0.72;
   Double_t y0     = 0.834;
   Double_t delta  = _yoffset + 0.001;
   Double_t ndelta = 0;
   
-  DrawLegend(x0, y0 - ndelta, hist[Data],           " data",          "lp"); ndelta += delta;
-  DrawLegend(x0, y0 - ndelta, hist[WZTo3LNu],       " WZ",            "f");  ndelta += delta;
-  DrawLegend(x0, y0 - ndelta, hist[ZZ],             " VV",            "f");  ndelta += delta;
-  DrawLegend(x0, y0 - ndelta, hist[ZJets_Madgraph], " V + jets",      "f");  ndelta += delta;
-  DrawLegend(x0, y0 - ndelta, hist[TTbar_Madgraph], " top",           "f");  ndelta += delta;
-  DrawLegend(x0, y0 - ndelta, allmc,                " #sigma_{stat}", "f");  ndelta += delta;
+  DrawLegend(x0 - 0.49, y0 - ndelta, hist[Data],           Form(" data (%.0f)",   hist[Data]          ->Integral()), "lp"); ndelta += delta;
+  DrawLegend(x0 - 0.49, y0 - ndelta, allmc,                Form(" MC (%.0f)",     allmc               ->Integral()), "f");  ndelta += delta;
+  DrawLegend(x0 - 0.49, y0 - ndelta, hist[WZTo3LNu],       Form(" WZ (%.0f)",     hist[WZTo3LNu]      ->Integral()), "f");  ndelta += delta;
+  DrawLegend(x0 - 0.49, y0 - ndelta, hist[ZJets_Madgraph], Form(" Z+jets (%.0f)", hist[ZJets_Madgraph]->Integral()), "f");  ndelta += delta;
+
+  ndelta = 0;
+
+  DrawLegend(x0 - 0.23, y0 - ndelta, hist[ZgammaToLLG],    Form(" Z#gamma (%.0f)",  hist[ZgammaToLLG]   ->Integral()), "f"); ndelta += delta;
+  DrawLegend(x0 - 0.23, y0 - ndelta, hist[ZZ],             Form(" ZZ (%.0f)",       hist[ZZ]            ->Integral()), "f"); ndelta += delta;
+  DrawLegend(x0 - 0.23, y0 - ndelta, hist[TTbar_Madgraph], Form(" t#bar{t} (%.0f)", hist[TTbar_Madgraph]->Integral()), "f"); ndelta += delta;
+  DrawLegend(x0 - 0.23, y0 - ndelta, hist[TW],             Form(" tW (%.0f)",       hist[TW]            ->Integral()), "f"); ndelta += delta;
+
+  ndelta = 0;
+
+  DrawLegend(x0, y0 - ndelta, hist[WW],             Form(" WW (%.0f)",      hist[WW]            ->Integral()), "f"); ndelta += delta;
+  DrawLegend(x0, y0 - ndelta, hist[WgammaToLNuG],   Form(" W#gamma (%.0f)", hist[WgammaToLNuG]  ->Integral()), "f"); ndelta += delta;
+  DrawLegend(x0, y0 - ndelta, hist[WJets_Madgraph], Form(" W+jets (%.0f)",  hist[WJets_Madgraph]->Integral()), "f"); ndelta += delta;
 
 
   // CMS titles
@@ -758,16 +779,16 @@ void SetParameters(UInt_t channel)
   if (channel == MMM || channel == MME) process[Data] += "Mu";
 
   color[Data]            = kBlack;
-  color[WW]              = kRed+3;
-  color[ZZ]              = kRed+3;
-  color[WgammaToLNuG]    = kRed+3;
-  color[ZgammaToLLG]     = kRed+3;
-  color[TW]              = kAzure-9;
-  color[TbarW]           = kAzure-9;
-  color[TTbar_Madgraph]  = kAzure-9;
-  color[TTbar_Powheg_2L] = kAzure-9;
-  color[WJets_Madgraph]  = kGreen+2;
-  color[ZJets_Madgraph]  = kGreen+2;
+  color[WW]              = kAzure;    // kRed+3 (VV)
+  color[ZZ]              = kRed+1;    // kRed+3 (VV)
+  color[WgammaToLNuG]    = kTeal;     // kRed+3 (VV)
+  color[ZgammaToLLG]     = kRed+3;    // kRed+3 (VV)
+  color[TW]              = kAzure-3;  // kAzure-9 (top)
+  color[TbarW]           = kAzure-3;  // kAzure-9 (top)
+  color[TTbar_Madgraph]  = kAzure-9;  // kAzure-9 (top)
+  color[TTbar_Powheg_2L] = kAzure-9;  // kAzure-9 (top)
+  color[WJets_Madgraph]  = kGray+1;   // kGreen+2 (V + jets)
+  color[ZJets_Madgraph]  = kGreen+2;  // kGreen+2 (V + jets)
   color[WZTo3LNu]        = kOrange-2;
 
   systError[Data]            = 0.0;
@@ -784,8 +805,8 @@ void SetParameters(UInt_t channel)
   systError[WZTo3LNu]        = 0.0 / 1e2;
 
   _setLogy    = false;
-  _luminosity = 12103.3;  // 12103.3 for PU
-  //  _luminosity = 19602.0;  // 19468.3 for PU
+  //  _luminosity = 12103.3;  // 12103.3 for PU
+  _luminosity = 19602.0;  // 19468.3 for PU
   _yoffset    = 0.048;
   _verbosity  = 3;
   _directory  = "Summer12_53X/WH";
