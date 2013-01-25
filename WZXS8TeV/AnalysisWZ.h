@@ -126,12 +126,15 @@ class AnalysisWZ: public CMSAnalysisSelectorMiniTrees
   TH1D*                       hCounterEff[nChannels][nCuts];
   TH1D*                       hCounter   [nChannels][nCuts];
 
-  TH1D*                       hNPV       [nChannels][nCuts];
-  TH1D*                       hMET       [nChannels][nCuts];
-  TH1D*                       hSumCharges[nChannels][nCuts];
-  TH1D*                       hPtLepton1 [nChannels][nCuts];
-  TH1D*                       hPtLepton2 [nChannels][nCuts];
-  TH1D*                       hPtLepton3 [nChannels][nCuts];
+  TH1D*                       hNPV         [nChannels][nCuts];
+  TH1D*                       hMET         [nChannels][nCuts];
+  TH1D*                       hSumCharges  [nChannels][nCuts];
+  TH1D*                       hInvMass2Lep1[nChannels][nCuts];
+  TH1D*                       hInvMass2Lep2[nChannels][nCuts];
+  TH1D*                       hInvMass3Lep [nChannels][nCuts];
+  TH1D*                       hPtLepton1   [nChannels][nCuts];
+  TH1D*                       hPtLepton2   [nChannels][nCuts];
+  TH1D*                       hPtLepton3   [nChannels][nCuts];
 
   TH1D*                       hPtZLepton1[nChannels][nCuts];
   TH1D*                       hPtZLepton2[nChannels][nCuts];

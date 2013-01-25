@@ -38,10 +38,13 @@ void AnalysisWZ::Initialise()
 
       if (j < Exactly3Leptons) continue;
 
-      hSumCharges[i][j] = CreateH1D(TString("hSumCharges" + suffix), "",   7, -3,   4);
-      hPtLepton1 [i][j] = CreateH1D(TString("hPtLepton1"  + suffix), "", 200,  0, 200);
-      hPtLepton2 [i][j] = CreateH1D(TString("hPtLepton2"  + suffix), "", 200,  0, 200);
-      hPtLepton3 [i][j] = CreateH1D(TString("hPtLepton3"  + suffix), "", 200,  0, 200);    
+      hSumCharges  [i][j] = CreateH1D(TString("hSumCharges"   + suffix), "",   9, -4,    5);
+      hInvMass2Lep1[i][j] = CreateH1D(TString("hInvMass2Lep1" + suffix), "", 200,  0,  200);
+      hInvMass2Lep2[i][j] = CreateH1D(TString("hInvMass2Lep2" + suffix), "", 200,  0,  200);
+      hInvMass3Lep [i][j] = CreateH1D(TString("hInvMass3Lep"  + suffix), "", 500,  0, 1000);
+      hPtLepton1   [i][j] = CreateH1D(TString("hPtLepton1"    + suffix), "", 200,  0,  200);
+      hPtLepton2   [i][j] = CreateH1D(TString("hPtLepton2"    + suffix), "", 200,  0,  200);
+      hPtLepton3   [i][j] = CreateH1D(TString("hPtLepton3"    + suffix), "", 200,  0,  200);    
 
       if (j < HasWCandidate) continue;
 
@@ -183,6 +186,20 @@ void AnalysisWZ::InsideLoop()
   if (!FillCounters(nSelElec,          nSelMuon,      Has2IsoGoodLeptons)) return;
 
 
+  // Debug histograms to understand MMM lack of MC
+  //----------------------------------------------------------------------------
+  if (nSelElec >= 2)
+    {
+      hNPV[EEE][Has2IsoGoodLeptons]->Fill(T_Vertex_z->size(), efficiency_weight * xs_weight);
+      hMET[EEE][Has2IsoGoodLeptons]->Fill(T_METPFTypeI_ET,    efficiency_weight * xs_weight);
+    }
+  if (nSelMuon >= 2)
+    {
+      hNPV[MMM][Has2IsoGoodLeptons]->Fill(T_Vertex_z->size(), efficiency_weight * xs_weight);
+      hMET[MMM][Has2IsoGoodLeptons]->Fill(T_METPFTypeI_ET,    efficiency_weight * xs_weight);
+    }
+
+
   // Exactly3Leptons
   //----------------------------------------------------------------------------
   if ((nSelMuon + nSelElec) != 3) return;
@@ -196,7 +213,7 @@ void AnalysisWZ::InsideLoop()
   else if (nSelElec == 2) theChannel = EEM;
 
 
-  // Require at least two leptons with pt > 20 GeV, one of them in the Z
+  // Require at least two leptons with pt > 20 GeV
   //----------------------------------------------------------------------------
   UInt_t nHighPtElec = 0;
   UInt_t nHighPtMuon = 0;
@@ -204,7 +221,7 @@ void AnalysisWZ::InsideLoop()
   for (UInt_t i=0; i<nSelElec; i++) if (Electrons[i].Pt() > 20) nHighPtElec++;
   for (UInt_t i=0; i<nSelMuon; i++) if (Muons    [i].Pt() > 20) nHighPtMuon++;
 
-  if ((nHighPtElec + nHighPtMuon) < 2) return;
+  if ((nHighPtElec + nHighPtMuon) < 3) return;  // Replace 3 by 2
 
   if (nSelMuon >= 2 && nHighPtMuon < 1) return;
   if (nSelElec >= 2 && nHighPtElec < 1) return;
@@ -597,39 +614,95 @@ void AnalysisWZ::FillHistograms(UInt_t iChannel, UInt_t iCut)
 
   if (iCut < Exactly3Leptons) return;
 
-  Double_t sumCharges = -999;
+  Double_t sumCharges   = -999;
+  Double_t invMass3Lep  = -999;
+  Double_t invMass2Lep1 =  999;
+  Double_t invMass2Lep2 =  999;
 
   std::vector<Double_t> ptLeptons;
 
   ptLeptons.clear();
 
+
+  // MMM
+  //----------------------------------------------------------------------------
   if (theChannel == MMM)
     {
       sumCharges = Muons_Charge[0] + Muons_Charge[1] + Muons_Charge[2];
+
+      invMass3Lep = (Muons[0] + Muons[1] + Muons[2]).M();
+
+      if (Muons_Charge[0] * Muons_Charge[1] < 0) {
+
+	invMass2Lep1 = (Muons[0] + Muons[1]).M();
+
+	if (Muons_Charge[0] * Muons_Charge[2] < 0) invMass2Lep2 = (Muons[0] + Muons[2]).M();
+	if (Muons_Charge[1] * Muons_Charge[2] < 0) invMass2Lep2 = (Muons[1] + Muons[2]).M();
+      }
+      else if (Muons_Charge[0] * Muons_Charge[2] < 0) {
+
+	invMass2Lep1 = (Muons[0] + Muons[2]).M();
+
+	if (Muons_Charge[1] * Muons_Charge[2] < 0) invMass2Lep2 = (Muons[1] + Muons[2]).M();
+      }
+      else
+	if (Muons_Charge[1] * Muons_Charge[2] < 0) invMass2Lep1 = (Muons[1] + Muons[2]).M();
 
       ptLeptons.push_back(Muons[0].Pt());
       ptLeptons.push_back(Muons[1].Pt());
       ptLeptons.push_back(Muons[2].Pt());
     }
+  // MME
+  //----------------------------------------------------------------------------
   else if (theChannel == MME)
     {
       sumCharges = Muons_Charge[0] + Muons_Charge[1] + Electrons_Charge[0];
+
+      invMass3Lep = (Muons[0] + Muons[1] + Electrons[0]).M();
+
+      if (Muons_Charge[0] * Muons_Charge[1] < 0) invMass2Lep1 = (Muons[0] + Muons[1]).M();
 
       ptLeptons.push_back(Muons[0].Pt());
       ptLeptons.push_back(Muons[1].Pt());
       ptLeptons.push_back(Electrons[0].Pt());
     }
+  // EEM
+  //----------------------------------------------------------------------------
   else if (theChannel == EEM)
     {
       sumCharges = Muons_Charge[0] + Electrons_Charge[0] + Electrons_Charge[1];
+
+      invMass3Lep = (Muons[0] + Electrons[1] + Electrons[2]).M();
+
+      if (Electrons_Charge[0] * Electrons_Charge[1] < 0) invMass2Lep1 = (Electrons[0] + Electrons[1]).M();
 
       ptLeptons.push_back(Muons[0].Pt());
       ptLeptons.push_back(Electrons[0].Pt());
       ptLeptons.push_back(Electrons[1].Pt());
     }
+  // EEE
+  //----------------------------------------------------------------------------
   else if (theChannel == EEE)
     {
       sumCharges = Electrons_Charge[0] + Electrons_Charge[1] + Electrons_Charge[2];
+
+      invMass3Lep = (Electrons[0] + Electrons[1] + Electrons[2]).M();
+
+      if (Electrons_Charge[0] * Electrons_Charge[1] < 0) {
+
+	invMass2Lep1 = (Electrons[0] + Electrons[1]).M();
+
+	if (Electrons_Charge[0] * Electrons_Charge[2] < 0) invMass2Lep2 = (Electrons[0] + Electrons[2]).M();
+	if (Electrons_Charge[1] * Electrons_Charge[2] < 0) invMass2Lep2 = (Electrons[1] + Electrons[2]).M();
+      }
+      else if (Electrons_Charge[0] * Electrons_Charge[2] < 0) {
+
+	invMass2Lep1 = (Electrons[0] + Electrons[2]).M();
+
+	if (Electrons_Charge[1] * Electrons_Charge[2] < 0) invMass2Lep2 = (Electrons[1] + Electrons[2]).M();
+      }
+      else
+	if (Electrons_Charge[1] * Electrons_Charge[2] < 0) invMass2Lep1 = (Electrons[1] + Electrons[2]).M();
 
       ptLeptons.push_back(Electrons[0].Pt());
       ptLeptons.push_back(Electrons[1].Pt());
@@ -638,10 +711,23 @@ void AnalysisWZ::FillHistograms(UInt_t iChannel, UInt_t iCut)
 
   std::sort(ptLeptons.begin(), ptLeptons.end(), std::greater<Double_t>());
 
-  hSumCharges[iChannel][iCut]->Fill(sumCharges,   hweight);
-  hPtLepton1 [iChannel][iCut]->Fill(ptLeptons[0], hweight);
-  hPtLepton2 [iChannel][iCut]->Fill(ptLeptons[1], hweight);
-  hPtLepton3 [iChannel][iCut]->Fill(ptLeptons[2], hweight);
+  hSumCharges  [iChannel][iCut]->Fill(sumCharges,  hweight);
+  hInvMass3Lep [iChannel][iCut]->Fill(invMass3Lep, hweight);
+
+  hPtLepton1   [iChannel][iCut]->Fill(ptLeptons[0], hweight);
+  hPtLepton2   [iChannel][iCut]->Fill(ptLeptons[1], hweight);
+  hPtLepton3   [iChannel][iCut]->Fill(ptLeptons[2], hweight);
+
+  if (fabs(invMass2Lep1 - Z_MASS) < fabs(invMass2Lep2 - Z_MASS))
+    {
+      hInvMass2Lep1[iChannel][iCut]->Fill(invMass2Lep1, hweight);
+      hInvMass2Lep2[iChannel][iCut]->Fill(invMass2Lep2, hweight);
+    }
+  else
+    {
+      hInvMass2Lep1[iChannel][iCut]->Fill(invMass2Lep2, hweight);
+      hInvMass2Lep2[iChannel][iCut]->Fill(invMass2Lep1, hweight);
+    }
 
   if (iCut < HasWCandidate) return;
 

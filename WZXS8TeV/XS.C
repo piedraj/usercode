@@ -96,7 +96,7 @@ void     DrawHistogram            (TString     hname,
 				   TString     units        = "NULL",
 				   Double_t    xmin         = -999,
 				   Double_t    xmax         =  999,
-				   Bool_t      moveOverflow = true);
+				   Bool_t      moveOverflow = false);
 
 Float_t  GetMaximumIncludingErrors(TH1F*       h,
 				   Double_t    xmin = -999,
@@ -148,16 +148,23 @@ void XS(UInt_t channel = EEE,
 
   if (cut == MET) MeasureTheCrossSection(channel);
 
+  //  DrawHistogram("hNPV_EEE_Has2IsoGoodLeptons", "number of primary vertices", -1, 0, "NULL", 0, 30, false);
+  //  DrawHistogram("hNPV_MMM_Has2IsoGoodLeptons", "number of primary vertices", -1, 0, "NULL", 0, 30, false);
+
   TString suffix = "_" + sChannel[channel] + "_" + sCut[cut];
-  
+
   DrawHistogram("hNPV" + suffix, "number of primary vertices", -1, 0, "NULL", 0, 30, false);
   DrawHistogram("hMET" + suffix, "E_{T}^{miss}",                5, 0, "GeV");
 
   if (cut < Exactly3Leptons) return;
 
-  DrawHistogram("hPtLepton1" + suffix, "p_{T}^{first lepton}",  5, 0, "GeV");
-  DrawHistogram("hPtLepton2" + suffix, "p_{T}^{second lepton}", 5, 0, "GeV");
-  DrawHistogram("hPtLepton3" + suffix, "p_{T}^{third lepton}",  5, 0, "GeV");
+  DrawHistogram("hSumCharges"   + suffix, "q_{1} + q_{2} + q_{3}");
+  DrawHistogram("hPtLepton1"    + suffix, "p_{T}^{first lepton}",  5, 0, "GeV");
+  DrawHistogram("hPtLepton2"    + suffix, "p_{T}^{second lepton}", 5, 0, "GeV");
+  DrawHistogram("hPtLepton3"    + suffix, "p_{T}^{third lepton}",  5, 0, "GeV");
+  DrawHistogram("hInvMass2Lep1" + suffix, "m_{#font[12]{ll}}",     2, 0, "GeV", 60, 120);
+  DrawHistogram("hInvMass2Lep2" + suffix, "m_{#font[12]{ll}}^{second combination}",   2, 0, "GeV");
+  DrawHistogram("hInvMass3Lep"  + suffix, "m_{#font[12]{3l}}",     2, 0, "GeV");
 
   if (cut < HasWCandidate) return;
 
