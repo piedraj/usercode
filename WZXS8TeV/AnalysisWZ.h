@@ -92,29 +92,32 @@ class AnalysisWZ: public CMSAnalysisSelectorMiniTrees
 
   // My member functions
   //----------------------------------------------------------------------------
-  void       GetParameters    ();
+  void         GetParameters             ();
 			    
-  Bool_t     ElectronBDT               (UInt_t iElec);
-  Bool_t     ElectronID                (UInt_t iElec);
-  Bool_t     ElectronCloseToPV         (UInt_t iElec);
-  Bool_t     ElectronIsolation         (UInt_t iElec);
+  Bool_t       ElectronBDT               (UInt_t iElec);
+  Bool_t       ElectronID                (UInt_t iElec);
+  Bool_t       ElectronCloseToPV         (UInt_t iElec);
+  Bool_t       ElectronIsolation         (UInt_t iElec);
 			    	      
-  Bool_t     MuonID                    (UInt_t iMuon);
-  Bool_t     MuonCloseToPV             (UInt_t iMuon);
-  Bool_t     MuonIsolation             (UInt_t iMuon);
+  Bool_t       MuonID                    (UInt_t iMuon);
+  Bool_t       MuonCloseToPV             (UInt_t iMuon);
+  Bool_t       MuonIsolation             (UInt_t iMuon);
   
-  void       FillChannelCounters       (UInt_t iChannel,
-				        UInt_t iCut);
+  void         FillChannelCounters       (UInt_t iChannel,
+					  UInt_t iCut);
 
-  Bool_t     FillCounters              (UInt_t nElec,
-				        UInt_t nMuon,
-				        UInt_t iCut);
+  Bool_t       FillCounters              (UInt_t nElec,
+					  UInt_t nMuon,
+					  UInt_t iCut);
 
-  void       FillHistograms            (UInt_t iChannel,
-				        UInt_t iCut);
+  void         FillHistograms            (UInt_t iChannel,
+					  UInt_t iCut);
 
-  const bool isSignalMCInsideZmassRange(const float & masslow,
-					const float & masshigh) const;
+  const Bool_t isSignalMCInsideZmassRange(const float & masslow,
+					  const float & masshigh) const;
+
+  const Bool_t WgammaFilter              () const;
+  void         GenStudy                  ();
 
 
  public:
@@ -126,20 +129,79 @@ class AnalysisWZ: public CMSAnalysisSelectorMiniTrees
   TH1D*                       hCounterEff[nChannels][nCuts];
   TH1D*                       hCounter   [nChannels][nCuts];
 
-  TH1D*                       hNPV         [nChannels][nCuts];
-  TH1D*                       hMET         [nChannels][nCuts];
-  TH1D*                       hSumCharges  [nChannels][nCuts];
-  TH1D*                       hInvMass2Lep1[nChannels][nCuts];
-  TH1D*                       hInvMass2Lep2[nChannels][nCuts];
-  TH1D*                       hInvMass3Lep [nChannels][nCuts];
-  TH1D*                       hPtLepton1   [nChannels][nCuts];
-  TH1D*                       hPtLepton2   [nChannels][nCuts];
-  TH1D*                       hPtLepton3   [nChannels][nCuts];
+  TH1D*                       hNPV          [nChannels][nCuts];
+  TH1D*                       hMET          [nChannels][nCuts];
+  TH1D*                       hSumCharges   [nChannels][nCuts];
+  TH1D*                       hInvMass2Lep1 [nChannels][nCuts];
+  TH1D*                       hInvMass2Lep2 [nChannels][nCuts];
+  TH1D*                       hInvMass3Lep  [nChannels][nCuts];
+  TH1D*                       hPtLepton1    [nChannels][nCuts];
+  TH1D*                       hPtLepton2    [nChannels][nCuts];
+  TH1D*                       hPtLepton3    [nChannels][nCuts];
+  TH1D*                       hMVARingsMuon1[nChannels][nCuts];
+  TH1D*                       hMVARingsMuon2[nChannels][nCuts];
+  TH1D*                       hMVARingsMuon3[nChannels][nCuts];
 
   TH1D*                       hPtZLepton1[nChannels][nCuts];
   TH1D*                       hPtZLepton2[nChannels][nCuts];
   TH1D*                       hPtWLepton [nChannels][nCuts];
   TH1D*                       hInvMassZ  [nChannels][nCuts];
+
+
+  // Gen study
+  //----------------------------------------------------------------------------
+  TH1D*                       h_n_tau_St3;
+  TH1D*                       h_n_muon_St3;
+  TH1D*                       h_n_muon_Gen;
+  TH1D*                       h_n_muon_Rec;
+  TH1D*                       h_n_muon_Global;
+  TH1D*                       h_n_muon_PV;
+  TH1D*                       h_n_muon_Iso;
+  TH1D*                       h_n_muon_ID;
+  TH1D*                       h_n_elec_St3;
+  TH1D*                       h_n_elec_Gen;
+  TH1D*                       h_n_elec_Rec;
+  TH1D*                       h_n_elec_Global;
+  TH1D*                       h_n_elec_PV;
+  TH1D*                       h_n_elec_Iso;
+  TH1D*                       h_n_elec_ID;
+
+  TH1D*                       h_pt_tau_St3;
+  TH1D*                       h_pt_muon_St3;
+  TH1D*                       h_pt_muon_Gen;
+  TH1D*                       h_pt_muon_Rec;
+  TH1D*                       h_pt_muon_Global;
+  TH1D*                       h_pt_muon_PV;
+  TH1D*                       h_pt_muon_Iso;
+  TH1D*                       h_pt_muon_ID;
+  TH1D*                       h_pt_elec_St3;
+  TH1D*                       h_pt_elec_Gen;
+  TH1D*                       h_pt_elec_Rec;
+  TH1D*                       h_pt_elec_Global;
+  TH1D*                       h_pt_elec_PV;
+  TH1D*                       h_pt_elec_Iso;
+  TH1D*                       h_pt_elec_ID;
+
+  TH1D*                       h_eta_tau_St3;
+  TH1D*                       h_eta_muon_St3;
+  TH1D*                       h_eta_muon_Gen;
+  TH1D*                       h_eta_muon_Rec;
+  TH1D*                       h_eta_muon_Global;
+  TH1D*                       h_eta_muon_PV;
+  TH1D*                       h_eta_muon_Iso;
+  TH1D*                       h_eta_muon_ID;
+  TH1D*                       h_eta_elec_St3;
+  TH1D*                       h_eta_elec_Gen;
+  TH1D*                       h_eta_elec_Rec;
+  TH1D*                       h_eta_elec_Global;
+  TH1D*                       h_eta_elec_PV;
+  TH1D*                       h_eta_elec_Iso;
+  TH1D*                       h_eta_elec_ID;
+
+  TH1D*                       h_mvaRings_muon_r1;
+  TH1D*                       h_mvaRings_muon_r2;
+  TH1D*                       h_mvaRings_muon_r3;
+  TH1D*                       h_mvaRings_muon_r4;
 
 
   // Input parameters
@@ -156,11 +218,13 @@ class AnalysisWZ: public CMSAnalysisSelectorMiniTrees
 
   // Data members
   //----------------------------------------------------------------------------
-  std::vector<Double_t>       Muons_Charge;
-  std::vector<Double_t>       Electrons_Charge;
-
   std::vector<TLorentzVector> Muons;
+  std::vector<Int_t>          Muons_Index;
+  std::vector<Double_t>       Muons_Charge;
+
   std::vector<TLorentzVector> Electrons;
+  std::vector<Int_t>          Electrons_Index;
+  std::vector<Double_t>       Electrons_Charge;
 
   TLorentzVector              ZLepton1;
   TLorentzVector              ZLepton2;

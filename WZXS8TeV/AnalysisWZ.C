@@ -33,18 +33,21 @@ void AnalysisWZ::Initialise()
       hCounterEff[i][j] = CreateH1D(TString("hCounterEff" + suffix), "", 3, 0, 3);
       hCounter   [i][j] = CreateH1D(TString("hCounter"    + suffix), "", 3, 0, 3);
 
-      hNPV[i][j] = CreateH1D(TString("hNPV" + suffix), "",  60, 0,  60);
+      hNPV[i][j] = CreateH1D(TString("hNPV" + suffix), "",  50, 0,  50);
       hMET[i][j] = CreateH1D(TString("hMET" + suffix), "", 200, 0, 200);
 
       if (j < Exactly3Leptons) continue;
 
-      hSumCharges  [i][j] = CreateH1D(TString("hSumCharges"   + suffix), "",   9, -4,    5);
-      hInvMass2Lep1[i][j] = CreateH1D(TString("hInvMass2Lep1" + suffix), "", 200,  0,  200);
-      hInvMass2Lep2[i][j] = CreateH1D(TString("hInvMass2Lep2" + suffix), "", 200,  0,  200);
-      hInvMass3Lep [i][j] = CreateH1D(TString("hInvMass3Lep"  + suffix), "", 500,  0, 1000);
-      hPtLepton1   [i][j] = CreateH1D(TString("hPtLepton1"    + suffix), "", 200,  0,  200);
-      hPtLepton2   [i][j] = CreateH1D(TString("hPtLepton2"    + suffix), "", 200,  0,  200);
-      hPtLepton3   [i][j] = CreateH1D(TString("hPtLepton3"    + suffix), "", 200,  0,  200);    
+      hSumCharges   [i][j] = CreateH1D(TString("hSumCharges"    + suffix), "",   9,   -4,   5);
+      hInvMass2Lep1 [i][j] = CreateH1D(TString("hInvMass2Lep1"  + suffix), "", 200,    0, 200);
+      hInvMass2Lep2 [i][j] = CreateH1D(TString("hInvMass2Lep2"  + suffix), "", 200,    0, 200);
+      hInvMass3Lep  [i][j] = CreateH1D(TString("hInvMass3Lep"   + suffix), "", 400,    0, 400);
+      hPtLepton1    [i][j] = CreateH1D(TString("hPtLepton1"     + suffix), "", 200,    0, 200);
+      hPtLepton2    [i][j] = CreateH1D(TString("hPtLepton2"     + suffix), "", 200,    0, 200);
+      hPtLepton3    [i][j] = CreateH1D(TString("hPtLepton3"     + suffix), "", 200,    0, 200);    
+      hMVARingsMuon1[i][j] = CreateH1D(TString("hMVARingsMuon1" + suffix), "", 110, -1.1, 1.1);
+      hMVARingsMuon2[i][j] = CreateH1D(TString("hMVARingsMuon2" + suffix), "", 110, -1.1, 1.1);
+      hMVARingsMuon3[i][j] = CreateH1D(TString("hMVARingsMuon3" + suffix), "", 110, -1.1, 1.1);    
 
       if (j < HasWCandidate) continue;
 
@@ -54,6 +57,62 @@ void AnalysisWZ::Initialise()
       hInvMassZ  [i][j] = CreateH1D(TString("hInvMassZ"   + suffix), "",  80, 71, 111);
     }
   }
+
+
+  // Gen study
+  //----------------------------------------------------------------------------
+  h_n_tau_St3     = CreateH1D("h_n_tau_St3",     "", 10, 0, 10);
+  h_n_muon_St3    = CreateH1D("h_n_muon_St3",    "", 10, 0, 10);
+  h_n_muon_Gen    = CreateH1D("h_n_muon_Gen",    "", 10, 0, 10);
+  h_n_muon_Rec    = CreateH1D("h_n_muon_Rec",    "", 10, 0, 10);
+  h_n_muon_Global = CreateH1D("h_n_muon_Global", "", 10, 0, 10);
+  h_n_muon_PV     = CreateH1D("h_n_muon_PV",     "", 10, 0, 10);
+  h_n_muon_Iso    = CreateH1D("h_n_muon_Iso",    "", 10, 0, 10);
+  h_n_muon_ID     = CreateH1D("h_n_muon_ID",     "", 10, 0, 10);
+  h_n_elec_St3    = CreateH1D("h_n_elec_St3",    "", 10, 0, 10);
+  h_n_elec_Gen    = CreateH1D("h_n_elec_Gen",    "", 10, 0, 10);
+  h_n_elec_Rec    = CreateH1D("h_n_elec_Rec",    "", 10, 0, 10);
+  h_n_elec_Global = CreateH1D("h_n_elec_Global", "", 10, 0, 10);
+  h_n_elec_PV     = CreateH1D("h_n_elec_PV",     "", 10, 0, 10);
+  h_n_elec_Iso    = CreateH1D("h_n_elec_Iso",    "", 10, 0, 10);
+  h_n_elec_ID     = CreateH1D("h_n_elec_ID",     "", 10, 0, 10);
+
+  h_pt_tau_St3     = CreateH1D("h_pt_tau_St3",     "", 200, 0, 200);
+  h_pt_muon_St3    = CreateH1D("h_pt_muon_St3",    "", 200, 0, 200);
+  h_pt_muon_Gen    = CreateH1D("h_pt_muon_Gen",    "", 200, 0, 200);
+  h_pt_muon_Rec    = CreateH1D("h_pt_muon_Rec",    "", 200, 0, 200);
+  h_pt_muon_Global = CreateH1D("h_pt_muon_Global", "", 200, 0, 200);
+  h_pt_muon_PV     = CreateH1D("h_pt_muon_PV",     "", 200, 0, 200);
+  h_pt_muon_Iso    = CreateH1D("h_pt_muon_Iso",    "", 200, 0, 200);
+  h_pt_muon_ID     = CreateH1D("h_pt_muon_ID",     "", 200, 0, 200);
+  h_pt_elec_St3    = CreateH1D("h_pt_elec_St3",    "", 200, 0, 200);
+  h_pt_elec_Gen    = CreateH1D("h_pt_elec_Gen",    "", 200, 0, 200);
+  h_pt_elec_Rec    = CreateH1D("h_pt_elec_Rec",    "", 200, 0, 200);
+  h_pt_elec_Global = CreateH1D("h_pt_elec_Global", "", 200, 0, 200);
+  h_pt_elec_PV     = CreateH1D("h_pt_elec_PV",     "", 200, 0, 200);
+  h_pt_elec_Iso    = CreateH1D("h_pt_elec_Iso",    "", 200, 0, 200);
+  h_pt_elec_ID     = CreateH1D("h_pt_elec_ID",     "", 200, 0, 200);
+
+  h_eta_tau_St3     = CreateH1D("h_eta_tau_St3",     "", 180, -3, 3);
+  h_eta_muon_St3    = CreateH1D("h_eta_muon_St3",    "", 180, -3, 3);
+  h_eta_muon_Gen    = CreateH1D("h_eta_muon_Gen",    "", 180, -3, 3);
+  h_eta_muon_Rec    = CreateH1D("h_eta_muon_Rec",    "", 180, -3, 3);
+  h_eta_muon_Global = CreateH1D("h_eta_muon_Global", "", 180, -3, 3);
+  h_eta_muon_PV     = CreateH1D("h_eta_muon_PV",     "", 180, -3, 3);
+  h_eta_muon_Iso    = CreateH1D("h_eta_muon_Iso",    "", 180, -3, 3);
+  h_eta_muon_ID     = CreateH1D("h_eta_muon_ID",     "", 180, -3, 3);
+  h_eta_elec_St3    = CreateH1D("h_eta_elec_St3",    "", 180, -3, 3);
+  h_eta_elec_Gen    = CreateH1D("h_eta_elec_Gen",    "", 180, -3, 3);
+  h_eta_elec_Rec    = CreateH1D("h_eta_elec_Rec",    "", 180, -3, 3);
+  h_eta_elec_Global = CreateH1D("h_eta_elec_Global", "", 180, -3, 3);
+  h_eta_elec_PV     = CreateH1D("h_eta_elec_PV",     "", 180, -3, 3);
+  h_eta_elec_Iso    = CreateH1D("h_eta_elec_Iso",    "", 180, -3, 3);
+  h_eta_elec_ID     = CreateH1D("h_eta_elec_ID",     "", 180, -3, 3);
+
+  h_mvaRings_muon_r1 = CreateH1D("h_mvaRings_muon_r1", "", 110, -1.1, 1.1);
+  h_mvaRings_muon_r2 = CreateH1D("h_mvaRings_muon_r2", "", 110, -1.1, 1.1);
+  h_mvaRings_muon_r3 = CreateH1D("h_mvaRings_muon_r3", "", 110, -1.1, 1.1);
+  h_mvaRings_muon_r4 = CreateH1D("h_mvaRings_muon_r4", "", 110, -1.1, 1.1);
 }
 
 
@@ -68,11 +127,13 @@ void AnalysisWZ::InsideLoop()
 
   efficiency_weight = pu_weight;
 
-  Muons_Charge.clear();
-  Electrons_Charge.clear();
-
   Muons.clear();
+  Muons_Index.clear();
+  Muons_Charge.clear();
+
   Electrons.clear();
+  Electrons_Index.clear();
+  Electrons_Charge.clear();
 
   dileptonInvMass =  0;
   nSelMuon        =  0;
@@ -80,8 +141,18 @@ void AnalysisWZ::InsideLoop()
   theChannel      = -1;
 
 
+  // Apply Wgamma* filter
+  //----------------------------------------------------------------------------
+  if (sample.Contains("WGstar") && WgammaFilter()) return;
+
+
+  // Gen study
+  //----------------------------------------------------------------------------
+  GenStudy();
+
+
   // Accept only WZ events inside the Z window
-  //----------------------------------------------------------------------
+  //----------------------------------------------------------------------------
   if (sample.Contains("WZTo3LNu") && !isSignalMCInsideZmassRange(71,111)) return;
 
 
@@ -133,9 +204,11 @@ void AnalysisWZ::InsideLoop()
 
     if (!MuonID(i)) continue;
 
-    Muons_Charge.push_back(T_Muon_Charge->at(i));
-
     Muons.push_back(Muon);
+
+    Muons_Index.push_back(i);
+
+    Muons_Charge.push_back(T_Muon_Charge->at(i));
   }
 
   nSelMuon = Muons.size();
@@ -172,9 +245,11 @@ void AnalysisWZ::InsideLoop()
     
     countIsoElectrons++;
 
-    Electrons_Charge.push_back(T_Elec_Charge->at(i));
-	
     Electrons.push_back(Elec);
+
+    Electrons_Index.push_back(i);
+
+    Electrons_Charge.push_back(T_Elec_Charge->at(i));
   }
 
   nSelElec = Electrons.size();
@@ -628,6 +703,14 @@ void AnalysisWZ::FillHistograms(UInt_t iChannel, UInt_t iCut)
   //----------------------------------------------------------------------------
   if (theChannel == MMM)
     {
+      Int_t index1 = Muons_Index[0];
+      Int_t index2 = Muons_Index[1];
+      Int_t index3 = Muons_Index[2];
+
+      hMVARingsMuon1[iChannel][iCut]->Fill(T_Muon_MVARings->at(index1), hweight);
+      hMVARingsMuon2[iChannel][iCut]->Fill(T_Muon_MVARings->at(index2), hweight);
+      hMVARingsMuon3[iChannel][iCut]->Fill(T_Muon_MVARings->at(index3), hweight);
+
       sumCharges = Muons_Charge[0] + Muons_Charge[1] + Muons_Charge[2];
 
       invMass3Lep = (Muons[0] + Muons[1] + Muons[2]).M();
@@ -656,6 +739,12 @@ void AnalysisWZ::FillHistograms(UInt_t iChannel, UInt_t iCut)
   //----------------------------------------------------------------------------
   else if (theChannel == MME)
     {
+      Int_t index1 = Muons_Index[0];
+      Int_t index2 = Muons_Index[1];
+
+      hMVARingsMuon1[iChannel][iCut]->Fill(T_Muon_MVARings->at(index1), hweight);
+      hMVARingsMuon2[iChannel][iCut]->Fill(T_Muon_MVARings->at(index2), hweight);
+
       sumCharges = Muons_Charge[0] + Muons_Charge[1] + Electrons_Charge[0];
 
       invMass3Lep = (Muons[0] + Muons[1] + Electrons[0]).M();
@@ -670,6 +759,10 @@ void AnalysisWZ::FillHistograms(UInt_t iChannel, UInt_t iCut)
   //----------------------------------------------------------------------------
   else if (theChannel == EEM)
     {
+      Int_t index3 = Muons_Index[0];
+
+      hMVARingsMuon3[iChannel][iCut]->Fill(T_Muon_MVARings->at(index3), hweight);
+
       sumCharges = Muons_Charge[0] + Electrons_Charge[0] + Electrons_Charge[1];
 
       invMass3Lep = (Muons[0] + Electrons[1] + Electrons[2]).M();
@@ -711,12 +804,12 @@ void AnalysisWZ::FillHistograms(UInt_t iChannel, UInt_t iCut)
 
   std::sort(ptLeptons.begin(), ptLeptons.end(), std::greater<Double_t>());
 
-  hSumCharges  [iChannel][iCut]->Fill(sumCharges,  hweight);
-  hInvMass3Lep [iChannel][iCut]->Fill(invMass3Lep, hweight);
+  hSumCharges [iChannel][iCut]->Fill(sumCharges,  hweight);
+  hInvMass3Lep[iChannel][iCut]->Fill(invMass3Lep, hweight);
 
-  hPtLepton1   [iChannel][iCut]->Fill(ptLeptons[0], hweight);
-  hPtLepton2   [iChannel][iCut]->Fill(ptLeptons[1], hweight);
-  hPtLepton3   [iChannel][iCut]->Fill(ptLeptons[2], hweight);
+  hPtLepton1[iChannel][iCut]->Fill(ptLeptons[0], hweight);
+  hPtLepton2[iChannel][iCut]->Fill(ptLeptons[1], hweight);
+  hPtLepton3[iChannel][iCut]->Fill(ptLeptons[2], hweight);
 
   if (fabs(invMass2Lep1 - Z_MASS) < fabs(invMass2Lep2 - Z_MASS))
     {
@@ -759,15 +852,15 @@ const bool AnalysisWZ::isSignalMCInsideZmassRange(const float & masslow,
 {
   float masszcand = 0.0;
 
-  const unsigned int ntauSt3  = T_Gen_TauSt3_PID ->size();
-  const unsigned int nmuonSt3 = T_Gen_MuonSt3_PID->size();
-  const unsigned int nelecSt3 = T_Gen_ElecSt3_PID->size();
+  const UInt_t ntauSt3  = T_Gen_TauSt3_PID->size();
+  const UInt_t nmuonSt3 = T_Gen_MuonSt3_PID->size();
+  const UInt_t nelecSt3 = T_Gen_ElecSt3_PID->size();
 
   if (ntauSt3 >= 2)
     {
       std::vector<std::pair<int,TLorentzVector> > precand;
 
-      for (unsigned int i=0; i<ntauSt3; ++i)
+      for (UInt_t i=0; i<ntauSt3; ++i)
 	{
 	  TLorentzVector Tau(T_Gen_TauSt3_Px->at(i),
 			     T_Gen_TauSt3_Py->at(i),
@@ -780,9 +873,9 @@ const bool AnalysisWZ::isSignalMCInsideZmassRange(const float & masslow,
 
       // Construct the Z candidate
       //------------------------------------------------------------------------
-      for (unsigned int j=0; j<precand.size(); ++j)
+      for (UInt_t j=0; j<precand.size(); ++j)
 	{
-	  for (unsigned int i=j+1; i<precand.size(); ++i)
+	  for (UInt_t i=j+1; i<precand.size(); ++i)
 	    {
 	      if (precand[j].first/precand[i].first == 1) continue;
 
@@ -797,7 +890,7 @@ const bool AnalysisWZ::isSignalMCInsideZmassRange(const float & masslow,
     {
       std::vector<TLorentzVector> zcand;
 
-      for (unsigned int i=0; i<nmuonSt3; ++i)
+      for (UInt_t i=0; i<nmuonSt3; ++i)
 	{
 	  if (abs(T_Gen_Muon_MPID->at(i)) == 23) // PID Z == 23
 	    {
@@ -819,7 +912,7 @@ const bool AnalysisWZ::isSignalMCInsideZmassRange(const float & masslow,
     {
       std::vector<TLorentzVector> zcand;
 
-      for(unsigned int i=0; i<nelecSt3; ++i)
+      for (UInt_t i=0; i<nelecSt3; ++i)
 	{
 	  if(abs(T_Gen_Elec_MPID->at(i)) == 23)
 	    {
@@ -849,4 +942,281 @@ const bool AnalysisWZ::isSignalMCInsideZmassRange(const float & masslow,
     }
   
   return ispass;
+}
+
+
+//------------------------------------------------------------------------------
+// WgammaFilter
+//------------------------------------------------------------------------------
+const Bool_t AnalysisWZ::WgammaFilter() const
+{
+  const UInt_t ntauSt3  = T_Gen_TauSt3_PID->size();
+  const UInt_t nmuonSt3 = T_Gen_MuonSt3_PID->size();
+  const UInt_t nelecSt3 = T_Gen_ElecSt3_PID->size();
+
+  Bool_t low  = false;
+  Bool_t high = false;
+
+  if (ntauSt3 >= 2) {
+    for (UInt_t i=0; i<ntauSt3; ++i) {
+      for (UInt_t j=i+1; j<ntauSt3; ++j) {
+
+	if (T_Gen_TauSt3_PID->at(i) * T_Gen_TauSt3_PID->at(j) > 0) continue;
+
+	TLorentzVector lep1(T_Gen_TauSt3_Px->at(i),
+			    T_Gen_TauSt3_Py->at(i),
+			    T_Gen_TauSt3_Pz->at(i),
+			    T_Gen_TauSt3_Energy->at(i));
+
+	TLorentzVector lep2(T_Gen_TauSt3_Px->at(j),
+			    T_Gen_TauSt3_Py->at(j),
+			    T_Gen_TauSt3_Pz->at(j),
+			    T_Gen_TauSt3_Energy->at(j));
+      
+	((lep1 + lep2).M() > 12.) ? high = true : low = true;
+      }
+    }
+  }
+
+  if (nmuonSt3 >= 2) {
+    for (UInt_t i=0; i<nmuonSt3; ++i) {
+      for (UInt_t j=i+1; j<nmuonSt3; ++j) {
+
+	if (T_Gen_MuonSt3_PID->at(i) * T_Gen_MuonSt3_PID->at(j) > 0) continue;
+
+	TLorentzVector lep1(T_Gen_MuonSt3_Px->at(i),
+			    T_Gen_MuonSt3_Py->at(i),
+			    T_Gen_MuonSt3_Pz->at(i),
+			    T_Gen_MuonSt3_Energy->at(i));
+
+	TLorentzVector lep2(T_Gen_MuonSt3_Px->at(j),
+			    T_Gen_MuonSt3_Py->at(j),
+			    T_Gen_MuonSt3_Pz->at(j),
+			    T_Gen_MuonSt3_Energy->at(j));
+      
+	((lep1 + lep2).M() > 12.) ? high = true : low = true;
+      }
+    }
+  }
+
+  if (nelecSt3 >= 2) {
+    for (UInt_t i=0; i<nelecSt3; ++i) {
+      for (UInt_t j=i+1; j<nelecSt3; ++j) {
+
+	if (T_Gen_ElecSt3_PID->at(i) * T_Gen_ElecSt3_PID->at(j) > 0) continue;
+
+	TLorentzVector lep1(T_Gen_ElecSt3_Px->at(i),
+			    T_Gen_ElecSt3_Py->at(i),
+			    T_Gen_ElecSt3_Pz->at(i),
+			    T_Gen_ElecSt3_Energy->at(i));
+
+	TLorentzVector lep2(T_Gen_ElecSt3_Px->at(j),
+			    T_Gen_ElecSt3_Py->at(j),
+			    T_Gen_ElecSt3_Pz->at(j),
+			    T_Gen_ElecSt3_Energy->at(j));
+      
+	((lep1 + lep2).M() > 12.) ? high = true : low = true;
+      }
+    }
+  }
+
+  return (high && !low);
+}
+
+
+//------------------------------------------------------------------------------
+// GenStudy
+//------------------------------------------------------------------------------
+void AnalysisWZ::GenStudy()
+{
+  UInt_t n_tau_St3     = 0;
+  UInt_t n_muon_St3    = 0;
+  UInt_t n_muon_Gen    = 0;
+  UInt_t n_muon_Rec    = 0;
+  UInt_t n_muon_Global = 0;
+  UInt_t n_muon_PV     = 0;
+  UInt_t n_muon_Iso    = 0;
+  UInt_t n_muon_ID     = 0;
+  UInt_t n_elec_St3    = 0;
+  UInt_t n_elec_Gen    = 0;
+  UInt_t n_elec_Rec    = 0;
+  UInt_t n_elec_Global = 0;
+  UInt_t n_elec_PV     = 0;
+  UInt_t n_elec_Iso    = 0;
+  UInt_t n_elec_ID     = 0;
+
+
+  // Gen St3
+  //----------------------------------------------------------------------------
+  for (UInt_t i=0; i<T_Gen_TauSt3_Px->size(); ++i)
+    {
+      TLorentzVector tlv(T_Gen_TauSt3_Px->at(i), T_Gen_TauSt3_Py->at(i), T_Gen_TauSt3_Pz->at(i), T_Gen_TauSt3_Energy->at(i));
+      
+      if (tlv.Pt()        <=  10) continue;
+      if (fabs(tlv.Eta()) >= 2.5) continue;
+
+      h_pt_tau_St3 ->Fill(tlv.Pt());
+      h_eta_tau_St3->Fill(tlv.Eta());
+      n_tau_St3++;
+    }
+
+  for (UInt_t i=0; i<T_Gen_MuonSt3_Px->size(); ++i)
+    {
+      TLorentzVector tlv(T_Gen_MuonSt3_Px->at(i), T_Gen_MuonSt3_Py->at(i), T_Gen_MuonSt3_Pz->at(i), T_Gen_MuonSt3_Energy->at(i));
+    
+      if (tlv.Pt()        <=  10) continue;
+      if (fabs(tlv.Eta()) >= 2.4) continue;
+
+      h_pt_muon_St3 ->Fill(tlv.Pt());
+      h_eta_muon_St3->Fill(tlv.Eta());
+      n_muon_St3++;
+    }
+
+  for (UInt_t i=0; i<T_Gen_ElecSt3_Px->size(); ++i)
+    {
+      TLorentzVector tlv(T_Gen_ElecSt3_Px->at(i), T_Gen_ElecSt3_Py->at(i), T_Gen_ElecSt3_Pz->at(i), T_Gen_ElecSt3_Energy->at(i));
+    
+      if (tlv.Pt()        <=  10) continue;
+      if (fabs(tlv.Eta()) >= 2.5) continue;
+
+      h_pt_elec_St3 ->Fill(tlv.Pt());
+      h_eta_elec_St3->Fill(tlv.Eta());
+      n_elec_St3++;
+    }
+
+  if (n_tau_St3  > 0) h_n_tau_St3 ->Fill(n_tau_St3);
+  if (n_muon_St3 > 0) h_n_muon_St3->Fill(n_muon_St3);
+  if (n_elec_St3 > 0) h_n_elec_St3->Fill(n_elec_St3);
+
+
+  // Gen
+  //----------------------------------------------------------------------------
+  for (UInt_t i=0; i<T_Gen_Muon_Px->size(); ++i)
+    {
+      TLorentzVector tlv(T_Gen_Muon_Px->at(i), T_Gen_Muon_Py->at(i), T_Gen_Muon_Pz->at(i), T_Gen_Muon_Energy->at(i));
+    
+      if (tlv.Pt()        <=  10) continue;
+      if (fabs(tlv.Eta()) >= 2.4) continue;
+
+      h_pt_muon_Gen ->Fill(tlv.Pt());
+      h_eta_muon_Gen->Fill(tlv.Eta());
+      n_muon_Gen++;
+    }
+
+  for (UInt_t i=0; i<T_Gen_Elec_Px->size(); ++i)
+    {
+      TLorentzVector tlv(T_Gen_Elec_Px->at(i), T_Gen_Elec_Py->at(i), T_Gen_Elec_Pz->at(i), T_Gen_Elec_Energy->at(i));
+    
+      if (tlv.Pt()        <=  10) continue;
+      if (fabs(tlv.Eta()) >= 2.5) continue;
+
+      h_pt_elec_Gen ->Fill(tlv.Pt());
+      h_eta_elec_Gen->Fill(tlv.Eta());
+      n_elec_Gen++;
+    }
+
+  if (n_muon_Gen > 0) h_n_muon_Gen->Fill(n_muon_Gen);
+  if (n_elec_Gen > 0) h_n_elec_Gen->Fill(n_elec_Gen);
+
+
+  // Rec
+  //----------------------------------------------------------------------------
+  for (UInt_t i=0; i<T_Muon_Px->size(); ++i)
+    {
+      TLorentzVector tlv(T_Muon_Px->at(i), T_Muon_Py->at(i), T_Muon_Pz->at(i), T_Muon_Energy->at(i));
+    
+      if (tlv.Pt()        <=  10) continue;
+      if (fabs(tlv.Eta()) >= 2.4) continue;
+
+      h_pt_muon_Rec ->Fill(tlv.Pt());
+      h_eta_muon_Rec->Fill(tlv.Eta());
+      n_muon_Rec++;
+
+      Bool_t isnotglobal = ( T_Muon_IsAllStandAloneMuons->at(i)
+			     && !T_Muon_IsGlobalMuon->at(i)
+			     && !T_Muon_IsAllTrackerMuons->at(i) );
+
+      if (isnotglobal) continue;
+
+      h_pt_muon_Global ->Fill(tlv.Pt());
+      h_eta_muon_Global->Fill(tlv.Eta());
+      n_muon_Global++;
+      
+      if (!MuonCloseToPV(i)) continue;
+
+      h_pt_muon_PV ->Fill(tlv.Pt());
+      h_eta_muon_PV->Fill(tlv.Eta());
+      n_muon_PV++;
+
+      if (tlv.Pt() <= 20)
+	{
+	  if  (fabs(tlv.Eta()) < 1.479) h_mvaRings_muon_r1->Fill(T_Muon_MVARings->at(i));
+	  else                          h_mvaRings_muon_r2->Fill(T_Muon_MVARings->at(i));
+	}
+      else
+	{
+	  if  (fabs(tlv.Eta()) < 1.479) h_mvaRings_muon_r3->Fill(T_Muon_MVARings->at(i));
+	  else                          h_mvaRings_muon_r4->Fill(T_Muon_MVARings->at(i));
+	}
+
+      if (!MuonIsolation(i)) continue;
+
+      h_pt_muon_Iso ->Fill(tlv.Pt());
+      h_eta_muon_Iso->Fill(tlv.Eta());
+      n_muon_Iso++;
+
+      if (!MuonID(i)) continue;
+
+      h_pt_muon_ID ->Fill(tlv.Pt());
+      h_eta_muon_ID->Fill(tlv.Eta());
+      n_muon_ID++;
+    }
+
+  for (UInt_t i=0; i<T_Elec_Px->size(); ++i)
+    {
+      TLorentzVector tlv(T_Elec_Px->at(i), T_Elec_Py->at(i), T_Elec_Pz->at(i), T_Elec_Energy->at(i));
+    
+      if (tlv.Pt()        <=  10) continue;
+      if (fabs(tlv.Eta()) >= 2.5) continue;
+
+      h_pt_elec_Rec ->Fill(tlv.Pt());
+      h_eta_elec_Rec->Fill(tlv.Eta());
+      n_elec_Rec++;
+
+      if (!ElectronID(i)) continue;
+
+      h_pt_elec_Global ->Fill(tlv.Pt());
+      h_eta_elec_Global->Fill(tlv.Eta());
+      n_elec_Global++;
+
+      if (!ElectronCloseToPV(i)) continue;
+
+      h_pt_elec_PV ->Fill(tlv.Pt());
+      h_eta_elec_PV->Fill(tlv.Eta());
+      n_elec_PV++;
+
+      if (!ElectronIsolation(i)) continue;
+
+      h_pt_elec_Iso ->Fill(tlv.Pt());
+      h_eta_elec_Iso->Fill(tlv.Eta());
+      n_elec_Iso++;
+
+      if (!ElectronBDT(i)) continue;
+    
+      h_pt_elec_ID ->Fill(tlv.Pt());
+      h_eta_elec_ID->Fill(tlv.Eta());
+      n_elec_ID++;
+    }
+
+  if (n_muon_Rec    > 0) h_n_muon_Rec   ->Fill(n_muon_Rec);
+  if (n_muon_Global > 0) h_n_muon_Global->Fill(n_muon_Global);
+  if (n_muon_PV     > 0) h_n_muon_PV    ->Fill(n_muon_PV);
+  if (n_muon_Iso    > 0) h_n_muon_Iso   ->Fill(n_muon_Iso);
+  if (n_muon_ID     > 0) h_n_muon_ID    ->Fill(n_muon_ID);
+
+  if (n_elec_Rec    > 0) h_n_elec_Rec   ->Fill(n_elec_Rec);
+  if (n_elec_Global > 0) h_n_elec_Global->Fill(n_elec_Global);
+  if (n_elec_PV     > 0) h_n_elec_PV    ->Fill(n_elec_PV);
+  if (n_elec_Iso    > 0) h_n_elec_Iso   ->Fill(n_elec_Iso);
+  if (n_elec_ID     > 0) h_n_elec_ID    ->Fill(n_elec_ID);
 }

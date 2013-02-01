@@ -34,7 +34,7 @@ const Double_t ngenWZphase = 1449067;  // (71 < mZ < 111 GeV)
 //------------------------------------------------------------------------------
 const UInt_t nChannels  =  4;
 const UInt_t nCuts      =  7;
-const UInt_t nProcesses = 13;
+const UInt_t nProcesses = 35;
 
 enum {MMM, EEE, MME, EEM};
 
@@ -50,18 +50,43 @@ enum {
 
 enum {
   Data,
+  DYJets_Madgraph,
   ZJets_Madgraph,
-  TW,
-  TbarW,
-  TTbar_Madgraph,
-  TTbar_Powheg_2L,
   WJets_Madgraph,
-  ZZ,
-  WW,
+  WGstarToElNuMad,
+  WGstarToMuNuMad,
+  WGstarToTauNuMad,
   WgammaToLNuG,
   ZgammaToLLG,
-  WZTo3LNu
+  TTbar_Madgraph,
+  TW,
+  TbarW,
+  WW,
+  WZTo3LNu,
+  WZTo2L2QMad,
+  ZZTo2L2QMad,
+  ZZ,
+  ggZZ2L2L,
+  ggZZ4L,
+  ZZ2Mu2Tau,
+  ZZ4E,
+  ZZ2E2Tau,
+  ZZ4Mu,
+  ZZ2E2Mu,
+  ZZ4Tau,
+  HZZ4L,
+  WWGJets,
+  WZZJets,
+  ZZZJets,
+  WWZJets,
+  WWWJets,
+  TTWJets,
+  TTZJets,
+  TTWWJets,
+  TTGJets
 };
+
+enum {linY = 0, logY};
 
 
 // Settings
@@ -73,7 +98,6 @@ TString        process  [nProcesses];
 Color_t        color    [nProcesses];
 Double_t       systError[nProcesses];
 
-Bool_t         _setLogy;
 Double_t       _luminosity;
 Double_t       _yoffset;
 Int_t          _verbosity;
@@ -85,17 +109,22 @@ vector<UInt_t> vprocess;
 
 // Member functions
 //------------------------------------------------------------------------------
-void     SetParameters            (UInt_t      channel);
+void     SetParameters            ();
+
+void     ReadInputFiles           (UInt_t      channel);
 
 void     MeasureTheCrossSection   (UInt_t      channel);
 
 void     DrawHistogram            (TString     hname,
 				   TString     xtitle,
 				   Int_t       ngroup       = -1,
-				   Int_t       precision    = 0,
+				   Int_t       precision    =  0,
 				   TString     units        = "NULL",
+				   Bool_t      setLogy      = false,
 				   Double_t    xmin         = -999,
-				   Double_t    xmax         =  999,
+				   Double_t    xmax         = -999,
+				   Double_t    ymin         = -999,
+				   Double_t    ymax         = -999,
 				   Bool_t      moveOverflow = false);
 
 Float_t  GetMaximumIncludingErrors(TH1F*       h,
@@ -104,12 +133,12 @@ Float_t  GetMaximumIncludingErrors(TH1F*       h,
 
 
 void     MoveOverflowBins         (TH1*        h,
-				   Double_t    xmin,
-				   Double_t    xmax);
+				   Double_t    xmin = -999,
+				   Double_t    xmax = -999);
 
 void     ZeroOutOfRangeBins       (TH1*        h,
-				   Double_t    xmin,
-				   Double_t    xmax);
+				   Double_t    xmin = -999,
+				   Double_t    xmax = -999);
 
 void     SetAxis                  (TH1*        hist,
 				   TString     xtitle,
@@ -136,42 +165,56 @@ TLegend* DrawLegend               (Float_t     x1,
 //------------------------------------------------------------------------------
 // XS
 //------------------------------------------------------------------------------
-void XS(UInt_t channel = EEE,
-	UInt_t cut     = Exactly3Leptons,
-	Bool_t batch   = false)
+void XS(UInt_t cut   = Exactly3Leptons,
+	Bool_t batch = false)
 {
-  if (channel >= nChannels) return; 
-
   gROOT->SetBatch(batch);
 
-  SetParameters(channel);
+  SetParameters();
 
-  if (cut == MET) MeasureTheCrossSection(channel);
+  for (UInt_t channel=0; channel<nChannels; channel++) {
 
-  //  DrawHistogram("hNPV_EEE_Has2IsoGoodLeptons", "number of primary vertices", -1, 0, "NULL", 0, 30, false);
-  //  DrawHistogram("hNPV_MMM_Has2IsoGoodLeptons", "number of primary vertices", -1, 0, "NULL", 0, 30, false);
+    ReadInputFiles(channel);
+    
+    MeasureTheCrossSection(channel);
 
-  TString suffix = "_" + sChannel[channel] + "_" + sCut[cut];
+    TString suffix = "_" + sChannel[channel] + "_" + sCut[cut];
+  
+    DrawHistogram("hNPV" + suffix, "number of primary vertices", -1, 0, "NULL", linY, 0, 30);
+    DrawHistogram("hMET" + suffix, "E_{T}^{miss}",                5, 0, "GeV");
 
-  DrawHistogram("hNPV" + suffix, "number of primary vertices", -1, 0, "NULL", 0, 30, false);
-  DrawHistogram("hMET" + suffix, "E_{T}^{miss}",                5, 0, "GeV");
+    if (cut < Exactly3Leptons) continue;
+  
+    DrawHistogram("hSumCharges"   + suffix, "q_{1} + q_{2} + q_{3}");
+    DrawHistogram("hPtLepton1"    + suffix, "p_{T}^{first lepton}",   5, 0, "GeV", linY);
+    DrawHistogram("hPtLepton2"    + suffix, "p_{T}^{second lepton}",  5, 0, "GeV", linY);
+    DrawHistogram("hPtLepton3"    + suffix, "p_{T}^{third lepton}",   5, 0, "GeV", linY);
+    DrawHistogram("hInvMass3Lep"  + suffix, "m_{#font[12]{3l}}",     10, 0, "GeV", linY);
+    DrawHistogram("hInvMass2Lep1" + suffix, "m_{#font[12]{ll}}",      2, 0, "GeV", linY);
 
-  if (cut < Exactly3Leptons) return;
-
-  DrawHistogram("hSumCharges"   + suffix, "q_{1} + q_{2} + q_{3}");
-  DrawHistogram("hPtLepton1"    + suffix, "p_{T}^{first lepton}",  5, 0, "GeV");
-  DrawHistogram("hPtLepton2"    + suffix, "p_{T}^{second lepton}", 5, 0, "GeV");
-  DrawHistogram("hPtLepton3"    + suffix, "p_{T}^{third lepton}",  5, 0, "GeV");
-  DrawHistogram("hInvMass2Lep1" + suffix, "m_{#font[12]{ll}}",     2, 0, "GeV", 60, 120);
-  DrawHistogram("hInvMass2Lep2" + suffix, "m_{#font[12]{ll}}^{second combination}",   2, 0, "GeV");
-  DrawHistogram("hInvMass3Lep"  + suffix, "m_{#font[12]{3l}}",     5, 0, "GeV",  0, 600);
-
-  if (cut < HasWCandidate) return;
-
-  DrawHistogram("hPtZLepton1" + suffix, "p_{T}^{Z leading lepton}",  5, 0, "GeV");
-  DrawHistogram("hPtZLepton2" + suffix, "p_{T}^{Z trailing lepton}", 5, 0, "GeV", 0, 100);
-  DrawHistogram("hPtWLepton"  + suffix, "p_{T}^{W lepton}",          5, 0, "GeV");
-  DrawHistogram("hInvMassZ"   + suffix, "m_{#font[12]{ll}}",         2, 0, "GeV");
+    //    if (channel == MMM || channel == EEE)
+    //      {
+    //    	DrawHistogram("hInvMass2Lep2" + suffix, "m_{#font[12]{ll}}^{second combination}", 5, 0, "GeV", linY);
+    //      }
+    
+    if (channel == MMM || channel == MME)
+      {
+	DrawHistogram("hMVARingsMuon1" + suffix, "MVA rings^{first muon}",  -1, 0, "NULL", logY, 0.7, 1.1);
+	DrawHistogram("hMVARingsMuon2" + suffix, "MVA rings^{second muon}", -1, 0, "NULL", logY, 0.7, 1.1);
+      }
+  
+    if (channel == MMM || channel == EEM)
+      {
+	DrawHistogram("hMVARingsMuon3" + suffix, "MVA rings^{third muon}", -1, 0, "NULL", logY, 0.7, 1.1);
+      }
+  
+    if (cut < HasWCandidate) continue;
+    
+    DrawHistogram("hPtZLepton1" + suffix, "p_{T}^{Z leading lepton}",  5, 0, "GeV", linY);
+    DrawHistogram("hPtZLepton2" + suffix, "p_{T}^{Z trailing lepton}", 5, 0, "GeV", linY);
+    DrawHistogram("hPtWLepton"  + suffix, "p_{T}^{W lepton}",          5, 0, "GeV", linY);
+    DrawHistogram("hInvMassZ"   + suffix, "m_{#font[12]{ll}}",         2, 0, "GeV", linY);
+  }
 }
 
 
@@ -203,7 +246,7 @@ void MeasureTheCrossSection(UInt_t channel)
     }
     else {
       nbackground += dummy->Integral();
-      if (j == TTbar_Madgraph || j == TTbar_Powheg_2L)
+      if (j == TTbar_Madgraph)
 	nTTbar = dummy->Integral();
     }
   }
@@ -284,8 +327,11 @@ void DrawHistogram(TString  hname,
 		   Int_t    ngroup,
 		   Int_t    precision,
 		   TString  units,
+		   Bool_t   setLogy,
 		   Double_t xmin,
 		   Double_t xmax,
+		   Double_t ymin,
+		   Double_t ymax,
 		   Bool_t   moveOverflow)
 {
   TCanvas* canvas = new TCanvas(hname, hname, 550, 900);
@@ -312,7 +358,7 @@ void DrawHistogram(TString  hname,
   //----------------------------------------------------------------------------
   pad1->cd();
   
-  pad1->SetLogy(_setLogy);
+  pad1->SetLogy(setLogy);
 
   Double_t mcIntegral = 0;
 
@@ -351,16 +397,18 @@ void DrawHistogram(TString  hname,
 
   // Normalize MC to data
   //----------------------------------------------------------------------------
-  //  if (hname.Contains("hNPV") && !hname.Contains("MET")) {
-  //  
-  //    for (UInt_t i=0; i<vprocess.size(); i++) {
-  //
-  //      UInt_t j = vprocess.at(i);
-  //      
-  //      if (j != Data && mcIntegral > 0)
-  //	hist[j]->Scale(hist[Data]->Integral() / mcIntegral);
-  //    }
-  //  }
+  if (0)
+    {
+      for (UInt_t i=0; i<vprocess.size(); i++)
+	{
+	  UInt_t j = vprocess.at(i);
+        
+	  if (j != Data && mcIntegral > 0)
+	    {
+	      hist[j]->Scale(hist[Data]->Integral() / mcIntegral);
+	    }
+	}
+    }
 
 
   // All MC
@@ -433,15 +481,15 @@ void DrawHistogram(TString  hname,
 
   if (theMaxMC > theMax) theMax = theMaxMC;
 
-  if (pad1->GetLogy()) {
-
-    theMax = TMath::Power(10, TMath::Log10(theMax) + 4);
-
-    hist[Data]->SetMinimum(0.01);
-  }
-  else theMax *= 1.4;
+  if (pad1->GetLogy())
+    theMax = TMath::Power(10, TMath::Log10(theMax) + 2);
+  else
+    theMax *= 1.45;
 
   hist[Data]->SetMaximum(theMax);
+
+  if (ymin != -999) hist[Data]->SetMinimum(ymin);
+  if (ymax != -999) hist[Data]->SetMaximum(ymax);
 
 
   // Legend
@@ -450,24 +498,58 @@ void DrawHistogram(TString  hname,
   Double_t y0     = 0.834;
   Double_t delta  = _yoffset + 0.001;
   Double_t ndelta = 0;
+
+  Double_t WGstarIntegral  = 0.0;
+  Double_t ZJetsIntegral   = 0.0;
+  Double_t ZZIntegral      = 0.0;
+  Double_t VVVJetsIntegral = 0.0;
   
-  DrawLegend(x0 - 0.49, y0 - ndelta, hist[Data],           Form(" data (%.0f)",   hist[Data]          ->Integral()), "lp"); ndelta += delta;
-  DrawLegend(x0 - 0.49, y0 - ndelta, allmc,                Form(" MC (%.0f)",     allmc               ->Integral()), "f");  ndelta += delta;
-  DrawLegend(x0 - 0.49, y0 - ndelta, hist[WZTo3LNu],       Form(" WZ (%.0f)",     hist[WZTo3LNu]      ->Integral()), "f");  ndelta += delta;
-  DrawLegend(x0 - 0.49, y0 - ndelta, hist[ZJets_Madgraph], Form(" Z+jets (%.0f)", hist[ZJets_Madgraph]->Integral()), "f");  ndelta += delta;
+  WGstarIntegral += hist[WGstarToElNuMad]->Integral();
+  WGstarIntegral += hist[WGstarToMuNuMad]->Integral();
+  WGstarIntegral += hist[WGstarToTauNuMad]->Integral();
+  WGstarIntegral += hist[WgammaToLNuG]->Integral();
+
+  ZJetsIntegral += hist[DYJets_Madgraph]->Integral();
+  ZJetsIntegral += hist[ZJets_Madgraph]->Integral();
+
+  ZZIntegral += hist[ggZZ2L2L]->Integral();
+  ZZIntegral += hist[ggZZ4L]->Integral();
+  ZZIntegral += hist[ZZ2Mu2Tau]->Integral();
+  ZZIntegral += hist[ZZ4E]->Integral();
+  ZZIntegral += hist[ZZ2E2Tau]->Integral();
+  ZZIntegral += hist[ZZ4Mu]->Integral();
+  ZZIntegral += hist[ZZ2E2Mu]->Integral();
+  ZZIntegral += hist[ZZ4Tau]->Integral();
+  ZZIntegral += hist[HZZ4L]->Integral();
+
+  VVVJetsIntegral += hist[WWGJets]->Integral();
+  VVVJetsIntegral += hist[WZZJets]->Integral();
+  VVVJetsIntegral += hist[ZZZJets]->Integral();
+  VVVJetsIntegral += hist[WWZJets]->Integral();
+  VVVJetsIntegral += hist[WWWJets]->Integral();
+  VVVJetsIntegral += hist[TTWJets]->Integral();
+  VVVJetsIntegral += hist[TTZJets]->Integral();
+  //  VVVJetsIntegral += hist[TTWWJets]->Integral();
+  VVVJetsIntegral += hist[TTGJets]->Integral();
+
+  DrawLegend(x0 - 0.49, y0 - ndelta, hist[Data],           Form(" data (%.0f)",   hist[Data]->Integral()),     "lp"); ndelta += delta;
+  DrawLegend(x0 - 0.49, y0 - ndelta, allmc,                Form(" MC (%.0f)",     allmc->Integral()),          "f");  ndelta += delta;
+  DrawLegend(x0 - 0.49, y0 - ndelta, hist[WZTo3LNu],       Form(" WZ (%.0f)",     hist[WZTo3LNu]->Integral()), "f");  ndelta += delta;
+  DrawLegend(x0 - 0.49, y0 - ndelta, hist[ZJets_Madgraph], Form(" Z+jets (%.0f)", ZJetsIntegral),              "f");  ndelta += delta;
 
   ndelta = 0;
 
-  DrawLegend(x0 - 0.23, y0 - ndelta, hist[ZgammaToLLG],    Form(" Z#gamma (%.0f)",  hist[ZgammaToLLG]   ->Integral()), "f"); ndelta += delta;
-  DrawLegend(x0 - 0.23, y0 - ndelta, hist[ZZ],             Form(" ZZ (%.0f)",       hist[ZZ]            ->Integral()), "f"); ndelta += delta;
-  DrawLegend(x0 - 0.23, y0 - ndelta, hist[TTbar_Madgraph], Form(" t#bar{t} (%.0f)", hist[TTbar_Madgraph]->Integral()), "f"); ndelta += delta;
-  DrawLegend(x0 - 0.23, y0 - ndelta, hist[TW],             Form(" tW (%.0f)",       hist[TW]            ->Integral()), "f"); ndelta += delta;
+  DrawLegend(x0 - 0.24, y0 - ndelta, hist[ggZZ2L2L],        Form(" ZZ (%.0f)",                    ZZIntegral),                       "f"); ndelta += delta;
+  DrawLegend(x0 - 0.24, y0 - ndelta, hist[TTbar_Madgraph],  Form(" t#bar{t} (%.0f)",              hist[TTbar_Madgraph]->Integral()), "f"); ndelta += delta;
+  DrawLegend(x0 - 0.24, y0 - ndelta, hist[TW],              Form(" tW (%.0f)",                    hist[TW]->Integral()),             "f"); ndelta += delta;
+  DrawLegend(x0 - 0.24, y0 - ndelta, hist[WZTo2L2QMad],     Form(" WZ(#font[12]{l}#nuqq) (%.0f)", hist[WZTo2L2QMad]->Integral()),    "f"); ndelta += delta;
 
   ndelta = 0;
 
-  DrawLegend(x0, y0 - ndelta, hist[WW],             Form(" WW (%.0f)",      hist[WW]            ->Integral()), "f"); ndelta += delta;
-  DrawLegend(x0, y0 - ndelta, hist[WgammaToLNuG],   Form(" W#gamma (%.0f)", hist[WgammaToLNuG]  ->Integral()), "f"); ndelta += delta;
-  DrawLegend(x0, y0 - ndelta, hist[WJets_Madgraph], Form(" W+jets (%.0f)",  hist[WJets_Madgraph]->Integral()), "f"); ndelta += delta;
+  DrawLegend(x0, y0 - ndelta, hist[WW],              Form(" WW (%.0f)",         hist[WW]->Integral()),             "f"); ndelta += delta;
+  DrawLegend(x0, y0 - ndelta, hist[WgammaToLNuG],    Form(" W#gamma(*) (%.0f)", WGstarIntegral),                   "f"); ndelta += delta;
+  DrawLegend(x0, y0 - ndelta, hist[WJets_Madgraph],  Form(" W+jets (%.0f)",     hist[WJets_Madgraph]->Integral()), "f"); ndelta += delta;
+  DrawLegend(x0, y0 - ndelta, hist[WWGJets],  Form(" VVV (%.0f)",               VVVJetsIntegral),                  "f"); ndelta += delta;
 
 
   // CMS titles
@@ -550,7 +632,7 @@ void DrawHistogram(TString  hname,
 
   canvas->cd();
 
-  TString suffixLogy = (_setLogy) ? "_log" : "";
+  TString suffixLogy = (setLogy) ? "_log" : "";
 
   canvas->SaveAs(Form("%s/%s/%s%s.%s",
 		      _format.Data(),
@@ -754,7 +836,7 @@ TLegend* DrawLegend(Float_t x1,
 //------------------------------------------------------------------------------
 // SetParameters
 //------------------------------------------------------------------------------
-void SetParameters(UInt_t channel)
+void SetParameters()
 {
   sChannel[MMM] = "MMM";
   sChannel[EEE] = "EEE";
@@ -769,50 +851,79 @@ void SetParameters(UInt_t channel)
   sCut[HasWCandidate]      = "HasWCandidate";
   sCut[MET]                = "MET";
 
-  process[Data]            = "Double";
-  process[ZJets_Madgraph]  = "ZJets_Madgraph";
-  process[TW]              = "TW";
-  process[TbarW]           = "TbarW";
-  process[TTbar_Madgraph]  = "TTbar_Madgraph";
-  process[TTbar_Powheg_2L] = "TTbar_Powheg_2L";
-  process[WJets_Madgraph]  = "WJets_Madgraph";
-  process[ZZ]              = "ZZ";
-  process[WW]              = "WW";
-  process[WgammaToLNuG]    = "WgammaToLNuG";
-  process[ZgammaToLLG]     = "ZgammaToLLG";
-  process[WZTo3LNu]        = "WZTo3LNu";
+  process[DYJets_Madgraph]  = "DYJets_Madgraph";
+  process[ZJets_Madgraph]   = "ZJets_Madgraph";
+  process[WJets_Madgraph]   = "WJets_Madgraph";
+  process[WGstarToElNuMad]  = "WGstarToElNuMad";
+  process[WGstarToMuNuMad]  = "WGstarToMuNuMad";
+  process[WGstarToTauNuMad] = "WGstarToTauNuMad";
+  process[WgammaToLNuG]     = "WgammaToLNuG";
+  process[ZgammaToLLG]      = "ZgammaToLLG";
+  process[TTbar_Madgraph]   = "TTbar_Madgraph";
+  process[TW]               = "TW";
+  process[TbarW]            = "TbarW";
+  process[WW]               = "WW";
+  process[WZTo3LNu]         = "WZTo3LNu";
+  process[WZTo2L2QMad]      = "WZTo2L2QMad";
+  process[ZZTo2L2QMad]      = "ZZTo2L2QMad";
+  process[ZZ]               = "ZZ";
+  process[ggZZ2L2L]         = "ggZZ2L2L";
+  process[ggZZ4L]           = "ggZZ4L";
+  process[ZZ2Mu2Tau]        = "ZZ2Mu2Tau";
+  process[ZZ4E]             = "ZZ4E";
+  process[ZZ2E2Tau]         = "ZZ2E2Tau";
+  process[ZZ4Mu]            = "ZZ4Mu";
+  process[ZZ2E2Mu]          = "ZZ2E2Mu";
+  process[ZZ4Tau]           = "ZZ4Tau";
+  process[HZZ4L]            = "HZZ4L";
+  process[WWGJets]          = "WWGJets";
+  process[WZZJets]          = "WZZJets";
+  process[ZZZJets]          = "ZZZJets";
+  process[WWZJets]          = "WWZJets";
+  process[WWWJets]          = "WWWJets";
+  process[TTWJets]          = "TTWJets";
+  process[TTZJets]          = "TTZJets";
+  process[TTWWJets]         = "TTWWJets";
+  process[TTGJets]          = "TTGJets";
 
-  if (channel == EEE || channel == EEM) process[Data] += "Electron";
-  if (channel == MMM || channel == MME) process[Data] += "Mu";
+  color[Data]             = kBlack;
+  color[DYJets_Madgraph]  = kGreen+2;   // Z+jets
+  color[ZJets_Madgraph]   = kGreen+2;   // Z+jets
+  color[WJets_Madgraph]   = kGray+1;    // W+jets
+  color[WGstarToElNuMad]  = kYellow;    // Wgamma(*)
+  color[WGstarToMuNuMad]  = kYellow;    // Wgamma(*)
+  color[WGstarToTauNuMad] = kYellow;    // Wgamma(*)
+  color[WgammaToLNuG]     = kYellow;    // Wgamma(*)
+  color[TTbar_Madgraph]   = kAzure-9;   // ttbar
+  color[TW]               = kAzure-3;   // tW
+  color[TbarW]            = kAzure-3;   // tW
+  color[WW]               = kAzure;     // WW
+  color[WZTo3LNu]         = kOrange-2;  // WZ
+  color[WZTo2L2QMad]      = kBlack;     // WZ(lnuqq)
+  color[ZZTo2L2QMad]      = kRed+1;     // ZZ
+  color[ZgammaToLLG]      = kRed+1;     // ZZ, REPLACED
+  color[ZZ]               = kRed+1;     // ZZ, REPLACED
+  color[ggZZ2L2L]         = kRed+1;     // ZZ
+  color[ggZZ4L]           = kRed+1;     // ZZ
+  color[ZZ2Mu2Tau]        = kRed+1;     // ZZ
+  color[ZZ4E]             = kRed+1;     // ZZ
+  color[ZZ2E2Tau]         = kRed+1;     // ZZ
+  color[ZZ4Mu]            = kRed+1;     // ZZ
+  color[ZZ2E2Mu]          = kRed+1;     // ZZ
+  color[ZZ4Tau]           = kRed+1;     // ZZ
+  color[HZZ4L]            = kRed+1;     // ZZ
+  color[WWGJets]          = kTeal;      // VVV
+  color[WZZJets]          = kTeal;      // VVV
+  color[ZZZJets]          = kTeal;      // VVV
+  color[WWZJets]          = kTeal;      // VVV
+  color[WWWJets]          = kTeal;      // VVV
+  color[TTWJets]          = kTeal;      // VVV
+  color[TTZJets]          = kTeal;      // VVV
+  color[TTWWJets]         = kTeal;      // VVV
+  color[TTGJets]          = kTeal;      // VVV
 
-  color[Data]            = kBlack;
-  color[WW]              = kAzure;    // kRed+3 (VV)
-  color[ZZ]              = kRed+1;    // kRed+3 (VV)
-  color[WgammaToLNuG]    = kTeal;     // kRed+3 (VV)
-  color[ZgammaToLLG]     = kRed+3;    // kRed+3 (VV)
-  color[TW]              = kAzure-3;  // kAzure-9 (top)
-  color[TbarW]           = kAzure-3;  // kAzure-9 (top)
-  color[TTbar_Madgraph]  = kAzure-9;  // kAzure-9 (top)
-  color[TTbar_Powheg_2L] = kAzure-9;  // kAzure-9 (top)
-  color[WJets_Madgraph]  = kGray+1;   // kGreen+2 (V + jets)
-  color[ZJets_Madgraph]  = kGreen+2;  // kGreen+2 (V + jets)
-  color[WZTo3LNu]        = kOrange-2;
+  for (UInt_t i=0; i<nProcesses; i++) systError[i] = 0.0;
 
-  systError[Data]            = 0.0;
-  systError[ZJets_Madgraph]  = 0.0 / 1e2;
-  systError[TW]              = 0.0 / 1e2;
-  systError[TbarW]           = 0.0 / 1e2;
-  systError[TTbar_Madgraph]  = 0.0 / 1e2;
-  systError[TTbar_Powheg_2L] = 0.0 / 1e2;
-  systError[WJets_Madgraph]  = 0.0 / 1e2;
-  systError[ZZ]              = 0.0 / 1e2;
-  systError[WW]              = 0.0 / 1e2;
-  systError[WgammaToLNuG]    = 0.0 / 1e2;
-  systError[ZgammaToLLG]     = 0.0 / 1e2;
-  systError[WZTo3LNu]        = 0.0 / 1e2;
-
-  _setLogy    = false;
-  //  _luminosity = 12103.3;  // 12103.3 for PU
   _luminosity = 19602.0;  // 19468.3 for PU
   _yoffset    = 0.048;
   _verbosity  = 3;
@@ -829,21 +940,53 @@ void SetParameters(UInt_t channel)
   TH1::SetDefaultSumw2();
 
   vprocess.clear();
+
   vprocess.push_back(Data);
-  vprocess.push_back(WW);               // VV
-  vprocess.push_back(ZZ);               // VV
-  vprocess.push_back(WgammaToLNuG);     // VV
-  vprocess.push_back(ZgammaToLLG);      // VV
-  vprocess.push_back(TW);               // top
-  vprocess.push_back(TbarW);            // top
-  vprocess.push_back(TTbar_Madgraph);   // top
-  vprocess.push_back(WJets_Madgraph);   // V + jets
-  vprocess.push_back(ZJets_Madgraph);   // V + jets
-  vprocess.push_back(WZTo3LNu);         // WZ
+  vprocess.push_back(DYJets_Madgraph);
+  vprocess.push_back(ZJets_Madgraph);
+  vprocess.push_back(WJets_Madgraph);
+  vprocess.push_back(WGstarToElNuMad);
+  vprocess.push_back(WGstarToMuNuMad);
+  vprocess.push_back(WGstarToTauNuMad);
+  vprocess.push_back(WgammaToLNuG);
+  vprocess.push_back(TTbar_Madgraph);
+  vprocess.push_back(TW);
+  vprocess.push_back(TbarW);
+  vprocess.push_back(WW);
+  vprocess.push_back(WZTo2L2QMad);
+  vprocess.push_back(ZZTo2L2QMad);
+  //  vprocess.push_back(ZgammaToLLG);  // REPLACED
+  //  vprocess.push_back(ZZ);           // REPLACED
+  vprocess.push_back(ggZZ2L2L);
+  vprocess.push_back(ggZZ4L);
+  vprocess.push_back(ZZ2Mu2Tau);
+  vprocess.push_back(ZZ4E);
+  vprocess.push_back(ZZ2E2Tau);
+  vprocess.push_back(ZZ4Mu);
+  vprocess.push_back(ZZ2E2Mu);
+  vprocess.push_back(ZZ4Tau);
+  vprocess.push_back(HZZ4L);
+  vprocess.push_back(WWGJets);
+  vprocess.push_back(WZZJets);
+  vprocess.push_back(ZZZJets);
+  vprocess.push_back(WWZJets);
+  vprocess.push_back(WWWJets);
+  vprocess.push_back(TTWJets);
+  vprocess.push_back(TTZJets);
+  //  vprocess.push_back(TTWWJets);
+  vprocess.push_back(TTGJets);
+  vprocess.push_back(WZTo3LNu);
+}
 
 
-  // Read input files
-  //----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+// ReadInputFiles
+//------------------------------------------------------------------------------
+void ReadInputFiles(UInt_t channel)
+{
+  if (channel == EEE || channel == EEM) process[Data] = "DoubleElectron";
+  if (channel == MMM || channel == MME) process[Data] = "DoubleMu";
+
   TString path = Form("/nfs/fanae/user/piedra/work/WZXS8TeV/results/%s/",
   		      _directory.Data());
 

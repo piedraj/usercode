@@ -42,10 +42,5 @@ cd WZXS8TeV
 
 source /opt/root/bin/thisroot.sh
 
-root -l XS.C+\(MMM\)
-root -l XS.C+\(MME\)
-root -l XS.C+\(EEM\)
-root -l XS.C+\(EEE\)
-
-
+root -l XS.C+
 
