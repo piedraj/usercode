@@ -13,10 +13,10 @@
 
 
 Double_t G_Event_Weight = 1;
-//Double_t G_Event_Lumi   = 12103.3;  // pb
 Double_t G_Event_Lumi   = 19468.3;  // pb
 TProof*  proof          = 0;
-TString  dataPath       = "/hadoop";
+//TString  dataPath     = "/hadoop";
+TString  dataPath       = "/gpfs/csic_projects/tier3data";
 
 
 void RunPROOF_WZ(TString  sample  = "DoubleMu",
@@ -27,8 +27,8 @@ void RunPROOF_WZ(TString  sample  = "DoubleMu",
   //----------------------------------------------------------------------------
   //  gPAFOptions->proofMode = kSequential;
   //  gPAFOptions->proofMode = kLite;
-  //  gPAFOptions->proofMode = kCluster;
-  gPAFOptions->proofMode = kPoD;
+  gPAFOptions->proofMode = kCluster;
+  //  gPAFOptions->proofMode = kPoD;
   gPAFOptions->NSlots    = 20;
 
 

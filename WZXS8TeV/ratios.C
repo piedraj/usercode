@@ -5,8 +5,8 @@ Double_t xs7tevErrorStat[nchannels] = { 1.22,  2.20,  2.99,  2.32,  2.61};
 Double_t xs7tevErrorSyst[nchannels] = { 0.71,  0.74,  0.98,  0.71,  0.72};
 Double_t xs7tevErrorLumi[nchannels] = { 0.45,  0.47,  0.52,  0.43,  0.44};
 
-Double_t xs8tev         [nchannels] = {999, 25.9, 24.2, 23.1, 22.6};
-Double_t xs8tevErrorStat[nchannels] = {999,  1.4,  1.8,  1.5,  1.5};
+Double_t xs8tev         [nchannels] = {999, 25.7, 24.0, 22.9, 22.9};
+Double_t xs8tevErrorStat[nchannels] = {999,  1.4,  1.8,  1.5,  1.6};
 Double_t xs8tevErrorSyst[nchannels] = {999,  0.0,  0.0,  0.0,  0.0};
 Double_t xs8tevErrorLumi[nchannels] = {999,  1.1,  1.1,  1.0,  1.0};
 
@@ -23,8 +23,7 @@ TString _format = "png";
 //------------------------------------------------------------------------------
 void ratios(Int_t ecm = 8)
 {
-  //  Double_t luminosity = (ecm == 8) ? 19602 : 4920;  // pb-1
-  Double_t luminosity = (ecm == 8) ? 12103 : 4920;  // pb-1
+  Double_t luminosity = (ecm == 8) ? 19602 : 4920;  // pb-1
   Double_t xsWplusZ   = (ecm == 8) ?  13.9 : 11.4;  // pb
   Double_t xsWminusZ  = (ecm == 8) ?   8.1 :  6.4;  // pb
 

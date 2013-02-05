@@ -14,6 +14,9 @@
 #include <vector>
 
 
+const Bool_t runAtOviedo = false;
+
+
 // Input parameters for the WZ cross section
 //------------------------------------------------------------------------------
 const Double_t xsWplusZ_nlo  = 14.48;  // pb (arXiv:1105.0020v1)
@@ -166,7 +169,7 @@ TLegend* DrawLegend               (Float_t     x1,
 // XS
 //------------------------------------------------------------------------------
 void XS(UInt_t cut   = Exactly3Leptons,
-	Bool_t batch = false)
+	Bool_t batch = true)
 {
   gROOT->SetBatch(batch);
 
@@ -192,11 +195,6 @@ void XS(UInt_t cut   = Exactly3Leptons,
     DrawHistogram("hInvMass3Lep"  + suffix, "m_{#font[12]{3l}}",     10, 0, "GeV", linY);
     DrawHistogram("hInvMass2Lep1" + suffix, "m_{#font[12]{ll}}",      2, 0, "GeV", linY);
 
-    //    if (channel == MMM || channel == EEE)
-    //      {
-    //    	DrawHistogram("hInvMass2Lep2" + suffix, "m_{#font[12]{ll}}^{second combination}", 5, 0, "GeV", linY);
-    //      }
-    
     if (channel == MMM || channel == MME)
       {
 	DrawHistogram("hMVARingsMuon1" + suffix, "MVA rings^{first muon}",  -1, 0, "NULL", logY, 0.7, 1.1);
@@ -987,13 +985,24 @@ void ReadInputFiles(UInt_t channel)
   if (channel == EEE || channel == EEM) process[Data] = "DoubleElectron";
   if (channel == MMM || channel == MME) process[Data] = "DoubleMu";
 
-  TString path = Form("/nfs/fanae/user/piedra/work/WZXS8TeV/results/%s/",
-  		      _directory.Data());
+  TString prefix = (runAtOviedo) ? "/nfs/fanae/user" : "/gpfs/csic_users";
+
+  TString path = Form("%s/piedra/work/WZXS8TeV/results/%s/",
+		      prefix.Data(),
+		      _directory.Data());
 
   for (UInt_t i=0; i<vprocess.size(); i++) {
 
     UInt_t j = vprocess.at(i);
 
     input[j] = new TFile(path + process[j] + ".root");
+
+
+    // Debug
+    //--------------------------------------------------------------------------
+    TH1F* dummy = (TH1F*)input[j]->Get("hCounter_MMM_Exactly3Leptons");
+
+    if (!dummy)
+      printf(" [ReadInputFiles] The %s file is broken.\n", process[j].Data());
   }
 }

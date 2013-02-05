@@ -1,8 +1,23 @@
 ################################################################################
 #
+# 0. Setup ROOT / PoD
+#
+################################################################################
+
+source /opt/root/bin/thisroot.sh  # fanae
+source /nfs/fanae/PoD/PoD_env.sh  # fanae
+
+source /gpfs/csic_projects/cms/sw/ROOT/current/root/bin/thisroot.sh  # gridui
+
+
+################################################################################
+#
 # 1. Get the code
 #
 ################################################################################
+
+export CVSROOT=:ext:piedra@cmssw.cvs.cern.ch:/local/reps/CMSSW  # gridui
+export CVS_RSH=ssh                                              # gridui
 
 cvs co -d WZXS8TeV       UserCode/piedra/WZXS8TeV
 cvs co -d PAF            UserCode/IGonzalez/ProofAnalysisFramework
@@ -26,9 +41,6 @@ cvs co -d PUWeight UserCode/IFCA-UO/Utils/PUWeight
 
 cd PAF
 
-source /opt/root/bin/thisroot.sh
-source /nfs/fanae/PoD/PoD_env.sh
-
 ./run.sh
 
 
@@ -39,8 +51,6 @@ source /nfs/fanae/PoD/PoD_env.sh
 ################################################################################
 
 cd WZXS8TeV
-
-source /opt/root/bin/thisroot.sh
 
 root -l XS.C+
 

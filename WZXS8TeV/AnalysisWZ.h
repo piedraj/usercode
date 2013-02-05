@@ -226,14 +226,16 @@ class AnalysisWZ: public CMSAnalysisSelectorMiniTrees
   std::vector<Int_t>          Electrons_Index;
   std::vector<Double_t>       Electrons_Charge;
 
+  std::vector< std::pair<Double_t, Int_t> > ptIndexPair;
+
+  UInt_t                      leptonIndex[3];
+
   TLorentzVector              ZLepton1;
   TLorentzVector              ZLepton2;
   TLorentzVector              WLepton;
 
   Bool_t                      isData;
   Double_t                    dileptonInvMass;
-  UInt_t                      nSelMuon;
-  UInt_t                      nSelElec;
   UInt_t                      theChannel;
 
 
