@@ -106,13 +106,14 @@ Double_t       _yoffset;
 Int_t          _verbosity;
 TString        _directory;
 TString        _format;
+UInt_t         _cut;
 
 vector<UInt_t> vprocess;
 
 
 // Member functions
 //------------------------------------------------------------------------------
-void     SetParameters            ();
+void     SetParameters            (UInt_t      cut);
 
 void     ReadInputFiles           (UInt_t      channel);
 
@@ -173,7 +174,7 @@ void XS(UInt_t cut   = Exactly3Leptons,
 {
   gROOT->SetBatch(batch);
 
-  SetParameters();
+  SetParameters(cut);
 
   for (UInt_t channel=0; channel<nChannels; channel++) {
 
@@ -632,9 +633,10 @@ void DrawHistogram(TString  hname,
 
   TString suffixLogy = (setLogy) ? "_log" : "";
 
-  canvas->SaveAs(Form("%s/%s/%s%s.%s",
+  canvas->SaveAs(Form("%s/%s/%s/%s%s.%s",
 		      _format.Data(),
 		      _directory.Data(),
+		      sCut[_cut].Data(),
 		      hname.Data(),
 		      suffixLogy.Data(),
 		      _format.Data()));
@@ -834,7 +836,7 @@ TLegend* DrawLegend(Float_t x1,
 //------------------------------------------------------------------------------
 // SetParameters
 //------------------------------------------------------------------------------
-void SetParameters()
+void SetParameters(UInt_t cut)
 {
   sChannel[MMM] = "MMM";
   sChannel[EEE] = "EEE";
@@ -927,13 +929,14 @@ void SetParameters()
   _verbosity  = 3;
   _directory  = "Summer12_53X/WH";
   _format     = "png";
+  _cut        = cut;
 
   gInterpreter->ExecuteMacro("HiggsPaperStyle.C");
 
   gStyle->SetHatchesLineWidth(  1);
   gStyle->SetHatchesSpacing  (0.7);
   
-  gSystem->mkdir(_format + "/" + _directory, kTRUE);
+  gSystem->mkdir(_format + "/" + _directory + "/" + sCut[_cut], kTRUE);
 
   TH1::SetDefaultSumw2();
 
