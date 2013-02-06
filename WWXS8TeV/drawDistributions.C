@@ -109,7 +109,7 @@ void drawDistributions(Int_t    njet       = 0,
 
   // Read input files
   //----------------------------------------------------------------------------
-  TString path = Form("~lara/public/rootfilesMoriond/%djet/%s/", _njet, _channel.Data());
+  TString path = Form("rootfiles/%djet/%s/", _njet, _channel.Data());
 
   for (UInt_t ip=0; ip<nProcesses; ip++)
     input[ip] = new TFile(path + process[ip] + ".root", "read");
