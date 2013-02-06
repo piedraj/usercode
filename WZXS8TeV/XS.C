@@ -131,7 +131,7 @@ void     DrawHistogram            (TString     hname,
 				   Double_t    ymax         = -999,
 				   Bool_t      moveOverflow = false);
 
-Float_t  GetMaximumIncludingErrors(TH1F*       h,
+Double_t GetMaximumIncludingErrors(TH1*        h,
 				   Double_t    xmin = -999,
 				   Double_t    xmax = -999);
 
@@ -165,6 +165,8 @@ TLegend* DrawLegend               (Float_t     x1,
 				   Float_t     xoffset = 0.200,
 				   Float_t     yoffset = _yoffset);
 
+Double_t Yield                    (TH1*        h);
+
 
 //------------------------------------------------------------------------------
 // XS
@@ -172,6 +174,8 @@ TLegend* DrawLegend               (Float_t     x1,
 void XS(UInt_t cut   = Exactly3Leptons,
 	Bool_t batch = true)
 {
+  if (cut < Exactly3Leptons) return;
+
   gROOT->SetBatch(batch);
 
   SetParameters(cut);
@@ -183,12 +187,9 @@ void XS(UInt_t cut   = Exactly3Leptons,
     MeasureTheCrossSection(channel);
 
     TString suffix = "_" + sChannel[channel] + "_" + sCut[cut];
-  
-    DrawHistogram("hNPV" + suffix, "number of primary vertices", -1, 0, "NULL", linY, 0, 30);
-    DrawHistogram("hMET" + suffix, "E_{T}^{miss}",                5, 0, "GeV");
-
-    if (cut < Exactly3Leptons) continue;
-  
+    
+    DrawHistogram("hNPV"          + suffix, "number of PV",          -1, 0, "NULL", linY, 0, 30);
+    DrawHistogram("hMET"          + suffix, "E_{T}^{miss}",           5, 0, "GeV");
     DrawHistogram("hSumCharges"   + suffix, "q_{1} + q_{2} + q_{3}");
     DrawHistogram("hPtLepton1"    + suffix, "p_{T}^{first lepton}",   5, 0, "GeV", linY);
     DrawHistogram("hPtLepton2"    + suffix, "p_{T}^{second lepton}",  5, 0, "GeV", linY);
@@ -227,7 +228,7 @@ void MeasureTheCrossSection(UInt_t channel)
   Double_t nbackground = 0;
   Double_t nTTbar      = 0;
 
-  Double_t nWZ = ((TH1F*)input[WZTo3LNu]->Get("hCounterEff_" + sChannel[channel] + "_MET"))->Integral();
+  Double_t nWZ = ((TH1D*)input[WZTo3LNu]->Get("hCounterEff_" + sChannel[channel] + "_MET"))->Integral();
 
   TString hname = "hCounter_" + sChannel[channel] + "_MET";
 
@@ -235,7 +236,7 @@ void MeasureTheCrossSection(UInt_t channel)
 
     UInt_t j = vprocess.at(i);
 
-    TH1F* dummy = (TH1F*)input[j]->Get(hname);
+    TH1D* dummy = (TH1D*)input[j]->Get(hname);
 
     if (j == Data) {
       ndata = dummy->Integral();
@@ -363,13 +364,13 @@ void DrawHistogram(TString  hname,
 
   THStack* hstack = new THStack(hname, hname);
 
-  TH1F* hist[nProcesses];
+  TH1D* hist[nProcesses];
 
   for (UInt_t i=0; i<vprocess.size(); i++) {
 
     UInt_t j = vprocess.at(i);
 
-    hist[j] = (TH1F*)input[j]->Get(hname);
+    hist[j] = (TH1D*)input[j]->Get(hname);
     hist[j]->SetName(hname + process[j]);
 
     if (ngroup > 0) hist[j]->Rebin(ngroup);
@@ -412,7 +413,7 @@ void DrawHistogram(TString  hname,
 
   // All MC
   //----------------------------------------------------------------------------
-  TH1F* allmc = (TH1F*)hist[Data]->Clone("allmc");
+  TH1D* allmc = (TH1D*)hist[Data]->Clone("allmc");
 
   allmc->SetFillColor  (kGray+2);
   allmc->SetFillStyle  (   3345);
@@ -498,57 +499,57 @@ void DrawHistogram(TString  hname,
   Double_t delta  = _yoffset + 0.001;
   Double_t ndelta = 0;
 
-  Double_t WGstarIntegral  = 0.0;
-  Double_t ZJetsIntegral   = 0.0;
-  Double_t ZZIntegral      = 0.0;
-  Double_t VVVJetsIntegral = 0.0;
+  Double_t WGstarYield  = 0.0;
+  Double_t ZJetsYield   = 0.0;
+  Double_t ZZYield      = 0.0;
+  Double_t VVVJetsYield = 0.0;
   
-  WGstarIntegral += hist[WGstarToElNuMad]->Integral();
-  WGstarIntegral += hist[WGstarToMuNuMad]->Integral();
-  WGstarIntegral += hist[WGstarToTauNuMad]->Integral();
-  WGstarIntegral += hist[WgammaToLNuG]->Integral();
+  WGstarYield += Yield(hist[WGstarToElNuMad]);
+  WGstarYield += Yield(hist[WGstarToMuNuMad]);
+  WGstarYield += Yield(hist[WGstarToTauNuMad]);
+  WGstarYield += Yield(hist[WgammaToLNuG]);
 
-  ZJetsIntegral += hist[DYJets_Madgraph]->Integral();
-  ZJetsIntegral += hist[ZJets_Madgraph]->Integral();
+  ZJetsYield += Yield(hist[DYJets_Madgraph]);
+  ZJetsYield += Yield(hist[ZJets_Madgraph]);
 
-  ZZIntegral += hist[ggZZ2L2L]->Integral();
-  ZZIntegral += hist[ggZZ4L]->Integral();
-  ZZIntegral += hist[ZZ2Mu2Tau]->Integral();
-  ZZIntegral += hist[ZZ4E]->Integral();
-  ZZIntegral += hist[ZZ2E2Tau]->Integral();
-  ZZIntegral += hist[ZZ4Mu]->Integral();
-  ZZIntegral += hist[ZZ2E2Mu]->Integral();
-  ZZIntegral += hist[ZZ4Tau]->Integral();
-  ZZIntegral += hist[HZZ4L]->Integral();
+  ZZYield += Yield(hist[ggZZ2L2L]);
+  ZZYield += Yield(hist[ggZZ4L]);
+  ZZYield += Yield(hist[ZZ2Mu2Tau]);
+  ZZYield += Yield(hist[ZZ4E]);
+  ZZYield += Yield(hist[ZZ2E2Tau]);
+  ZZYield += Yield(hist[ZZ4Mu]);
+  ZZYield += Yield(hist[ZZ2E2Mu]);
+  ZZYield += Yield(hist[ZZ4Tau]);
+  ZZYield += Yield(hist[HZZ4L]);
 
-  VVVJetsIntegral += hist[WWGJets]->Integral();
-  VVVJetsIntegral += hist[WZZJets]->Integral();
-  VVVJetsIntegral += hist[ZZZJets]->Integral();
-  VVVJetsIntegral += hist[WWZJets]->Integral();
-  VVVJetsIntegral += hist[WWWJets]->Integral();
-  VVVJetsIntegral += hist[TTWJets]->Integral();
-  VVVJetsIntegral += hist[TTZJets]->Integral();
-  //  VVVJetsIntegral += hist[TTWWJets]->Integral();
-  VVVJetsIntegral += hist[TTGJets]->Integral();
+  VVVJetsYield += Yield(hist[WWGJets]);
+  VVVJetsYield += Yield(hist[WZZJets]);
+  VVVJetsYield += Yield(hist[ZZZJets]);
+  VVVJetsYield += Yield(hist[WWZJets]);
+  VVVJetsYield += Yield(hist[WWWJets]);
+  VVVJetsYield += Yield(hist[TTWJets]);
+  VVVJetsYield += Yield(hist[TTZJets]);
+  //  VVVJetsYield += Yield(hist[TTWWJets]);  // CRAB running
+  VVVJetsYield += Yield(hist[TTGJets]);
 
-  DrawLegend(x0 - 0.49, y0 - ndelta, hist[Data],           Form(" data (%.0f)",   hist[Data]->Integral()),     "lp"); ndelta += delta;
-  DrawLegend(x0 - 0.49, y0 - ndelta, allmc,                Form(" MC (%.0f)",     allmc->Integral()),          "f");  ndelta += delta;
-  DrawLegend(x0 - 0.49, y0 - ndelta, hist[WZTo3LNu],       Form(" WZ (%.0f)",     hist[WZTo3LNu]->Integral()), "f");  ndelta += delta;
-  DrawLegend(x0 - 0.49, y0 - ndelta, hist[ZJets_Madgraph], Form(" Z+jets (%.0f)", ZJetsIntegral),              "f");  ndelta += delta;
-
-  ndelta = 0;
-
-  DrawLegend(x0 - 0.24, y0 - ndelta, hist[ggZZ2L2L],        Form(" ZZ (%.0f)",                    ZZIntegral),                       "f"); ndelta += delta;
-  DrawLegend(x0 - 0.24, y0 - ndelta, hist[TTbar_Madgraph],  Form(" t#bar{t} (%.0f)",              hist[TTbar_Madgraph]->Integral()), "f"); ndelta += delta;
-  DrawLegend(x0 - 0.24, y0 - ndelta, hist[TW],              Form(" tW (%.0f)",                    hist[TW]->Integral()),             "f"); ndelta += delta;
-  DrawLegend(x0 - 0.24, y0 - ndelta, hist[WZTo2L2QMad],     Form(" WZ(#font[12]{l}#nuqq) (%.0f)", hist[WZTo2L2QMad]->Integral()),    "f"); ndelta += delta;
+  DrawLegend(x0 - 0.49, y0 - ndelta, hist[Data],           Form(" data (%.0f)",   Yield(hist[Data])),     "lp"); ndelta += delta;
+  DrawLegend(x0 - 0.49, y0 - ndelta, allmc,                Form(" MC (%.0f)",     Yield(allmc)),          "f");  ndelta += delta;
+  DrawLegend(x0 - 0.49, y0 - ndelta, hist[WZTo3LNu],       Form(" WZ (%.0f)",     Yield(hist[WZTo3LNu])), "f");  ndelta += delta;
+  DrawLegend(x0 - 0.49, y0 - ndelta, hist[ZJets_Madgraph], Form(" Z+jets (%.0f)", ZJetsYield),            "f");  ndelta += delta;
 
   ndelta = 0;
 
-  DrawLegend(x0, y0 - ndelta, hist[WW],              Form(" WW (%.0f)",         hist[WW]->Integral()),             "f"); ndelta += delta;
-  DrawLegend(x0, y0 - ndelta, hist[WgammaToLNuG],    Form(" W#gamma(*) (%.0f)", WGstarIntegral),                   "f"); ndelta += delta;
-  DrawLegend(x0, y0 - ndelta, hist[WJets_Madgraph],  Form(" W+jets (%.0f)",     hist[WJets_Madgraph]->Integral()), "f"); ndelta += delta;
-  DrawLegend(x0, y0 - ndelta, hist[WWGJets],  Form(" VVV (%.0f)",               VVVJetsIntegral),                  "f"); ndelta += delta;
+  DrawLegend(x0 - 0.24, y0 - ndelta, hist[ggZZ2L2L],        Form(" ZZ (%.0f)",                    ZZYield),                     "f"); ndelta += delta;
+  DrawLegend(x0 - 0.24, y0 - ndelta, hist[TTbar_Madgraph],  Form(" t#bar{t} (%.0f)",              Yield(hist[TTbar_Madgraph])), "f"); ndelta += delta;
+  DrawLegend(x0 - 0.24, y0 - ndelta, hist[TW],              Form(" tW (%.0f)",                    Yield(hist[TW])),             "f"); ndelta += delta;
+  DrawLegend(x0 - 0.24, y0 - ndelta, hist[WZTo2L2QMad],     Form(" WZ(#font[12]{l}#nuqq) (%.0f)", Yield(hist[WZTo2L2QMad])),    "f"); ndelta += delta;
+
+  ndelta = 0;
+
+  DrawLegend(x0, y0 - ndelta, hist[WW],              Form(" WW (%.0f)",         Yield(hist[WW])),             "f"); ndelta += delta;
+  DrawLegend(x0, y0 - ndelta, hist[WgammaToLNuG],    Form(" W#gamma(*) (%.0f)", WGstarYield),                 "f"); ndelta += delta;
+  DrawLegend(x0, y0 - ndelta, hist[WJets_Madgraph],  Form(" W+jets (%.0f)",     Yield(hist[WJets_Madgraph])), "f"); ndelta += delta;
+  DrawLegend(x0, y0 - ndelta, hist[WWGJets],  Form(" VVV (%.0f)",               VVVJetsYield),                "f"); ndelta += delta;
 
 
   // CMS titles
@@ -571,8 +572,8 @@ void DrawHistogram(TString  hname,
   //----------------------------------------------------------------------------
   pad2->cd();
     
-  TH1F* ratio       = (TH1F*)hist[Data]->Clone("ratio");
-  TH1F* uncertainty = (TH1F*)allmc->Clone("uncertainty");
+  TH1D* ratio       = (TH1D*)hist[Data]->Clone("ratio");
+  TH1D* uncertainty = (TH1D*)allmc->Clone("uncertainty");
 
   for (Int_t ibin=1; ibin<=ratio->GetNbinsX(); ibin++) {
 
@@ -608,7 +609,7 @@ void DrawHistogram(TString  hname,
   //----------------------------------------------------------------------------
   pad3->cd();
 
-  TH1F* hdeviations = new TH1F("hdeviations", "", 25, 0, 2.5);
+  TH1D* hdeviations = new TH1D("hdeviations", "", 25, 0, 2.5);
 
   hdeviations->SetName("hdeviations_" + hname);
 
@@ -646,9 +647,9 @@ void DrawHistogram(TString  hname,
 //------------------------------------------------------------------------------
 // GetMaximumIncludingErrors
 //------------------------------------------------------------------------------
-Float_t GetMaximumIncludingErrors(TH1F*    h,
-				  Double_t xmin,
-				  Double_t xmax)
+Double_t GetMaximumIncludingErrors(TH1*     h,
+				   Double_t xmin,
+				   Double_t xmax)
 {
   UInt_t nbins = h->GetNbinsX();
 
@@ -974,7 +975,7 @@ void SetParameters(UInt_t cut)
   vprocess.push_back(WWWJets);
   vprocess.push_back(TTWJets);
   vprocess.push_back(TTZJets);
-  //  vprocess.push_back(TTWWJets);
+  //  vprocess.push_back(TTWWJets);  // CRAB running
   vprocess.push_back(TTGJets);
   vprocess.push_back(WZTo3LNu);
 }
@@ -1003,9 +1004,20 @@ void ReadInputFiles(UInt_t channel)
 
     // Debug
     //--------------------------------------------------------------------------
-    TH1F* dummy = (TH1F*)input[j]->Get("hCounter_MMM_Exactly3Leptons");
+    TH1D* dummy = (TH1D*)input[j]->Get("hCounter_MMM_Exactly3Leptons");
 
     if (!dummy)
       printf(" [ReadInputFiles] The %s file is broken.\n", process[j].Data());
   }
+}
+
+
+//------------------------------------------------------------------------------
+// Yield
+//------------------------------------------------------------------------------
+Double_t Yield(TH1* h)
+{
+  Int_t nbins = h->GetNbinsX();
+
+  return h->Integral(0, nbins+1);
 }

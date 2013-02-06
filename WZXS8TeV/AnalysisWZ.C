@@ -87,10 +87,10 @@ void AnalysisWZ::Initialise()
       hCounterEff[i][j] = CreateH1D(TString("hCounterEff" + suffix), "", 3, 0, 3);
       hCounter   [i][j] = CreateH1D(TString("hCounter"    + suffix), "", 3, 0, 3);
 
+      if (j < Exactly3Leptons) continue;
+
       hNPV[i][j] = CreateH1D(TString("hNPV" + suffix), "",  50, 0,  50);
       hMET[i][j] = CreateH1D(TString("hMET" + suffix), "", 200, 0, 200);
-
-      if (j < Exactly3Leptons) continue;
 
       hSumCharges   [i][j] = CreateH1D(TString("hSumCharges"    + suffix), "",   9,   -4,   5);
       hInvMass2Lep1 [i][j] = CreateH1D(TString("hInvMass2Lep1"  + suffix), "", 200,    0, 200);
@@ -763,14 +763,14 @@ Bool_t AnalysisWZ::FillCounters(UInt_t nElec, UInt_t nMuon, UInt_t iCut)
 //------------------------------------------------------------------------------
 void AnalysisWZ::FillHistograms(UInt_t iChannel, UInt_t iCut)
 {
+  if (iCut < Exactly3Leptons) return;
+
   FillChannelCounters(iChannel, iCut);
 
   Double_t hweight = efficiency_weight * xs_weight;
 
   hNPV[iChannel][iCut]->Fill(T_Vertex_z->size(), hweight);
   hMET[iChannel][iCut]->Fill(T_METPFTypeI_ET,    hweight);
-
-  if (iCut < Exactly3Leptons) return;
 
   Double_t sumCharges   = -999;
   Double_t invMass3Lep  = -999;
