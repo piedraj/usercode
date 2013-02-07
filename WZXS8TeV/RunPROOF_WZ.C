@@ -15,20 +15,22 @@
 Double_t G_Event_Weight = 1;
 Double_t G_Event_Lumi   = 19468.3;  // pb
 TProof*  proof          = 0;
-//TString  dataPath     = "/hadoop";
-TString  dataPath       = "/gpfs/csic_projects/tier3data";
+TString  dataPath       = "";
 
 
 void RunPROOF_WZ(TString  sample  = "DoubleMu",
 		 Long64_t nEvents = -1,
 		 Bool_t   update  = true)
 {
+  dataPath = GuessLocalBasePath();
+
+
   // PROOF mode
   //----------------------------------------------------------------------------
   //  gPAFOptions->proofMode = kSequential;
   //  gPAFOptions->proofMode = kLite;
-  gPAFOptions->proofMode = kCluster;
-  //  gPAFOptions->proofMode = kPoD;
+  //  gPAFOptions->proofMode = kCluster;
+  gPAFOptions->proofMode = kPoD;
   gPAFOptions->NSlots    = 20;
 
 
@@ -65,7 +67,7 @@ void RunPROOF_WZ(TString  sample  = "DoubleMu",
 
     gPAFOptions->dataFiles = dm->GetFiles();
 
-    G_Event_Weight = dm->GetCrossSection() * G_Event_Lumi / dm->GetEventsInTheSample();
+     G_Event_Weight = dm->GetCrossSection() * G_Event_Lumi / dm->GetEventsInTheSample();
 
     cout << endl;
     cout << "      x-section = " << dm->GetCrossSection()      << endl;
@@ -203,4 +205,32 @@ vector<TString> GetRealDataFiles(const char* relativepath,
     cerr << "ERROR: Could not find data!" << endl;
 
   return theFiles;
+}
+
+
+//------------------------------------------------------------------------------
+// GuessLocalBasePath
+//------------------------------------------------------------------------------
+TString GuessLocalBasePath()
+{
+  TString host = gSystem->HostName();
+
+  if (host.Contains("geol.uniovi.es"))
+    {
+      return TString("/hadoop");
+    }
+  else if (host.Contains("ciencias.uniovi.es"))
+    {
+      return TString("/data");
+    }
+  else if (host.Contains("ifca.es"))
+    {
+      return TString("/gpfs/csic_projects/tier3data");
+    }
+  else
+    {
+      cerr << "ERROR: Could not guess base path from host name " << host << endl;
+
+      return TString("");
+    }
 }

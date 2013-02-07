@@ -239,7 +239,7 @@ void AnalysisWZ::InsideLoop()
 			T_Muon_Pz->at(i),
 			T_Muon_Energy->at(i));
 
-    if (Muon.Pt() <= 20) continue;
+    if (Muon.Pt() <= 10) continue;
 
     if (fabs(Muon.Eta()) >= 2.4) continue;
 
@@ -285,7 +285,7 @@ void AnalysisWZ::InsideLoop()
 			T_Elec_Pz->at(i),
 			T_Elec_Energy->at(i));
 
-    if (Elec.Pt() <= 20) continue;
+    if (Elec.Pt() <= 10) continue;
 
     if (fabs(Elec.Eta()) >= 2.5) continue;
 
@@ -323,16 +323,26 @@ void AnalysisWZ::InsideLoop()
   //----------------------------------------------------------------------------
   if ((countIsoGoodElectrons + countIsoGoodMuons) < 3) return;
 
+
+  // Require at least N = 3 leptons with pt > 20 GeV
+  //----------------------------------------------------------------------------
   for (UInt_t i=0; i<countIsoGoodElectrons; i++)
     {
-      ptIndexPair.push_back(std::make_pair(Electrons[i].Pt(), Electrons_Index[i] + 1000));
+      if (Electrons[i].Pt() > 20)
+	ptIndexPair.push_back(std::make_pair(Electrons[i].Pt(), Electrons_Index[i] + 1000));
     }
 
   for (UInt_t i=0; i<countIsoGoodMuons; i++)
     {
-      ptIndexPair.push_back(std::make_pair(Muons[i].Pt(), Muons_Index[i]));
+      if (Muons[i].Pt() > 20)
+	ptIndexPair.push_back(std::make_pair(Muons[i].Pt(), Muons_Index[i]));
     }
   
+  if (ptIndexPair.size() < 3) return;
+
+
+  // Sort the leptons by pt
+  //----------------------------------------------------------------------------
   std::sort(ptIndexPair.begin(), ptIndexPair.end());
 
   std::reverse(ptIndexPair.begin(), ptIndexPair.end());

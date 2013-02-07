@@ -14,9 +14,6 @@
 #include <vector>
 
 
-const Bool_t runAtOviedo = false;
-
-
 // Input parameters for the WZ cross section
 //------------------------------------------------------------------------------
 const Double_t xsWplusZ_nlo  = 14.48;  // pb (arXiv:1105.0020v1)
@@ -94,18 +91,20 @@ enum {linY = 0, logY};
 
 // Settings
 //------------------------------------------------------------------------------
-TString        sChannel [nChannels];
-TString        sCut     [nCuts];
-TFile*         input    [nProcesses];
-TString        process  [nProcesses];
-Color_t        color    [nProcesses];
-Double_t       systError[nProcesses];
+TString         sChannel [nChannels];
+TString         sCut     [nCuts];
+TFile*          input    [nProcesses];
+TString         process  [nProcesses];
+Color_t         color    [nProcesses];
+Double_t        systError[nProcesses];
 
+Bool_t         _normalizeMC2Data;
 Double_t       _luminosity;
 Double_t       _yoffset;
 Int_t          _verbosity;
 TString        _directory;
 TString        _format;
+TString        _output;
 UInt_t         _cut;
 
 vector<UInt_t> vprocess;
@@ -129,7 +128,7 @@ void     DrawHistogram            (TString     hname,
 				   Double_t    xmax         = -999,
 				   Double_t    ymin         = -999,
 				   Double_t    ymax         = -999,
-				   Bool_t      moveOverflow = false);
+				   Bool_t      moveOverflow = true);
 
 Double_t GetMaximumIncludingErrors(TH1*        h,
 				   Double_t    xmin = -999,
@@ -167,12 +166,14 @@ TLegend* DrawLegend               (Float_t     x1,
 
 Double_t Yield                    (TH1*        h);
 
+TString  GuessLocalBasePath       ();
+
 
 //------------------------------------------------------------------------------
 // XS
 //------------------------------------------------------------------------------
 void XS(UInt_t cut   = Exactly3Leptons,
-	Bool_t batch = true)
+	Bool_t batch = false)
 {
   if (cut < Exactly3Leptons) return;
 
@@ -184,7 +185,7 @@ void XS(UInt_t cut   = Exactly3Leptons,
 
     ReadInputFiles(channel);
     
-    MeasureTheCrossSection(channel);
+    if (cut == MET) MeasureTheCrossSection(channel);
 
     TString suffix = "_" + sChannel[channel] + "_" + sCut[cut];
     
@@ -371,13 +372,13 @@ void DrawHistogram(TString  hname,
     UInt_t j = vprocess.at(i);
 
     hist[j] = (TH1D*)input[j]->Get(hname);
-    hist[j]->SetName(hname + process[j]);
-
-    if (ngroup > 0) hist[j]->Rebin(ngroup);
+    hist[j]->SetName(hname + "_" + process[j]);
 
     if (moveOverflow) MoveOverflowBins  (hist[j], xmin, xmax);
     else              ZeroOutOfRangeBins(hist[j], xmin, xmax);
     
+    if (ngroup > 0) hist[j]->Rebin(ngroup);
+
     if (j == Data) {
       hist[j]->SetMarkerStyle(kFullCircle);
       hist[j]->SetTitle("");
@@ -397,7 +398,7 @@ void DrawHistogram(TString  hname,
 
   // Normalize MC to data
   //----------------------------------------------------------------------------
-  if (0)
+  if (_normalizeMC2Data)
     {
       for (UInt_t i=0; i<vprocess.size(); i++)
 	{
@@ -529,7 +530,7 @@ void DrawHistogram(TString  hname,
   VVVJetsYield += Yield(hist[WWWJets]);
   VVVJetsYield += Yield(hist[TTWJets]);
   VVVJetsYield += Yield(hist[TTZJets]);
-  //  VVVJetsYield += Yield(hist[TTWWJets]);  // CRAB running
+  VVVJetsYield += Yield(hist[TTWWJets]);
   VVVJetsYield += Yield(hist[TTGJets]);
 
   DrawLegend(x0 - 0.49, y0 - ndelta, hist[Data],           Form(" data (%.0f)",   Yield(hist[Data])),     "lp"); ndelta += delta;
@@ -634,10 +635,8 @@ void DrawHistogram(TString  hname,
 
   TString suffixLogy = (setLogy) ? "_log" : "";
 
-  canvas->SaveAs(Form("%s/%s/%s/%s%s.%s",
-		      _format.Data(),
-		      _directory.Data(),
-		      sCut[_cut].Data(),
+  canvas->SaveAs(Form("%s/%s%s.%s",
+		      _output.Data(),
 		      hname.Data(),
 		      suffixLogy.Data(),
 		      _format.Data()));
@@ -925,19 +924,26 @@ void SetParameters(UInt_t cut)
 
   for (UInt_t i=0; i<nProcesses; i++) systError[i] = 0.0;
 
-  _luminosity = 19602.0;  // 19468.3 for PU
-  _yoffset    = 0.048;
-  _verbosity  = 3;
-  _directory  = "Summer12_53X/WH";
-  _format     = "png";
-  _cut        = cut;
+  _normalizeMC2Data = false;
+  _luminosity       = 19602.0;  // 19468.3 for PU
+  _yoffset          = 0.048;
+  _verbosity        = 3;
+  _directory        = "Summer12_53X/WH";
+  _format           = "png";
+  _cut              = cut;
+
+  if (_normalizeMC2Data) printf("\n WARNING: normalizing MC to data\n\n");
+
+  TString patch = (_normalizeMC2Data) ? "normalized/" : "";
+
+  _output = _format + "/" + _directory + "/" + patch + sCut[_cut];
 
   gInterpreter->ExecuteMacro("HiggsPaperStyle.C");
 
   gStyle->SetHatchesLineWidth(  1);
   gStyle->SetHatchesSpacing  (0.7);
   
-  gSystem->mkdir(_format + "/" + _directory + "/" + sCut[_cut], kTRUE);
+  gSystem->mkdir(_output, kTRUE);
 
   TH1::SetDefaultSumw2();
 
@@ -975,7 +981,7 @@ void SetParameters(UInt_t cut)
   vprocess.push_back(WWWJets);
   vprocess.push_back(TTWJets);
   vprocess.push_back(TTZJets);
-  //  vprocess.push_back(TTWWJets);  // CRAB running
+  vprocess.push_back(TTWWJets);
   vprocess.push_back(TTGJets);
   vprocess.push_back(WZTo3LNu);
 }
@@ -989,10 +995,8 @@ void ReadInputFiles(UInt_t channel)
   if (channel == EEE || channel == EEM) process[Data] = "DoubleElectron";
   if (channel == MMM || channel == MME) process[Data] = "DoubleMu";
 
-  TString prefix = (runAtOviedo) ? "/nfs/fanae/user" : "/gpfs/csic_users";
-
   TString path = Form("%s/piedra/work/WZXS8TeV/results/%s/",
-		      prefix.Data(),
+		      GuessLocalBasePath().Data(),
 		      _directory.Data());
 
   for (UInt_t i=0; i<vprocess.size(); i++) {
@@ -1020,4 +1024,28 @@ Double_t Yield(TH1* h)
   Int_t nbins = h->GetNbinsX();
 
   return h->Integral(0, nbins+1);
+}
+
+
+//------------------------------------------------------------------------------
+// GuessLocalBasePath
+//------------------------------------------------------------------------------
+TString GuessLocalBasePath()
+{
+  TString host = gSystem->HostName();
+
+  if (host.Contains("uniovi.es"))
+    {
+      return TString("/nfs/fanae/user");
+    }
+  else if (host.Contains("ifca.es"))
+    {
+      return TString("/gpfs/csic_user");
+    }
+  else
+    {
+      printf(" ERROR: Could not guess base path from host name %s.", host.Data());
+
+      return TString("");
+    }
 }
