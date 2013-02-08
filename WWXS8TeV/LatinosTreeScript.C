@@ -108,11 +108,11 @@ void LatinosTreeScript(Float_t luminosity,
   TH1F* hMassOutZevents [numberMetCuts];
 
   for (size_t nC=0; nC<numberMetCuts; nC++) {
-    hNinZevents     [nC] = new TH1F(Form("hNinZevents%.1f",      MetCut[nC]), "",   3, 0,   3);
-    hNoutZevents    [nC] = new TH1F(Form("hNoutZevents%.1f",     MetCut[nC]), "",   3, 0,   3);
-    hNinLooseZevents[nC] = new TH1F(Form("hNinLooseZevents%.1f", MetCut[nC]), "",   3, 0,   3);
-    hMassInZevents  [nC] = new TH1F(Form("hMassInZevents%.1f",   MetCut[nC]), "", 200, 0, 200);
-    hMassOutZevents [nC] = new TH1F(Form("hMassOutZevents%.1f",  MetCut[nC]), "", 200, 0, 200);
+    hNinZevents     [nC] = new TH1F(Form("hNinZevents%.2f",      MetCut[nC]), "",   3, 0,   3);
+    hNoutZevents    [nC] = new TH1F(Form("hNoutZevents%.2f",     MetCut[nC]), "",   3, 0,   3);
+    hNinLooseZevents[nC] = new TH1F(Form("hNinLooseZevents%.2f", MetCut[nC]), "",   3, 0,   3);
+    hMassInZevents  [nC] = new TH1F(Form("hMassInZevents%.2f",   MetCut[nC]), "", 200, 0, 200);
+    hMassOutZevents [nC] = new TH1F(Form("hMassOutZevents%.2f",  MetCut[nC]), "", 200, 0, 200);
   }
 
 
@@ -132,8 +132,8 @@ void LatinosTreeScript(Float_t luminosity,
   //----------------------------------------------------------------------------
   TString filesPath;
 
-  if (runAtOviedo) filesPath = " /hadoop/LatinosSkims/ReducedTrees/R53X_S1_V08_S2_V09_S3_V13/";
-  if (runAtIfca)   filesPath = "/gpfs/csic_projects/cms/data/LatinosSkims/ReducedTrees/R52X_S1_V05_S2_V05_S3_V05/ForICHEP2/";
+  if (runAtOviedo) filesPath = "/data/LatinosSkims/ReducedTrees/R53X_S1_V08_S2_V09_S3_V13/";
+  if (runAtIfca)   filesPath = "/gpfs/csic_projects/tier3data/LatinosSkims/ReducedTrees/R53X_S1_V08_S2_V09_S3_V13/";
 
   TChain* tree = new TChain("latino", "latino");
 
@@ -167,11 +167,6 @@ void LatinosTreeScript(Float_t luminosity,
     tree->Add(filesPath + "MC_TightTight/2L/latino_019_TTTo2L2Nu2B.root");
   }
   else if (theSample == "TW") {
-    tree->Add(filesPath + "MC_TightTight/2L/latino_011_TtWFullDR.root");
-    tree->Add(filesPath + "MC_TightTight/2L/latino_012_TbartWFullDR.root");
-  }
-  else if (theSample == "Top") {
-    tree->Add(filesPath + "MC_TightTight/2L/latino_019_TTTo2L2Nu2B.root");
     tree->Add(filesPath + "MC_TightTight/2L/latino_011_TtWFullDR.root");
     tree->Add(filesPath + "MC_TightTight/2L/latino_012_TbartWFullDR.root");
   }

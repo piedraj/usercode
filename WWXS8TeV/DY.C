@@ -114,17 +114,17 @@ void DY(Double_t &yield,
   TH1F* hNoutDataOF[numberMetCuts];
 
   for (UInt_t nC=0; nC<numberMetCuts; nC++) {
-    hNinDYSF  [nC] = (TH1F*)inputDYSF  ->Get(Form("hNinZevents%.1f",  MetCuts[nC]));
-    hNinWZSF  [nC] = (TH1F*)inputWZSF  ->Get(Form("hNinZevents%.1f",  MetCuts[nC]));
-    hNinZZSF  [nC] = (TH1F*)inputZZSF  ->Get(Form("hNinZevents%.1f",  MetCuts[nC]));
-    hNinDataSF[nC] = (TH1F*)inputDataSF->Get(Form("hNinZevents%.1f",  MetCuts[nC]));
-    hNinDataOF[nC] = (TH1F*)inputDataOF->Get(Form("hNinZevents%.1f",  MetCuts[nC]));
+    hNinDYSF  [nC] = (TH1F*)inputDYSF  ->Get(Form("hNinZevents%.2f", MetCuts[nC]));
+    hNinWZSF  [nC] = (TH1F*)inputWZSF  ->Get(Form("hNinZevents%.2f", MetCuts[nC]));
+    hNinZZSF  [nC] = (TH1F*)inputZZSF  ->Get(Form("hNinZevents%.2f", MetCuts[nC]));
+    hNinDataSF[nC] = (TH1F*)inputDataSF->Get(Form("hNinZevents%.2f", MetCuts[nC]));
+    hNinDataOF[nC] = (TH1F*)inputDataOF->Get(Form("hNinZevents%.2f", MetCuts[nC]));
 
-    hNoutDYSF  [nC] = (TH1F*)inputDYSF  ->Get(Form("hNoutZevents%.1f", MetCuts[nC]));     
-    hNoutWZSF  [nC] = (TH1F*)inputWZSF  ->Get(Form("hNoutZevents%.1f", MetCuts[nC]));     
-    hNoutZZSF  [nC] = (TH1F*)inputZZSF  ->Get(Form("hNoutZevents%.1f", MetCuts[nC]));     
-    hNoutDataSF[nC] = (TH1F*)inputDataSF->Get(Form("hNoutZevents%.1f", MetCuts[nC]));
-    hNoutDataOF[nC] = (TH1F*)inputDataOF->Get(Form("hNoutZevents%.1f", MetCuts[nC]));
+    hNoutDYSF  [nC] = (TH1F*)inputDYSF  ->Get(Form("hNoutZevents%.2f", MetCuts[nC]));     
+    hNoutWZSF  [nC] = (TH1F*)inputWZSF  ->Get(Form("hNoutZevents%.2f", MetCuts[nC]));     
+    hNoutZZSF  [nC] = (TH1F*)inputZZSF  ->Get(Form("hNoutZevents%.2f", MetCuts[nC]));     
+    hNoutDataSF[nC] = (TH1F*)inputDataSF->Get(Form("hNoutZevents%.2f", MetCuts[nC]));
+    hNoutDataOF[nC] = (TH1F*)inputDataOF->Get(Form("hNoutZevents%.2f", MetCuts[nC]));
   }
 
 
@@ -141,8 +141,8 @@ void DY(Double_t &yield,
   TFile* inputDYmumu = new TFile(Form("%s/%djet/MuMu/DY.root", directory.Data(), njet));
   TFile* inputDYee   = new TFile(Form("%s/%djet/EE/DY.root",   directory.Data(), njet));
 
-  TH1F* hNinDYmumu = (TH1F*)inputDYmumu->Get("hNinLooseZevents20.0");
-  TH1F* hNinDYee   = (TH1F*)inputDYee  ->Get("hNinLooseZevents20.0");
+  TH1F* hNinDYmumu = (TH1F*)inputDYmumu->Get("hNinLooseZevents20.00");
+  TH1F* hNinDYee   = (TH1F*)inputDYee  ->Get("hNinLooseZevents20.00");
 
   Double_t NinDYmumu = hNinDYmumu->GetBinContent(2);
   Double_t NinDYee   = hNinDYee  ->GetBinContent(2);

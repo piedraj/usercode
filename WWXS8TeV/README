@@ -20,7 +20,7 @@ cvs update -dP
 #
 #    njet       = {0, 1, 2, 3}
 #    ichannel   = {-1, All, SF, OF, MuMu, EE, EMu, MuE}
-#    luminosity = 5064
+#    luminosity = 19468
 #    printLevel = {SILENT, NOTE, DEBUG}
 #    drawTheXS  = false
 #    fiducialXS = false
