@@ -87,7 +87,7 @@ void AnalysisWZ::Initialise()
       hCounterEff[i][j] = CreateH1D(TString("hCounterEff" + suffix), "", 3, 0, 3);
       hCounter   [i][j] = CreateH1D(TString("hCounter"    + suffix), "", 3, 0, 3);
 
-      if (j < Exactly3Leptons) continue;
+      if (j < AtLeast3Leptons) continue;
 
       hNPV[i][j] = CreateH1D(TString("hNPV" + suffix), "",  50, 0,  50);
       hMET[i][j] = CreateH1D(TString("hMET" + suffix), "", 200, 0, 200);
@@ -189,6 +189,10 @@ void AnalysisWZ::InsideLoop()
   Electrons_Index.clear();
   Electrons_Charge.clear();
 
+  LooseMuons.clear();
+  LooseMuons_Index.clear();
+  LooseMuons_Charge.clear();
+
   ptIndexPair.clear();
 
   for (UInt_t i=0; i<3; i++) leptonIndex[i] = -1;
@@ -197,19 +201,18 @@ void AnalysisWZ::InsideLoop()
   theChannel      = -1;
 
 
-  // Apply Wgamma* filter
-  //----------------------------------------------------------------------------
-  if (sample.Contains("WGstar") && WgammaFilter()) return;
-
-
   // Gen study
   //----------------------------------------------------------------------------
   GenStudy();
 
 
-  // Accept only WZ events inside the Z window
+  // MC filters
   //----------------------------------------------------------------------------
+  if (sample.Contains("WGstar") && WgammaFilter()) return;
+
   if (sample.Contains("WZTo3LNu") && !isSignalMCInsideZmassRange(71,111)) return;
+
+  if (sample.Contains("ZJets_Madgraph") && T_Gen_bSt3_Px->size() > 0) return;
 
 
   // AllEvents
@@ -251,11 +254,11 @@ void AnalysisWZ::InsideLoop()
 
     countMuons++;
 
-    if (!MuonCloseToPV(i)) continue;
+    if (!MuonCloseToPV(i, false)) continue;
 
     countPVMuons++;
 
-    if (!MuonIsolation(i)) continue;
+    if (!MuonIsolation(i, false)) continue;
 
     countIsoMuons++;
 
@@ -297,9 +300,9 @@ void AnalysisWZ::InsideLoop()
 
     countPVElectrons++;
 
-    if (!ElectronIsolation(i)) continue;
+    if (!ElectronIsolation(i, false)) continue;
 
-    if (!ElectronBDT(i)) continue;
+    if (!ElectronBDT(i, false)) continue;
     
     countIsoElectrons++;
 
@@ -372,7 +375,7 @@ void AnalysisWZ::InsideLoop()
   if (sample.Contains("DoubleMu")       && electronCounter > 1) return;
   if (sample.Contains("DoubleElectron") && electronCounter < 2) return;
 
-  FillHistograms(theChannel, Exactly3Leptons);
+  FillHistograms(theChannel, AtLeast3Leptons);
 
 
   // HasZCandidate
@@ -573,7 +576,7 @@ void AnalysisWZ::GetParameters()
 //------------------------------------------------------------------------------
 // ElectronBDT
 //------------------------------------------------------------------------------
-Bool_t AnalysisWZ::ElectronBDT(UInt_t iElec)
+Bool_t AnalysisWZ::ElectronBDT(UInt_t iElec, Bool_t isLoose)
 {
   Double_t eta = fabs(T_Elec_SC_Eta->at(iElec));
 	
@@ -592,7 +595,11 @@ Bool_t AnalysisWZ::ElectronBDT(UInt_t iElec)
       else if (eta > 1.479 )               {mvaCut = 0.92;}
     }
 
-  return (T_Elec_MVA->at(iElec) > mvaCut);
+  Bool_t pass = (T_Elec_MVA->at(iElec) > mvaCut);
+
+  if (isLoose) pass = !pass;
+
+  return pass;
 }
 
 
@@ -661,9 +668,13 @@ Bool_t AnalysisWZ::ElectronCloseToPV(UInt_t iElec)
 //------------------------------------------------------------------------------
 // ElectronIsolation
 //------------------------------------------------------------------------------
-Bool_t AnalysisWZ::ElectronIsolation(UInt_t iElec) 
+Bool_t AnalysisWZ::ElectronIsolation(UInt_t iElec, Bool_t isLoose) 
 {
-  return (T_Elec_pfComb->at(iElec) < 0.15);
+  Bool_t pass = (T_Elec_pfComb->at(iElec) < 0.15);
+
+  if (isLoose) pass = !pass;
+
+  return pass;
 }
 
 
@@ -698,13 +709,21 @@ Bool_t AnalysisWZ::MuonID(UInt_t iMuon)
 //------------------------------------------------------------------------------
 // MuonCloseToPV
 //------------------------------------------------------------------------------
-Bool_t AnalysisWZ::MuonCloseToPV(UInt_t iMuon)
+Bool_t AnalysisWZ::MuonCloseToPV(UInt_t iMuon, Bool_t isLoose)
 {
   Bool_t pass = (fabs(T_Muon_dzPVBiasedPV->at(iMuon)) <= 0.1);
 
   Double_t MaxMuIP = (T_Muon_Pt->at(iMuon) < 20) ? 0.01 : 0.02;
 
-  pass &= (fabs(T_Muon_IP2DBiasedPV->at(iMuon)) <= MaxMuIP);
+  if (isLoose)
+    {
+      pass &= (fabs(T_Muon_IP2DBiasedPV->at(iMuon)) > MaxMuIP);
+      pass &= (fabs(T_Muon_IP2DBiasedPV->at(iMuon)) <= 0.2);
+    }
+  else
+    {
+      pass &= (fabs(T_Muon_IP2DBiasedPV->at(iMuon)) <= MaxMuIP);
+    }
 
   return pass;
 }
@@ -713,25 +732,29 @@ Bool_t AnalysisWZ::MuonCloseToPV(UInt_t iMuon)
 //------------------------------------------------------------------------------
 // MuonIsolation
 //------------------------------------------------------------------------------
-Bool_t AnalysisWZ::MuonIsolation(UInt_t iMuon) 
+Bool_t AnalysisWZ::MuonIsolation(UInt_t iMuon, Bool_t isLoose) 
 {
+  Bool_t pass = true;
+
   Double_t mueta = T_Muon_Eta->at(iMuon);
   Double_t mupt  = T_Muon_Pt ->at(iMuon);
 
-  Double_t isoCut = false;
+  Double_t isoCut = -1;
 
-  if (mupt <= 20)
+  if (mupt <= 20) isoCut = (fabs(mueta) < 1.479) ? 0.82 : 0.86;
+  else            isoCut = (fabs(mueta) < 1.479) ? 0.86 : 0.82;
+
+  if (isLoose)
     {
-      if  (fabs(mueta) < 1.479) isoCut = 0.82;
-      else                      isoCut = 0.86;
+      pass &= (T_Muon_MVARings->at(iMuon) < isoCut);
+      pass &= (T_Muon_MVARings->at(iMuon) >= -0.6);
     }
   else
     {
-      if  (fabs(mueta) < 1.479) isoCut = 0.86;
-      else                      isoCut = 0.82;
+      pass &= (T_Muon_MVARings->at(iMuon) >= isoCut);
     }
-
-  return (T_Muon_MVARings->at(iMuon) >= isoCut);
+  
+  return pass;
 }
 
 
@@ -773,7 +796,7 @@ Bool_t AnalysisWZ::FillCounters(UInt_t nElec, UInt_t nMuon, UInt_t iCut)
 //------------------------------------------------------------------------------
 void AnalysisWZ::FillHistograms(UInt_t iChannel, UInt_t iCut)
 {
-  if (iCut < Exactly3Leptons) return;
+  if (iCut < AtLeast3Leptons) return;
 
   FillChannelCounters(iChannel, iCut);
 

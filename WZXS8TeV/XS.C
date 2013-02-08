@@ -34,7 +34,7 @@ const Double_t ngenWZphase = 1449067;  // (71 < mZ < 111 GeV)
 //------------------------------------------------------------------------------
 const UInt_t nChannels  =  4;
 const UInt_t nCuts      =  7;
-const UInt_t nProcesses = 35;
+const UInt_t nProcesses = 36;
 
 enum {MMM, EEE, MME, EEM};
 
@@ -42,7 +42,7 @@ enum {
   AllEvents,
   HLT,
   Has2IsoGoodLeptons,
-  Exactly3Leptons,
+  AtLeast3Leptons,
   HasZCandidate,
   HasWCandidate,
   MET
@@ -52,6 +52,7 @@ enum {
   Data,
   DYJets_Madgraph,
   ZJets_Madgraph,
+  ZbbToLL,
   WJets_Madgraph,
   WGstarToElNuMad,
   WGstarToMuNuMad,
@@ -172,10 +173,10 @@ TString  GuessLocalBasePath       ();
 //------------------------------------------------------------------------------
 // XS
 //------------------------------------------------------------------------------
-void XS(UInt_t cut   = Exactly3Leptons,
+void XS(UInt_t cut   = AtLeast3Leptons,
 	Bool_t batch = false)
 {
-  if (cut < Exactly3Leptons) return;
+  if (cut < AtLeast3Leptons) return;
 
   gROOT->SetBatch(batch);
 
@@ -485,7 +486,7 @@ void DrawHistogram(TString  hname,
   if (pad1->GetLogy())
     theMax = TMath::Power(10, TMath::Log10(theMax) + 2);
   else
-    theMax *= 1.45;
+    theMax *= 1.5;
 
   hist[Data]->SetMaximum(theMax);
 
@@ -533,10 +534,11 @@ void DrawHistogram(TString  hname,
   VVVJetsYield += Yield(hist[TTWWJets]);
   VVVJetsYield += Yield(hist[TTGJets]);
 
-  DrawLegend(x0 - 0.49, y0 - ndelta, hist[Data],           Form(" data (%.0f)",   Yield(hist[Data])),     "lp"); ndelta += delta;
-  DrawLegend(x0 - 0.49, y0 - ndelta, allmc,                Form(" MC (%.0f)",     Yield(allmc)),          "f");  ndelta += delta;
-  DrawLegend(x0 - 0.49, y0 - ndelta, hist[WZTo3LNu],       Form(" WZ (%.0f)",     Yield(hist[WZTo3LNu])), "f");  ndelta += delta;
-  DrawLegend(x0 - 0.49, y0 - ndelta, hist[ZJets_Madgraph], Form(" Z+jets (%.0f)", ZJetsYield),            "f");  ndelta += delta;
+  DrawLegend(x0 - 0.49, y0 - ndelta, hist[Data],           Form(" data (%.0f)",       Yield(hist[Data])),     "lp"); ndelta += delta;
+  DrawLegend(x0 - 0.49, y0 - ndelta, allmc,                Form(" MC (%.0f)",         Yield(allmc)),          "f");  ndelta += delta;
+  DrawLegend(x0 - 0.49, y0 - ndelta, hist[WZTo3LNu],       Form(" WZ (%.0f)",         Yield(hist[WZTo3LNu])), "f");  ndelta += delta;
+  DrawLegend(x0 - 0.49, y0 - ndelta, hist[ZJets_Madgraph], Form(" Z+jets (%.0f)",     ZJetsYield),            "f");  ndelta += delta;
+  DrawLegend(x0 - 0.49, y0 - ndelta, hist[ZbbToLL],        Form(" Z+b#bar{b} (%.0f)", Yield(hist[ZbbToLL])),  "f");  ndelta += delta;
 
   ndelta = 0;
 
@@ -846,13 +848,14 @@ void SetParameters(UInt_t cut)
   sCut[AllEvents]          = "AllEvents";
   sCut[HLT]                = "HLT";
   sCut[Has2IsoGoodLeptons] = "Has2IsoGoodLeptons";
-  sCut[Exactly3Leptons]    = "Exactly3Leptons";
+  sCut[AtLeast3Leptons]    = "AtLeast3Leptons";
   sCut[HasZCandidate]      = "HasZCandidate";
   sCut[HasWCandidate]      = "HasWCandidate";
   sCut[MET]                = "MET";
 
   process[DYJets_Madgraph]  = "DYJets_Madgraph";
   process[ZJets_Madgraph]   = "ZJets_Madgraph";
+  process[ZbbToLL]          = "ZbbToLL";
   process[WJets_Madgraph]   = "WJets_Madgraph";
   process[WGstarToElNuMad]  = "WGstarToElNuMad";
   process[WGstarToMuNuMad]  = "WGstarToMuNuMad";
@@ -889,6 +892,7 @@ void SetParameters(UInt_t cut)
   color[Data]             = kBlack;
   color[DYJets_Madgraph]  = kGreen+2;   // Z+jets
   color[ZJets_Madgraph]   = kGreen+2;   // Z+jets
+  color[ZbbToLL]          = kGray+1;    // Z+bb
   color[WJets_Madgraph]   = kGray+1;    // W+jets
   color[WGstarToElNuMad]  = kYellow;    // Wgamma(*)
   color[WGstarToMuNuMad]  = kYellow;    // Wgamma(*)
@@ -952,6 +956,7 @@ void SetParameters(UInt_t cut)
   vprocess.push_back(Data);
   vprocess.push_back(DYJets_Madgraph);
   vprocess.push_back(ZJets_Madgraph);
+  vprocess.push_back(ZbbToLL);
   vprocess.push_back(WJets_Madgraph);
   vprocess.push_back(WGstarToElNuMad);
   vprocess.push_back(WGstarToMuNuMad);
@@ -1008,7 +1013,7 @@ void ReadInputFiles(UInt_t channel)
 
     // Debug
     //--------------------------------------------------------------------------
-    TH1D* dummy = (TH1D*)input[j]->Get("hCounter_MMM_Exactly3Leptons");
+    TH1D* dummy = (TH1D*)input[j]->Get("hCounter_MMM_AtLeast3Leptons");
 
     if (!dummy)
       printf(" [ReadInputFiles] The %s file is broken.\n", process[j].Data());

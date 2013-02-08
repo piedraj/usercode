@@ -17,17 +17,13 @@
 
 // Input parameters for the WZ cross section
 //------------------------------------------------------------------------------
-const Double_t xsWplusZ_nlo  = 14.48;  // pb (arXiv:1105.0020v1)
-const Double_t xsWminusZ_nlo =  8.40;  // pb (arXiv:1105.0020v1)
-const Double_t xsWplusZ      = 13.89;  // pb (MCFM with 71 < mZ < 111 GeV)
-const Double_t xsWminusZ     =  8.06;  // pb (MCFM with 71 < mZ < 111 GeV)
-
+const Double_t xsWplusZ    = 13.89;  // pb (MCFM with 71 < mZ < 111 GeV)
+const Double_t xsWminusZ   =  8.06;  // pb (MCFM with 71 < mZ < 111 GeV)
 const Double_t W2e         = 0.1075;
 const Double_t W2m         = 0.1057;
 const Double_t W2tau       = 0.1125;
 const Double_t Z2ll        = 0.033658;
 const Double_t WZ23lnu     = 3 * Z2ll * (W2e + W2m + W2tau);
-const Double_t ngenWZ      = 2017979;
 const Double_t ngenWZphase = 1449067;  // (71 < mZ < 111 GeV)
 
 
@@ -51,7 +47,7 @@ enum {
   Has2PVLeptons,
   Has2IsoLeptons,
   Has2IsoGoodLeptons,
-  Exactly3Leptons,
+  AtLeast3Leptons,
   HasZCandidate,
   HasWCandidate,
   MET
@@ -64,7 +60,7 @@ TString sCut[] = {
   "Has2PVLeptons",
   "Has2IsoLeptons",
   "Has2IsoGoodLeptons",
-  "Exactly3Leptons",
+  "AtLeast3Leptons",
   "HasZCandidate",
   "HasWCandidate",
   "MET"
@@ -94,14 +90,14 @@ class AnalysisWZ: public CMSAnalysisSelectorMiniTrees
   //----------------------------------------------------------------------------
   void         GetParameters             ();
 			    
-  Bool_t       ElectronBDT               (UInt_t iElec);
   Bool_t       ElectronID                (UInt_t iElec);
   Bool_t       ElectronCloseToPV         (UInt_t iElec);
-  Bool_t       ElectronIsolation         (UInt_t iElec);
+  Bool_t       ElectronBDT               (UInt_t iElec, Bool_t isLoose = false);
+  Bool_t       ElectronIsolation         (UInt_t iElec, Bool_t isLoose = false);
 			    	      
   Bool_t       MuonID                    (UInt_t iMuon);
-  Bool_t       MuonCloseToPV             (UInt_t iMuon);
-  Bool_t       MuonIsolation             (UInt_t iMuon);
+  Bool_t       MuonCloseToPV             (UInt_t iMuon, Bool_t isLoose = false);
+  Bool_t       MuonIsolation             (UInt_t iMuon, Bool_t isLoose = false);
   
   void         FillChannelCounters       (UInt_t iChannel,
 					  UInt_t iCut);
@@ -151,6 +147,9 @@ class AnalysisWZ: public CMSAnalysisSelectorMiniTrees
   // Gen study
   //----------------------------------------------------------------------------
   TH1D*                       h_n_tau_St3;
+  TH1D*                       h_pt_tau_St3;
+  TH1D*                       h_eta_tau_St3;
+
   TH1D*                       h_n_muon_St3;
   TH1D*                       h_n_muon_Gen;
   TH1D*                       h_n_muon_Rec;
@@ -166,7 +165,6 @@ class AnalysisWZ: public CMSAnalysisSelectorMiniTrees
   TH1D*                       h_n_elec_Iso;
   TH1D*                       h_n_elec_ID;
 
-  TH1D*                       h_pt_tau_St3;
   TH1D*                       h_pt_muon_St3;
   TH1D*                       h_pt_muon_Gen;
   TH1D*                       h_pt_muon_Rec;
@@ -182,7 +180,6 @@ class AnalysisWZ: public CMSAnalysisSelectorMiniTrees
   TH1D*                       h_pt_elec_Iso;
   TH1D*                       h_pt_elec_ID;
 
-  TH1D*                       h_eta_tau_St3;
   TH1D*                       h_eta_muon_St3;
   TH1D*                       h_eta_muon_Gen;
   TH1D*                       h_eta_muon_Rec;
@@ -225,6 +222,10 @@ class AnalysisWZ: public CMSAnalysisSelectorMiniTrees
   std::vector<TLorentzVector> Electrons;
   std::vector<Int_t>          Electrons_Index;
   std::vector<Double_t>       Electrons_Charge;
+
+  std::vector<TLorentzVector> LooseMuons;
+  std::vector<Int_t>          LooseMuons_Index;
+  std::vector<Double_t>       LooseMuons_Charge;
 
   std::vector< std::pair<Double_t, Int_t> > ptIndexPair;
 
