@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 //
-//    FILE: RunPROOF_WW.C
+//    FILE: RunPROOF_WZ.C
 // AUTHORS: I. Gonzalez, A.Y. Rodriguez, J. Piedra
 //    DATE: 2012
 //
@@ -13,14 +13,18 @@
 
 
 Double_t G_Event_Weight = 1;
-Double_t G_Event_Lumi   = 12103.3;  // pb
+Double_t G_Event_Lumi   = 19468.3;  // pb
 TProof*  proof          = 0;
+TString  dataPath       = "";
 
 
-void RunPROOF_WW(TString  sample   = "WZTo3LNu",
-		 TString  selector = "AnalysisWW",
-		 Long64_t nEvents  = -1)
+void RunPROOF_WW(TString  sample  = "DoubleMu",
+		 Long64_t nEvents = -1,
+		 Bool_t   update  = true)
 {
+  dataPath = GuessLocalBasePath();
+
+
   // PROOF mode
   //----------------------------------------------------------------------------
   //  gPAFOptions->proofMode = kSequential;
@@ -47,67 +51,39 @@ void RunPROOF_WW(TString  sample   = "WZTo3LNu",
   
   // Read input files
   //----------------------------------------------------------------------------
-  TString dataPath = "/hadoop";
+  gROOT->LoadMacro("../DatasetManager/DatasetManager.C+");
 
-  if (sample.Contains("Data_DoubleElectron")) {
-    gPAFOptions->dataFiles.push_back(dataPath + "/MC_Summer12_53X/Tree_DoubleElectronA_892_0.root");
-    gPAFOptions->dataFiles.push_back(dataPath + "/MC_Summer12_53X/Tree_DoubleElectronB_4404_0.root");
-    gPAFOptions->dataFiles.push_back(dataPath + "/MC_Summer12_53X/Tree_DoubleElectronB_4404_1.root");
-    gPAFOptions->dataFiles.push_back(dataPath + "/MC_Summer12_53X/Tree_DoubleElectronC_6807_0.root");
-    gPAFOptions->dataFiles.push_back(dataPath + "/MC_Summer12_53X/Tree_DoubleElectronC_6807_1.root");
-    gPAFOptions->dataFiles.push_back(dataPath + "/MC_Summer12_53X/Tree_DoubleElectronC_6807_2.root");
-  }								  
-  else if (sample.Contains("Data_DoubleMu")) {			  
-    gPAFOptions->dataFiles.push_back(dataPath + "/MC_Summer12_53X/Tree_DoubleMuA_892_0.root");
-    gPAFOptions->dataFiles.push_back(dataPath + "/MC_Summer12_53X/Tree_DoubleMuB_4404_0.root");
-    gPAFOptions->dataFiles.push_back(dataPath + "/MC_Summer12_53X/Tree_DoubleMuB_4404_1.root");
-    gPAFOptions->dataFiles.push_back(dataPath + "/MC_Summer12_53X/Tree_DoubleMuB_4404_2.root");
-    gPAFOptions->dataFiles.push_back(dataPath + "/MC_Summer12_53X/Tree_DoubleMuB_4404_3.root");
-    gPAFOptions->dataFiles.push_back(dataPath + "/MC_Summer12_53X/Tree_DoubleMuC_6807_0.root");
-    gPAFOptions->dataFiles.push_back(dataPath + "/MC_Summer12_53X/Tree_DoubleMuC_6807_1.root");
-    gPAFOptions->dataFiles.push_back(dataPath + "/MC_Summer12_53X/Tree_DoubleMuC_6807_2.root");
-    gPAFOptions->dataFiles.push_back(dataPath + "/MC_Summer12_53X/Tree_DoubleMuC_6807_3.root");
-    gPAFOptions->dataFiles.push_back(dataPath + "/MC_Summer12_53X/Tree_DoubleMuC_6807_4.root");
-  }								  
-  else if (sample.Contains("Data_MuEG")) {			  
-    gPAFOptions->dataFiles.push_back(dataPath + "/MC_Summer12_53X/Tree_MuEGA_892_0.root");
-    gPAFOptions->dataFiles.push_back(dataPath + "/MC_Summer12_53X/Tree_MuEGB_4404_0.root");
-    gPAFOptions->dataFiles.push_back(dataPath + "/MC_Summer12_53X/Tree_MuEGB_4404_1.root");
-    gPAFOptions->dataFiles.push_back(dataPath + "/MC_Summer12_53X/Tree_MuEGB_4404_2.root");
-    gPAFOptions->dataFiles.push_back(dataPath + "/MC_Summer12_53X/Tree_MuEGC_6807_0.root");
-    gPAFOptions->dataFiles.push_back(dataPath + "/MC_Summer12_53X/Tree_MuEGC_6807_1.root");
-    gPAFOptions->dataFiles.push_back(dataPath + "/MC_Summer12_53X/Tree_MuEGC_6807_2.root");
-    gPAFOptions->dataFiles.push_back(dataPath + "/MC_Summer12_53X/Tree_MuEGC_6807_3.root");
+  if (sample.Contains("DoubleElectron") ||
+      sample.Contains("DoubleMu") ||
+      sample.Contains("MuEG")) {
+
+    gPAFOptions->dataFiles = GetRealDataFiles("MC_Summer12_53X/NewJEC", sample.Data());
   }
   else {
 
-    gROOT->LoadMacro("../DatasetManager/DatasetManager.C+");
+    DatasetManager* dm = new DatasetManager("Summer12_53X", "NewJEC");
 
-    DatasetManager* dm = new DatasetManager("Summer12_53X");
+    if (update) dm->RedownloadFiles();
 
-    // Use this if you know that the information on the google doc table has
-    // changed and you need to update the information
-    dm->RedownloadFiles();
+    dm->LoadDataset(sample);
 
-    dm->LoadDataset(sample);  // Load information about a given dataset
-    
-    G_Event_Weight = dm->GetCrossSection() * G_Event_Lumi / dm->GetEventsInTheSample();
+    gPAFOptions->dataFiles = dm->GetFiles();
+
+     G_Event_Weight = dm->GetCrossSection() * G_Event_Lumi / dm->GetEventsInTheSample();
 
     cout << endl;
-    cout << "             xs = " << dm->GetCrossSection()      << endl;
+    cout << "      x-section = " << dm->GetCrossSection()      << endl;
     cout << "     luminosity = " << G_Event_Lumi               << endl;
     cout << "        nevents = " << dm->GetEventsInTheSample() << endl;
     cout << " base file name = " << dm->GetBaseFileName()      << endl;
-    cout << "      xs weight = " << G_Event_Weight             << endl;
+    cout << "         weight = " << G_Event_Weight             << endl;
     cout << endl;
-
-    gPAFOptions->dataFiles = dm->GetFiles();
   }
 
 
   // Output file name
   //----------------------------------------------------------------------------
-  TString outputDir = "../WWXS8TeV_TopTrees/rootfiles/Summer12_53X/";
+  TString outputDir = "../WWXS8TeV_TopTrees/results/Summer12_53X/NewJEC";
 
   gSystem->mkdir(outputDir, kTRUE);
 
@@ -132,7 +108,7 @@ void RunPROOF_WW(TString  sample   = "WZTo3LNu",
   
   // Name of analysis class
   //----------------------------------------------------------------------------
-  gPAFOptions->myAnalysis = selector.Data();
+  gPAFOptions->myAnalysis = "AnalysisWW";
 
 
   // Additional packages to be uploaded to PROOF
@@ -157,4 +133,107 @@ void RunPROOF_WW(TString  sample   = "WZTo3LNu",
   //----------------------------------------------------------------------------
   if (!RunAnalysis())
     cerr << " ERROR: There was a problem running the analysis" << endl;
+}
+
+
+//------------------------------------------------------------------------------
+// GetRealDataFiles
+//------------------------------------------------------------------------------
+vector<TString> GetRealDataFiles(const char* relativepath,
+				 const char* filebasename)
+{
+  vector<TString> theFiles;
+
+  TString basefile(filebasename);
+
+  TString fullpath = dataPath + "/" + relativepath;
+
+  printf("%s\n\n", fullpath.Data());
+
+  TString command("ls ");
+
+  command += 
+    fullpath + "/Tree_" + basefile + "A_892.root " +
+    fullpath + "/Tree_" + basefile + "A_892_[0-9].root " +
+    fullpath + "/Tree_" + basefile + "A_892_[0-9][0-9].root " +
+    fullpath + "/Tree_" + basefile + "B_4404.root " +
+    fullpath + "/Tree_" + basefile + "B_4404_[0-9].root " +
+    fullpath + "/Tree_" + basefile + "B_4404_[0-9][0-9].root " +
+    fullpath + "/Tree_" + basefile + "C_6807.root " +
+    fullpath + "/Tree_" + basefile + "C_6807_[0-9].root " +
+    fullpath + "/Tree_" + basefile + "C_6807_[0-9][0-9].root " +
+    fullpath + "/Tree_" + basefile + "C_91.root " +
+    fullpath + "/Tree_" + basefile + "C_ReReco11Dec_134.root " +
+    fullpath + "/Tree_" + basefile + "D_7274.root " +
+    fullpath + "/Tree_" + basefile + "D_7274_[0-9].root " +
+    fullpath + "/Tree_" + basefile + "D_7274_[0-9][0-9].root";
+
+  command += " 2> /dev/null";
+
+  TString result;
+
+  FILE* pipe = gSystem->OpenPipe(command, "r");
+
+  if (!pipe) {
+    cerr << "ERROR: in RunPROOF_WZ::GetRealDataFiles. Cannot run command \""
+	 << command << "\"" << endl;
+  }
+  else {
+    TString line;
+    while (line.Gets(pipe)) {
+      if (result != "")
+	result += "\n";
+      result += line;
+    }
+  
+    gSystem->ClosePipe(pipe);
+  }
+
+  if (result != "") {
+    TObjArray* filesfound = result.Tokenize(TString('\n'));
+    if (!filesfound)
+      cerr << "ERROR: Could not parse output while finding files" << endl;
+    else {
+      for (int i=0; i<filesfound->GetEntries(); i++) {
+	
+	theFiles.push_back(filesfound->At(i)->GetName());
+      }
+      filesfound->Clear();
+
+      delete filesfound;
+    }
+  }
+
+  if (theFiles.size() == 0)
+    cerr << "ERROR: Could not find data!" << endl;
+
+  return theFiles;
+}
+
+
+//------------------------------------------------------------------------------
+// GuessLocalBasePath
+//------------------------------------------------------------------------------
+TString GuessLocalBasePath()
+{
+  TString host = gSystem->HostName();
+
+  if (host.Contains("geol.uniovi.es"))
+    {
+      return TString("/hadoop");
+    }
+  else if (host.Contains("ciencias.uniovi.es"))
+    {
+      return TString("/data");
+    }
+  else if (host.Contains("ifca.es"))
+    {
+      return TString("/gpfs/csic_projects/tier3data");
+    }
+  else
+    {
+      cerr << "ERROR: Could not guess base path from host name " << host << endl;
+
+      return TString("");
+    }
 }

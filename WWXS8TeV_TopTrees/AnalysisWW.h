@@ -133,6 +133,7 @@ class AnalysisWW: public CMSAnalysisSelectorMiniTrees
   Double_t                    Lepton1_Charge;
   Double_t                    Lepton2_Charge;
 
+  Bool_t                      isData;
   UInt_t                      nmuon;
   UInt_t                      nelec;
   UInt_t                      channel;

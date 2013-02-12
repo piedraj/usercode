@@ -45,7 +45,11 @@ void AnalysisWW::Initialise()
 //------------------------------------------------------------------------------
 void AnalysisWW::InsideLoop()
 {
-  pu_weight = (sample.Contains("Data")) ? 1.0 : fPUWeight->GetWeight((Int_t)T_Event_nTruePU);
+  isData = (sample.Contains("DoubleElectron") ||
+	    sample.Contains("DoubleMu") ||
+	    sample.Contains("MuEG")) ? 1 : 0;
+
+  pu_weight = (isData) ? 1.0 : fPUWeight->GetWeight((Int_t)T_Event_nTruePU);
 
   efficiency_weight = pu_weight;
 
@@ -162,7 +166,7 @@ void AnalysisWW::InsideLoop()
 
   // Apply lepton scale factors
   //----------------------------------------------------------------------------
-  if (!sample.Contains("Data")) {
+  if (!isData) {
     if      (channel == MuMu) efficiency_weight *= SFmumu;
     else if (channel == EE)   efficiency_weight *= SFee;
     else if (channel == EMu)  efficiency_weight *= SFmue;
