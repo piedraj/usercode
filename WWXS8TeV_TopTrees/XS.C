@@ -103,7 +103,7 @@ Bool_t   _setLogy    = false;
 Double_t _luminosity = 19468.3;  // pb
 Double_t _yoffset    = 0.048;
 Int_t    _verbosity  = 3;
-TString  _directory  = "results/Summer12_53X/NewJEC";
+TString  _directory  = "results/MC_Summer12_53X/NewJEC";
 TString  _format     = "png";
 
 

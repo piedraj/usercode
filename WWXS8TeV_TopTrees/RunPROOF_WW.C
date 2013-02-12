@@ -16,6 +16,7 @@ Double_t G_Event_Weight = 1;
 Double_t G_Event_Lumi   = 19468.3;  // pb
 TProof*  proof          = 0;
 TString  dataPath       = "";
+TString  samplesPath    = "MC_Summer12_53X/NewJEC";
 
 
 void RunPROOF_WW(TString  sample  = "DoubleMu",
@@ -57,7 +58,27 @@ void RunPROOF_WW(TString  sample  = "DoubleMu",
       sample.Contains("DoubleMu") ||
       sample.Contains("MuEG")) {
 
-    gPAFOptions->dataFiles = GetRealDataFiles("MC_Summer12_53X/NewJEC", sample.Data());
+    gPAFOptions->dataFiles = GetRealDataFiles(samplesPath.Data(), sample.Data());
+  }
+  else if (sample.Contains("T2tt_FineBin")) {
+
+    gPAFOptions->dataFiles.push_back(dataPath + samplesPath + "/Tree_T2tt_FineBin_v1_ALL_1.root");
+    gPAFOptions->dataFiles.push_back(dataPath + samplesPath + "/Tree_T2tt_FineBin_v1_ALL_2.root");
+    gPAFOptions->dataFiles.push_back(dataPath + samplesPath + "/Tree_T2tt_FineBin_v1_ALL_3.root");
+    gPAFOptions->dataFiles.push_back(dataPath + samplesPath + "/Tree_T2tt_FineBin_v1_ALL_4.root");
+    gPAFOptions->dataFiles.push_back(dataPath + samplesPath + "/Tree_T2tt_FineBin_v1_ALL_5more.root");
+    gPAFOptions->dataFiles.push_back(dataPath + samplesPath + "/Tree_T2tt_FineBin_v1v2_ALL_1.root");
+    gPAFOptions->dataFiles.push_back(dataPath + samplesPath + "/Tree_T2tt_FineBin_v1v2_ALL_2.root");
+    gPAFOptions->dataFiles.push_back(dataPath + samplesPath + "/Tree_T2tt_FineBin_v1v2_ALL_3.root");
+    gPAFOptions->dataFiles.push_back(dataPath + samplesPath + "/Tree_T2tt_FineBin_v1v2_ALL_4.root");
+    gPAFOptions->dataFiles.push_back(dataPath + samplesPath + "/Tree_T2tt_FineBin_v1v2_ALL_5more.root");
+    gPAFOptions->dataFiles.push_back(dataPath + samplesPath + "/Tree_T2tt_FineBin_v3_ALL_1.root");
+    gPAFOptions->dataFiles.push_back(dataPath + samplesPath + "/Tree_T2tt_FineBin_v3_ALL_2.root");
+    gPAFOptions->dataFiles.push_back(dataPath + samplesPath + "/Tree_T2tt_FineBin_v3_ALL_3.root");
+    gPAFOptions->dataFiles.push_back(dataPath + samplesPath + "/Tree_T2tt_FineBin_v3_ALL_4.root");
+    gPAFOptions->dataFiles.push_back(dataPath + samplesPath + "/Tree_T2tt_FineBin_v3_ALL_5more.root");
+    gPAFOptions->dataFiles.push_back(dataPath + samplesPath + "/Tree_T2tt_FineBin_v4_ALL.root");
+    gPAFOptions->dataFiles.push_back(dataPath + samplesPath + "/Tree_T2tt_FineBin_v6_ALL.root");
   }
   else {
 
@@ -83,7 +104,7 @@ void RunPROOF_WW(TString  sample  = "DoubleMu",
 
   // Output file name
   //----------------------------------------------------------------------------
-  TString outputDir = "../WWXS8TeV_TopTrees/results/Summer12_53X/NewJEC";
+  TString outputDir = "../WWXS8TeV_TopTrees/results/" + samplesPath;
 
   gSystem->mkdir(outputDir, kTRUE);
 
@@ -146,7 +167,7 @@ vector<TString> GetRealDataFiles(const char* relativepath,
 
   TString basefile(filebasename);
 
-  TString fullpath = dataPath + "/" + relativepath;
+  TString fullpath = dataPath + relativepath;
 
   printf("%s\n\n", fullpath.Data());
 
@@ -220,15 +241,15 @@ TString GuessLocalBasePath()
 
   if (host.Contains("geol.uniovi.es"))
     {
-      return TString("/hadoop");
+      return TString("/hadoop/");
     }
   else if (host.Contains("ciencias.uniovi.es"))
     {
-      return TString("/data");
+      return TString("/data/");
     }
   else if (host.Contains("ifca.es"))
     {
-      return TString("/gpfs/csic_projects/tier3data");
+      return TString("/gpfs/csic_projects/tier3data/");
     }
   else
     {

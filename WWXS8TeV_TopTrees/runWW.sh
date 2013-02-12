@@ -1,5 +1,5 @@
 
- ./resetproof.sh
+ ./resetproof.sh -a
 
  root -l -b -q RunPROOF_WW.C\(\"ZJets_Madgraph\"\)
  root -l -b -q RunPROOF_WW.C\(\"TW\"\)
@@ -15,4 +15,8 @@
  root -l -b -q RunPROOF_WW.C\(\"DoubleElectron\"\)
  root -l -b -q RunPROOF_WW.C\(\"DoubleMu\"\)
  root -l -b -q RunPROOF_WW.C\(\"MuEG\"\)
+
+ ./resetproof.sh -a
+
+ root -l -b -q RunPROOF_WW.C\(\"T2tt_FineBin\"\)
 
