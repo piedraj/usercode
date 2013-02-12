@@ -171,7 +171,7 @@ void DrawHistogram(TString  hname,
 		   Int_t    precision    = 0,
 		   TString  units        = "NULL",
 		   Double_t xmin         = -999,
-		   Double_t xmax         =  999,
+		   Double_t xmax         = -999,
 		   Bool_t   moveOverflow = true)
 {
   TCanvas* canvas = new TCanvas(hname, hname, 550, 900);
