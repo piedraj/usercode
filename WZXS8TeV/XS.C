@@ -34,7 +34,7 @@ const Double_t ngenWZphase = 1449067;  // (71 < mZ < 111 GeV)
 //------------------------------------------------------------------------------
 const UInt_t nChannels  =  4;
 const UInt_t nCuts      =  7;
-const UInt_t nProcesses = 36;
+const UInt_t nProcesses = 37;
 
 enum {MMM, EEE, MME, EEM};
 
@@ -53,6 +53,7 @@ enum {
   DYJets_Madgraph,
   ZJets_Madgraph,
   ZbbToLL,
+  WbbToLNu,
   WJets_Madgraph,
   WGstarToElNuMad,
   WGstarToMuNuMad,
@@ -190,32 +191,17 @@ void XS(UInt_t cut   = AtLeast3Leptons,
 
     TString suffix = "_" + sChannel[channel] + "_" + sCut[cut];
     
-    DrawHistogram("hNPV"          + suffix, "number of PV",          -1, 0, "NULL", linY, 0, 30);
-    DrawHistogram("hMET"          + suffix, "E_{T}^{miss}",           5, 0, "GeV");
-    DrawHistogram("hSumCharges"   + suffix, "q_{1} + q_{2} + q_{3}");
-    DrawHistogram("hPtLepton1"    + suffix, "p_{T}^{first lepton}",   5, 0, "GeV", linY);
-    DrawHistogram("hPtLepton2"    + suffix, "p_{T}^{second lepton}",  5, 0, "GeV", linY);
-    DrawHistogram("hPtLepton3"    + suffix, "p_{T}^{third lepton}",   5, 0, "GeV", linY);
-    DrawHistogram("hInvMass3Lep"  + suffix, "m_{#font[12]{3l}}",     10, 0, "GeV", linY);
-    DrawHistogram("hInvMass2Lep1" + suffix, "m_{#font[12]{ll}}",      2, 0, "GeV", linY);
-
-    if (channel == MMM || channel == MME)
-      {
-	DrawHistogram("hMVARingsMuon1" + suffix, "MVA rings^{first muon}",  -1, 0, "NULL", logY, 0.7, 1.1);
-	DrawHistogram("hMVARingsMuon2" + suffix, "MVA rings^{second muon}", -1, 0, "NULL", logY, 0.7, 1.1);
-      }
-  
-    if (channel == MMM || channel == EEM)
-      {
-	DrawHistogram("hMVARingsMuon3" + suffix, "MVA rings^{third muon}", -1, 0, "NULL", logY, 0.7, 1.1);
-      }
-  
-    if (cut < HasWCandidate) continue;
-    
-    DrawHistogram("hPtZLepton1" + suffix, "p_{T}^{Z leading lepton}",  5, 0, "GeV", linY);
-    DrawHistogram("hPtZLepton2" + suffix, "p_{T}^{Z trailing lepton}", 5, 0, "GeV", linY);
-    DrawHistogram("hPtWLepton"  + suffix, "p_{T}^{W lepton}",          5, 0, "GeV", linY);
-    DrawHistogram("hInvMassZ"   + suffix, "m_{#font[12]{ll}}",         2, 0, "GeV", linY);
+    DrawHistogram("hNPV"         + suffix, "number of PV",              -1, 0, "NULL", linY, 0, 30);
+    DrawHistogram("hSumCharges"  + suffix, "q_{1} + q_{2} + q_{3}",     -1, 0, "NULL", linY);
+    DrawHistogram("hMET"         + suffix, "E_{T}^{miss}",               5, 0, "GeV",  linY);
+    DrawHistogram("hInvMass2Lep" + suffix, "m_{#font[12]{ll}}",          2, 0, "GeV",  linY, 60, 120);
+    DrawHistogram("hInvMass3Lep" + suffix, "m_{#font[12]{3l}}",         10, 0, "GeV",  linY);
+    DrawHistogram("hPtLepton1"   + suffix, "p_{T}^{first lepton}",       5, 0, "GeV",  linY);
+    DrawHistogram("hPtLepton2"   + suffix, "p_{T}^{second lepton}",      5, 0, "GeV",  linY);
+    DrawHistogram("hPtLepton3"   + suffix, "p_{T}^{third lepton}",       5, 0, "GeV",  linY);
+    //    DrawHistogram("hPtZLepton1"  + suffix, "p_{T}^{Z leading lepton}",   5, 0, "GeV",  linY);
+    //    DrawHistogram("hPtZLepton2"  + suffix, "p_{T}^{Z trailing lepton}",  5, 0, "GeV",  linY);
+    //    DrawHistogram("hPtWLepton"   + suffix, "p_{T}^{W lepton}",           5, 0, "GeV",  linY);
   }
 }
 
@@ -503,6 +489,7 @@ void DrawHistogram(TString  hname,
 
   Double_t WGstarYield  = 0.0;
   Double_t ZJetsYield   = 0.0;
+  Double_t WJetsYield   = 0.0;
   Double_t ZZYield      = 0.0;
   Double_t VVVJetsYield = 0.0;
   
@@ -514,6 +501,10 @@ void DrawHistogram(TString  hname,
   ZJetsYield += Yield(hist[DYJets_Madgraph]);
   ZJetsYield += Yield(hist[ZJets_Madgraph]);
 
+  WJetsYield += Yield(hist[WJets_Madgraph]);
+  WJetsYield += Yield(hist[WbbToLNu]);
+
+  ZZYield += Yield(hist[ZgammaToLLG]);
   ZZYield += Yield(hist[ggZZ2L2L]);
   ZZYield += Yield(hist[ggZZ4L]);
   ZZYield += Yield(hist[ZZ2Mu2Tau]);
@@ -549,10 +540,10 @@ void DrawHistogram(TString  hname,
 
   ndelta = 0;
 
-  DrawLegend(x0, y0 - ndelta, hist[WW],              Form(" WW (%.0f)",         Yield(hist[WW])),             "f"); ndelta += delta;
-  DrawLegend(x0, y0 - ndelta, hist[WgammaToLNuG],    Form(" W#gamma(*) (%.0f)", WGstarYield),                 "f"); ndelta += delta;
-  DrawLegend(x0, y0 - ndelta, hist[WJets_Madgraph],  Form(" W+jets (%.0f)",     Yield(hist[WJets_Madgraph])), "f"); ndelta += delta;
-  DrawLegend(x0, y0 - ndelta, hist[WWGJets],  Form(" VVV (%.0f)",               VVVJetsYield),                "f"); ndelta += delta;
+  DrawLegend(x0, y0 - ndelta, hist[WW],              Form(" WW (%.0f)",         Yield(hist[WW])), "f"); ndelta += delta;
+  DrawLegend(x0, y0 - ndelta, hist[WgammaToLNuG],    Form(" W#gamma(*) (%.0f)", WGstarYield),     "f"); ndelta += delta;
+  DrawLegend(x0, y0 - ndelta, hist[WJets_Madgraph],  Form(" W+jets (%.0f)",     WJetsYield),      "f"); ndelta += delta;
+  DrawLegend(x0, y0 - ndelta, hist[WWGJets],  Form(" VVV (%.0f)",               VVVJetsYield),    "f"); ndelta += delta;
 
 
   // CMS titles
@@ -856,6 +847,7 @@ void SetParameters(UInt_t cut)
   process[DYJets_Madgraph]  = "DYJets_Madgraph";
   process[ZJets_Madgraph]   = "ZJets_Madgraph";
   process[ZbbToLL]          = "ZbbToLL";
+  process[WbbToLNu]         = "WbbToLNu";
   process[WJets_Madgraph]   = "WJets_Madgraph";
   process[WGstarToElNuMad]  = "WGstarToElNuMad";
   process[WGstarToMuNuMad]  = "WGstarToMuNuMad";
@@ -893,6 +885,7 @@ void SetParameters(UInt_t cut)
   color[DYJets_Madgraph]  = kGreen+2;   // Z+jets
   color[ZJets_Madgraph]   = kGreen+2;   // Z+jets
   color[ZbbToLL]          = kGray+1;    // Z+bb
+  color[WbbToLNu]         = kGray+1;    // W+bb
   color[WJets_Madgraph]   = kGray+1;    // W+jets
   color[WGstarToElNuMad]  = kYellow;    // Wgamma(*)
   color[WGstarToMuNuMad]  = kYellow;    // Wgamma(*)
@@ -905,7 +898,7 @@ void SetParameters(UInt_t cut)
   color[WZTo3LNu]         = kOrange-2;  // WZ
   color[WZTo2L2QMad]      = kBlack;     // WZ(lnuqq)
   color[ZZTo2L2QMad]      = kRed+1;     // ZZ
-  color[ZgammaToLLG]      = kRed+1;     // ZZ, REPLACED
+  color[ZgammaToLLG]      = kRed+1;     // ZZ
   color[ZZ]               = kRed+1;     // ZZ, REPLACED
   color[ggZZ2L2L]         = kRed+1;     // ZZ
   color[ggZZ4L]           = kRed+1;     // ZZ
@@ -957,6 +950,7 @@ void SetParameters(UInt_t cut)
   vprocess.push_back(DYJets_Madgraph);
   vprocess.push_back(ZJets_Madgraph);
   vprocess.push_back(ZbbToLL);
+  vprocess.push_back(WbbToLNu);
   vprocess.push_back(WJets_Madgraph);
   vprocess.push_back(WGstarToElNuMad);
   vprocess.push_back(WGstarToMuNuMad);
@@ -968,7 +962,7 @@ void SetParameters(UInt_t cut)
   vprocess.push_back(WW);
   vprocess.push_back(WZTo2L2QMad);
   vprocess.push_back(ZZTo2L2QMad);
-  //  vprocess.push_back(ZgammaToLLG);  // REPLACED
+  vprocess.push_back(ZgammaToLLG);
   //  vprocess.push_back(ZZ);           // REPLACED
   vprocess.push_back(ggZZ2L2L);
   vprocess.push_back(ggZZ4L);

@@ -89,26 +89,17 @@ void AnalysisWZ::Initialise()
 
       if (j < AtLeast3Leptons) continue;
 
-      hNPV[i][j] = CreateH1D(TString("hNPV" + suffix), "",  50, 0,  50);
-      hMET[i][j] = CreateH1D(TString("hMET" + suffix), "", 200, 0, 200);
-
-      hSumCharges   [i][j] = CreateH1D(TString("hSumCharges"    + suffix), "",   9,   -4,   5);
-      hInvMass2Lep1 [i][j] = CreateH1D(TString("hInvMass2Lep1"  + suffix), "", 200,    0, 200);
-      hInvMass2Lep2 [i][j] = CreateH1D(TString("hInvMass2Lep2"  + suffix), "", 200,    0, 200);
-      hInvMass3Lep  [i][j] = CreateH1D(TString("hInvMass3Lep"   + suffix), "", 400,    0, 400);
-      hPtLepton1    [i][j] = CreateH1D(TString("hPtLepton1"     + suffix), "", 200,    0, 200);
-      hPtLepton2    [i][j] = CreateH1D(TString("hPtLepton2"     + suffix), "", 200,    0, 200);
-      hPtLepton3    [i][j] = CreateH1D(TString("hPtLepton3"     + suffix), "", 200,    0, 200);    
-      hMVARingsMuon1[i][j] = CreateH1D(TString("hMVARingsMuon1" + suffix), "", 110, -1.1, 1.1);
-      hMVARingsMuon2[i][j] = CreateH1D(TString("hMVARingsMuon2" + suffix), "", 110, -1.1, 1.1);
-      hMVARingsMuon3[i][j] = CreateH1D(TString("hMVARingsMuon3" + suffix), "", 110, -1.1, 1.1);    
-
-      if (j < HasWCandidate) continue;
-
-      hPtZLepton1[i][j] = CreateH1D(TString("hPtZLepton1" + suffix), "", 200,  0, 200);
-      hPtZLepton2[i][j] = CreateH1D(TString("hPtZLepton2" + suffix), "", 200,  0, 200);
-      hPtWLepton [i][j] = CreateH1D(TString("hPtWLepton"  + suffix), "", 200,  0, 200);    
-      hInvMassZ  [i][j] = CreateH1D(TString("hInvMassZ"   + suffix), "",  80, 71, 111);
+      hNPV        [i][j] = CreateH1D(TString("hNPV"         + suffix), "",  50,  0,  50);
+      hMET        [i][j] = CreateH1D(TString("hMET"         + suffix), "", 200,  0, 200);
+      hSumCharges [i][j] = CreateH1D(TString("hSumCharges"  + suffix), "",   9, -4,   5);
+      hInvMass2Lep[i][j] = CreateH1D(TString("hInvMass2Lep" + suffix), "", 200,  0, 200);
+      hInvMass3Lep[i][j] = CreateH1D(TString("hInvMass3Lep" + suffix), "", 400,  0, 400);
+      hPtLepton1  [i][j] = CreateH1D(TString("hPtLepton1"   + suffix), "", 200,  0, 200);
+      hPtLepton2  [i][j] = CreateH1D(TString("hPtLepton2"   + suffix), "", 200,  0, 200);
+      hPtLepton3  [i][j] = CreateH1D(TString("hPtLepton3"   + suffix), "", 200,  0, 200);    
+      hPtZLepton1 [i][j] = CreateH1D(TString("hPtZLepton1"  + suffix), "", 200,  0, 200);
+      hPtZLepton2 [i][j] = CreateH1D(TString("hPtZLepton2"  + suffix), "", 200,  0, 200);
+      hPtWLepton  [i][j] = CreateH1D(TString("hPtWLepton"   + suffix), "", 200,  0, 200);    
     }
   }
 
@@ -181,24 +172,12 @@ void AnalysisWZ::InsideLoop()
 
   efficiency_weight = pu_weight;
 
-  Muons.clear();
-  Muons_Index.clear();
-  Muons_Charge.clear();
+  AnalysisLeptons.clear();
 
-  Electrons.clear();
-  Electrons_Index.clear();
-  Electrons_Charge.clear();
-
-  LooseMuons.clear();
-  LooseMuons_Index.clear();
-  LooseMuons_Charge.clear();
-
-  ptIndexPair.clear();
-
-  for (UInt_t i=0; i<3; i++) leptonIndex[i] = -1;
-
-  dileptonInvMass =  0;
-  theChannel      = -1;
+  invMass2Lep =  0;
+  invMass3Lep =  0;
+  sumCharges  =  0;
+  theChannel  = -1;
 
 
   // Gen study
@@ -213,6 +192,8 @@ void AnalysisWZ::InsideLoop()
   if (sample.Contains("WZTo3LNu") && !isSignalMCInsideZmassRange(71,111)) return;
 
   if (sample.Contains("ZJets_Madgraph") && T_Gen_bSt3_Px->size() > 0) return;
+
+  if (sample.Contains("WJets_Madgraph") && T_Gen_bSt3_Px->size() > 0) return;
 
 
   // AllEvents
@@ -230,21 +211,20 @@ void AnalysisWZ::InsideLoop()
 
   // Loop over muons
   //----------------------------------------------------------------------------
-  UInt_t countMuons        = 0;
-  UInt_t countPVMuons      = 0;
-  UInt_t countIsoMuons     = 0;
-  UInt_t countIsoGoodMuons = 0;
+  UInt_t countMuons    = 0;
+  UInt_t countPVMuons  = 0;
+  UInt_t countIsoMuons = 0;
 
   for (UInt_t i=0; i<T_Muon_Px->size(); i++) {
 
-    TLorentzVector Muon(T_Muon_Px->at(i),
-			T_Muon_Py->at(i),
-			T_Muon_Pz->at(i),
-			T_Muon_Energy->at(i));
+    TLorentzVector MuonVector(T_Muon_Px->at(i),
+			      T_Muon_Py->at(i),
+			      T_Muon_Pz->at(i),
+			      T_Muon_Energy->at(i));
 
-    if (Muon.Pt() <= 10) continue;
+    if (MuonVector.Pt() <= 10) continue;
 
-    if (fabs(Muon.Eta()) >= 2.4) continue;
+    if (fabs(MuonVector.Eta()) >= 2.4) continue;
 
     Bool_t isnotglobal = ( T_Muon_IsAllStandAloneMuons->at(i)
 			   && !T_Muon_IsGlobalMuon->at(i)
@@ -254,43 +234,74 @@ void AnalysisWZ::InsideLoop()
 
     countMuons++;
 
-    if (!MuonCloseToPV(i, false)) continue;
 
-    countPVMuons++;
+    // Tight muons
+    //--------------------------------------------------------------------------
+    if (MuonCloseToPV(i, false)) {
 
-    if (!MuonIsolation(i, false)) continue;
+      countPVMuons++;
 
-    countIsoMuons++;
+      if (MuonIsolation(i, false)) {
 
-    if (!MuonID(i)) continue;
+	countIsoMuons++;
 
-    Muons.push_back(Muon);
+	if (MuonID(i)) {
 
-    Muons_Index.push_back(i);
+	  Lepton AnalysisMuon;
 
-    Muons_Charge.push_back(T_Muon_Charge->at(i));
+	  AnalysisMuon.index  = i;
+	  AnalysisMuon.flavor = Muon;
+	  AnalysisMuon.type   = Tight;
+	  AnalysisMuon.charge = T_Muon_Charge->at(i);
+	  AnalysisMuon.v      = MuonVector;
 
-    countIsoGoodMuons++;
+	  AnalysisLeptons.push_back(AnalysisMuon);
+	}
+      }
+    }
+
+
+    // Loose muons
+    //--------------------------------------------------------------------------
+    if (!useFakes) continue;
+
+    if (MuonCloseToPV(i, true)) {
+
+      if (MuonIsolation(i, true)) {
+
+	if (MuonID(i)) {
+	  
+	  Lepton AnalysisMuon;
+	  
+	  AnalysisMuon.index  = i;
+	  AnalysisMuon.flavor = Muon;
+	  AnalysisMuon.type   = Loose;
+	  AnalysisMuon.charge = T_Muon_Charge->at(i);
+	  AnalysisMuon.v      = MuonVector;
+
+	  AnalysisLeptons.push_back(AnalysisMuon);
+	}
+      }
+    }
   }
 
 
   // Loop over electrons
   //----------------------------------------------------------------------------
-  UInt_t countElectrons        = 0;
-  UInt_t countPVElectrons      = 0;
-  UInt_t countIsoElectrons     = 0;
-  UInt_t countIsoGoodElectrons = 0;
+  UInt_t countElectrons    = 0;
+  UInt_t countPVElectrons  = 0;
+  UInt_t countIsoElectrons = 0;
 
   for (UInt_t i=0; i<T_Elec_Px->size(); i++) {
 
-    TLorentzVector Elec(T_Elec_Px->at(i),
-			T_Elec_Py->at(i),
-			T_Elec_Pz->at(i),
-			T_Elec_Energy->at(i));
+    TLorentzVector ElectronVector(T_Elec_Px->at(i),
+				  T_Elec_Py->at(i),
+				  T_Elec_Pz->at(i),
+				  T_Elec_Energy->at(i));
 
-    if (Elec.Pt() <= 10) continue;
+    if (ElectronVector.Pt() <= 10) continue;
 
-    if (fabs(Elec.Eta()) >= 2.5) continue;
+    if (fabs(ElectronVector.Eta()) >= 2.5) continue;
 
     if (!ElectronID(i)) continue;
 
@@ -300,72 +311,91 @@ void AnalysisWZ::InsideLoop()
 
     countPVElectrons++;
 
-    if (!ElectronIsolation(i, false)) continue;
 
-    if (!ElectronBDT(i, false)) continue;
-    
-    countIsoElectrons++;
+    // Tight electrons
+    //--------------------------------------------------------------------------
+    if (ElectronIsolation(i, false)) {
 
-    Electrons.push_back(Elec);
+      countIsoElectrons++;
 
-    Electrons_Index.push_back(i);
+      if (ElectronBDT(i, false)) {
+	
+	Lepton AnalysisElectron;
+	
+	AnalysisElectron.index  = i;
+	AnalysisElectron.flavor = Electron;
+	AnalysisElectron.type   = Tight;
+	AnalysisElectron.charge = T_Elec_Charge->at(i);
+	AnalysisElectron.v      = ElectronVector;
+	
+	AnalysisLeptons.push_back(AnalysisElectron);
+      }
+    }
 
-    Electrons_Charge.push_back(T_Elec_Charge->at(i));
 
-    countIsoGoodElectrons++;
+    // Loose electrons
+    //--------------------------------------------------------------------------
+    if (!useFakes) continue;
+
+    if (ElectronIsolation(i, true)) {
+
+      if (ElectronBDT(i, true)) {
+	
+	Lepton AnalysisElectron;
+	
+	AnalysisElectron.index  = i;
+	AnalysisElectron.flavor = Electron;
+	AnalysisElectron.type   = Loose;
+	AnalysisElectron.charge = T_Elec_Charge->at(i);
+	AnalysisElectron.v      = ElectronVector;
+	
+	AnalysisLeptons.push_back(AnalysisElectron);
+      }
+    }
   }
 
 
-  if (!FillCounters(countElectrons,        countMuons,        Has2Leptons))        return;
-  if (!FillCounters(countPVElectrons,      countPVMuons,      Has2PVLeptons))      return;
-  if (!FillCounters(countIsoElectrons,     countIsoMuons,     Has2IsoLeptons))     return;
-  if (!FillCounters(countIsoGoodElectrons, countIsoGoodMuons, Has2IsoGoodLeptons)) return;
-
-
-  // Require at least N = 3 leptons
+  // Require at least 2 tight leptons
   //----------------------------------------------------------------------------
-  if ((countIsoGoodElectrons + countIsoGoodMuons) < 3) return;
-
-
-  // Require at least N = 3 leptons with pt > 20 GeV
-  //----------------------------------------------------------------------------
-  for (UInt_t i=0; i<countIsoGoodElectrons; i++)
-    {
-      if (Electrons[i].Pt() > 20)
-	ptIndexPair.push_back(std::make_pair(Electrons[i].Pt(), Electrons_Index[i] + 1000));
-    }
-
-  for (UInt_t i=0; i<countIsoGoodMuons; i++)
-    {
-      if (Muons[i].Pt() > 20)
-	ptIndexPair.push_back(std::make_pair(Muons[i].Pt(), Muons_Index[i]));
-    }
-  
-  if (ptIndexPair.size() < 3) return;
+  if (!FillCounters(countElectrons,    countMuons,    Has2Leptons))    return;
+  if (!FillCounters(countPVElectrons,  countPVMuons,  Has2PVLeptons))  return;
+  if (!FillCounters(countIsoElectrons, countIsoMuons, Has2IsoLeptons)) return;
 
 
   // Sort the leptons by pt
   //----------------------------------------------------------------------------
-  std::sort(ptIndexPair.begin(), ptIndexPair.end());
+  if (AnalysisLeptons.size() < 3) return;
 
-  std::reverse(ptIndexPair.begin(), ptIndexPair.end());
+  std::sort(AnalysisLeptons.begin(), AnalysisLeptons.end());
 
-  UInt_t leptonCounter = 0;
-    
-  for (std::vector< std::pair<Double_t, Int_t> >::iterator dx=ptIndexPair.begin();
-       dx!=ptIndexPair.end(); dx++) {
+  std::reverse(AnalysisLeptons.begin(), AnalysisLeptons.end());
 
-    std::pair<Double_t, Int_t> result = (*dx);
 
-    if (leptonCounter < 3) leptonIndex[leptonCounter++] = result.second;
+  // Require exactly 3 leptons with pt > 20 GeV
+  //----------------------------------------------------------------------------
+  UInt_t numberOfHighPtLeptons = 0;
+
+  for (std::vector<Lepton>::iterator lep_iterator=AnalysisLeptons.begin();
+       lep_iterator!=AnalysisLeptons.end(); lep_iterator++) {
+      
+    if ((*lep_iterator).v.Pt() > 20) numberOfHighPtLeptons++;
   }
+
+  if (numberOfHighPtLeptons != 3) return;
 
 
   // Classify the channels
   //----------------------------------------------------------------------------
-  Int_t electronCounter = 0;
+  UInt_t electronCounter = 0;
+  UInt_t leptonCounter   = 0;
 
-  for (UInt_t i=0; i<3; i++) if (leptonIndex[i] > 999) electronCounter++;
+  for (std::vector<Lepton>::iterator lep_iterator=AnalysisLeptons.begin();
+       lep_iterator!=AnalysisLeptons.end(); lep_iterator++) {
+  
+    if (++leptonCounter > 3) break;
+
+    if ((*lep_iterator).flavor == Electron) electronCounter++;
+  }
 
   if      (electronCounter == 0) theChannel = MMM;
   else if (electronCounter == 1) theChannel = MME;
@@ -375,86 +405,64 @@ void AnalysisWZ::InsideLoop()
   if (sample.Contains("DoubleMu")       && electronCounter > 1) return;
   if (sample.Contains("DoubleElectron") && electronCounter < 2) return;
 
+
+  // Make Z and W candidates
+  //----------------------------------------------------------------------------
+  for (std::vector<Lepton>::iterator lep1_iterator=AnalysisLeptons.begin();
+       lep1_iterator!=AnalysisLeptons.end(); lep1_iterator++) {
+
+    Lepton lep1 = (*lep1_iterator);
+
+    if (lep1.v.Pt() <= 20) break;
+
+    sumCharges += lep1.charge;
+
+    for (std::vector<Lepton>::iterator lep2_iterator=AnalysisLeptons.begin();
+	 lep2_iterator!=AnalysisLeptons.end(); lep2_iterator++) {
+      
+      if (lep2_iterator == lep1_iterator) continue;
+
+      Lepton lep2 = (*lep2_iterator);
+
+      if (lep2.v.Pt() <= 20) break;
+
+      if (lep1.flavor != lep2.flavor) continue;
+
+      if (lep1.charge * lep2.charge > 0) continue;
+
+      Double_t inv_mass = (lep1.v + lep2.v).M();
+
+      if (fabs(inv_mass - Z_MASS) < fabs(invMass2Lep - Z_MASS)) {
+
+	invMass2Lep = inv_mass;
+
+	ZLepton1 = lep1.v;
+	ZLepton2 = lep2.v;
+
+	for (std::vector<Lepton>::iterator lep3_iterator=AnalysisLeptons.begin();
+	     lep3_iterator!=AnalysisLeptons.end(); lep3_iterator++) {
+	
+	  if (lep3_iterator == lep1_iterator) continue;
+	  if (lep3_iterator == lep2_iterator) continue;
+
+	  Lepton lep3 = (*lep3_iterator);
+
+	  if (lep3.v.Pt() <= 20) break;
+	  
+	  WLepton = lep3.v;
+	}
+      }
+    }
+  }
+
+  invMass3Lep = (ZLepton1 + ZLepton2 + WLepton).M();
+
   FillHistograms(theChannel, AtLeast3Leptons);
 
 
   // HasZCandidate
   //----------------------------------------------------------------------------
-  if (theChannel == EEE) {
-    for (UInt_t i=0; i<2; i++) {
-      for (UInt_t j=i+1; j<3; j++) {
-
-	if (Electrons_Charge[i] * Electrons_Charge[j] > 0) continue;
-
-	Double_t invMass = (Electrons[i] + Electrons[j]).M();
-
-	if (invMass < 71 || invMass > 111) continue;
-
-	if (fabs(invMass - Z_MASS) < fabs(dileptonInvMass - Z_MASS)) {
-
-	  dileptonInvMass = invMass;
-
-	  ZLepton1 = Electrons[i];
-	  ZLepton2 = Electrons[j];
-
-	  for (UInt_t k=0; k<3; k++)
-	    if (k != i && k != j) WLepton = Electrons[k];
-	}
-      }
-    }
-  }
-  else if (theChannel == EEM) {
-
-    if (Electrons_Charge[0] * Electrons_Charge[1] > 0) return;
-
-    Double_t invMass = (Electrons[0] + Electrons[1]).M();
-
-    if (invMass < 71 || invMass > 111) return;
-
-    dileptonInvMass = invMass;
-
-    ZLepton1 = Electrons[0];
-    ZLepton2 = Electrons[1];
-    WLepton  = Muons[0];
-  }
-  else if (theChannel == MME) {
-
-    if (Muons_Charge[0] * Muons_Charge[1] > 0) return;
-
-    Double_t invMass = (Muons[0] + Muons[1]).M();
-
-    if (invMass < 71 || invMass > 111) return;
-
-    dileptonInvMass = invMass;
-
-    ZLepton1 = Muons[0];
-    ZLepton2 = Muons[1];
-    WLepton  = Electrons[0];
-  }
-  else if (theChannel == MMM) {
-    for (UInt_t i=0; i<2; i++) {
-      for (UInt_t j=i+1; j<3; j++) {
-
-	if (Muons_Charge[i] * Muons_Charge[j] > 0) continue;
-
-	Double_t invMass = (Muons[i] + Muons[j]).M();
-
-	if (invMass < 71 || invMass > 111) continue;
-	  
-	if (fabs(invMass - Z_MASS) < fabs(dileptonInvMass - Z_MASS)) {
-	  dileptonInvMass = invMass;
-
-	  ZLepton1 = Muons[i];
-	  ZLepton2 = Muons[j];
-	  
-	  for (UInt_t k=0; k<3; k++)
-	    if (k != i && k != j) WLepton = Muons[k];
-	}
-      }
-    }
-  }
-
-  if (dileptonInvMass < 71) return;
+  if (invMass2Lep < 71 || invMass2Lep > 111) return;
 
   FillHistograms(theChannel, HasZCandidate);
 
@@ -563,6 +571,7 @@ void AnalysisWZ::GetParameters()
   directory = GetInputParameters()->TheNamedString("directory");
   sample    = GetInputParameters()->TheNamedString("sample");
 
+  GetInputParameters()->TheNamedBool  ("useFakes",   useFakes);
   GetInputParameters()->TheNamedDouble("xs_weight",  xs_weight);
   GetInputParameters()->TheNamedDouble("luminosity", luminosity);
   
@@ -802,137 +811,8 @@ void AnalysisWZ::FillHistograms(UInt_t iChannel, UInt_t iCut)
 
   Double_t hweight = efficiency_weight * xs_weight;
 
-  hNPV[iChannel][iCut]->Fill(T_Vertex_z->size(), hweight);
-  hMET[iChannel][iCut]->Fill(T_METPFTypeI_ET,    hweight);
-
-  Double_t sumCharges   = -999;
-  Double_t invMass3Lep  = -999;
-  Double_t invMass2Lep1 =  999;
-  Double_t invMass2Lep2 =  999;
-
-
-  // MMM
-  //----------------------------------------------------------------------------
-  if (theChannel == MMM)
-    {
-      Int_t index1 = Muons_Index[0];
-      Int_t index2 = Muons_Index[1];
-      Int_t index3 = Muons_Index[2];
-
-      hMVARingsMuon1[iChannel][iCut]->Fill(T_Muon_MVARings->at(index1), hweight);
-      hMVARingsMuon2[iChannel][iCut]->Fill(T_Muon_MVARings->at(index2), hweight);
-      hMVARingsMuon3[iChannel][iCut]->Fill(T_Muon_MVARings->at(index3), hweight);
-
-      sumCharges = Muons_Charge[0] + Muons_Charge[1] + Muons_Charge[2];
-
-      invMass3Lep = (Muons[0] + Muons[1] + Muons[2]).M();
-
-      if (Muons_Charge[0] * Muons_Charge[1] < 0) {
-
-	invMass2Lep1 = (Muons[0] + Muons[1]).M();
-
-	if (Muons_Charge[0] * Muons_Charge[2] < 0) invMass2Lep2 = (Muons[0] + Muons[2]).M();
-	if (Muons_Charge[1] * Muons_Charge[2] < 0) invMass2Lep2 = (Muons[1] + Muons[2]).M();
-      }
-      else if (Muons_Charge[0] * Muons_Charge[2] < 0) {
-
-	invMass2Lep1 = (Muons[0] + Muons[2]).M();
-
-	if (Muons_Charge[1] * Muons_Charge[2] < 0) invMass2Lep2 = (Muons[1] + Muons[2]).M();
-      }
-      else
-	if (Muons_Charge[1] * Muons_Charge[2] < 0) invMass2Lep1 = (Muons[1] + Muons[2]).M();
-    }
-  // MME
-  //----------------------------------------------------------------------------
-  else if (theChannel == MME)
-    {
-      Int_t index1 = Muons_Index[0];
-      Int_t index2 = Muons_Index[1];
-
-      hMVARingsMuon1[iChannel][iCut]->Fill(T_Muon_MVARings->at(index1), hweight);
-      hMVARingsMuon2[iChannel][iCut]->Fill(T_Muon_MVARings->at(index2), hweight);
-
-      sumCharges = Muons_Charge[0] + Muons_Charge[1] + Electrons_Charge[0];
-
-      invMass3Lep = (Muons[0] + Muons[1] + Electrons[0]).M();
-
-      if (Muons_Charge[0] * Muons_Charge[1] < 0) invMass2Lep1 = (Muons[0] + Muons[1]).M();
-    }
-  // EEM
-  //----------------------------------------------------------------------------
-  else if (theChannel == EEM)
-    {
-      Int_t index3 = Muons_Index[0];
-
-      hMVARingsMuon3[iChannel][iCut]->Fill(T_Muon_MVARings->at(index3), hweight);
-
-      sumCharges = Muons_Charge[0] + Electrons_Charge[0] + Electrons_Charge[1];
-
-      invMass3Lep = (Muons[0] + Electrons[1] + Electrons[2]).M();
-
-      if (Electrons_Charge[0] * Electrons_Charge[1] < 0) invMass2Lep1 = (Electrons[0] + Electrons[1]).M();
-    }
-  // EEE
-  //----------------------------------------------------------------------------
-  else if (theChannel == EEE)
-    {
-      sumCharges = Electrons_Charge[0] + Electrons_Charge[1] + Electrons_Charge[2];
-
-      invMass3Lep = (Electrons[0] + Electrons[1] + Electrons[2]).M();
-
-      if (Electrons_Charge[0] * Electrons_Charge[1] < 0) {
-
-	invMass2Lep1 = (Electrons[0] + Electrons[1]).M();
-
-	if (Electrons_Charge[0] * Electrons_Charge[2] < 0) invMass2Lep2 = (Electrons[0] + Electrons[2]).M();
-	if (Electrons_Charge[1] * Electrons_Charge[2] < 0) invMass2Lep2 = (Electrons[1] + Electrons[2]).M();
-      }
-      else if (Electrons_Charge[0] * Electrons_Charge[2] < 0) {
-
-	invMass2Lep1 = (Electrons[0] + Electrons[2]).M();
-
-	if (Electrons_Charge[1] * Electrons_Charge[2] < 0) invMass2Lep2 = (Electrons[1] + Electrons[2]).M();
-      }
-      else
-	if (Electrons_Charge[1] * Electrons_Charge[2] < 0) invMass2Lep1 = (Electrons[1] + Electrons[2]).M();
-    }
-
-
-  // Fill the histograms
-  //----------------------------------------------------------------------------
-  hSumCharges [iChannel][iCut]->Fill(sumCharges,  hweight);
-  hInvMass3Lep[iChannel][iCut]->Fill(invMass3Lep, hweight);
-
-  UInt_t leptonCounter = 0;
-    
-  for (std::vector< std::pair<Double_t, Int_t> >::iterator dx=ptIndexPair.begin();
-       dx!=ptIndexPair.end(); dx++) {
-
-    std::pair<Double_t, Int_t> result = (*dx);
-
-    if (leptonCounter == 0) {hPtLepton1[iChannel][iCut]->Fill(result.first, hweight); leptonCounter++;}
-    if (leptonCounter == 1) {hPtLepton2[iChannel][iCut]->Fill(result.first, hweight); leptonCounter++;}
-    if (leptonCounter == 2) {hPtLepton3[iChannel][iCut]->Fill(result.first, hweight); leptonCounter++;}
-  }
-
-  if (fabs(invMass2Lep1 - Z_MASS) < fabs(invMass2Lep2 - Z_MASS))
-    {
-      hInvMass2Lep1[iChannel][iCut]->Fill(invMass2Lep1, hweight);
-      hInvMass2Lep2[iChannel][iCut]->Fill(invMass2Lep2, hweight);
-    }
-  else
-    {
-      hInvMass2Lep1[iChannel][iCut]->Fill(invMass2Lep2, hweight);
-      hInvMass2Lep2[iChannel][iCut]->Fill(invMass2Lep1, hweight);
-    }
-
-  if (iCut < HasWCandidate) return;
-
-  Double_t invMass = (ZLepton1 + ZLepton2).M();
-
   Double_t pt1, pt2;
-
+  
   if (ZLepton1.Pt() > ZLepton2.Pt())
     {
       pt1 = ZLepton1.Pt(); pt2 = ZLepton2.Pt();
@@ -941,11 +821,18 @@ void AnalysisWZ::FillHistograms(UInt_t iChannel, UInt_t iCut)
     {
       pt1 = ZLepton2.Pt(); pt2 = ZLepton1.Pt();
     }
-  
-  hPtZLepton1[iChannel][iCut]->Fill(pt1,          hweight);
-  hPtZLepton2[iChannel][iCut]->Fill(pt2,          hweight);
-  hPtWLepton [iChannel][iCut]->Fill(WLepton.Pt(), hweight);
-  hInvMassZ  [iChannel][iCut]->Fill(invMass,      hweight);
+
+  hNPV        [iChannel][iCut]->Fill(T_Vertex_z->size(),        hweight);
+  hMET        [iChannel][iCut]->Fill(T_METPFTypeI_ET,           hweight);
+  hSumCharges [iChannel][iCut]->Fill(sumCharges,                hweight);
+  hInvMass2Lep[iChannel][iCut]->Fill(invMass2Lep,               hweight);
+  hInvMass3Lep[iChannel][iCut]->Fill(invMass3Lep,               hweight);
+  hPtLepton1  [iChannel][iCut]->Fill(AnalysisLeptons[0].v.Pt(), hweight);
+  hPtLepton2  [iChannel][iCut]->Fill(AnalysisLeptons[1].v.Pt(), hweight);
+  hPtLepton3  [iChannel][iCut]->Fill(AnalysisLeptons[2].v.Pt(), hweight);
+  hPtZLepton1 [iChannel][iCut]->Fill(pt1,                       hweight);
+  hPtZLepton2 [iChannel][iCut]->Fill(pt2,                       hweight);
+  hPtWLepton  [iChannel][iCut]->Fill(WLepton.Pt(),              hweight);
 }
 
 

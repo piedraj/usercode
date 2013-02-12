@@ -15,6 +15,9 @@
 #include <vector>
 
 
+const Double_t Z_MASS = 91.1876;  // GeV
+
+
 // Input parameters for the WZ cross section
 //------------------------------------------------------------------------------
 const Double_t xsWplusZ    = 13.89;  // pb (MCFM with 71 < mZ < 111 GeV)
@@ -27,15 +30,11 @@ const Double_t WZ23lnu     = 3 * Z2ll * (W2e + W2m + W2tau);
 const Double_t ngenWZphase = 1449067;  // (71 < mZ < 111 GeV)
 
 
-const Double_t Z_MASS = 91.1876;  // GeV
-
 const UInt_t nChannels = 4;
 
 enum {MMM, EEE, MME, EEM};
 
 TString sChannel[] = {"MMM", "EEE", "MME", "EEM"};
-
-enum {iMuon, iElectron};
 
 
 const UInt_t nCuts = 10;
@@ -64,6 +63,25 @@ TString sCut[] = {
   "HasZCandidate",
   "HasWCandidate",
   "MET"
+};
+
+
+enum {Muon, Electron};
+
+enum {Tight, Loose};
+
+struct Lepton
+{
+  UInt_t         index;
+  UInt_t         flavor;
+  UInt_t         type;
+  Double_t       charge;
+  TLorentzVector v;
+
+  Bool_t operator<(const Lepton& a) const
+  {
+    return v.Pt() < a.v.Pt();
+  }
 };
 
 
@@ -107,12 +125,13 @@ class AnalysisWZ: public CMSAnalysisSelectorMiniTrees
 					  UInt_t iCut);
 
   void         FillHistograms            (UInt_t iChannel,
-					  UInt_t iCut);
+  					  UInt_t iCut);
 
   const Bool_t isSignalMCInsideZmassRange(const float & masslow,
 					  const float & masshigh) const;
 
   const Bool_t WgammaFilter              () const;
+
   void         GenStudy                  ();
 
 
@@ -125,23 +144,17 @@ class AnalysisWZ: public CMSAnalysisSelectorMiniTrees
   TH1D*                       hCounterEff[nChannels][nCuts];
   TH1D*                       hCounter   [nChannels][nCuts];
 
-  TH1D*                       hNPV          [nChannels][nCuts];
-  TH1D*                       hMET          [nChannels][nCuts];
-  TH1D*                       hSumCharges   [nChannels][nCuts];
-  TH1D*                       hInvMass2Lep1 [nChannels][nCuts];
-  TH1D*                       hInvMass2Lep2 [nChannels][nCuts];
-  TH1D*                       hInvMass3Lep  [nChannels][nCuts];
-  TH1D*                       hPtLepton1    [nChannels][nCuts];
-  TH1D*                       hPtLepton2    [nChannels][nCuts];
-  TH1D*                       hPtLepton3    [nChannels][nCuts];
-  TH1D*                       hMVARingsMuon1[nChannels][nCuts];
-  TH1D*                       hMVARingsMuon2[nChannels][nCuts];
-  TH1D*                       hMVARingsMuon3[nChannels][nCuts];
-
-  TH1D*                       hPtZLepton1[nChannels][nCuts];
-  TH1D*                       hPtZLepton2[nChannels][nCuts];
-  TH1D*                       hPtWLepton [nChannels][nCuts];
-  TH1D*                       hInvMassZ  [nChannels][nCuts];
+  TH1D*                       hNPV        [nChannels][nCuts];
+  TH1D*                       hMET        [nChannels][nCuts];
+  TH1D*                       hSumCharges [nChannels][nCuts];
+  TH1D*                       hInvMass2Lep[nChannels][nCuts];
+  TH1D*                       hInvMass3Lep[nChannels][nCuts];
+  TH1D*                       hPtLepton1  [nChannels][nCuts];
+  TH1D*                       hPtLepton2  [nChannels][nCuts];
+  TH1D*                       hPtLepton3  [nChannels][nCuts];
+  TH1D*                       hPtZLepton1 [nChannels][nCuts];
+  TH1D*                       hPtZLepton2 [nChannels][nCuts];
+  TH1D*                       hPtWLepton  [nChannels][nCuts];
 
 
   // Gen study
@@ -203,6 +216,7 @@ class AnalysisWZ: public CMSAnalysisSelectorMiniTrees
 
   // Input parameters
   //----------------------------------------------------------------------------
+  Bool_t                      useFakes;
   TString                     directory;
   TString                     sample;
   TString                     fileSuffix;
@@ -215,28 +229,16 @@ class AnalysisWZ: public CMSAnalysisSelectorMiniTrees
 
   // Data members
   //----------------------------------------------------------------------------
-  std::vector<TLorentzVector> Muons;
-  std::vector<Int_t>          Muons_Index;
-  std::vector<Double_t>       Muons_Charge;
-
-  std::vector<TLorentzVector> Electrons;
-  std::vector<Int_t>          Electrons_Index;
-  std::vector<Double_t>       Electrons_Charge;
-
-  std::vector<TLorentzVector> LooseMuons;
-  std::vector<Int_t>          LooseMuons_Index;
-  std::vector<Double_t>       LooseMuons_Charge;
-
-  std::vector< std::pair<Double_t, Int_t> > ptIndexPair;
-
-  UInt_t                      leptonIndex[3];
+  std::vector<Lepton>         AnalysisLeptons;
 
   TLorentzVector              ZLepton1;
   TLorentzVector              ZLepton2;
   TLorentzVector              WLepton;
 
   Bool_t                      isData;
-  Double_t                    dileptonInvMass;
+  Double_t                    invMass2Lep;
+  Double_t                    invMass3Lep;
+  Double_t                    sumCharges;
   UInt_t                      theChannel;
 
 

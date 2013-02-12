@@ -18,9 +18,10 @@ TProof*  proof          = 0;
 TString  dataPath       = "";
 
 
-void RunPROOF_WZ(TString  sample  = "DoubleMu",
-		 Long64_t nEvents = -1,
-		 Bool_t   update  = true)
+void RunPROOF_WZ(TString  sample   = "DoubleMu",
+		 Long64_t nEvents  = -1,
+		 Bool_t   useFakes = false,
+		 Bool_t   update   = true)
 {
   dataPath = GuessLocalBasePath();
 
@@ -98,6 +99,7 @@ void RunPROOF_WZ(TString  sample  = "DoubleMu",
   gPAFOptions->inputParameters->SetNamedString("sample",     sample.Data());
   gPAFOptions->inputParameters->SetNamedDouble("xs_weight",  G_Event_Weight);
   gPAFOptions->inputParameters->SetNamedDouble("luminosity", G_Event_Lumi);
+  gPAFOptions->inputParameters->SetNamedBool  ("useFakes",   useFakes);
 
 
   // Number of events (Long64_t)
