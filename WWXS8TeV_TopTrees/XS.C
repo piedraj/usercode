@@ -315,7 +315,7 @@ void DrawHistogram(TString  hname,
 
     hist[Data]->SetMinimum(0.01);
   }
-  else theMax *= 1.3;
+  else theMax *= 1.5;
 
   hist[Data]->SetMaximum(theMax);
 
@@ -327,14 +327,17 @@ void DrawHistogram(TString  hname,
   Double_t delta  = _yoffset + 0.001;
   Double_t ndelta = 0;
   
-  DrawLegend(x0, y0 - ndelta, hist[Data],               " data",          "lp"); ndelta += delta;
-  DrawLegend(x0, y0 - ndelta, hist[T2tt_FineBin],       " stop",          "l");  ndelta += delta;
-  DrawLegend(x0, y0 - ndelta, hist[WWTo2L2Nu_Madgraph], " WW",            "f");  ndelta += delta;
-  DrawLegend(x0, y0 - ndelta, hist[ZZ],                 " VV",            "f");  ndelta += delta;
-  DrawLegend(x0, y0 - ndelta, hist[ZJets_Madgraph],     " Z + jets",      "f");  ndelta += delta;
-  DrawLegend(x0, y0 - ndelta, hist[WJets_Madgraph],     " W + jets",      "f");  ndelta += delta;
-  DrawLegend(x0, y0 - ndelta, hist[TTbar_Madgraph],     " top",           "f");  ndelta += delta;
-  DrawLegend(x0, y0 - ndelta, allmc,                    " #sigma_{stat}", "f");  ndelta += delta;
+  DrawLegend(x0 - 0.17, y0 - ndelta, hist[Data],               " data", "lp"); ndelta += delta;
+  DrawLegend(x0 - 0.17, y0 - ndelta, hist[T2tt_FineBin],       " stop", "l");  ndelta += delta;
+  DrawLegend(x0 - 0.17, y0 - ndelta, hist[WWTo2L2Nu_Madgraph], " WW",   "f");  ndelta += delta;
+  DrawLegend(x0 - 0.17, y0 - ndelta, hist[ZZ],                 " VV",   "f");  ndelta += delta;
+
+  ndelta = 0;
+
+  DrawLegend(x0, y0 - ndelta, hist[ZJets_Madgraph], " Z + jets",      "f"); ndelta += delta;
+  DrawLegend(x0, y0 - ndelta, hist[WJets_Madgraph], " W + jets",      "f"); ndelta += delta;
+  DrawLegend(x0, y0 - ndelta, hist[TTbar_Madgraph], " top",           "f"); ndelta += delta;
+  DrawLegend(x0, y0 - ndelta, allmc,                " #sigma_{stat}", "f"); ndelta += delta;
 
 
   // CMS titles
