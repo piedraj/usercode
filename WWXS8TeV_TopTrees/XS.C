@@ -8,17 +8,6 @@
 #include <vector>
 
 
-// Input parameters for the WW cross section
-//------------------------------------------------------------------------------
-const Double_t xsWW_nlo  = 57.25;  // pb (arXiv:1105.0020v1)
-const Double_t WW2lnln   = (3 * 0.108) * (3 * 0.108);
-
-const Double_t ngen_qqWW = 1933235;
-const Double_t ngen_ggWW = 109987;
-
-const Double_t f_qqWW = 0.97;
-const Double_t f_ggWW = 0.03;
-
 const UInt_t nChannels = 4;
 
 enum {MuMu, EE, EMu, MuE};
@@ -33,7 +22,7 @@ enum {TwoLepton, WWLevel};
 TString sCut[] = {"TwoLepton", "WWLevel"};
 
 
-const UInt_t nProcesses = 11;
+const UInt_t nProcesses = 12;
 
 enum {
   Data,
@@ -46,7 +35,8 @@ enum {
   TTbar_Madgraph,
   WJets_Madgraph,
   ZJets_Madgraph,
-  ZgammaToLLG
+  ZgammaToLLG,
+  T2tt_FineBin
 };
 
 
@@ -65,6 +55,7 @@ process[TTbar_Madgraph]     = "TTbar_Madgraph";
 process[WJets_Madgraph]     = "WJets_Madgraph";
 process[ZJets_Madgraph]     = "ZJets_Madgraph";
 process[ZgammaToLLG]        = "ZgammaToLLG";
+process[T2tt_FineBin]       = "T2tt_FineBin";
 
 
 Color_t color[nProcesses];
@@ -80,6 +71,7 @@ color[TTbar_Madgraph]     = kYellow;
 color[WJets_Madgraph]     = kGray+1;
 color[ZJets_Madgraph]     = kGreen+2;
 color[ZgammaToLLG]        = kGreen+2;
+color[T2tt_FineBin]       = kRed+1;
 
 
 Double_t systError[nProcesses];
@@ -95,6 +87,7 @@ systError[TTbar_Madgraph]     = 0.0 / 1e2;
 systError[WJets_Madgraph]     = 0.0 / 1e2;
 systError[ZJets_Madgraph]     = 0.0 / 1e2;
 systError[ZgammaToLLG]        = 0.0 / 1e2;
+systError[T2tt_FineBin]       = 0.0 / 1e2;
 
 
 // Settings
@@ -144,6 +137,7 @@ void XS(Int_t channel = MuMu)
   vprocess.push_back(WJets_Madgraph);
   vprocess.push_back(ZJets_Madgraph);
   vprocess.push_back(ZgammaToLLG);
+  vprocess.push_back(T2tt_FineBin);
 
 
   // Read input files
@@ -158,8 +152,6 @@ void XS(Int_t channel = MuMu)
 
   // Do the work
   //----------------------------------------------------------------------------
-  if (0) MeasureTheCrossSection(sChannel[channel]);
-
   TString suffix = "_" + sChannel[channel] + "_" + sCut[WWLevel];
     
   DrawHistogram("hNPV"       + suffix, "number of primary vertices", -1, 0, "NULL", 0, 30, false);
@@ -167,120 +159,6 @@ void XS(Int_t channel = MuMu)
   DrawHistogram("hPtLepton1" + suffix, "p_{T}^{leading lepton}",      5, 0, "GeV");
   DrawHistogram("hPtLepton2" + suffix, "p_{T}^{trailing lepton}",     5, 0, "GeV",  0, 100);
   DrawHistogram("hMll"       + suffix, "m_{#font[12]{ll}}",           5, 0, "GeV");
-}
-
-
-//------------------------------------------------------------------------------
-// MeasureTheCrossSection
-//------------------------------------------------------------------------------
-void MeasureTheCrossSection(TString channel = "MuMu")
-{
-  Double_t ndata       = 0;
-  Double_t nbackground = 0;
-  Double_t nexp_qqWW   = 0;
-  Double_t nexp_ggWW   = 0;
-  Double_t nexp_TTbar  = 0;
-  Double_t nexp_WJets  = 0;
-  Double_t nexp_DY     = 0;
-
-  Double_t nraw_qqWW = ((TH1F*)input[WWTo2L2Nu_Madgraph]->Get("hCounterEff_" + channel + "_WWLevel"))->Integral();
-  Double_t nraw_ggWW = ((TH1F*)input[ggWWto2L]          ->Get("hCounterEff_" + channel + "_WWLevel"))->Integral();
-
-  TString hname = "hCounter_" + channel + "_WWLevel";
-
-  for (UInt_t i=0; i<vprocess.size(); i++) {
-
-    UInt_t j = vprocess.at(i);
-
-    TH1F* dummy = (TH1F*)input[j]->Get(hname);
-
-    if (j == Data) {
-      ndata = dummy->Integral();
-    }
-    else if (j == WWTo2L2Nu_Madgraph) {
-      nexp_qqWW = dummy->Integral();
-    }
-    else if (j == ggWWto2L) {
-      nexp_ggWW = dummy->Integral();
-    }
-    else if (j == TW || j == TbarW || j == TTbar_Madgraph) {
-      nbackground += dummy->Integral();
-      nexp_TTbar  += dummy->Integral();
-    }
-    else if (j == WJets_Madgraph) {
-      nbackground += dummy->Integral();
-      nexp_WJets  += dummy->Integral();
-    }
-    else if (j == ZJets_Madgraph || j == ZgammaToLLG) {
-      nbackground += dummy->Integral();
-      nexp_DY     += dummy->Integral();
-    }
-    else {
-      nbackground += dummy->Integral();
-    }      
-  }
-
-
-  // Estimate the cross section
-  //----------------------------------------------------------------------------
-  Double_t efficiency = f_qqWW * nraw_qqWW / ngen_qqWW + f_ggWW * nraw_ggWW / ngen_ggWW;
-
-  Double_t xs = (ndata - nbackground) / (_luminosity * efficiency * WW2lnln);
-
-
-  // Relative errors
-  //----------------------------------------------------------------------------
-  Double_t xsRelativeErrorBackground = 0.0;
-  Double_t xsRelativeErrorEfficiency = 0.0;
-
-  Double_t xsRelativeErrorSyst = 0;
-  xsRelativeErrorSyst += (xsRelativeErrorBackground * xsRelativeErrorBackground);
-  xsRelativeErrorSyst += (xsRelativeErrorEfficiency * xsRelativeErrorEfficiency);
-  xsRelativeErrorSyst = sqrt(xsRelativeErrorSyst);
-
-  Double_t xsRelativeErrorStat = 1e2 * sqrt(ndata) / (ndata - nbackground);
-  Double_t xsRelativeErrorLumi = 4.4;
-
-
-  // Absolute errors
-  //----------------------------------------------------------------------------
-  Double_t xsErrorSyst = xs * xsRelativeErrorSyst / 1e2;  // pb
-  Double_t xsErrorStat = xs * xsRelativeErrorStat / 1e2;  // pb
-  Double_t xsErrorLumi = xs * xsRelativeErrorLumi / 1e2;  // pb
-
-
-  // Print the results
-  //----------------------------------------------------------------------------
-  if (_verbosity > 0) {
-    printf("\n");
-    printf("                          ---------- %s ---------- ", channel.Data());
-  }
-
-  if (_verbosity > 2) {
-    printf("\n");
-    printf("                          luminosity = %.1f pb\n", _luminosity);
-    printf("                        generated gg -> WW = %.0f\n", ngen_ggWW);
-    printf("                        generated qq -> WW = %.0f\n", ngen_qqWW);
-  }
-
-  if (_verbosity > 1) {
-    printf("\n");
-    printf("                       WW efficiency = %.2f %s\n", 1e2 * efficiency, "%");
-    printf("                         nbackground = %6.1f +- %5.1f\n", nbackground,       sqrt(nbackground));
-    printf("                               ndata = %6.1f +- %5.1f\n", ndata,             sqrt(ndata));
-    printf("                 ndata - nbackground = %6.1f +- %5.1f\n", ndata-nbackground, sqrt(ndata+nbackground));
-    printf("                            qq -> WW = %6.1f +- %5.1f\n", nexp_qqWW,         sqrt(nexp_qqWW));
-    printf("                            gg -> WW = %6.1f +- %5.1f\n", nexp_ggWW,         sqrt(nexp_ggWW));
-    printf("                                 top = %6.1f +- %5.1f\n", nexp_TTbar,        sqrt(nexp_TTbar));
-    printf("                              W+jets = %6.1f +- %5.1f\n", nexp_WJets,        sqrt(nexp_WJets));
-    printf("                              Z+jets = %6.1f +- %5.1f\n", nexp_DY,           sqrt(nexp_DY));
-  }
-
-  if (_verbosity > 0) {
-    printf("\n");
-    printf("                         measured xs = %.2f +- %.2f (stat) +- %.2f (lumi) pb\n", xs, xsErrorStat, xsErrorLumi);
-    printf("\n");
-  }
 }
 
 
@@ -333,6 +211,9 @@ void DrawHistogram(TString  hname,
     hist[j] = (TH1F*)input[j]->Get(hname);
     hist[j]->SetName(hname + process[j]);
 
+    if (j == T2tt_FineBin && T2tt_FineBin > Data)
+      hist[T2tt_FineBin]->Scale(hist[Data]->GetEntries() / hist[T2tt_FineBin]->GetEntries());
+
     if (moveOverflow) MoveOverflowBins  (hist[j], xmin, xmax);
     else              ZeroOutOfRangeBins(hist[j], xmin, xmax);
     
@@ -341,6 +222,10 @@ void DrawHistogram(TString  hname,
     if (j == Data) {
       hist[j]->SetMarkerStyle(kFullCircle);
       hist[j]->SetTitle("");
+    }
+    else if (j == T2tt_FineBin) {
+      hist[j]->SetLineColor(color[j]);
+      hist[j]->SetLineWidth(2);
     }
     else {
       hist[j]->SetFillColor(color[j]);
@@ -371,7 +256,8 @@ void DrawHistogram(TString  hname,
 
       UInt_t j = vprocess.at(i);
 
-      if (j == Data) continue;
+      if (j == Data)         continue;
+      if (j == T2tt_FineBin) continue;
 
       Double_t binContent = hist[j]->GetBinContent(ibin);
       
@@ -409,10 +295,11 @@ void DrawHistogram(TString  hname,
   //----------------------------------------------------------------------------
   xaxis->SetRangeUser(xmin, xmax);
 
-  hist[Data]->Draw("ep");
-  hstack    ->Draw("hist,same");
-  allmc     ->Draw("e2,same");
-  hist[Data]->Draw("ep,same");
+  hist[Data]        ->Draw("ep");
+  hstack            ->Draw("hist,same");
+  allmc             ->Draw("e2,same");
+  hist[T2tt_FineBin]->Draw("hist,same");
+  hist[Data]        ->Draw("ep,same");
 
 
   // Adjust scale
@@ -441,6 +328,7 @@ void DrawHistogram(TString  hname,
   Double_t ndelta = 0;
   
   DrawLegend(x0, y0 - ndelta, hist[Data],               " data",          "lp"); ndelta += delta;
+  DrawLegend(x0, y0 - ndelta, hist[T2tt_FineBin],       " stop",          "l");  ndelta += delta;
   DrawLegend(x0, y0 - ndelta, hist[WWTo2L2Nu_Madgraph], " WW",            "f");  ndelta += delta;
   DrawLegend(x0, y0 - ndelta, hist[ZZ],                 " VV",            "f");  ndelta += delta;
   DrawLegend(x0, y0 - ndelta, hist[ZJets_Madgraph],     " Z + jets",      "f");  ndelta += delta;
