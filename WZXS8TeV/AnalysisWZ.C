@@ -6,61 +6,7 @@ ClassImp(AnalysisWZ);
 #endif
 
 
-AnalysisWZ::AnalysisWZ(TTree* tree) : CMSAnalysisSelectorMiniTrees(tree)
-{
-  h_n_tau_St3     = 0;
-  h_n_muon_St3    = 0;
-  h_n_muon_Gen    = 0;
-  h_n_muon_Rec    = 0;
-  h_n_muon_Global = 0;
-  h_n_muon_PV     = 0;
-  h_n_muon_Iso    = 0;
-  h_n_muon_ID     = 0;
-  h_n_elec_St3    = 0;
-  h_n_elec_Gen    = 0;
-  h_n_elec_Rec    = 0;
-  h_n_elec_Global = 0;
-  h_n_elec_PV     = 0;
-  h_n_elec_Iso    = 0;
-  h_n_elec_ID     = 0;
-
-  h_pt_tau_St3     = 0;
-  h_pt_muon_St3    = 0;
-  h_pt_muon_Gen    = 0;
-  h_pt_muon_Rec    = 0;
-  h_pt_muon_Global = 0;
-  h_pt_muon_PV     = 0;
-  h_pt_muon_Iso    = 0;
-  h_pt_muon_ID     = 0;
-  h_pt_elec_St3    = 0;
-  h_pt_elec_Gen    = 0;
-  h_pt_elec_Rec    = 0;
-  h_pt_elec_Global = 0;
-  h_pt_elec_PV     = 0;
-  h_pt_elec_Iso    = 0;
-  h_pt_elec_ID     = 0;
-
-  h_eta_tau_St3     = 0;
-  h_eta_muon_St3    = 0;
-  h_eta_muon_Gen    = 0;
-  h_eta_muon_Rec    = 0;
-  h_eta_muon_Global = 0;
-  h_eta_muon_PV     = 0;
-  h_eta_muon_Iso    = 0;
-  h_eta_muon_ID     = 0;
-  h_eta_elec_St3    = 0;
-  h_eta_elec_Gen    = 0;
-  h_eta_elec_Rec    = 0;
-  h_eta_elec_Global = 0;
-  h_eta_elec_PV     = 0;
-  h_eta_elec_Iso    = 0;
-  h_eta_elec_ID     = 0;
-
-  h_mvaRings_muon_r1 = 0;
-  h_mvaRings_muon_r2 = 0;
-  h_mvaRings_muon_r3 = 0;
-  h_mvaRings_muon_r4 = 0;
-}
+AnalysisWZ::AnalysisWZ(TTree* tree) : CMSAnalysisSelectorMiniTrees(tree) {}
 
 
 //------------------------------------------------------------------------------
@@ -102,62 +48,6 @@ void AnalysisWZ::Initialise()
       hPtWLepton  [i][j] = CreateH1D(TString("hPtWLepton"   + suffix), "", 200,  0, 200);    
     }
   }
-
-
-  // Gen study
-  //----------------------------------------------------------------------------
-  h_n_tau_St3     = CreateH1D("h_n_tau_St3",     "", 10, 0, 10);
-  h_n_muon_St3    = CreateH1D("h_n_muon_St3",    "", 10, 0, 10);
-  h_n_muon_Gen    = CreateH1D("h_n_muon_Gen",    "", 10, 0, 10);
-  h_n_muon_Rec    = CreateH1D("h_n_muon_Rec",    "", 10, 0, 10);
-  h_n_muon_Global = CreateH1D("h_n_muon_Global", "", 10, 0, 10);
-  h_n_muon_PV     = CreateH1D("h_n_muon_PV",     "", 10, 0, 10);
-  h_n_muon_Iso    = CreateH1D("h_n_muon_Iso",    "", 10, 0, 10);
-  h_n_muon_ID     = CreateH1D("h_n_muon_ID",     "", 10, 0, 10);
-  h_n_elec_St3    = CreateH1D("h_n_elec_St3",    "", 10, 0, 10);
-  h_n_elec_Gen    = CreateH1D("h_n_elec_Gen",    "", 10, 0, 10);
-  h_n_elec_Rec    = CreateH1D("h_n_elec_Rec",    "", 10, 0, 10);
-  h_n_elec_Global = CreateH1D("h_n_elec_Global", "", 10, 0, 10);
-  h_n_elec_PV     = CreateH1D("h_n_elec_PV",     "", 10, 0, 10);
-  h_n_elec_Iso    = CreateH1D("h_n_elec_Iso",    "", 10, 0, 10);
-  h_n_elec_ID     = CreateH1D("h_n_elec_ID",     "", 10, 0, 10);
-
-  h_pt_tau_St3     = CreateH1D("h_pt_tau_St3",     "", 200, 0, 200);
-  h_pt_muon_St3    = CreateH1D("h_pt_muon_St3",    "", 200, 0, 200);
-  h_pt_muon_Gen    = CreateH1D("h_pt_muon_Gen",    "", 200, 0, 200);
-  h_pt_muon_Rec    = CreateH1D("h_pt_muon_Rec",    "", 200, 0, 200);
-  h_pt_muon_Global = CreateH1D("h_pt_muon_Global", "", 200, 0, 200);
-  h_pt_muon_PV     = CreateH1D("h_pt_muon_PV",     "", 200, 0, 200);
-  h_pt_muon_Iso    = CreateH1D("h_pt_muon_Iso",    "", 200, 0, 200);
-  h_pt_muon_ID     = CreateH1D("h_pt_muon_ID",     "", 200, 0, 200);
-  h_pt_elec_St3    = CreateH1D("h_pt_elec_St3",    "", 200, 0, 200);
-  h_pt_elec_Gen    = CreateH1D("h_pt_elec_Gen",    "", 200, 0, 200);
-  h_pt_elec_Rec    = CreateH1D("h_pt_elec_Rec",    "", 200, 0, 200);
-  h_pt_elec_Global = CreateH1D("h_pt_elec_Global", "", 200, 0, 200);
-  h_pt_elec_PV     = CreateH1D("h_pt_elec_PV",     "", 200, 0, 200);
-  h_pt_elec_Iso    = CreateH1D("h_pt_elec_Iso",    "", 200, 0, 200);
-  h_pt_elec_ID     = CreateH1D("h_pt_elec_ID",     "", 200, 0, 200);
-
-  h_eta_tau_St3     = CreateH1D("h_eta_tau_St3",     "", 180, -3, 3);
-  h_eta_muon_St3    = CreateH1D("h_eta_muon_St3",    "", 180, -3, 3);
-  h_eta_muon_Gen    = CreateH1D("h_eta_muon_Gen",    "", 180, -3, 3);
-  h_eta_muon_Rec    = CreateH1D("h_eta_muon_Rec",    "", 180, -3, 3);
-  h_eta_muon_Global = CreateH1D("h_eta_muon_Global", "", 180, -3, 3);
-  h_eta_muon_PV     = CreateH1D("h_eta_muon_PV",     "", 180, -3, 3);
-  h_eta_muon_Iso    = CreateH1D("h_eta_muon_Iso",    "", 180, -3, 3);
-  h_eta_muon_ID     = CreateH1D("h_eta_muon_ID",     "", 180, -3, 3);
-  h_eta_elec_St3    = CreateH1D("h_eta_elec_St3",    "", 180, -3, 3);
-  h_eta_elec_Gen    = CreateH1D("h_eta_elec_Gen",    "", 180, -3, 3);
-  h_eta_elec_Rec    = CreateH1D("h_eta_elec_Rec",    "", 180, -3, 3);
-  h_eta_elec_Global = CreateH1D("h_eta_elec_Global", "", 180, -3, 3);
-  h_eta_elec_PV     = CreateH1D("h_eta_elec_PV",     "", 180, -3, 3);
-  h_eta_elec_Iso    = CreateH1D("h_eta_elec_Iso",    "", 180, -3, 3);
-  h_eta_elec_ID     = CreateH1D("h_eta_elec_ID",     "", 180, -3, 3);
-
-  h_mvaRings_muon_r1 = CreateH1D("h_mvaRings_muon_r1", "", 110, -1.1, 1.1);
-  h_mvaRings_muon_r2 = CreateH1D("h_mvaRings_muon_r2", "", 110, -1.1, 1.1);
-  h_mvaRings_muon_r3 = CreateH1D("h_mvaRings_muon_r3", "", 110, -1.1, 1.1);
-  h_mvaRings_muon_r4 = CreateH1D("h_mvaRings_muon_r4", "", 110, -1.1, 1.1);
 }
 
 
@@ -180,16 +70,9 @@ void AnalysisWZ::InsideLoop()
   theChannel  = -1;
 
 
-  // Gen study
-  //----------------------------------------------------------------------------
-  GenStudy();
-
-
   // MC filters
   //----------------------------------------------------------------------------
   if (sample.Contains("WGstar") && WgammaFilter()) return;
-
-  if (sample.Contains("WZTo3LNu") && !isSignalMCInsideZmassRange(71,111)) return;
 
   if (sample.Contains("ZJets_Madgraph") && T_Gen_bSt3_Px->size() > 0) return;
 
@@ -211,9 +94,10 @@ void AnalysisWZ::InsideLoop()
 
   // Loop over muons
   //----------------------------------------------------------------------------
-  UInt_t countMuons    = 0;
-  UInt_t countPVMuons  = 0;
-  UInt_t countIsoMuons = 0;
+  UInt_t countMuons        = 0;
+  UInt_t countPVMuons      = 0;
+  UInt_t countIsoMuons     = 0;
+  UInt_t countIsoGoodMuons = 0;
 
   for (UInt_t i=0; i<T_Muon_Px->size(); i++) {
 
@@ -221,7 +105,7 @@ void AnalysisWZ::InsideLoop()
 			      T_Muon_Py->at(i),
 			      T_Muon_Pz->at(i),
 			      T_Muon_Energy->at(i));
-
+    
     if (MuonVector.Pt() <= 10) continue;
 
     if (fabs(MuonVector.Eta()) >= 2.4) continue;
@@ -234,63 +118,40 @@ void AnalysisWZ::InsideLoop()
 
     countMuons++;
 
+    if (MuonCloseToPV(i) == Rejected) continue;
 
-    // Tight muons
-    //--------------------------------------------------------------------------
-    if (MuonCloseToPV(i, false)) {
+    countPVMuons++;
 
-      countPVMuons++;
+    UInt_t muon_type = MuonIsolation(i);
 
-      if (MuonIsolation(i, false)) {
+    if (muon_type == Rejected) continue;
 
-	countIsoMuons++;
+    if (muon_type != MuonCloseToPV(i)) continue;
 
-	if (MuonID(i)) {
+    countIsoMuons++;
 
-	  Lepton AnalysisMuon;
+    if (!MuonID(i)) continue;
 
-	  AnalysisMuon.index  = i;
-	  AnalysisMuon.flavor = Muon;
-	  AnalysisMuon.type   = Tight;
-	  AnalysisMuon.charge = T_Muon_Charge->at(i);
-	  AnalysisMuon.v      = MuonVector;
+    countIsoGoodMuons++;
 
-	  AnalysisLeptons.push_back(AnalysisMuon);
-	}
-      }
-    }
+    Lepton AnalysisMuon;
 
+    AnalysisMuon.index  = i;
+    AnalysisMuon.flavor = Muon;
+    AnalysisMuon.type   = muon_type;
+    AnalysisMuon.charge = T_Muon_Charge->at(i);
+    AnalysisMuon.v      = MuonVector;
 
-    // Loose muons
-    //--------------------------------------------------------------------------
-    if (!useFakes) continue;
-
-    if (MuonCloseToPV(i, true)) {
-
-      if (MuonIsolation(i, true)) {
-
-	if (MuonID(i)) {
-	  
-	  Lepton AnalysisMuon;
-	  
-	  AnalysisMuon.index  = i;
-	  AnalysisMuon.flavor = Muon;
-	  AnalysisMuon.type   = Loose;
-	  AnalysisMuon.charge = T_Muon_Charge->at(i);
-	  AnalysisMuon.v      = MuonVector;
-
-	  AnalysisLeptons.push_back(AnalysisMuon);
-	}
-      }
-    }
+    AnalysisLeptons.push_back(AnalysisMuon);
   }
 
 
   // Loop over electrons
   //----------------------------------------------------------------------------
-  UInt_t countElectrons    = 0;
-  UInt_t countPVElectrons  = 0;
-  UInt_t countIsoElectrons = 0;
+  UInt_t countElectrons        = 0;
+  UInt_t countPVElectrons      = 0;
+  UInt_t countIsoElectrons     = 0;
+  UInt_t countIsoGoodElectrons = 0;
 
   for (UInt_t i=0; i<T_Elec_Px->size(); i++) {
 
@@ -311,55 +172,36 @@ void AnalysisWZ::InsideLoop()
 
     countPVElectrons++;
 
+    if (ElectronIsolation(i) == Rejected) continue;
 
-    // Tight electrons
-    //--------------------------------------------------------------------------
-    if (ElectronIsolation(i, false)) {
+    countIsoElectrons++;
 
-      countIsoElectrons++;
+    UInt_t electron_type = ElectronBDT(i);
 
-      if (ElectronBDT(i, false)) {
+    if (electron_type == Rejected) continue;
+
+    if (electron_type != ElectronIsolation(i)) continue;
 	
-	Lepton AnalysisElectron;
-	
-	AnalysisElectron.index  = i;
-	AnalysisElectron.flavor = Electron;
-	AnalysisElectron.type   = Tight;
-	AnalysisElectron.charge = T_Elec_Charge->at(i);
-	AnalysisElectron.v      = ElectronVector;
-	
-	AnalysisLeptons.push_back(AnalysisElectron);
-      }
-    }
+    countIsoGoodElectrons++;
 
-
-    // Loose electrons
-    //--------------------------------------------------------------------------
-    if (!useFakes) continue;
-
-    if (ElectronIsolation(i, true)) {
-
-      if (ElectronBDT(i, true)) {
-	
-	Lepton AnalysisElectron;
-	
-	AnalysisElectron.index  = i;
-	AnalysisElectron.flavor = Electron;
-	AnalysisElectron.type   = Loose;
-	AnalysisElectron.charge = T_Elec_Charge->at(i);
-	AnalysisElectron.v      = ElectronVector;
-	
-	AnalysisLeptons.push_back(AnalysisElectron);
-      }
-    }
+    Lepton AnalysisElectron;
+    
+    AnalysisElectron.index  = i;
+    AnalysisElectron.flavor = Electron;
+    AnalysisElectron.type   = electron_type;
+    AnalysisElectron.charge = T_Elec_Charge->at(i);
+    AnalysisElectron.v      = ElectronVector;
+    
+    AnalysisLeptons.push_back(AnalysisElectron);
   }
 
 
   // Require at least 2 tight leptons
   //----------------------------------------------------------------------------
-  if (!FillCounters(countElectrons,    countMuons,    Has2Leptons))    return;
-  if (!FillCounters(countPVElectrons,  countPVMuons,  Has2PVLeptons))  return;
-  if (!FillCounters(countIsoElectrons, countIsoMuons, Has2IsoLeptons)) return;
+  if (!FillCounters(countElectrons,        countMuons,        Has2Leptons))        return;
+  if (!FillCounters(countPVElectrons,      countPVMuons,      Has2PVLeptons))      return;
+  if (!FillCounters(countIsoElectrons,     countIsoMuons,     Has2IsoLeptons))     return;
+  if (!FillCounters(countIsoGoodElectrons, countIsoGoodMuons, Has2IsoGoodLeptons)) return;
 
 
   // Sort the leptons by pt
@@ -574,18 +416,13 @@ void AnalysisWZ::GetParameters()
   GetInputParameters()->TheNamedBool  ("useFakes",   useFakes);
   GetInputParameters()->TheNamedDouble("xs_weight",  xs_weight);
   GetInputParameters()->TheNamedDouble("luminosity", luminosity);
-  
-  if (sample.Contains("WZTo3LNu"))
-    {
-      xs_weight = (xsWplusZ + xsWminusZ) * WZ23lnu * luminosity / ngenWZphase;
-    }
 }
 
 
 //------------------------------------------------------------------------------
 // ElectronBDT
 //------------------------------------------------------------------------------
-Bool_t AnalysisWZ::ElectronBDT(UInt_t iElec, Bool_t isLoose)
+UInt_t AnalysisWZ::ElectronBDT(UInt_t iElec)
 {
   Double_t eta = fabs(T_Elec_SC_Eta->at(iElec));
 	
@@ -604,11 +441,21 @@ Bool_t AnalysisWZ::ElectronBDT(UInt_t iElec, Bool_t isLoose)
       else if (eta > 1.479 )               {mvaCut = 0.92;}
     }
 
-  Bool_t pass = (T_Elec_MVA->at(iElec) > mvaCut);
-
-  if (isLoose) pass = !pass;
-
-  return pass;
+  if (T_Elec_MVA->at(iElec) > mvaCut)
+    {
+      return Tight;
+    }
+  else
+    {
+      if (useFakes)
+	{
+	  return Loose;
+	}
+      else
+	{
+	  return Rejected;
+	}
+    }
 }
 
 
@@ -677,13 +524,23 @@ Bool_t AnalysisWZ::ElectronCloseToPV(UInt_t iElec)
 //------------------------------------------------------------------------------
 // ElectronIsolation
 //------------------------------------------------------------------------------
-Bool_t AnalysisWZ::ElectronIsolation(UInt_t iElec, Bool_t isLoose) 
+UInt_t AnalysisWZ::ElectronIsolation(UInt_t iElec) 
 {
-  Bool_t pass = (T_Elec_pfComb->at(iElec) < 0.15);
-
-  if (isLoose) pass = !pass;
-
-  return pass;
+  if (T_Elec_pfComb->at(iElec) < 0.15)
+    {
+      return Tight;
+    }
+  else
+    {
+      if (useFakes)
+	{
+	  return Loose;
+	}
+      else
+	{
+	  return Rejected;
+	}
+    }
 }
 
 
@@ -718,33 +575,35 @@ Bool_t AnalysisWZ::MuonID(UInt_t iMuon)
 //------------------------------------------------------------------------------
 // MuonCloseToPV
 //------------------------------------------------------------------------------
-Bool_t AnalysisWZ::MuonCloseToPV(UInt_t iMuon, Bool_t isLoose)
+UInt_t AnalysisWZ::MuonCloseToPV(UInt_t iMuon)
 {
-  Bool_t pass = (fabs(T_Muon_dzPVBiasedPV->at(iMuon)) <= 0.1);
+  if (fabs(T_Muon_dzPVBiasedPV->at(iMuon)) > 0.1) return Rejected;
 
   Double_t MaxMuIP = (T_Muon_Pt->at(iMuon) < 20) ? 0.01 : 0.02;
 
-  if (isLoose)
+  if (fabs(T_Muon_IP2DBiasedPV->at(iMuon)) <= MaxMuIP)
     {
-      pass &= (fabs(T_Muon_IP2DBiasedPV->at(iMuon)) > MaxMuIP);
-      pass &= (fabs(T_Muon_IP2DBiasedPV->at(iMuon)) <= 0.2);
+      return Tight;
     }
   else
     {
-      pass &= (fabs(T_Muon_IP2DBiasedPV->at(iMuon)) <= MaxMuIP);
+      if (useFakes && fabs(T_Muon_IP2DBiasedPV->at(iMuon)) <= 0.2)
+	{
+	  return Loose;
+	}
+      else
+	{
+	  return Rejected;
+	}
     }
-
-  return pass;
 }
 
 
 //------------------------------------------------------------------------------
 // MuonIsolation
 //------------------------------------------------------------------------------
-Bool_t AnalysisWZ::MuonIsolation(UInt_t iMuon, Bool_t isLoose) 
+UInt_t AnalysisWZ::MuonIsolation(UInt_t iMuon) 
 {
-  Bool_t pass = true;
-
   Double_t mueta = T_Muon_Eta->at(iMuon);
   Double_t mupt  = T_Muon_Pt ->at(iMuon);
 
@@ -753,17 +612,21 @@ Bool_t AnalysisWZ::MuonIsolation(UInt_t iMuon, Bool_t isLoose)
   if (mupt <= 20) isoCut = (fabs(mueta) < 1.479) ? 0.82 : 0.86;
   else            isoCut = (fabs(mueta) < 1.479) ? 0.86 : 0.82;
 
-  if (isLoose)
+  if (T_Muon_MVARings->at(iMuon) >= isoCut)
     {
-      pass &= (T_Muon_MVARings->at(iMuon) < isoCut);
-      pass &= (T_Muon_MVARings->at(iMuon) >= -0.6);
+      return Tight;
     }
   else
     {
-      pass &= (T_Muon_MVARings->at(iMuon) >= isoCut);
+      if (useFakes && T_Muon_MVARings->at(iMuon) >= -0.6)
+	{
+	  return Loose;
+	}
+      else
+	{
+	  return Rejected;
+	}
     }
-  
-  return pass;
 }
 
 
@@ -833,107 +696,6 @@ void AnalysisWZ::FillHistograms(UInt_t iChannel, UInt_t iCut)
   hPtZLepton1 [iChannel][iCut]->Fill(pt1,                       hweight);
   hPtZLepton2 [iChannel][iCut]->Fill(pt2,                       hweight);
   hPtWLepton  [iChannel][iCut]->Fill(WLepton.Pt(),              hweight);
-}
-
-
-//------------------------------------------------------------------------------
-// isSignalMCInsideZmassRange
-//------------------------------------------------------------------------------
-const bool AnalysisWZ::isSignalMCInsideZmassRange(const float & masslow,
-						  const float & masshigh) const
-{
-  float masszcand = 0.0;
-
-  const UInt_t ntauSt3  = T_Gen_TauSt3_PID->size();
-  const UInt_t nmuonSt3 = T_Gen_MuonSt3_PID->size();
-  const UInt_t nelecSt3 = T_Gen_ElecSt3_PID->size();
-
-  if (ntauSt3 >= 2)
-    {
-      std::vector<std::pair<int,TLorentzVector> > precand;
-
-      for (UInt_t i=0; i<ntauSt3; ++i)
-	{
-	  TLorentzVector Tau(T_Gen_TauSt3_Px->at(i),
-			     T_Gen_TauSt3_Py->at(i),
-			     T_Gen_TauSt3_Pz->at(i),
-			     T_Gen_TauSt3_Energy->at(i));
-	  
-	  precand.push_back(std::pair<int, TLorentzVector>(T_Gen_TauSt3_PID->at(i), Tau));
-	}
-      
-
-      // Construct the Z candidate
-      //------------------------------------------------------------------------
-      for (UInt_t j=0; j<precand.size(); ++j)
-	{
-	  for (UInt_t i=j+1; i<precand.size(); ++i)
-	    {
-	      if (precand[j].first/precand[i].first == 1) continue;
-
-	      float thismass = (precand[j].second + precand[i].second).M();
-	      
-	      if (fabs(masszcand - Z_MASS) > (thismass - Z_MASS)) masszcand = thismass;
-	    }
-	}
-      
-    }
-  else if (nmuonSt3 >= 2)
-    {
-      std::vector<TLorentzVector> zcand;
-
-      for (UInt_t i=0; i<nmuonSt3; ++i)
-	{
-	  if (abs(T_Gen_Muon_MPID->at(i)) == 23) // PID Z == 23
-	    {
-	      zcand.push_back(TLorentzVector(T_Gen_Muon_Px->at(i),
-					     T_Gen_Muon_Py->at(i),
-					     T_Gen_Muon_Pz->at(i),
-					     T_Gen_Muon_Energy->at(i)));
-	    }
-	}
-
-      if (zcand.size() == 2)
-	{
-	  TLorentzVector prov(zcand[0] + zcand[1]);
-
-	  masszcand = prov.M();
-	}
-    }
-  else if (nelecSt3 >= 2)
-    {
-      std::vector<TLorentzVector> zcand;
-
-      for (UInt_t i=0; i<nelecSt3; ++i)
-	{
-	  if(abs(T_Gen_Elec_MPID->at(i)) == 23)
-	    {
-	      zcand.push_back(TLorentzVector(T_Gen_Elec_Px->at(i),
-					     T_Gen_Elec_Py->at(i),
-					     T_Gen_Elec_Pz->at(i),
-					     T_Gen_Elec_Energy->at(i)));
-	    }
-	}
-      
-      if (zcand.size() == 2)
-	{
-	  TLorentzVector prov(zcand[0] + zcand[1]);
-
-	  masszcand = prov.M();
-	}
-    }
-  
-
-  // Accepting only generated events inside the range
-  //----------------------------------------------------------------------------
-  bool ispass = true;
-
-  if (masszcand < masslow || masszcand > masshigh)
-    {
-      ispass = false;
-    }
-  
-  return ispass;
 }
 
 
@@ -1013,202 +775,4 @@ const Bool_t AnalysisWZ::WgammaFilter() const
   }
 
   return (high && !low);
-}
-
-
-//------------------------------------------------------------------------------
-// GenStudy
-//------------------------------------------------------------------------------
-void AnalysisWZ::GenStudy()
-{
-  UInt_t n_tau_St3     = 0;
-  UInt_t n_muon_St3    = 0;
-  UInt_t n_muon_Gen    = 0;
-  UInt_t n_muon_Rec    = 0;
-  UInt_t n_muon_Global = 0;
-  UInt_t n_muon_PV     = 0;
-  UInt_t n_muon_Iso    = 0;
-  UInt_t n_muon_ID     = 0;
-  UInt_t n_elec_St3    = 0;
-  UInt_t n_elec_Gen    = 0;
-  UInt_t n_elec_Rec    = 0;
-  UInt_t n_elec_Global = 0;
-  UInt_t n_elec_PV     = 0;
-  UInt_t n_elec_Iso    = 0;
-  UInt_t n_elec_ID     = 0;
-
-
-  // Gen St3
-  //----------------------------------------------------------------------------
-  for (UInt_t i=0; i<T_Gen_TauSt3_Px->size(); ++i)
-    {
-      TLorentzVector tlv(T_Gen_TauSt3_Px->at(i), T_Gen_TauSt3_Py->at(i), T_Gen_TauSt3_Pz->at(i), T_Gen_TauSt3_Energy->at(i));
-      
-      if (tlv.Pt()        <=  10) continue;
-      if (fabs(tlv.Eta()) >= 2.5) continue;
-
-      h_pt_tau_St3 ->Fill(tlv.Pt());
-      h_eta_tau_St3->Fill(tlv.Eta());
-      n_tau_St3++;
-    }
-
-  for (UInt_t i=0; i<T_Gen_MuonSt3_Px->size(); ++i)
-    {
-      TLorentzVector tlv(T_Gen_MuonSt3_Px->at(i), T_Gen_MuonSt3_Py->at(i), T_Gen_MuonSt3_Pz->at(i), T_Gen_MuonSt3_Energy->at(i));
-    
-      if (tlv.Pt()        <=  10) continue;
-      if (fabs(tlv.Eta()) >= 2.4) continue;
-
-      h_pt_muon_St3 ->Fill(tlv.Pt());
-      h_eta_muon_St3->Fill(tlv.Eta());
-      n_muon_St3++;
-    }
-
-  for (UInt_t i=0; i<T_Gen_ElecSt3_Px->size(); ++i)
-    {
-      TLorentzVector tlv(T_Gen_ElecSt3_Px->at(i), T_Gen_ElecSt3_Py->at(i), T_Gen_ElecSt3_Pz->at(i), T_Gen_ElecSt3_Energy->at(i));
-    
-      if (tlv.Pt()        <=  10) continue;
-      if (fabs(tlv.Eta()) >= 2.5) continue;
-
-      h_pt_elec_St3 ->Fill(tlv.Pt());
-      h_eta_elec_St3->Fill(tlv.Eta());
-      n_elec_St3++;
-    }
-
-  if (n_tau_St3  > 0) h_n_tau_St3 ->Fill(n_tau_St3);
-  if (n_muon_St3 > 0) h_n_muon_St3->Fill(n_muon_St3);
-  if (n_elec_St3 > 0) h_n_elec_St3->Fill(n_elec_St3);
-
-
-  // Gen
-  //----------------------------------------------------------------------------
-  for (UInt_t i=0; i<T_Gen_Muon_Px->size(); ++i)
-    {
-      TLorentzVector tlv(T_Gen_Muon_Px->at(i), T_Gen_Muon_Py->at(i), T_Gen_Muon_Pz->at(i), T_Gen_Muon_Energy->at(i));
-    
-      if (tlv.Pt()        <=  10) continue;
-      if (fabs(tlv.Eta()) >= 2.4) continue;
-
-      h_pt_muon_Gen ->Fill(tlv.Pt());
-      h_eta_muon_Gen->Fill(tlv.Eta());
-      n_muon_Gen++;
-    }
-
-  for (UInt_t i=0; i<T_Gen_Elec_Px->size(); ++i)
-    {
-      TLorentzVector tlv(T_Gen_Elec_Px->at(i), T_Gen_Elec_Py->at(i), T_Gen_Elec_Pz->at(i), T_Gen_Elec_Energy->at(i));
-    
-      if (tlv.Pt()        <=  10) continue;
-      if (fabs(tlv.Eta()) >= 2.5) continue;
-
-      h_pt_elec_Gen ->Fill(tlv.Pt());
-      h_eta_elec_Gen->Fill(tlv.Eta());
-      n_elec_Gen++;
-    }
-
-  if (n_muon_Gen > 0) h_n_muon_Gen->Fill(n_muon_Gen);
-  if (n_elec_Gen > 0) h_n_elec_Gen->Fill(n_elec_Gen);
-
-
-  // Rec
-  //----------------------------------------------------------------------------
-  for (UInt_t i=0; i<T_Muon_Px->size(); ++i)
-    {
-      TLorentzVector tlv(T_Muon_Px->at(i), T_Muon_Py->at(i), T_Muon_Pz->at(i), T_Muon_Energy->at(i));
-    
-      if (tlv.Pt()        <=  10) continue;
-      if (fabs(tlv.Eta()) >= 2.4) continue;
-
-      h_pt_muon_Rec ->Fill(tlv.Pt());
-      h_eta_muon_Rec->Fill(tlv.Eta());
-      n_muon_Rec++;
-
-      Bool_t isnotglobal = ( T_Muon_IsAllStandAloneMuons->at(i)
-			     && !T_Muon_IsGlobalMuon->at(i)
-			     && !T_Muon_IsAllTrackerMuons->at(i) );
-
-      if (isnotglobal) continue;
-
-      h_pt_muon_Global ->Fill(tlv.Pt());
-      h_eta_muon_Global->Fill(tlv.Eta());
-      n_muon_Global++;
-      
-      if (!MuonCloseToPV(i)) continue;
-
-      h_pt_muon_PV ->Fill(tlv.Pt());
-      h_eta_muon_PV->Fill(tlv.Eta());
-      n_muon_PV++;
-
-      if (tlv.Pt() <= 20)
-	{
-	  if  (fabs(tlv.Eta()) < 1.479) h_mvaRings_muon_r1->Fill(T_Muon_MVARings->at(i));
-	  else                          h_mvaRings_muon_r2->Fill(T_Muon_MVARings->at(i));
-	}
-      else
-	{
-	  if  (fabs(tlv.Eta()) < 1.479) h_mvaRings_muon_r3->Fill(T_Muon_MVARings->at(i));
-	  else                          h_mvaRings_muon_r4->Fill(T_Muon_MVARings->at(i));
-	}
-
-      if (!MuonIsolation(i)) continue;
-
-      h_pt_muon_Iso ->Fill(tlv.Pt());
-      h_eta_muon_Iso->Fill(tlv.Eta());
-      n_muon_Iso++;
-
-      if (!MuonID(i)) continue;
-
-      h_pt_muon_ID ->Fill(tlv.Pt());
-      h_eta_muon_ID->Fill(tlv.Eta());
-      n_muon_ID++;
-    }
-
-  for (UInt_t i=0; i<T_Elec_Px->size(); ++i)
-    {
-      TLorentzVector tlv(T_Elec_Px->at(i), T_Elec_Py->at(i), T_Elec_Pz->at(i), T_Elec_Energy->at(i));
-    
-      if (tlv.Pt()        <=  10) continue;
-      if (fabs(tlv.Eta()) >= 2.5) continue;
-
-      h_pt_elec_Rec ->Fill(tlv.Pt());
-      h_eta_elec_Rec->Fill(tlv.Eta());
-      n_elec_Rec++;
-
-      if (!ElectronID(i)) continue;
-
-      h_pt_elec_Global ->Fill(tlv.Pt());
-      h_eta_elec_Global->Fill(tlv.Eta());
-      n_elec_Global++;
-
-      if (!ElectronCloseToPV(i)) continue;
-
-      h_pt_elec_PV ->Fill(tlv.Pt());
-      h_eta_elec_PV->Fill(tlv.Eta());
-      n_elec_PV++;
-
-      if (!ElectronIsolation(i)) continue;
-
-      h_pt_elec_Iso ->Fill(tlv.Pt());
-      h_eta_elec_Iso->Fill(tlv.Eta());
-      n_elec_Iso++;
-
-      if (!ElectronBDT(i)) continue;
-    
-      h_pt_elec_ID ->Fill(tlv.Pt());
-      h_eta_elec_ID->Fill(tlv.Eta());
-      n_elec_ID++;
-    }
-
-  if (n_muon_Rec    > 0) h_n_muon_Rec   ->Fill(n_muon_Rec);
-  if (n_muon_Global > 0) h_n_muon_Global->Fill(n_muon_Global);
-  if (n_muon_PV     > 0) h_n_muon_PV    ->Fill(n_muon_PV);
-  if (n_muon_Iso    > 0) h_n_muon_Iso   ->Fill(n_muon_Iso);
-  if (n_muon_ID     > 0) h_n_muon_ID    ->Fill(n_muon_ID);
-
-  if (n_elec_Rec    > 0) h_n_elec_Rec   ->Fill(n_elec_Rec);
-  if (n_elec_Global > 0) h_n_elec_Global->Fill(n_elec_Global);
-  if (n_elec_PV     > 0) h_n_elec_PV    ->Fill(n_elec_PV);
-  if (n_elec_Iso    > 0) h_n_elec_Iso   ->Fill(n_elec_Iso);
-  if (n_elec_ID     > 0) h_n_elec_ID    ->Fill(n_elec_ID);
 }
