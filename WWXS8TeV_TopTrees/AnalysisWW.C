@@ -72,7 +72,7 @@ void AnalysisWW::InsideLoop()
   GetSelectedMuons    (10);
   GetSelectedElectrons(10);
 
-  if ((nmuon + nelec) != 2) return;
+  if ((nmuon + nelec) < 2) return;
 
   Int_t numberOfHighPtLeptons = 0;
 
