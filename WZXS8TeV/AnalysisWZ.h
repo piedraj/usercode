@@ -5,7 +5,9 @@
 #include "packages/PUWeight/PUWeight.h"
 #include "packages/TProofVector/TProofVector.h"
 
+#include "TFile.h"
 #include "TH1F.h"
+#include "TH2F.h"
 #include "TLorentzVector.h"
 #include "TVector3.h"
 
@@ -64,6 +66,9 @@ struct Lepton
   UInt_t         flavor;
   UInt_t         type;
   Double_t       charge;
+  Double_t       SF;
+  Double_t       f;  // fake rate
+  Double_t       p;  // prompt rate
   TLorentzVector v;
 
   Bool_t operator<(const Lepton& a) const
@@ -71,10 +76,6 @@ struct Lepton
     return v.Pt() < a.v.Pt();
   }
 };
-
-
-// Forward declaration
-class TLorentzVector;
 
 
 class AnalysisWZ: public CMSAnalysisSelectorMiniTrees
@@ -166,6 +167,23 @@ class AnalysisWZ: public CMSAnalysisSelectorMiniTrees
   Double_t                    invMass3Lep;
   Double_t                    sumCharges;
   UInt_t                      theChannel;
+
+
+  // SF, FR and PR
+  //----------------------------------------------------------------------------
+  TFile* MuonSF_file;
+  TFile* MuonFR_file;
+  TFile* MuonPR_file;
+  TFile* ElecSF_file;
+  TFile* ElecFR_file;
+  TFile* ElecPR_file;
+
+  TH2F*  MuonSF_hist;
+  TH2F*  MuonFR_hist;
+  TH2F*  MuonPR_hist;
+  TH2F*  ElecSF_hist;
+  TH2F*  ElecFR_hist;
+  TH2F*  ElecPR_hist;
 
 
   ClassDef(AnalysisWZ, 0);

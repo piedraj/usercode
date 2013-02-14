@@ -48,6 +48,32 @@ void AnalysisWZ::Initialise()
       hPtWLepton  [i][j] = CreateH1D(TString("hPtWLepton"   + suffix), "", 200,  0, 200);    
     }
   }
+
+
+  // SF, FR and PR files
+  //----------------------------------------------------------------------------
+  TString weights_path = "/nfs/fanae/user/piedra/work/WZ/AnalysisVHCode/WManager/data/";
+
+  MuonSF_file = new TFile(weights_path + "MuSF_2012.root",  "read");
+  ElecSF_file = new TFile(weights_path + "EleSF_2012.root", "read");
+
+  MuonFR_file = new TFile(weights_path + "MuFR_2012_jet50.root",  "read");
+  ElecFR_file = new TFile(weights_path + "EleFR_2012_jet50.root", "read");
+
+  MuonPR_file = new TFile("/nfs/fanae/user/piedra/work/WZ/work/WManager/PR/prompt_rateMuons.root",     "read");
+  ElecPR_file = new TFile("/nfs/fanae/user/piedra/work/WZ/work/WManager/PR/prompt_rateElectrons.root", "read");
+
+
+  // SF, FR and PR histograms
+  //----------------------------------------------------------------------------
+  MuonSF_hist = (TH2F*)MuonSF_file->Get("muonDATAMCratio_All_selec");
+  ElecSF_hist = (TH2F*)ElecSF_file->Get("electronsDATAMCratio_All_selec");
+
+  MuonFR_hist = (TH2F*)MuonFR_file->Get("h_Muon_signal_pT_eta");
+  ElecFR_hist = (TH2F*)ElecFR_file->Get("fakeElH2");
+
+  MuonPR_hist = (TH2F*)MuonPR_file->Get("effDATA_prompt_rate");
+  ElecPR_hist = (TH2F*)ElecPR_file->Get("effDATA_All_selec");
 }
 
 
@@ -110,6 +136,10 @@ void AnalysisWZ::InsideLoop()
 
     if (fabs(MuonVector.Eta()) >= 2.4) continue;
 
+    Double_t pt = MuonVector.Pt();
+
+    Double_t eta = fabs(MuonVector.Eta());
+
     Bool_t isnotglobal = ( T_Muon_IsAllStandAloneMuons->at(i)
 			   && !T_Muon_IsGlobalMuon->at(i)
 			   && !T_Muon_IsAllTrackerMuons->at(i) );
@@ -134,12 +164,23 @@ void AnalysisWZ::InsideLoop()
 
     countIsoGoodMuons++;
 
+    const Double_t scale_factor = MuonSF_hist->GetBinContent(MuonSF_hist->FindBin(pt,eta));
+
+    const Double_t prompt_rate = MuonPR_hist->GetBinContent(MuonPR_hist->FindBin(eta,pt));  // Inverted axis
+
+    if (pt > 35) pt = 34;
+
+    const Double_t fake_rate = MuonFR_hist->GetBinContent(MuonFR_hist->FindBin(pt,eta));
+
     Lepton AnalysisMuon;
 
     AnalysisMuon.index  = i;
     AnalysisMuon.flavor = Muon;
     AnalysisMuon.type   = muon_type;
     AnalysisMuon.charge = T_Muon_Charge->at(i);
+    AnalysisMuon.SF     = scale_factor;
+    AnalysisMuon.f      = fake_rate;
+    AnalysisMuon.p      = prompt_rate;
     AnalysisMuon.v      = MuonVector;
 
     AnalysisLeptons.push_back(AnalysisMuon);
@@ -164,6 +205,10 @@ void AnalysisWZ::InsideLoop()
 
     if (fabs(ElectronVector.Eta()) >= 2.5) continue;
 
+    Double_t pt = ElectronVector.Pt();
+
+    Double_t eta = fabs(ElectronVector.Eta());
+
     if (!ElectronID(i)) continue;
 
     countElectrons++;
@@ -184,12 +229,23 @@ void AnalysisWZ::InsideLoop()
 	
     countIsoGoodElectrons++;
 
+    const Double_t scale_factor = ElecSF_hist->GetBinContent(ElecSF_hist->FindBin(pt,eta));
+
+    const Double_t prompt_rate = ElecPR_hist->GetBinContent(ElecPR_hist->FindBin(eta,pt));  // Inverted axis
+
+    if (pt > 35) pt = 34;
+
+    const Double_t fake_rate = ElecFR_hist->GetBinContent(ElecFR_hist->FindBin(pt,eta));
+
     Lepton AnalysisElectron;
     
     AnalysisElectron.index  = i;
     AnalysisElectron.flavor = Electron;
     AnalysisElectron.type   = electron_type;
     AnalysisElectron.charge = T_Elec_Charge->at(i);
+    AnalysisElectron.SF     = scale_factor;
+    AnalysisElectron.f      = fake_rate;
+    AnalysisElectron.p      = prompt_rate;
     AnalysisElectron.v      = ElectronVector;
     
     AnalysisLeptons.push_back(AnalysisElectron);
@@ -224,6 +280,12 @@ void AnalysisWZ::InsideLoop()
   }
 
   if (numberOfHighPtLeptons != 3) return;
+
+
+  // Apply lepton SF
+  //----------------------------------------------------------------------------
+  if (!isData)
+    for (UInt_t i=0; i<3; i++) efficiency_weight *= AnalysisLeptons[i].SF;
 
 
   // Classify the channels

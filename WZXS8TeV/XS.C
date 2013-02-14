@@ -191,17 +191,20 @@ void XS(UInt_t cut   = AtLeast3Leptons,
 
     TString suffix = "_" + sChannel[channel] + "_" + sCut[cut];
     
-    DrawHistogram("hNPV"         + suffix, "number of PV",              -1, 0, "NULL", linY, 0, 30);
-    DrawHistogram("hSumCharges"  + suffix, "q_{1} + q_{2} + q_{3}",     -1, 0, "NULL", linY);
-    DrawHistogram("hMET"         + suffix, "E_{T}^{miss}",               5, 0, "GeV",  linY);
-    DrawHistogram("hInvMass2Lep" + suffix, "m_{#font[12]{ll}}",          2, 0, "GeV",  linY, 60, 120);
-    DrawHistogram("hInvMass3Lep" + suffix, "m_{#font[12]{3l}}",         10, 0, "GeV",  linY);
-    DrawHistogram("hPtLepton1"   + suffix, "p_{T}^{first lepton}",       5, 0, "GeV",  linY);
-    DrawHistogram("hPtLepton2"   + suffix, "p_{T}^{second lepton}",      5, 0, "GeV",  linY);
-    DrawHistogram("hPtLepton3"   + suffix, "p_{T}^{third lepton}",       5, 0, "GeV",  linY);
-    //    DrawHistogram("hPtZLepton1"  + suffix, "p_{T}^{Z leading lepton}",   5, 0, "GeV",  linY);
-    //    DrawHistogram("hPtZLepton2"  + suffix, "p_{T}^{Z trailing lepton}",  5, 0, "GeV",  linY);
-    //    DrawHistogram("hPtWLepton"   + suffix, "p_{T}^{W lepton}",           5, 0, "GeV",  linY);
+    DrawHistogram("hNPV"         + suffix, "number of PV",          -1, 0, "NULL", linY, 0, 30);
+    DrawHistogram("hSumCharges"  + suffix, "q_{1} + q_{2} + q_{3}", -1, 0, "NULL", linY);
+    DrawHistogram("hMET"         + suffix, "E_{T}^{miss}",           5, 0, "GeV",  linY);
+    DrawHistogram("hInvMass2Lep" + suffix, "m_{#font[12]{ll}}",      2, 0, "GeV",  linY, 60, 120);
+    DrawHistogram("hInvMass3Lep" + suffix, "m_{#font[12]{3l}}",     10, 0, "GeV",  linY);
+    DrawHistogram("hPtLepton1"   + suffix, "p_{T}^{first lepton}",   5, 0, "GeV",  linY);
+    DrawHistogram("hPtLepton2"   + suffix, "p_{T}^{second lepton}",  5, 0, "GeV",  linY);
+    DrawHistogram("hPtLepton3"   + suffix, "p_{T}^{third lepton}",   5, 0, "GeV",  linY);
+
+    if (cut < MET) continue;
+
+    DrawHistogram("hPtZLepton1" + suffix, "p_{T}^{Z leading lepton}",  5, 0, "GeV", linY);
+    DrawHistogram("hPtZLepton2" + suffix, "p_{T}^{Z trailing lepton}", 5, 0, "GeV", linY);
+    DrawHistogram("hPtWLepton"  + suffix, "p_{T}^{W lepton}",          5, 0, "GeV", linY);
   }
 }
 
@@ -533,17 +536,17 @@ void DrawHistogram(TString  hname,
 
   ndelta = 0;
 
-  DrawLegend(x0 - 0.24, y0 - ndelta, hist[ggZZ2L2L],        Form(" ZZ (%.0f)",                    ZZYield),                     "f"); ndelta += delta;
-  DrawLegend(x0 - 0.24, y0 - ndelta, hist[TTbar_Madgraph],  Form(" t#bar{t} (%.0f)",              Yield(hist[TTbar_Madgraph])), "f"); ndelta += delta;
-  DrawLegend(x0 - 0.24, y0 - ndelta, hist[TW],              Form(" tW (%.0f)",                    Yield(hist[TW])),             "f"); ndelta += delta;
-  DrawLegend(x0 - 0.24, y0 - ndelta, hist[WZTo2L2QMad],     Form(" WZ(#font[12]{l}#nuqq) (%.0f)", Yield(hist[WZTo2L2QMad])),    "f"); ndelta += delta;
+  DrawLegend(x0 - 0.24, y0 - ndelta, hist[ggZZ2L2L],       Form(" ZZ (%.0f)",                    ZZYield),                     "f"); ndelta += delta;
+  DrawLegend(x0 - 0.24, y0 - ndelta, hist[TTbar_Madgraph], Form(" t#bar{t} (%.0f)",              Yield(hist[TTbar_Madgraph])), "f"); ndelta += delta;
+  DrawLegend(x0 - 0.24, y0 - ndelta, hist[TW],             Form(" tW (%.0f)",                    Yield(hist[TW])),             "f"); ndelta += delta;
+  DrawLegend(x0 - 0.24, y0 - ndelta, hist[WZTo2L2QMad],    Form(" WZ(#font[12]{l}#nuqq) (%.0f)", Yield(hist[WZTo2L2QMad])),    "f"); ndelta += delta;
 
   ndelta = 0;
 
-  DrawLegend(x0, y0 - ndelta, hist[WW],              Form(" WW (%.0f)",         Yield(hist[WW])), "f"); ndelta += delta;
-  DrawLegend(x0, y0 - ndelta, hist[WgammaToLNuG],    Form(" W#gamma(*) (%.0f)", WGstarYield),     "f"); ndelta += delta;
-  DrawLegend(x0, y0 - ndelta, hist[WJets_Madgraph],  Form(" W+jets (%.0f)",     WJetsYield),      "f"); ndelta += delta;
-  DrawLegend(x0, y0 - ndelta, hist[WWGJets],  Form(" VVV (%.0f)",               VVVJetsYield),    "f"); ndelta += delta;
+  DrawLegend(x0, y0 - ndelta, hist[WW],             Form(" WW (%.0f)",         Yield(hist[WW])), "f"); ndelta += delta;
+  DrawLegend(x0, y0 - ndelta, hist[WgammaToLNuG],   Form(" W#gamma(*) (%.0f)", WGstarYield),     "f"); ndelta += delta;
+  DrawLegend(x0, y0 - ndelta, hist[WJets_Madgraph], Form(" W+jets (%.0f)",     WJetsYield),      "f"); ndelta += delta;
+  DrawLegend(x0, y0 - ndelta, hist[WWGJets],        Form(" VVV (%.0f)",        VVVJetsYield),    "f"); ndelta += delta;
 
 
   // CMS titles
@@ -963,7 +966,7 @@ void SetParameters(UInt_t cut)
   vprocess.push_back(WZTo2L2QMad);
   vprocess.push_back(ZZTo2L2QMad);
   vprocess.push_back(ZgammaToLLG);
-  //  vprocess.push_back(ZZ);           // REPLACED
+  //  vprocess.push_back(ZZ);  // REPLACED
   vprocess.push_back(ggZZ2L2L);
   vprocess.push_back(ggZZ4L);
   vprocess.push_back(ZZ2Mu2Tau);
