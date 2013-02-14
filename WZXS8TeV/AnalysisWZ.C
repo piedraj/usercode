@@ -43,6 +43,7 @@ void AnalysisWZ::Initialise()
       hPtLepton1  [i][j] = CreateH1D(TString("hPtLepton1"   + suffix), "", 200,  0, 200);
       hPtLepton2  [i][j] = CreateH1D(TString("hPtLepton2"   + suffix), "", 200,  0, 200);
       hPtLepton3  [i][j] = CreateH1D(TString("hPtLepton3"   + suffix), "", 200,  0, 200);    
+      hDeltaPhi12 [i][j] = CreateH1D(TString("hDeltaPhi12"  + suffix), "", 320,  0, 3.2);    
       hPtZLepton1 [i][j] = CreateH1D(TString("hPtZLepton1"  + suffix), "", 200,  0, 200);
       hPtZLepton2 [i][j] = CreateH1D(TString("hPtZLepton2"  + suffix), "", 200,  0, 200);
       hPtWLepton  [i][j] = CreateH1D(TString("hPtWLepton"   + suffix), "", 200,  0, 200);    
@@ -50,30 +51,17 @@ void AnalysisWZ::Initialise()
   }
 
 
-  // SF, FR and PR files
-  //----------------------------------------------------------------------------
-  TString weights_path = "/nfs/fanae/user/piedra/work/WZ/AnalysisVHCode/WManager/data/";
-
-  MuonSF_file = new TFile(weights_path + "MuSF_2012.root",  "read");
-  ElecSF_file = new TFile(weights_path + "EleSF_2012.root", "read");
-
-  MuonFR_file = new TFile(weights_path + "MuFR_2012_jet50.root",  "read");
-  ElecFR_file = new TFile(weights_path + "EleFR_2012_jet50.root", "read");
-
-  MuonPR_file = new TFile("/nfs/fanae/user/piedra/work/WZ/work/WManager/PR/prompt_rateMuons.root",     "read");
-  ElecPR_file = new TFile("/nfs/fanae/user/piedra/work/WZ/work/WManager/PR/prompt_rateElectrons.root", "read");
-
-
   // SF, FR and PR histograms
   //----------------------------------------------------------------------------
-  MuonSF_hist = (TH2F*)MuonSF_file->Get("muonDATAMCratio_All_selec");
-  ElecSF_hist = (TH2F*)ElecSF_file->Get("electronsDATAMCratio_All_selec");
+  TString path1 = "/nfs/fanae/user/piedra/work/WZ/AnalysisVHCode/WManager/data/";
+  TString path2 = "/nfs/fanae/user/piedra/work/WZ/work/WManager/PR/";
 
-  MuonFR_hist = (TH2F*)MuonFR_file->Get("h_Muon_signal_pT_eta");
-  ElecFR_hist = (TH2F*)ElecFR_file->Get("fakeElH2");
-
-  MuonPR_hist = (TH2F*)MuonPR_file->Get("effDATA_prompt_rate");
-  ElecPR_hist = (TH2F*)ElecPR_file->Get("effDATA_All_selec");
+  MuonSF = LoadHistogram(path1 + "MuSF_2012",            "muonDATAMCratio_All_selec",      "MuonSF");
+  ElecSF = LoadHistogram(path1 + "EleSF_2012",           "electronsDATAMCratio_All_selec", "ElecSF");
+  MuonFR = LoadHistogram(path1 + "MuFR_2012_jet50",      "h_Muon_signal_pT_eta",           "MuonFR");
+  ElecFR = LoadHistogram(path1 + "EleFR_2012_jet50",     "fakeElH2",                       "ElecFR");
+  MuonPR = LoadHistogram(path2 + "prompt_rateMuons",     "effDATA_prompt_rate",            "MuonPR");
+  ElecPR = LoadHistogram(path2 + "prompt_rateElectrons", "effDATA_All_selec",              "ElecPR");
 }
 
 
@@ -164,13 +152,13 @@ void AnalysisWZ::InsideLoop()
 
     countIsoGoodMuons++;
 
-    const Double_t scale_factor = MuonSF_hist->GetBinContent(MuonSF_hist->FindBin(pt,eta));
+    const Double_t scale_factor = MuonSF->GetBinContent(MuonSF->FindBin(pt,eta));
 
-    const Double_t prompt_rate = MuonPR_hist->GetBinContent(MuonPR_hist->FindBin(eta,pt));  // Inverted axis
+    const Double_t prompt_rate = MuonPR->GetBinContent(MuonPR->FindBin(eta,pt));  // Inverted axis
 
     if (pt > 35) pt = 34;
 
-    const Double_t fake_rate = MuonFR_hist->GetBinContent(MuonFR_hist->FindBin(pt,eta));
+    const Double_t fake_rate = MuonFR->GetBinContent(MuonFR->FindBin(pt,eta));
 
     Lepton AnalysisMuon;
 
@@ -229,13 +217,13 @@ void AnalysisWZ::InsideLoop()
 	
     countIsoGoodElectrons++;
 
-    const Double_t scale_factor = ElecSF_hist->GetBinContent(ElecSF_hist->FindBin(pt,eta));
+    const Double_t scale_factor = ElecSF->GetBinContent(ElecSF->FindBin(pt,eta));
 
-    const Double_t prompt_rate = ElecPR_hist->GetBinContent(ElecPR_hist->FindBin(eta,pt));  // Inverted axis
+    const Double_t prompt_rate = ElecPR->GetBinContent(ElecPR->FindBin(eta,pt));  // Inverted axis
 
     if (pt > 35) pt = 34;
 
-    const Double_t fake_rate = ElecFR_hist->GetBinContent(ElecFR_hist->FindBin(pt,eta));
+    const Double_t fake_rate = ElecFR->GetBinContent(ElecFR->FindBin(pt,eta));
 
     Lepton AnalysisElectron;
     
@@ -271,21 +259,34 @@ void AnalysisWZ::InsideLoop()
 
   // Require exactly 3 leptons with pt > 20 GeV
   //----------------------------------------------------------------------------
-  UInt_t numberOfHighPtLeptons = 0;
+  UInt_t highPtCounter = 0;
+  UInt_t tightCounter  = 0;
 
   for (std::vector<Lepton>::iterator lep_iterator=AnalysisLeptons.begin();
        lep_iterator!=AnalysisLeptons.end(); lep_iterator++) {
       
-    if ((*lep_iterator).v.Pt() > 20) numberOfHighPtLeptons++;
+    if ((*lep_iterator).v.Pt() <= 20) continue;
+
+    highPtCounter++;
+
+    if ((*lep_iterator).type == Tight) tightCounter++;
   }
 
-  if (numberOfHighPtLeptons != 3) return;
+  if (highPtCounter != 3) return;
+
+  if (mode != RAW && tightCounter < 2) return;
 
 
   // Apply lepton SF
   //----------------------------------------------------------------------------
   if (!isData)
     for (UInt_t i=0; i<3; i++) efficiency_weight *= AnalysisLeptons[i].SF;
+
+
+  // Data-driven estimates
+  //----------------------------------------------------------------------------
+  if (mode == PPF) efficiency_weight *= GetPPFWeight();
+  if (mode == PPP) efficiency_weight *= GetPPPWeight();
 
 
   // Classify the channels
@@ -419,7 +420,8 @@ void AnalysisWZ::Summary()
 
   outputfile.open(Form("%s/%s.txt", directory.Data(), sample.Data()));
 
-  outputfile << Form("\n %39s results with %7.1f pb\n", sample.Data(), luminosity);
+  outputfile << Form("\n %39s results with %7.1f pb [PU weight applied]\n",
+		     sample.Data(), luminosity);
 
   outputfile << Form("\n %18s  %10s %10s %10s %10s\n",
 		     " ",
@@ -433,32 +435,32 @@ void AnalysisWZ::Summary()
     outputfile << Form(" %18s:", sCut[i].Data());
 
     for (UInt_t j=0; j<nChannels; j++)
-      outputfile << Form(" %11.1f", hCounterPU[j][i]->Integral());
+      outputfile << Form(" %10.0f", hCounterPU[j][i]->Integral());
 
     outputfile << "\n";
   }
 
 
-  // MC only
+  // All weights
   //----------------------------------------------------------------------------
-  if (!sample.Contains("DoubleElectron") && !sample.Contains("DoubleMu")) {
+  outputfile << Form("\n %39s results with %7.1f pb [all weights applied]\n",
+		     sample.Data(), luminosity);
 
-    outputfile << Form("\n %18s  %10s %10s %10s %10s\n",
-		       " ",
-		       sChannel[0].Data(),
-		       sChannel[1].Data(),
-		       sChannel[2].Data(),
-		       sChannel[3].Data());
+  outputfile << Form("\n %18s  %10s %10s %10s %10s\n",
+		     " ",
+		     sChannel[0].Data(),
+		     sChannel[1].Data(),
+		     sChannel[2].Data(),
+		     sChannel[3].Data());
 
-    for (UInt_t i=0; i<nCuts; i++) {
+  for (UInt_t i=0; i<nCuts; i++) {
       
-      outputfile << Form(" %18s:", sCut[i].Data());
+    outputfile << Form(" %18s:", sCut[i].Data());
 
-      for (UInt_t j=0; j<nChannels; j++)
-	outputfile << Form(" %10.0f", hCounter[j][i]->Integral());
-      
-      outputfile << "\n";
-    }
+    for (UInt_t j=0; j<nChannels; j++)
+      outputfile << Form(" %10.0f", hCounter[j][i]->Integral());
+    
+    outputfile << "\n";
   }
 
   outputfile << "\n";
@@ -475,7 +477,7 @@ void AnalysisWZ::GetParameters()
   directory = GetInputParameters()->TheNamedString("directory");
   sample    = GetInputParameters()->TheNamedString("sample");
 
-  GetInputParameters()->TheNamedBool  ("useFakes",   useFakes);
+  GetInputParameters()->TheNamedInt   ("mode",       mode);
   GetInputParameters()->TheNamedDouble("xs_weight",  xs_weight);
   GetInputParameters()->TheNamedDouble("luminosity", luminosity);
 }
@@ -509,9 +511,9 @@ UInt_t AnalysisWZ::ElectronBDT(UInt_t iElec)
     }
   else
     {
-      if (useFakes)
+      if (mode != RAW)
 	{
-	  return Loose;
+	  return Fail;
 	}
       else
 	{
@@ -594,9 +596,9 @@ UInt_t AnalysisWZ::ElectronIsolation(UInt_t iElec)
     }
   else
     {
-      if (useFakes)
+      if (mode != RAW)
 	{
-	  return Loose;
+	  return Fail;
 	}
       else
 	{
@@ -649,9 +651,9 @@ UInt_t AnalysisWZ::MuonCloseToPV(UInt_t iMuon)
     }
   else
     {
-      if (useFakes && fabs(T_Muon_IP2DBiasedPV->at(iMuon)) <= 0.2)
+      if (mode != RAW && fabs(T_Muon_IP2DBiasedPV->at(iMuon)) <= 0.2)
 	{
-	  return Loose;
+	  return Fail;
 	}
       else
 	{
@@ -680,9 +682,9 @@ UInt_t AnalysisWZ::MuonIsolation(UInt_t iMuon)
     }
   else
     {
-      if (useFakes && T_Muon_MVARings->at(iMuon) >= -0.6)
+      if (mode != RAW && T_Muon_MVARings->at(iMuon) >= -0.6)
 	{
-	  return Loose;
+	  return Fail;
 	}
       else
 	{
@@ -736,6 +738,8 @@ void AnalysisWZ::FillHistograms(UInt_t iChannel, UInt_t iCut)
 
   Double_t hweight = efficiency_weight * xs_weight;
 
+  Double_t deltaPhi12 = AnalysisLeptons[0].v.DeltaPhi(AnalysisLeptons[1].v);
+
   Double_t pt1, pt2;
   
   if (ZLepton1.Pt() > ZLepton2.Pt())
@@ -755,6 +759,7 @@ void AnalysisWZ::FillHistograms(UInt_t iChannel, UInt_t iCut)
   hPtLepton1  [iChannel][iCut]->Fill(AnalysisLeptons[0].v.Pt(), hweight);
   hPtLepton2  [iChannel][iCut]->Fill(AnalysisLeptons[1].v.Pt(), hweight);
   hPtLepton3  [iChannel][iCut]->Fill(AnalysisLeptons[2].v.Pt(), hweight);
+  hDeltaPhi12 [iChannel][iCut]->Fill(fabs(deltaPhi12),          hweight);
   hPtZLepton1 [iChannel][iCut]->Fill(pt1,                       hweight);
   hPtZLepton2 [iChannel][iCut]->Fill(pt2,                       hweight);
   hPtWLepton  [iChannel][iCut]->Fill(WLepton.Pt(),              hweight);
@@ -837,4 +842,103 @@ const Bool_t AnalysisWZ::WgammaFilter() const
   }
 
   return (high && !low);
+}
+
+
+//------------------------------------------------------------------------------
+// GetPPFWeight
+//------------------------------------------------------------------------------
+Double_t AnalysisWZ::GetPPFWeight()
+{
+  Double_t promptProbability[3];
+  Double_t fakeProbability[3];
+
+  UInt_t ilepton = 0;
+
+  for (std::vector<Lepton>::iterator lep_iterator=AnalysisLeptons.begin();
+       lep_iterator!=AnalysisLeptons.end(); lep_iterator++) {
+    
+    Lepton lep = (*lep_iterator);
+
+    Double_t f = lep.f;
+    Double_t p = lep.p;
+
+    if (lep.type == Tight)
+      {
+	promptProbability[ilepton] = p * (1 - f);
+	fakeProbability[ilepton]   = p * f;
+      }
+    else if (lep.type == Fail)
+      {
+	promptProbability[ilepton] = f * (1 - p);
+	fakeProbability[ilepton]   = p * f;
+      }
+
+    promptProbability[ilepton] /= (p - f);
+    fakeProbability[ilepton]   /= (p - f);
+
+    if (++ilepton == 3) break;
+  }
+
+  Double_t PPF = promptProbability[0] * promptProbability[1] * fakeProbability[2];
+  Double_t PFP = promptProbability[0] * fakeProbability[1]   * promptProbability[2];
+  Double_t FPP = fakeProbability[0]   * promptProbability[1] * promptProbability[2];
+
+  return PPF + PFP + FPP;
+}
+
+
+//------------------------------------------------------------------------------
+// GetPPPWeight
+//------------------------------------------------------------------------------
+Double_t AnalysisWZ::GetPPPWeight()
+{
+  Double_t promptProbability[3];
+
+  UInt_t ilepton = 0;
+
+  for (std::vector<Lepton>::iterator lep_iterator=AnalysisLeptons.begin();
+       lep_iterator!=AnalysisLeptons.end(); lep_iterator++) {
+    
+    Lepton lep = (*lep_iterator);
+
+    Double_t f = lep.f;
+    Double_t p = lep.p;
+
+    if (lep.type == Tight)
+      {
+	promptProbability[ilepton] = p * (1 - f);
+      }
+    else if (lep.type == Fail)
+      {
+	promptProbability[ilepton] = f * (1 - p);
+      }
+
+    promptProbability[ilepton] /= (p - f);
+
+    if (++ilepton == 3) break;
+  }
+
+  Double_t PPP = promptProbability[0] * promptProbability[1] * promptProbability[2];
+
+  return PPP;
+}
+
+
+//------------------------------------------------------------------------------
+// LoadHistogram
+//------------------------------------------------------------------------------
+TH2F* AnalysisWZ::LoadHistogram(TString filename,
+				TString hname,
+				TString cname)
+{
+  TFile* inputfile = TFile::Open(filename + ".root");
+
+  TH2F* hist = (TH2F*)inputfile->Get(hname)->Clone(cname);
+
+  hist->SetDirectory(0);
+
+  inputfile->Close();
+
+  return hist;
 }

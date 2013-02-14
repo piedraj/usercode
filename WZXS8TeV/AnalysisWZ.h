@@ -58,17 +58,19 @@ TString sCut[] = {
 
 enum {Muon, Electron};
 
-enum {Rejected, Tight, Loose};
+enum {Rejected, Tight, Fail};
+
+enum {RAW, PPF, PPP};
 
 struct Lepton
 {
   UInt_t         index;
-  UInt_t         flavor;
-  UInt_t         type;
+  UInt_t         flavor;  // Muon, Electron
+  UInt_t         type;    // Rejected, Tight, Fail
   Double_t       charge;
   Double_t       SF;
-  Double_t       f;  // fake rate
-  Double_t       p;  // prompt rate
+  Double_t       f;       // fake rate
+  Double_t       p;       // prompt rate
   TLorentzVector v;
 
   Bool_t operator<(const Lepton& a) const
@@ -97,26 +99,33 @@ class AnalysisWZ: public CMSAnalysisSelectorMiniTrees
   //----------------------------------------------------------------------------
   void         GetParameters             ();
 			    
-  Bool_t       ElectronID                (UInt_t iElec);
-  Bool_t       ElectronCloseToPV         (UInt_t iElec);
-  UInt_t       ElectronBDT               (UInt_t iElec);
-  UInt_t       ElectronIsolation         (UInt_t iElec);
+  Bool_t       ElectronID                (UInt_t  iElec);
+  Bool_t       ElectronCloseToPV         (UInt_t  iElec);
+  UInt_t       ElectronBDT               (UInt_t  iElec);
+  UInt_t       ElectronIsolation         (UInt_t  iElec);
 			    	      
-  Bool_t       MuonID                    (UInt_t iMuon);
-  UInt_t       MuonCloseToPV             (UInt_t iMuon);
-  UInt_t       MuonIsolation             (UInt_t iMuon);
+  Bool_t       MuonID                    (UInt_t  iMuon);
+  UInt_t       MuonCloseToPV             (UInt_t  iMuon);
+  UInt_t       MuonIsolation             (UInt_t  iMuon);
   
-  void         FillChannelCounters       (UInt_t iChannel,
-					  UInt_t iCut);
+  void         FillChannelCounters       (UInt_t  iChannel,
+					  UInt_t  iCut);
 
-  Bool_t       FillCounters              (UInt_t nElec,
-					  UInt_t nMuon,
-					  UInt_t iCut);
+  Bool_t       FillCounters              (UInt_t  nElec,
+					  UInt_t  nMuon,
+					  UInt_t  iCut);
 
-  void         FillHistograms            (UInt_t iChannel,
-  					  UInt_t iCut);
+  void         FillHistograms            (UInt_t  iChannel,
+  					  UInt_t  iCut);
 
   const Bool_t WgammaFilter              () const;
+
+  Double_t     GetPPFWeight              ();
+  Double_t     GetPPPWeight              ();
+
+  TH2F*        LoadHistogram             (TString filename,
+					  TString hname,
+					  TString cname);
 
 
  public:
@@ -136,6 +145,7 @@ class AnalysisWZ: public CMSAnalysisSelectorMiniTrees
   TH1D*                       hPtLepton1  [nChannels][nCuts];
   TH1D*                       hPtLepton2  [nChannels][nCuts];
   TH1D*                       hPtLepton3  [nChannels][nCuts];
+  TH1D*                       hDeltaPhi12 [nChannels][nCuts];
   TH1D*                       hPtZLepton1 [nChannels][nCuts];
   TH1D*                       hPtZLepton2 [nChannels][nCuts];
   TH1D*                       hPtWLepton  [nChannels][nCuts];
@@ -143,7 +153,7 @@ class AnalysisWZ: public CMSAnalysisSelectorMiniTrees
 
   // Input parameters
   //----------------------------------------------------------------------------
-  Bool_t                      useFakes;
+  Int_t                       mode;
   TString                     directory;
   TString                     sample;
   TString                     fileSuffix;
@@ -171,19 +181,12 @@ class AnalysisWZ: public CMSAnalysisSelectorMiniTrees
 
   // SF, FR and PR
   //----------------------------------------------------------------------------
-  TFile* MuonSF_file;
-  TFile* MuonFR_file;
-  TFile* MuonPR_file;
-  TFile* ElecSF_file;
-  TFile* ElecFR_file;
-  TFile* ElecPR_file;
-
-  TH2F*  MuonSF_hist;
-  TH2F*  MuonFR_hist;
-  TH2F*  MuonPR_hist;
-  TH2F*  ElecSF_hist;
-  TH2F*  ElecFR_hist;
-  TH2F*  ElecPR_hist;
+  TH2F*                       MuonSF;
+  TH2F*                       MuonFR;
+  TH2F*                       MuonPR;
+  TH2F*                       ElecSF;
+  TH2F*                       ElecFR;
+  TH2F*                       ElecPR;
 
 
   ClassDef(AnalysisWZ, 0);

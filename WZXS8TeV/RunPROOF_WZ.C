@@ -12,6 +12,9 @@
 #include "scripts/PAFUtils.C"
 
 
+enum {RAW, PPF, PPP};
+
+
 Double_t G_Event_Weight = 1;
 Double_t G_Event_Lumi   = 19468.3;  // pb
 TProof*  proof          = 0;
@@ -19,8 +22,8 @@ TString  dataPath       = "";
 
 
 void RunPROOF_WZ(TString  sample   = "DoubleMu",
+		 Int_t    mode     = RAW,
 		 Long64_t nEvents  = -1,
-		 Bool_t   useFakes = false,
 		 Bool_t   update   = true)
 {
   dataPath = GuessLocalBasePath();
@@ -32,7 +35,7 @@ void RunPROOF_WZ(TString  sample   = "DoubleMu",
   //  gPAFOptions->proofMode = kLite;
   //  gPAFOptions->proofMode = kCluster;
   gPAFOptions->proofMode = kPoD;
-  gPAFOptions->NSlots    = 20;
+  gPAFOptions->NSlots    = 30;
 
 
   // PROOF start
@@ -86,6 +89,9 @@ void RunPROOF_WZ(TString  sample   = "DoubleMu",
 
   gSystem->mkdir(outputDir, kTRUE);
 
+  if (mode == PPF) sample += "_PPF";
+  if (mode == PPP) sample += "_PPP";
+
   TString outputFile = outputDir + "/" + sample + ".root";
   
   gPAFOptions->outputFile = outputFile;
@@ -99,7 +105,7 @@ void RunPROOF_WZ(TString  sample   = "DoubleMu",
   gPAFOptions->inputParameters->SetNamedString("sample",     sample.Data());
   gPAFOptions->inputParameters->SetNamedDouble("xs_weight",  G_Event_Weight);
   gPAFOptions->inputParameters->SetNamedDouble("luminosity", G_Event_Lumi);
-  gPAFOptions->inputParameters->SetNamedBool  ("useFakes",   useFakes);
+  gPAFOptions->inputParameters->SetNamedInt   ("mode",       mode);
 
 
   // Number of events (Long64_t)

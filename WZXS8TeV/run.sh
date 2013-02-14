@@ -1,8 +1,19 @@
 
+ export RAW=0;
+ export PPF=1;
+ export PPP=2;
+
  ./resetproof.sh -a
 
- root -l -b -q RunPROOF_WZ.C\(\"DoubleElectron\"\)
- root -l -b -q RunPROOF_WZ.C\(\"DoubleMu\"\)
+ root -l -b -q RunPROOF_WZ.C\(\"DoubleElectron\",RAW\)
+ root -l -b -q RunPROOF_WZ.C\(\"DoubleElectron\",PPF\)
+ root -l -b -q RunPROOF_WZ.C\(\"DoubleElectron\",PPP\)
+
+ ./resetproof.sh -a
+
+ root -l -b -q RunPROOF_WZ.C\(\"DoubleMu\",RAW\)
+ root -l -b -q RunPROOF_WZ.C\(\"DoubleMu\",PPF\)
+ root -l -b -q RunPROOF_WZ.C\(\"DoubleMu\",PPP\)
 
  ./resetproof.sh -a
 
