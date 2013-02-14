@@ -848,12 +848,22 @@ const Bool_t AnalysisWZ::WgammaFilter() const
 //------------------------------------------------------------------------------
 // GetPPFWeight
 //------------------------------------------------------------------------------
+// Weight rules
+//
+// Tight estimated as PROMPT: p(1-f)
+// Tight estimated as   FAKE: f(1-p)
+// Fail  estimated as PROMPT: pf
+// Fail  estimated as   FAKE: pf
+//
+// common factor: 1/(p-f)
+//------------------------------------------------------------------------------
 Double_t AnalysisWZ::GetPPFWeight()
 {
   Double_t promptProbability[3];
   Double_t fakeProbability[3];
 
   UInt_t ilepton = 0;
+  UInt_t ntight  = 0;
 
   for (std::vector<Lepton>::iterator lep_iterator=AnalysisLeptons.begin();
        lep_iterator!=AnalysisLeptons.end(); lep_iterator++) {
@@ -865,12 +875,14 @@ Double_t AnalysisWZ::GetPPFWeight()
 
     if (lep.type == Tight)
       {
+	ntight++;
+	
 	promptProbability[ilepton] = p * (1 - f);
-	fakeProbability[ilepton]   = p * f;
+	fakeProbability[ilepton]   = f * (1 - p);
       }
     else if (lep.type == Fail)
       {
-	promptProbability[ilepton] = f * (1 - p);
+	promptProbability[ilepton] = p * f;
 	fakeProbability[ilepton]   = p * f;
       }
 
@@ -884,7 +896,11 @@ Double_t AnalysisWZ::GetPPFWeight()
   Double_t PFP = promptProbability[0] * fakeProbability[1]   * promptProbability[2];
   Double_t FPP = fakeProbability[0]   * promptProbability[1] * promptProbability[2];
 
-  return PPF + PFP + FPP;
+  Double_t result = PPF + PFP + FPP;
+
+  if (ntight == 3) result *= -1.0;
+
+  return result;
 }
 
 
@@ -896,6 +912,7 @@ Double_t AnalysisWZ::GetPPPWeight()
   Double_t promptProbability[3];
 
   UInt_t ilepton = 0;
+  UInt_t ntight  = 0;
 
   for (std::vector<Lepton>::iterator lep_iterator=AnalysisLeptons.begin();
        lep_iterator!=AnalysisLeptons.end(); lep_iterator++) {
@@ -907,11 +924,13 @@ Double_t AnalysisWZ::GetPPPWeight()
 
     if (lep.type == Tight)
       {
+	ntight++;
+
 	promptProbability[ilepton] = p * (1 - f);
       }
     else if (lep.type == Fail)
       {
-	promptProbability[ilepton] = f * (1 - p);
+	promptProbability[ilepton] = p * f;
       }
 
     promptProbability[ilepton] /= (p - f);
@@ -920,6 +939,8 @@ Double_t AnalysisWZ::GetPPPWeight()
   }
 
   Double_t PPP = promptProbability[0] * promptProbability[1] * promptProbability[2];
+
+  if (ntight == 2) PPP *= -1.0;
 
   return PPP;
 }
