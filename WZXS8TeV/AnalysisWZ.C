@@ -249,7 +249,7 @@ void AnalysisWZ::InsideLoop()
   }
 
 
-  // Require at least 2 tight leptons
+  // Require at least 2 leptons
   //----------------------------------------------------------------------------
   if (!FillCounters(countElectrons,        countMuons,        Has2Leptons))        return;
   if (!FillCounters(countPVElectrons,      countPVMuons,      Has2PVLeptons))      return;
@@ -266,24 +266,24 @@ void AnalysisWZ::InsideLoop()
   std::reverse(AnalysisLeptons.begin(), AnalysisLeptons.end());
 
 
-  // Require exactly 3 leptons with pt > 20 GeV
+  // Require N leptons with pt > 20 GeV
   //----------------------------------------------------------------------------
-  UInt_t highPtCounter = 0;
-  UInt_t tightCounter  = 0;
+  if (AnalysisLeptons[0].v.Pt() <= 20) return;
+  if (AnalysisLeptons[1].v.Pt() <= 20) return;
 
-  for (std::vector<Lepton>::iterator lep_iterator=AnalysisLeptons.begin();
-       lep_iterator!=AnalysisLeptons.end(); lep_iterator++) {
-      
-    if ((*lep_iterator).v.Pt() <= 20) continue;
+  if (closure_test && AnalysisLeptons[2].v.Pt() > 20)
+    {
+      return;
+    }
+  else if (AnalysisLeptons[2].v.Pt() <= 20)
+    {
+      return;
+    }
 
-    highPtCounter++;
+  if (AnalysisLeptons.size() > 3 & AnalysisLeptons[3].v.Pt() > 20) return;
 
-    if ((*lep_iterator).type == Tight) tightCounter++;
-  }
-
-  if (highPtCounter != 3) return;
-
-  if (mode != RAW && tightCounter < 2) return;
+  if (AnalysisLeptons[0].type != Tight) return;
+  if (AnalysisLeptons[1].type != Tight) return;
 
 
   // Apply lepton SF
@@ -337,48 +337,31 @@ void AnalysisWZ::InsideLoop()
 
   // Make Z and W candidates
   //----------------------------------------------------------------------------
-  for (std::vector<Lepton>::iterator lep1_iterator=AnalysisLeptons.begin();
-       lep1_iterator!=AnalysisLeptons.end(); lep1_iterator++) {
+  for (UInt_t i=0; i<3; i++) {
 
-    Lepton lep1 = (*lep1_iterator);
+    sumCharges += AnalysisLeptons[i].charge;
 
-    if (lep1.v.Pt() <= 20) break;
-
-    sumCharges += lep1.charge;
-
-    for (std::vector<Lepton>::iterator lep2_iterator=AnalysisLeptons.begin();
-	 lep2_iterator!=AnalysisLeptons.end(); lep2_iterator++) {
+    for (UInt_t j=i+1; j<3; j++) {
       
-      if (lep2_iterator == lep1_iterator) continue;
+      if (AnalysisLeptons[i].flavor != AnalysisLeptons[j].flavor) continue;
 
-      Lepton lep2 = (*lep2_iterator);
+      if (AnalysisLeptons[i].charge * AnalysisLeptons[j].charge > 0) continue;
 
-      if (lep2.v.Pt() <= 20) break;
-
-      if (lep1.flavor != lep2.flavor) continue;
-
-      if (lep1.charge * lep2.charge > 0) continue;
-
-      Double_t inv_mass = (lep1.v + lep2.v).M();
+      Double_t inv_mass = (AnalysisLeptons[i].v + AnalysisLeptons[j].v).M();
 
       if (fabs(inv_mass - Z_MASS) < fabs(invMass2Lep - Z_MASS)) {
 
 	invMass2Lep = inv_mass;
 
-	ZLepton1 = lep1.v;
-	ZLepton2 = lep2.v;
+	ZLepton1 = AnalysisLeptons[i].v;
+	ZLepton2 = AnalysisLeptons[j].v;
 
-	for (std::vector<Lepton>::iterator lep3_iterator=AnalysisLeptons.begin();
-	     lep3_iterator!=AnalysisLeptons.end(); lep3_iterator++) {
+	for (UInt_t k=0; k<3; k++) {
 	
-	  if (lep3_iterator == lep1_iterator) continue;
-	  if (lep3_iterator == lep2_iterator) continue;
+	  if (k == i) continue;
+	  if (k == j) continue;
 
-	  Lepton lep3 = (*lep3_iterator);
-
-	  if (lep3.v.Pt() <= 20) break;
-	  
-	  WLepton = lep3.v;
+	  WLepton = AnalysisLeptons[k].v;
 	}
       }
     }
@@ -400,7 +383,7 @@ void AnalysisWZ::InsideLoop()
 
   // HasWCandidate
   //----------------------------------------------------------------------------
-  if (WLepton.Pt() <= 20) return;
+  if (!closure_test && WLepton.Pt() <= 20) return;
 
   if (WLepton.DeltaR(ZLepton1) < 0.1) return;
   if (WLepton.DeltaR(ZLepton2) < 0.1) return;
@@ -408,9 +391,36 @@ void AnalysisWZ::InsideLoop()
   FillHistograms(theChannel, HasWCandidate);
 
 
+  // Jet requirements
+  //----------------------------------------------------------------------------
+  Double_t leadingJetPt = 0;
+
+  if (closure_test)
+    {
+      for (UInt_t i=0; i<T_JetAKCHS_Px->size(); i++) {
+	
+	TLorentzVector Jet(T_JetAKCHS_Px->at(i),
+			   T_JetAKCHS_Py->at(i),
+			   T_JetAKCHS_Pz->at(i),
+			   T_JetAKCHS_Energy->at(i));
+
+	if (Jet.Pt() > leadingJetPt) leadingJetPt = Jet.Pt();
+      }
+    }
+
+  if (closure_test && leadingJetPt > 40) return;
+
+
   // MET
   //----------------------------------------------------------------------------
-  if (T_METPFTypeI_ET <= 30) return;
+  if (closure_test && T_METPFTypeI_ET > 25)
+    {
+      return;
+    }
+  else if (T_METPFTypeI_ET <= 30)
+    {
+      return;
+    }
 
   efficiency_weight *= (dataDriven_weight_hi / dataDriven_weight_lo);
 
@@ -505,9 +515,10 @@ void AnalysisWZ::GetParameters()
   directory = GetInputParameters()->TheNamedString("directory");
   sample    = GetInputParameters()->TheNamedString("sample");
 
-  GetInputParameters()->TheNamedInt   ("mode",       mode);
-  GetInputParameters()->TheNamedDouble("xs_weight",  xs_weight);
-  GetInputParameters()->TheNamedDouble("luminosity", luminosity);
+  GetInputParameters()->TheNamedInt   ("mode",         mode);
+  GetInputParameters()->TheNamedInt   ("closure_test", closure_test);
+  GetInputParameters()->TheNamedDouble("xs_weight",    xs_weight);
+  GetInputParameters()->TheNamedDouble("luminosity",   luminosity);
 }
 
 

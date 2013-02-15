@@ -19,7 +19,6 @@
 
 const Double_t Z_MASS = 91.1876;  // GeV
 
-
 const UInt_t nChannels = 4;
 
 enum {MMM, EEE, MME, EEM};
@@ -157,6 +156,7 @@ class AnalysisWZ: public CMSAnalysisSelectorMiniTrees
   // Input parameters
   //----------------------------------------------------------------------------
   Int_t                       mode;
+  Int_t                       closure_test;
   TString                     directory;
   TString                     sample;
   TString                     fileSuffix;

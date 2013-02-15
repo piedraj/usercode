@@ -21,10 +21,11 @@ TProof*  proof          = 0;
 TString  dataPath       = "";
 
 
-void RunPROOF_WZ(TString  sample   = "DoubleMu",
-		 Int_t    mode     = RAW,
-		 Long64_t nEvents  = -1,
-		 Bool_t   update   = true)
+void RunPROOF_WZ(TString  sample       = "DoubleMu",
+		 Int_t    mode         = RAW,
+		 Int_t    closure_test = 1,
+		 Long64_t nEvents      = -1,
+		 Bool_t   update       = true)
 {
   dataPath = GuessLocalBasePath();
 
@@ -92,6 +93,8 @@ void RunPROOF_WZ(TString  sample   = "DoubleMu",
   if (mode == PPF) sample += "_PPF";
   if (mode == PPP) sample += "_PPP";
 
+  if (closure_test) sample += "_closure_test";
+
   TString outputFile = outputDir + "/" + sample + ".root";
   
   gPAFOptions->outputFile = outputFile;
@@ -101,11 +104,12 @@ void RunPROOF_WZ(TString  sample   = "DoubleMu",
   //----------------------------------------------------------------------------
   gPAFOptions->inputParameters = new InputParameters();
 
-  gPAFOptions->inputParameters->SetNamedString("directory",  outputDir.Data());
-  gPAFOptions->inputParameters->SetNamedString("sample",     sample.Data());
-  gPAFOptions->inputParameters->SetNamedDouble("xs_weight",  G_Event_Weight);
-  gPAFOptions->inputParameters->SetNamedDouble("luminosity", G_Event_Lumi);
-  gPAFOptions->inputParameters->SetNamedInt   ("mode",       mode);
+  gPAFOptions->inputParameters->SetNamedString("directory",    outputDir.Data());
+  gPAFOptions->inputParameters->SetNamedString("sample",       sample.Data());
+  gPAFOptions->inputParameters->SetNamedDouble("xs_weight",    G_Event_Weight);
+  gPAFOptions->inputParameters->SetNamedDouble("luminosity",   G_Event_Lumi);
+  gPAFOptions->inputParameters->SetNamedInt   ("mode",         mode);
+  gPAFOptions->inputParameters->SetNamedInt   ("closure_test", closure_test);
 
 
   // Number of events (Long64_t)

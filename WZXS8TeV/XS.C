@@ -193,7 +193,7 @@ void XS(UInt_t cut   = AtLeast3Leptons,
 
   for (UInt_t channel=0; channel<nChannels; channel++) {
 
-    if (channel != EEE) continue;
+    if (channel != MMM) continue;
 
     ReadInputFiles(channel);
     

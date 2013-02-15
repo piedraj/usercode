@@ -7,13 +7,13 @@
 
  root -l -b -q RunPROOF_WZ.C\(\"DoubleElectron\",RAW\)
  root -l -b -q RunPROOF_WZ.C\(\"DoubleElectron\",PPF\)
- root -l -b -q RunPROOF_WZ.C\(\"DoubleElectron\",PPP\)
+#root -l -b -q RunPROOF_WZ.C\(\"DoubleElectron\",PPP\)
 
  ./resetproof.sh -a
 
  root -l -b -q RunPROOF_WZ.C\(\"DoubleMu\",RAW\)
  root -l -b -q RunPROOF_WZ.C\(\"DoubleMu\",PPF\)
- root -l -b -q RunPROOF_WZ.C\(\"DoubleMu\",PPP\)
+#root -l -b -q RunPROOF_WZ.C\(\"DoubleMu\",PPP\)
 
  ./resetproof.sh -a
 
@@ -40,7 +40,7 @@
  ./resetproof.sh -a
 
  root -l -b -q RunPROOF_WZ.C\(\"ZZTo2L2QMad\"\);       # line 38
- root -l -b -q RunPROOF_WZ.C\(\"ZZ\"\);                # line 40 -- REPLACED
+#root -l -b -q RunPROOF_WZ.C\(\"ZZ\"\);                # line 40 -- REPLACED
  root -l -b -q RunPROOF_WZ.C\(\"ggZZ2L2L\"\);          # line 43
  root -l -b -q RunPROOF_WZ.C\(\"ggZZ4L\"\);            # line 44
  root -l -b -q RunPROOF_WZ.C\(\"ZZ2Mu2Tau\"\);         # line 45
