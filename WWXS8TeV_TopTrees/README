@@ -4,6 +4,10 @@
 #
 ################################################################################
 
+export CVSROOT=:pserver:anonymous@cmssw.cvs.cern.ch:/local/reps/CMSSW
+cvs login
+CVS password: ask :)
+
 cvs co -d WWXS8TeV_TopTrees UserCode/piedra/WWXS8TeV_TopTrees
 cvs co -d PAF               UserCode/IGonzalez/ProofAnalysisFramework
 cvs co -d DatasetManager    UserCode/IGonzalez/DatasetManager
