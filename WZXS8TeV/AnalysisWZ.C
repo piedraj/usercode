@@ -35,18 +35,18 @@ void AnalysisWZ::Initialise()
 
       if (j < AtLeast3Leptons) continue;
 
-      hNPV        [i][j] = CreateH1D(TString("hNPV"         + suffix), "",  50,  0,  50);
-      hMET        [i][j] = CreateH1D(TString("hMET"         + suffix), "", 200,  0, 200);
-      hSumCharges [i][j] = CreateH1D(TString("hSumCharges"  + suffix), "",   9, -4,   5);
-      hInvMass2Lep[i][j] = CreateH1D(TString("hInvMass2Lep" + suffix), "", 200,  0, 200);
-      hInvMass3Lep[i][j] = CreateH1D(TString("hInvMass3Lep" + suffix), "", 400,  0, 400);
-      hPtLepton1  [i][j] = CreateH1D(TString("hPtLepton1"   + suffix), "", 200,  0, 200);
-      hPtLepton2  [i][j] = CreateH1D(TString("hPtLepton2"   + suffix), "", 200,  0, 200);
-      hPtLepton3  [i][j] = CreateH1D(TString("hPtLepton3"   + suffix), "", 200,  0, 200);    
-      hDeltaPhi12 [i][j] = CreateH1D(TString("hDeltaPhi12"  + suffix), "", 320,  0, 3.2);    
-      hPtZLepton1 [i][j] = CreateH1D(TString("hPtZLepton1"  + suffix), "", 200,  0, 200);
-      hPtZLepton2 [i][j] = CreateH1D(TString("hPtZLepton2"  + suffix), "", 200,  0, 200);
-      hPtWLepton  [i][j] = CreateH1D(TString("hPtWLepton"   + suffix), "", 200,  0, 200);    
+      hNPV         [i][j] = CreateH1D(TString("hNPV"          + suffix), "",  50,  0,  50);
+      hMET         [i][j] = CreateH1D(TString("hMET"          + suffix), "", 200,  0, 200);
+      hSumCharges  [i][j] = CreateH1D(TString("hSumCharges"   + suffix), "",   9, -4,   5);
+      hInvMass2Lep [i][j] = CreateH1D(TString("hInvMass2Lep"  + suffix), "", 200,  0, 200);
+      hInvMass3Lep [i][j] = CreateH1D(TString("hInvMass3Lep"  + suffix), "", 400,  0, 400);
+      hPtLepton1   [i][j] = CreateH1D(TString("hPtLepton1"    + suffix), "", 200,  0, 200);
+      hPtLepton2   [i][j] = CreateH1D(TString("hPtLepton2"    + suffix), "", 200,  0, 200);
+      hPtLepton3   [i][j] = CreateH1D(TString("hPtLepton3"    + suffix), "", 200,  0, 200);    
+      hDPhiZLeptons[i][j] = CreateH1D(TString("hDPhiZLeptons" + suffix), "", 320,  0, 3.2);    
+      hPtZLepton1  [i][j] = CreateH1D(TString("hPtZLepton1"   + suffix), "", 200,  0, 200);
+      hPtZLepton2  [i][j] = CreateH1D(TString("hPtZLepton2"   + suffix), "", 200,  0, 200);
+      hPtWLepton   [i][j] = CreateH1D(TString("hPtWLepton"    + suffix), "", 200,  0, 200);    
     }
   }
 
@@ -56,12 +56,17 @@ void AnalysisWZ::Initialise()
   TString path1 = "/nfs/fanae/user/piedra/work/WZ/AnalysisVHCode/WManager/data/";
   TString path2 = "/nfs/fanae/user/piedra/work/WZ/work/WManager/PR/";
 
-  MuonSF = LoadHistogram(path1 + "MuSF_2012",            "muonDATAMCratio_All_selec",      "MuonSF");
-  ElecSF = LoadHistogram(path1 + "EleSF_2012",           "electronsDATAMCratio_All_selec", "ElecSF");
-  MuonFR = LoadHistogram(path1 + "MuFR_2012_jet50",      "h_Muon_signal_pT_eta",           "MuonFR");
-  ElecFR = LoadHistogram(path1 + "EleFR_2012_jet50",     "fakeElH2",                       "ElecFR");
-  MuonPR = LoadHistogram(path2 + "prompt_rateMuons",     "effDATA_prompt_rate",            "MuonPR");
-  ElecPR = LoadHistogram(path2 + "prompt_rateElectrons", "effDATA_All_selec",              "ElecPR");
+  MuonSF = LoadHistogram(path1 + "MuSF_2012",  "muonDATAMCratio_All_selec",      "MuonSF");
+  ElecSF = LoadHistogram(path1 + "EleSF_2012", "electronsDATAMCratio_All_selec", "ElecSF");
+
+  MuonPR = LoadHistogram(path2 + "prompt_rateMuons",     "effDATA_prompt_rate", "MuonPR");
+  ElecPR = LoadHistogram(path2 + "prompt_rateElectrons", "effDATA_All_selec",   "ElecPR");
+
+  MuonFR_lo = LoadHistogram(path1 + "MuFR_2012_jet30",  "h_Muon_signal_pT_eta", "MuonFR_lo");
+  ElecFR_lo = LoadHistogram(path1 + "EleFR_2012_jet35", "fakeElH2",             "ElecFR_lo");
+
+  MuonFR_hi = LoadHistogram(path1 + "MuFR_2012_jet50",  "h_Muon_signal_pT_eta", "MuonFR_hi");
+  ElecFR_hi = LoadHistogram(path1 + "EleFR_2012_jet50", "fakeElH2",             "ElecFR_hi");
 }
 
 
@@ -158,7 +163,8 @@ void AnalysisWZ::InsideLoop()
 
     if (pt > 35) pt = 34;
 
-    const Double_t fake_rate = MuonFR->GetBinContent(MuonFR->FindBin(pt,eta));
+    const Double_t fake_rate_lo = MuonFR_lo->GetBinContent(MuonFR_lo->FindBin(pt,eta));
+    const Double_t fake_rate_hi = MuonFR_hi->GetBinContent(MuonFR_hi->FindBin(pt,eta));
 
     Lepton AnalysisMuon;
 
@@ -167,7 +173,8 @@ void AnalysisWZ::InsideLoop()
     AnalysisMuon.type   = muon_type;
     AnalysisMuon.charge = T_Muon_Charge->at(i);
     AnalysisMuon.SF     = scale_factor;
-    AnalysisMuon.f      = fake_rate;
+    AnalysisMuon.f_lo   = fake_rate_lo;
+    AnalysisMuon.f_hi   = fake_rate_hi;
     AnalysisMuon.p      = prompt_rate;
     AnalysisMuon.v      = MuonVector;
 
@@ -223,7 +230,8 @@ void AnalysisWZ::InsideLoop()
 
     if (pt > 35) pt = 34;
 
-    const Double_t fake_rate = ElecFR->GetBinContent(ElecFR->FindBin(pt,eta));
+    const Double_t fake_rate_lo = ElecFR_lo->GetBinContent(ElecFR_lo->FindBin(pt,eta));
+    const Double_t fake_rate_hi = ElecFR_hi->GetBinContent(ElecFR_hi->FindBin(pt,eta));
 
     Lepton AnalysisElectron;
     
@@ -232,7 +240,8 @@ void AnalysisWZ::InsideLoop()
     AnalysisElectron.type   = electron_type;
     AnalysisElectron.charge = T_Elec_Charge->at(i);
     AnalysisElectron.SF     = scale_factor;
-    AnalysisElectron.f      = fake_rate;
+    AnalysisElectron.f_lo   = fake_rate_lo;
+    AnalysisElectron.f_hi   = fake_rate_hi;
     AnalysisElectron.p      = prompt_rate;
     AnalysisElectron.v      = ElectronVector;
     
@@ -285,8 +294,23 @@ void AnalysisWZ::InsideLoop()
 
   // Data-driven estimates
   //----------------------------------------------------------------------------
-  if (mode == PPF) efficiency_weight *= GetPPFWeight();
-  if (mode == PPP) efficiency_weight *= GetPPPWeight();
+  if (mode == PPF)
+    {
+      dataDriven_weight_lo = GetPPFWeight(LowPtJet);
+      dataDriven_weight_hi = GetPPFWeight(HighPtJet);
+    }
+  else if (mode == PPP)
+    {
+      dataDriven_weight_lo = GetPPPWeight(LowPtJet);
+      dataDriven_weight_hi = GetPPPWeight(HighPtJet);
+    }
+  else
+    {
+      dataDriven_weight_lo = 1.0;
+      dataDriven_weight_hi = 1.0;
+    }
+
+  efficiency_weight *= dataDriven_weight_lo;
 
 
   // Classify the channels
@@ -360,6 +384,8 @@ void AnalysisWZ::InsideLoop()
     }
   }
 
+  if (invMass2Lep < 40) return;
+
   invMass3Lep = (ZLepton1 + ZLepton2 + WLepton).M();
 
   FillHistograms(theChannel, AtLeast3Leptons);
@@ -385,6 +411,8 @@ void AnalysisWZ::InsideLoop()
   // MET
   //----------------------------------------------------------------------------
   if (T_METPFTypeI_ET <= 30) return;
+
+  efficiency_weight *= (dataDriven_weight_hi / dataDriven_weight_lo);
 
   FillHistograms(theChannel, MET);
 }
@@ -738,7 +766,7 @@ void AnalysisWZ::FillHistograms(UInt_t iChannel, UInt_t iCut)
 
   Double_t hweight = efficiency_weight * xs_weight;
 
-  Double_t deltaPhi12 = AnalysisLeptons[0].v.DeltaPhi(AnalysisLeptons[1].v);
+  Double_t deltaPhi = ZLepton1.DeltaPhi(ZLepton2);
 
   Double_t pt1, pt2;
   
@@ -751,18 +779,18 @@ void AnalysisWZ::FillHistograms(UInt_t iChannel, UInt_t iCut)
       pt1 = ZLepton2.Pt(); pt2 = ZLepton1.Pt();
     }
 
-  hNPV        [iChannel][iCut]->Fill(T_Vertex_z->size(),        hweight);
-  hMET        [iChannel][iCut]->Fill(T_METPFTypeI_ET,           hweight);
-  hSumCharges [iChannel][iCut]->Fill(sumCharges,                hweight);
-  hInvMass2Lep[iChannel][iCut]->Fill(invMass2Lep,               hweight);
-  hInvMass3Lep[iChannel][iCut]->Fill(invMass3Lep,               hweight);
-  hPtLepton1  [iChannel][iCut]->Fill(AnalysisLeptons[0].v.Pt(), hweight);
-  hPtLepton2  [iChannel][iCut]->Fill(AnalysisLeptons[1].v.Pt(), hweight);
-  hPtLepton3  [iChannel][iCut]->Fill(AnalysisLeptons[2].v.Pt(), hweight);
-  hDeltaPhi12 [iChannel][iCut]->Fill(fabs(deltaPhi12),          hweight);
-  hPtZLepton1 [iChannel][iCut]->Fill(pt1,                       hweight);
-  hPtZLepton2 [iChannel][iCut]->Fill(pt2,                       hweight);
-  hPtWLepton  [iChannel][iCut]->Fill(WLepton.Pt(),              hweight);
+  hNPV         [iChannel][iCut]->Fill(T_Vertex_z->size(),        hweight);
+  hMET         [iChannel][iCut]->Fill(T_METPFTypeI_ET,           hweight);
+  hSumCharges  [iChannel][iCut]->Fill(sumCharges,                hweight);
+  hInvMass2Lep [iChannel][iCut]->Fill(invMass2Lep,               hweight);
+  hInvMass3Lep [iChannel][iCut]->Fill(invMass3Lep,               hweight);
+  hPtLepton1   [iChannel][iCut]->Fill(AnalysisLeptons[0].v.Pt(), hweight);
+  hPtLepton2   [iChannel][iCut]->Fill(AnalysisLeptons[1].v.Pt(), hweight);
+  hPtLepton3   [iChannel][iCut]->Fill(AnalysisLeptons[2].v.Pt(), hweight);
+  hDPhiZLeptons[iChannel][iCut]->Fill(fabs(deltaPhi),            hweight);
+  hPtZLepton1  [iChannel][iCut]->Fill(pt1,                       hweight);
+  hPtZLepton2  [iChannel][iCut]->Fill(pt2,                       hweight);
+  hPtWLepton   [iChannel][iCut]->Fill(WLepton.Pt(),              hweight);
 }
 
 
@@ -857,7 +885,7 @@ const Bool_t AnalysisWZ::WgammaFilter() const
 //
 // common factor: 1/(p-f)
 //------------------------------------------------------------------------------
-Double_t AnalysisWZ::GetPPFWeight()
+Double_t AnalysisWZ::GetPPFWeight(UInt_t jetPt)
 {
   Double_t promptProbability[3];
   Double_t fakeProbability[3];
@@ -870,7 +898,8 @@ Double_t AnalysisWZ::GetPPFWeight()
     
     Lepton lep = (*lep_iterator);
 
-    Double_t f = lep.f;
+    Double_t f = (jetPt == LowPtJet) ? lep.f_lo : lep.f_hi;
+
     Double_t p = lep.p;
 
     if (lep.type == Tight)
@@ -907,7 +936,7 @@ Double_t AnalysisWZ::GetPPFWeight()
 //------------------------------------------------------------------------------
 // GetPPPWeight
 //------------------------------------------------------------------------------
-Double_t AnalysisWZ::GetPPPWeight()
+Double_t AnalysisWZ::GetPPPWeight(UInt_t jetPt)
 {
   Double_t promptProbability[3];
 
@@ -919,7 +948,8 @@ Double_t AnalysisWZ::GetPPPWeight()
     
     Lepton lep = (*lep_iterator);
 
-    Double_t f = lep.f;
+    Double_t f = (jetPt == LowPtJet) ? lep.f_lo : lep.f_hi;
+
     Double_t p = lep.p;
 
     if (lep.type == Tight)

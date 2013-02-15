@@ -62,6 +62,8 @@ enum {Rejected, Tight, Fail};
 
 enum {RAW, PPF, PPP};
 
+enum {LowPtJet, HighPtJet};
+
 struct Lepton
 {
   UInt_t         index;
@@ -69,7 +71,8 @@ struct Lepton
   UInt_t         type;    // Rejected, Tight, Fail
   Double_t       charge;
   Double_t       SF;
-  Double_t       f;       // fake rate
+  Double_t       f_lo;    // fake rate with low  pt jet
+  Double_t       f_hi;    // fake rate with high pt jet
   Double_t       p;       // prompt rate
   TLorentzVector v;
 
@@ -120,8 +123,8 @@ class AnalysisWZ: public CMSAnalysisSelectorMiniTrees
 
   const Bool_t WgammaFilter              () const;
 
-  Double_t     GetPPFWeight              ();
-  Double_t     GetPPPWeight              ();
+  Double_t     GetPPFWeight              (UInt_t  jetPt);
+  Double_t     GetPPPWeight              (UInt_t  jetPt);
 
   TH2F*        LoadHistogram             (TString filename,
 					  TString hname,
@@ -137,18 +140,18 @@ class AnalysisWZ: public CMSAnalysisSelectorMiniTrees
   TH1D*                       hCounterEff[nChannels][nCuts];
   TH1D*                       hCounter   [nChannels][nCuts];
 
-  TH1D*                       hNPV        [nChannels][nCuts];
-  TH1D*                       hMET        [nChannels][nCuts];
-  TH1D*                       hSumCharges [nChannels][nCuts];
-  TH1D*                       hInvMass2Lep[nChannels][nCuts];
-  TH1D*                       hInvMass3Lep[nChannels][nCuts];
-  TH1D*                       hPtLepton1  [nChannels][nCuts];
-  TH1D*                       hPtLepton2  [nChannels][nCuts];
-  TH1D*                       hPtLepton3  [nChannels][nCuts];
-  TH1D*                       hDeltaPhi12 [nChannels][nCuts];
-  TH1D*                       hPtZLepton1 [nChannels][nCuts];
-  TH1D*                       hPtZLepton2 [nChannels][nCuts];
-  TH1D*                       hPtWLepton  [nChannels][nCuts];
+  TH1D*                       hNPV         [nChannels][nCuts];
+  TH1D*                       hMET         [nChannels][nCuts];
+  TH1D*                       hSumCharges  [nChannels][nCuts];
+  TH1D*                       hInvMass2Lep [nChannels][nCuts];
+  TH1D*                       hInvMass3Lep [nChannels][nCuts];
+  TH1D*                       hPtLepton1   [nChannels][nCuts];
+  TH1D*                       hPtLepton2   [nChannels][nCuts];
+  TH1D*                       hPtLepton3   [nChannels][nCuts];
+  TH1D*                       hDPhiZLeptons[nChannels][nCuts];
+  TH1D*                       hPtZLepton1  [nChannels][nCuts];
+  TH1D*                       hPtZLepton2  [nChannels][nCuts];
+  TH1D*                       hPtWLepton   [nChannels][nCuts];
 
 
   // Input parameters
@@ -178,14 +181,20 @@ class AnalysisWZ: public CMSAnalysisSelectorMiniTrees
   Double_t                    sumCharges;
   UInt_t                      theChannel;
 
+  Double_t                    dataDriven_weight_lo;
+  Double_t                    dataDriven_weight_hi;
+
 
   // SF, FR and PR
   //----------------------------------------------------------------------------
   TH2F*                       MuonSF;
-  TH2F*                       MuonFR;
+  TH2F*                       MuonFR_lo;  // jet pt = 30 GeV
+  TH2F*                       MuonFR_hi;  // jet pt = 50 GeV
   TH2F*                       MuonPR;
+
   TH2F*                       ElecSF;
-  TH2F*                       ElecFR;
+  TH2F*                       ElecFR_lo;  // jet pt = 35 GeV
+  TH2F*                       ElecFR_hi;  // jet pt = 50 GeV
   TH2F*                       ElecPR;
 
 

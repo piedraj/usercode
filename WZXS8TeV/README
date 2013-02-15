@@ -16,8 +16,13 @@ source /gpfs/csic_projects/cms/sw/ROOT/current/root/bin/thisroot.sh  # gridui
 #
 ################################################################################
 
-export CVSROOT=:ext:piedra@cmssw.cvs.cern.ch:/local/reps/CMSSW  # gridui
-export CVS_RSH=ssh                                              # gridui
+# fanae
+export CVSROOT=:pserver:anonymous@cmssw.cvs.cern.ch:/local/reps/CMSSW
+cvs login  # Only the first time
+
+# gridui
+export CVSROOT=:ext:piedra@cmssw.cvs.cern.ch:/local/reps/CMSSW
+export CVS_RSH=ssh
 
 cvs co -d WZXS8TeV       UserCode/piedra/WZXS8TeV
 cvs co -d PAF            UserCode/IGonzalez/ProofAnalysisFramework

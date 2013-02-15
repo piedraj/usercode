@@ -34,7 +34,7 @@ const Double_t ngenWZphase = 1449067;  // (71 < mZ < 111 GeV)
 //------------------------------------------------------------------------------
 const UInt_t nChannels  =  4;
 const UInt_t nCuts      =  7;
-const UInt_t nProcesses = 37;
+const UInt_t nProcesses = 39;
 
 enum {MMM, EEE, MME, EEM};
 
@@ -50,6 +50,8 @@ enum {
 
 enum {
   Data,
+  DataPPF,
+  DataPPP,
   DYJets_Madgraph,
   ZJets_Madgraph,
   ZbbToLL,
@@ -67,7 +69,7 @@ enum {
   WZTo3LNu,
   WZTo2L2QMad,
   ZZTo2L2QMad,
-  ZZ,
+  ZZ,  // Not used
   ggZZ2L2L,
   ggZZ4L,
   ZZ2Mu2Tau,
@@ -88,7 +90,10 @@ enum {
   TTGJets
 };
 
+
 enum {linY = 0, logY};
+
+enum {MCmode, PPFmode, PPPmode};
 
 
 // Settings
@@ -108,13 +113,15 @@ TString        _directory;
 TString        _format;
 TString        _output;
 UInt_t         _cut;
+UInt_t         _mode;
 
-vector<UInt_t> vprocess;
+vector<UInt_t>  vprocess;
 
 
 // Member functions
 //------------------------------------------------------------------------------
-void     SetParameters            (UInt_t      cut);
+void     SetParameters            (UInt_t      cut,
+				   UInt_t      mode);
 
 void     ReadInputFiles           (UInt_t      channel);
 
@@ -175,15 +182,18 @@ TString  GuessLocalBasePath       ();
 // XS
 //------------------------------------------------------------------------------
 void XS(UInt_t cut   = AtLeast3Leptons,
+	UInt_t mode  = PPFmode,
 	Bool_t batch = false)
 {
   if (cut < AtLeast3Leptons) return;
 
   gROOT->SetBatch(batch);
 
-  SetParameters(cut);
+  SetParameters(cut, mode);
 
   for (UInt_t channel=0; channel<nChannels; channel++) {
+
+    if (channel != EEE) continue;
 
     ReadInputFiles(channel);
     
@@ -191,20 +201,18 @@ void XS(UInt_t cut   = AtLeast3Leptons,
 
     TString suffix = "_" + sChannel[channel] + "_" + sCut[cut];
     
-    DrawHistogram("hNPV"         + suffix, "number of PV",          -1, 0, "NULL", linY, 0, 30);
-    DrawHistogram("hSumCharges"  + suffix, "q_{1} + q_{2} + q_{3}", -1, 0, "NULL", linY);
-    DrawHistogram("hMET"         + suffix, "E_{T}^{miss}",           5, 0, "GeV",  linY);
-    DrawHistogram("hInvMass2Lep" + suffix, "m_{#font[12]{ll}}",      2, 0, "GeV",  linY, 60, 120);
-    DrawHistogram("hInvMass3Lep" + suffix, "m_{#font[12]{3l}}",     10, 0, "GeV",  linY);
-    DrawHistogram("hPtLepton1"   + suffix, "p_{T}^{first lepton}",   5, 0, "GeV",  linY);
-    DrawHistogram("hPtLepton2"   + suffix, "p_{T}^{second lepton}",  5, 0, "GeV",  linY);
-    DrawHistogram("hPtLepton3"   + suffix, "p_{T}^{third lepton}",   5, 0, "GeV",  linY);
-
-    if (cut < MET) continue;
-
-    DrawHistogram("hPtZLepton1" + suffix, "p_{T}^{Z leading lepton}",  5, 0, "GeV", linY);
-    DrawHistogram("hPtZLepton2" + suffix, "p_{T}^{Z trailing lepton}", 5, 0, "GeV", linY);
-    DrawHistogram("hPtWLepton"  + suffix, "p_{T}^{W lepton}",          5, 0, "GeV", linY);
+    DrawHistogram("hNPV"          + suffix, "number of PV",               -1, 0, "NULL", linY, 0, 30);
+    DrawHistogram("hSumCharges"   + suffix, "q_{1} + q_{2} + q_{3}",      -1, 0, "NULL", linY);
+    DrawHistogram("hMET"          + suffix, "E_{T}^{miss}",                5, 0, "GeV",  linY);
+    DrawHistogram("hInvMass2Lep"  + suffix, "m_{#font[12]{ll}}",           2, 0, "GeV",  linY, 60, 120);
+    DrawHistogram("hInvMass3Lep"  + suffix, "m_{#font[12]{3l}}",          10, 0, "GeV",  linY);
+    DrawHistogram("hPtLepton1"    + suffix, "p_{T}^{first lepton}",        5, 0, "GeV",  linY);
+    DrawHistogram("hPtLepton2"    + suffix, "p_{T}^{second lepton}",       5, 0, "GeV",  linY);
+    DrawHistogram("hPtLepton3"    + suffix, "p_{T}^{third lepton}",        5, 0, "GeV",  linY);
+    DrawHistogram("hDPhiZLeptons" + suffix, "#Delta#phi_{#font[12]{ll}}",  5, 1, "^{o}", linY);
+    DrawHistogram("hPtZLepton1"   + suffix, "p_{T}^{Z leading lepton}",    5, 0, "GeV",  linY);
+    DrawHistogram("hPtZLepton2"   + suffix, "p_{T}^{Z trailing lepton}",   5, 0, "GeV",  linY);
+    DrawHistogram("hPtWLepton"    + suffix, "p_{T}^{W lepton}",            5, 0, "GeV",  linY);
   }
 }
 
@@ -489,64 +497,79 @@ void DrawHistogram(TString  hname,
   Double_t y0     = 0.834;
   Double_t delta  = _yoffset + 0.001;
   Double_t ndelta = 0;
-
-  Double_t WGstarYield  = 0.0;
-  Double_t ZJetsYield   = 0.0;
-  Double_t WJetsYield   = 0.0;
-  Double_t ZZYield      = 0.0;
-  Double_t VVVJetsYield = 0.0;
   
-  WGstarYield += Yield(hist[WGstarToElNuMad]);
-  WGstarYield += Yield(hist[WGstarToMuNuMad]);
-  WGstarYield += Yield(hist[WGstarToTauNuMad]);
-  WGstarYield += Yield(hist[WgammaToLNuG]);
+  DrawLegend(x0 - 0.49, y0 - ndelta, hist[Data],     Form(" data (%.0f)", Yield(hist[Data])),     "lp"); ndelta += delta;
+  DrawLegend(x0 - 0.49, y0 - ndelta, allmc,          Form(" all (%.0f)",  Yield(allmc)),          "f");  ndelta += delta;
+  DrawLegend(x0 - 0.49, y0 - ndelta, hist[WZTo3LNu], Form(" WZ (%.0f)",   Yield(hist[WZTo3LNu])), "f");  ndelta += delta;
 
-  ZJetsYield += Yield(hist[DYJets_Madgraph]);
-  ZJetsYield += Yield(hist[ZJets_Madgraph]);
+  if (_mode == PPPmode)
+    {
+      DrawLegend(x0 - 0.49, y0 - ndelta, hist[DataPPP], Form(" PPP (%.0f)", Yield(hist[DataPPP])), "f"); ndelta += delta;
+      DrawLegend(x0 - 0.49, y0 - ndelta, hist[DataPPF], Form(" PPF (%.0f)", Yield(hist[DataPPF])), "f"); ndelta += delta;
+    }
+  else
+    {
+      if (_mode == MCmode)
+	{
+	  Double_t TopYield   = 0.0;
+	  Double_t ZJetsYield = 0.0;
 
-  WJetsYield += Yield(hist[WJets_Madgraph]);
-  WJetsYield += Yield(hist[WbbToLNu]);
+	  TopYield += Yield(hist[TTbar_Madgraph]);
+	  TopYield += Yield(hist[TW]);
+	  TopYield += Yield(hist[TbarW]);
 
-  ZZYield += Yield(hist[ZgammaToLLG]);
-  ZZYield += Yield(hist[ggZZ2L2L]);
-  ZZYield += Yield(hist[ggZZ4L]);
-  ZZYield += Yield(hist[ZZ2Mu2Tau]);
-  ZZYield += Yield(hist[ZZ4E]);
-  ZZYield += Yield(hist[ZZ2E2Tau]);
-  ZZYield += Yield(hist[ZZ4Mu]);
-  ZZYield += Yield(hist[ZZ2E2Mu]);
-  ZZYield += Yield(hist[ZZ4Tau]);
-  ZZYield += Yield(hist[HZZ4L]);
+	  ZJetsYield += Yield(hist[DYJets_Madgraph]);
+	  ZJetsYield += Yield(hist[ZJets_Madgraph]);
+	  ZJetsYield += Yield(hist[ZbbToLL]);
 
-  VVVJetsYield += Yield(hist[WWGJets]);
-  VVVJetsYield += Yield(hist[WZZJets]);
-  VVVJetsYield += Yield(hist[ZZZJets]);
-  VVVJetsYield += Yield(hist[WWZJets]);
-  VVVJetsYield += Yield(hist[WWWJets]);
-  VVVJetsYield += Yield(hist[TTWJets]);
-  VVVJetsYield += Yield(hist[TTZJets]);
-  VVVJetsYield += Yield(hist[TTWWJets]);
-  VVVJetsYield += Yield(hist[TTGJets]);
+	  DrawLegend(x0 - 0.49, y0 - ndelta, hist[TTbar_Madgraph], Form(" top (%.0f)",    TopYield),   "f"); ndelta += delta;
+	  DrawLegend(x0 - 0.49, y0 - ndelta, hist[ZJets_Madgraph], Form(" Z+jets (%.0f)", ZJetsYield), "f"); ndelta += delta;
+	}
+      else if (_mode == PPFmode)
+	{
+	  DrawLegend(x0 - 0.49, y0 - ndelta, hist[DataPPF], Form(" data-driven (%.0f)", Yield(hist[DataPPF])), "f"); ndelta += delta;
+	}
 
-  DrawLegend(x0 - 0.49, y0 - ndelta, hist[Data],           Form(" data (%.0f)",       Yield(hist[Data])),     "lp"); ndelta += delta;
-  DrawLegend(x0 - 0.49, y0 - ndelta, allmc,                Form(" MC (%.0f)",         Yield(allmc)),          "f");  ndelta += delta;
-  DrawLegend(x0 - 0.49, y0 - ndelta, hist[WZTo3LNu],       Form(" WZ (%.0f)",         Yield(hist[WZTo3LNu])), "f");  ndelta += delta;
-  DrawLegend(x0 - 0.49, y0 - ndelta, hist[ZJets_Madgraph], Form(" Z+jets (%.0f)",     ZJetsYield),            "f");  ndelta += delta;
-  DrawLegend(x0 - 0.49, y0 - ndelta, hist[ZbbToLL],        Form(" Z+b#bar{b} (%.0f)", Yield(hist[ZbbToLL])),  "f");  ndelta += delta;
+      Double_t ZZYield      = 0.0;
+      Double_t WVYield      = 0.0;
+      Double_t VVVJetsYield = 0.0;
 
-  ndelta = 0;
+      ZZYield += Yield(hist[ZgammaToLLG]);
+      ZZYield += Yield(hist[ggZZ2L2L]);
+      ZZYield += Yield(hist[ggZZ4L]);
+      ZZYield += Yield(hist[ZZ2Mu2Tau]);
+      ZZYield += Yield(hist[ZZ4E]);
+      ZZYield += Yield(hist[ZZ2E2Tau]);
+      ZZYield += Yield(hist[ZZ4Mu]);
+      ZZYield += Yield(hist[ZZ2E2Mu]);
+      ZZYield += Yield(hist[ZZ4Tau]);
+      ZZYield += Yield(hist[HZZ4L]);
 
-  DrawLegend(x0 - 0.24, y0 - ndelta, hist[ggZZ2L2L],       Form(" ZZ (%.0f)",                    ZZYield),                     "f"); ndelta += delta;
-  DrawLegend(x0 - 0.24, y0 - ndelta, hist[TTbar_Madgraph], Form(" t#bar{t} (%.0f)",              Yield(hist[TTbar_Madgraph])), "f"); ndelta += delta;
-  DrawLegend(x0 - 0.24, y0 - ndelta, hist[TW],             Form(" tW (%.0f)",                    Yield(hist[TW])),             "f"); ndelta += delta;
-  DrawLegend(x0 - 0.24, y0 - ndelta, hist[WZTo2L2QMad],    Form(" WZ(#font[12]{l}#nuqq) (%.0f)", Yield(hist[WZTo2L2QMad])),    "f"); ndelta += delta;
+      WVYield += Yield(hist[WW]);
+      WVYield += Yield(hist[WZTo2L2QMad]);
+      WVYield += Yield(hist[WbbToLNu]);
+      WVYield += Yield(hist[WJets_Madgraph]);
+      WVYield += Yield(hist[WGstarToElNuMad]);
+      WVYield += Yield(hist[WGstarToMuNuMad]);
+      WVYield += Yield(hist[WGstarToTauNuMad]);
+      WVYield += Yield(hist[WgammaToLNuG]);
 
-  ndelta = 0;
+      VVVJetsYield += Yield(hist[WWGJets]);
+      VVVJetsYield += Yield(hist[WZZJets]);
+      VVVJetsYield += Yield(hist[ZZZJets]);
+      VVVJetsYield += Yield(hist[WWZJets]);
+      VVVJetsYield += Yield(hist[WWWJets]);
+      VVVJetsYield += Yield(hist[TTWJets]);
+      VVVJetsYield += Yield(hist[TTZJets]);
+      VVVJetsYield += Yield(hist[TTWWJets]);
+      VVVJetsYield += Yield(hist[TTGJets]);
+      
+      ndelta = 0;
 
-  DrawLegend(x0, y0 - ndelta, hist[WW],             Form(" WW (%.0f)",         Yield(hist[WW])), "f"); ndelta += delta;
-  DrawLegend(x0, y0 - ndelta, hist[WgammaToLNuG],   Form(" W#gamma(*) (%.0f)", WGstarYield),     "f"); ndelta += delta;
-  DrawLegend(x0, y0 - ndelta, hist[WJets_Madgraph], Form(" W+jets (%.0f)",     WJetsYield),      "f"); ndelta += delta;
-  DrawLegend(x0, y0 - ndelta, hist[WWGJets],        Form(" VVV (%.0f)",        VVVJetsYield),    "f"); ndelta += delta;
+      DrawLegend(x0 - 0.23, y0 - ndelta, hist[ggZZ2L2L], Form(" ZZ (%.0f)",  ZZYield),      "f"); ndelta += delta;
+      DrawLegend(x0 - 0.23, y0 - ndelta, hist[WW],       Form(" WV (%.0f)",  WVYield),      "f"); ndelta += delta;
+      DrawLegend(x0 - 0.23, y0 - ndelta, hist[WWGJets],  Form(" VVV (%.0f)", VVVJetsYield), "f"); ndelta += delta;
+    }
 
 
   // CMS titles
@@ -832,7 +855,7 @@ TLegend* DrawLegend(Float_t x1,
 //------------------------------------------------------------------------------
 // SetParameters
 //------------------------------------------------------------------------------
-void SetParameters(UInt_t cut)
+void SetParameters(UInt_t cut, UInt_t mode)
 {
   sChannel[MMM] = "MMM";
   sChannel[EEE] = "EEE";
@@ -885,24 +908,26 @@ void SetParameters(UInt_t cut)
   process[TTGJets]          = "TTGJets";
 
   color[Data]             = kBlack;
+  color[DataPPF]          = kGray+1;
+  color[DataPPP]          = kOrange-2;
   color[DYJets_Madgraph]  = kGreen+2;   // Z+jets
   color[ZJets_Madgraph]   = kGreen+2;   // Z+jets
-  color[ZbbToLL]          = kGray+1;    // Z+bb
-  color[WbbToLNu]         = kGray+1;    // W+bb
-  color[WJets_Madgraph]   = kGray+1;    // W+jets
-  color[WGstarToElNuMad]  = kYellow;    // Wgamma(*)
-  color[WGstarToMuNuMad]  = kYellow;    // Wgamma(*)
-  color[WGstarToTauNuMad] = kYellow;    // Wgamma(*)
-  color[WgammaToLNuG]     = kYellow;    // Wgamma(*)
-  color[TTbar_Madgraph]   = kAzure-9;   // ttbar
-  color[TW]               = kAzure-3;   // tW
-  color[TbarW]            = kAzure-3;   // tW
-  color[WW]               = kAzure;     // WW
+  color[ZbbToLL]          = kGreen+2;   // Z+jets
+  color[WbbToLNu]         = kAzure;     // WV
+  color[WJets_Madgraph]   = kAzure;     // WV
+  color[WGstarToElNuMad]  = kAzure;     // WV
+  color[WGstarToMuNuMad]  = kAzure;     // WV
+  color[WGstarToTauNuMad] = kAzure;     // WV
+  color[WgammaToLNuG]     = kAzure;     // WV
+  color[WW]               = kAzure;     // WV
+  color[WZTo2L2QMad]      = kAzure;     // WV
+  color[TTbar_Madgraph]   = kAzure-9;   // top
+  color[TW]               = kAzure-9;   // top
+  color[TbarW]            = kAzure-9;   // top
   color[WZTo3LNu]         = kOrange-2;  // WZ
-  color[WZTo2L2QMad]      = kBlack;     // WZ(lnuqq)
   color[ZZTo2L2QMad]      = kRed+1;     // ZZ
   color[ZgammaToLLG]      = kRed+1;     // ZZ
-  color[ZZ]               = kRed+1;     // ZZ, REPLACED
+  color[ZZ]               = kRed+1;     // ZZ
   color[ggZZ2L2L]         = kRed+1;     // ZZ
   color[ggZZ4L]           = kRed+1;     // ZZ
   color[ZZ2Mu2Tau]        = kRed+1;     // ZZ
@@ -912,15 +937,15 @@ void SetParameters(UInt_t cut)
   color[ZZ2E2Mu]          = kRed+1;     // ZZ
   color[ZZ4Tau]           = kRed+1;     // ZZ
   color[HZZ4L]            = kRed+1;     // ZZ
-  color[WWGJets]          = kTeal;      // VVV
-  color[WZZJets]          = kTeal;      // VVV
-  color[ZZZJets]          = kTeal;      // VVV
-  color[WWZJets]          = kTeal;      // VVV
-  color[WWWJets]          = kTeal;      // VVV
-  color[TTWJets]          = kTeal;      // VVV
-  color[TTZJets]          = kTeal;      // VVV
-  color[TTWWJets]         = kTeal;      // VVV
-  color[TTGJets]          = kTeal;      // VVV
+  color[WWGJets]          = kBlack;     // VVV
+  color[WZZJets]          = kBlack;     // VVV
+  color[ZZZJets]          = kBlack;     // VVV
+  color[WWZJets]          = kBlack;     // VVV
+  color[WWWJets]          = kBlack;     // VVV
+  color[TTWJets]          = kBlack;     // VVV
+  color[TTZJets]          = kBlack;     // VVV
+  color[TTWWJets]         = kBlack;     // VVV
+  color[TTGJets]          = kBlack;     // VVV
 
   for (UInt_t i=0; i<nProcesses; i++) systError[i] = 0.0;
 
@@ -928,9 +953,10 @@ void SetParameters(UInt_t cut)
   _luminosity       = 19602.0;  // 19468.3 for PU
   _yoffset          = 0.048;
   _verbosity        = 3;
-  _directory        = "Summer12_53X/WH";
+  _directory        = "Summer12_53X/WH/v2";
   _format           = "png";
   _cut              = cut;
+  _mode             = mode;
 
   if (_normalizeMC2Data) printf("\n WARNING: normalizing MC to data\n\n");
 
@@ -950,42 +976,59 @@ void SetParameters(UInt_t cut)
   vprocess.clear();
 
   vprocess.push_back(Data);
-  vprocess.push_back(DYJets_Madgraph);
-  vprocess.push_back(ZJets_Madgraph);
-  vprocess.push_back(ZbbToLL);
-  vprocess.push_back(WbbToLNu);
-  vprocess.push_back(WJets_Madgraph);
-  vprocess.push_back(WGstarToElNuMad);
-  vprocess.push_back(WGstarToMuNuMad);
-  vprocess.push_back(WGstarToTauNuMad);
-  vprocess.push_back(WgammaToLNuG);
-  vprocess.push_back(TTbar_Madgraph);
-  vprocess.push_back(TW);
-  vprocess.push_back(TbarW);
-  vprocess.push_back(WW);
-  vprocess.push_back(WZTo2L2QMad);
-  vprocess.push_back(ZZTo2L2QMad);
-  vprocess.push_back(ZgammaToLLG);
-  //  vprocess.push_back(ZZ);  // REPLACED
-  vprocess.push_back(ggZZ2L2L);
-  vprocess.push_back(ggZZ4L);
-  vprocess.push_back(ZZ2Mu2Tau);
-  vprocess.push_back(ZZ4E);
-  vprocess.push_back(ZZ2E2Tau);
-  vprocess.push_back(ZZ4Mu);
-  vprocess.push_back(ZZ2E2Mu);
-  vprocess.push_back(ZZ4Tau);
-  vprocess.push_back(HZZ4L);
-  vprocess.push_back(WWGJets);
-  vprocess.push_back(WZZJets);
-  vprocess.push_back(ZZZJets);
-  vprocess.push_back(WWZJets);
-  vprocess.push_back(WWWJets);
-  vprocess.push_back(TTWJets);
-  vprocess.push_back(TTZJets);
-  vprocess.push_back(TTWWJets);
-  vprocess.push_back(TTGJets);
-  vprocess.push_back(WZTo3LNu);
+
+  if (mode == PPPmode)
+    {
+      vprocess.push_back(DataPPF);
+      vprocess.push_back(DataPPP);
+    }
+  else
+    {
+      vprocess.push_back(WbbToLNu);
+      vprocess.push_back(WJets_Madgraph);
+      vprocess.push_back(WGstarToElNuMad);
+      vprocess.push_back(WGstarToMuNuMad);
+      vprocess.push_back(WGstarToTauNuMad);
+      vprocess.push_back(WgammaToLNuG);
+      vprocess.push_back(WW);
+      vprocess.push_back(WZTo2L2QMad);
+
+      if (mode == MCmode)
+	{
+	  vprocess.push_back(TTbar_Madgraph);
+	  vprocess.push_back(TW);
+	  vprocess.push_back(TbarW);
+	  vprocess.push_back(ZZTo2L2QMad);
+	  vprocess.push_back(DYJets_Madgraph);
+	  vprocess.push_back(ZJets_Madgraph);
+	  vprocess.push_back(ZbbToLL);
+	}
+      else if (mode == PPFmode)
+	{
+	  vprocess.push_back(DataPPF);
+	}
+      
+      vprocess.push_back(ZgammaToLLG);
+      vprocess.push_back(ggZZ2L2L);
+      vprocess.push_back(ggZZ4L);
+      vprocess.push_back(ZZ2Mu2Tau);
+      vprocess.push_back(ZZ4E);
+      vprocess.push_back(ZZ2E2Tau);
+      vprocess.push_back(ZZ4Mu);
+      vprocess.push_back(ZZ2E2Mu);
+      vprocess.push_back(ZZ4Tau);
+      vprocess.push_back(HZZ4L);
+      vprocess.push_back(WWGJets);
+      vprocess.push_back(WZZJets);
+      vprocess.push_back(ZZZJets);
+      vprocess.push_back(WWZJets);
+      vprocess.push_back(WWWJets);
+      vprocess.push_back(TTWJets);
+      vprocess.push_back(TTZJets);
+      vprocess.push_back(TTWWJets);
+      vprocess.push_back(TTGJets);
+      vprocess.push_back(WZTo3LNu);
+    }
 }
 
 
@@ -994,8 +1037,18 @@ void SetParameters(UInt_t cut)
 //------------------------------------------------------------------------------
 void ReadInputFiles(UInt_t channel)
 {
-  if (channel == EEE || channel == EEM) process[Data] = "DoubleElectron";
-  if (channel == MMM || channel == MME) process[Data] = "DoubleMu";
+  if (channel == EEE || channel == EEM)
+    {
+      process[Data]    = "DoubleElectron";
+      process[DataPPF] = "DoubleElectron_PPF";
+      process[DataPPP] = "DoubleElectron_PPP";
+    }
+  else if (channel == MMM || channel == MME)
+    {
+      process[Data]    = "DoubleMu";
+      process[DataPPF] = "DoubleMu_PPF";
+      process[DataPPP] = "DoubleMu_PPP";
+    }
 
   TString path = Form("%s/piedra/work/WZXS8TeV/results/%s/",
 		      GuessLocalBasePath().Data(),
