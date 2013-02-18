@@ -184,7 +184,7 @@ TString  GuessLocalBasePath       ();
 // XS
 //------------------------------------------------------------------------------
 void XS(UInt_t cut          = AtLeast3Leptons,
-	UInt_t mode         = PPFmode,
+	UInt_t mode         = MCmode,
 	UInt_t closure_test = 1,
 	Bool_t batch        = false)
 {
@@ -196,7 +196,7 @@ void XS(UInt_t cut          = AtLeast3Leptons,
 
   for (UInt_t channel=0; channel<nChannels; channel++) {
 
-    if (channel != MMM) continue;
+    if (channel != EEE) continue;
 
     if (ReadInputFiles(channel) < 0) break;
     
@@ -207,11 +207,14 @@ void XS(UInt_t cut          = AtLeast3Leptons,
     DrawHistogram("hNPV"          + suffix, "number of PV",               -1, 0, "NULL", linY, 0, 30);
     DrawHistogram("hSumCharges"   + suffix, "q_{1} + q_{2} + q_{3}",      -1, 0, "NULL", linY);
     DrawHistogram("hMET"          + suffix, "E_{T}^{miss}",                5, 0, "GeV",  linY);
-    DrawHistogram("hInvMass2Lep"  + suffix, "m_{#font[12]{ll}}",           2, 0, "GeV",  linY, 60, 120);
     DrawHistogram("hInvMass3Lep"  + suffix, "m_{#font[12]{3l}}",          10, 0, "GeV",  linY);
     DrawHistogram("hPtLepton1"    + suffix, "p_{T}^{first lepton}",        5, 0, "GeV",  linY);
     DrawHistogram("hPtLepton2"    + suffix, "p_{T}^{second lepton}",       5, 0, "GeV",  linY);
     DrawHistogram("hPtLepton3"    + suffix, "p_{T}^{third lepton}",        5, 0, "GeV",  linY);
+
+    if (cut < HasZCandidate) continue;
+
+    DrawHistogram("hInvMass2Lep"  + suffix, "m_{#font[12]{ll}}",           2, 0, "GeV",  linY, 60, 120);
     DrawHistogram("hDPhiZLeptons" + suffix, "#Delta#phi_{#font[12]{ll}}",  5, 1, "^{o}", linY);
     DrawHistogram("hPtZLepton1"   + suffix, "p_{T}^{Z leading lepton}",    5, 0, "GeV",  linY);
     DrawHistogram("hPtZLepton2"   + suffix, "p_{T}^{Z trailing lepton}",   5, 0, "GeV",  linY);

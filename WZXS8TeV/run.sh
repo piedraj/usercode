@@ -16,10 +16,10 @@
 
  root -l -b -q RunPROOF_WZ.C\(\"DYJets_Madgraph\"\);   # line  3
  root -l -b -q RunPROOF_WZ.C\(\"ZJets_Madgraph\"\);    # line  4
+ root -l -b -q RunPROOF_WZ.C\(\"ZbbToLL\"\);           # line  5
 
  ./resetproof.sh -a
 
- root -l -b -q RunPROOF_WZ.C\(\"ZbbToLL\"\);           # line  5
  root -l -b -q RunPROOF_WZ.C\(\"WbbToLNu\"\);          # line  7
  root -l -b -q RunPROOF_WZ.C\(\"WJets_Madgraph\"\);    # line  8
  root -l -b -q RunPROOF_WZ.C\(\"WGstarToElNuMad\"\);   # line  9
