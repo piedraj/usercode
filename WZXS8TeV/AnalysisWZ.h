@@ -147,6 +147,7 @@ class AnalysisWZ: public CMSAnalysisSelectorMiniTrees
   TH1D*                       hPtLepton1   [nChannels][nCuts];
   TH1D*                       hPtLepton2   [nChannels][nCuts];
   TH1D*                       hPtLepton3   [nChannels][nCuts];
+  TH1D*                       hPtLeadingJet[nChannels][nCuts];
   TH1D*                       hDPhiZLeptons[nChannels][nCuts];
   TH1D*                       hPtZLepton1  [nChannels][nCuts];
   TH1D*                       hPtZLepton2  [nChannels][nCuts];
@@ -179,6 +180,7 @@ class AnalysisWZ: public CMSAnalysisSelectorMiniTrees
   Double_t                    invMass2Lep;
   Double_t                    invMass3Lep;
   Double_t                    sumCharges;
+  Double_t                    ptLeadingJet;
   UInt_t                      theChannel;
 
   Double_t                    dataDriven_weight_lo;

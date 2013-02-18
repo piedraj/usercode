@@ -43,6 +43,7 @@ void AnalysisWZ::Initialise()
       hPtLepton1   [i][j] = CreateH1D(TString("hPtLepton1"    + suffix), "", 200,  0, 200);
       hPtLepton2   [i][j] = CreateH1D(TString("hPtLepton2"    + suffix), "", 200,  0, 200);
       hPtLepton3   [i][j] = CreateH1D(TString("hPtLepton3"    + suffix), "", 200,  0, 200);    
+      hPtLeadingJet[i][j] = CreateH1D(TString("hPtLeadingJet" + suffix), "", 200,  0, 200);    
       hDPhiZLeptons[i][j] = CreateH1D(TString("hDPhiZLeptons" + suffix), "", 320,  0, 3.2);    
       hPtZLepton1  [i][j] = CreateH1D(TString("hPtZLepton1"   + suffix), "", 200,  0, 200);
       hPtZLepton2  [i][j] = CreateH1D(TString("hPtZLepton2"   + suffix), "", 200,  0, 200);
@@ -83,10 +84,11 @@ void AnalysisWZ::InsideLoop()
 
   AnalysisLeptons.clear();
 
-  invMass2Lep =  0;
-  invMass3Lep =  0;
-  sumCharges  =  0;
-  theChannel  = -1;
+  invMass2Lep  =  0;
+  invMass3Lep  =  0;
+  sumCharges   =  0;
+  ptLeadingJet =  0;
+  theChannel   = -1;
 
 
   // MC filters
@@ -271,14 +273,11 @@ void AnalysisWZ::InsideLoop()
   if (AnalysisLeptons[0].v.Pt() <= 20) return;
   if (AnalysisLeptons[1].v.Pt() <= 20) return;
 
-  if (closure_test && AnalysisLeptons[2].v.Pt() > 20)
-    {
-      return;
-    }
-  else if (AnalysisLeptons[2].v.Pt() <= 20)
-    {
-      return;
-    }
+  Bool_t pt3pass = (AnalysisLeptons[2].v.Pt() > 20);
+
+  if (closure_test) pt3pass = !pt3pass;
+
+  if (!pt3pass) return;
 
   if (AnalysisLeptons.size() > 3 & AnalysisLeptons[3].v.Pt() > 20) return;
 
@@ -367,9 +366,24 @@ void AnalysisWZ::InsideLoop()
     }
   }
 
-  if (invMass2Lep < 40) return;
+  if (invMass2Lep < 12) return;
 
   invMass3Lep = (ZLepton1 + ZLepton2 + WLepton).M();
+
+
+  // Jet requirements
+  //----------------------------------------------------------------------------
+  for (UInt_t i=0; i<T_JetAKCHS_Px->size(); i++) {
+	
+    TLorentzVector Jet(T_JetAKCHS_Px->at(i),
+		       T_JetAKCHS_Py->at(i),
+		       T_JetAKCHS_Pz->at(i),
+		       T_JetAKCHS_Energy->at(i));
+
+    if (Jet.Pt() > ptLeadingJet) ptLeadingJet = Jet.Pt();
+  }
+
+  if (closure_test && ptLeadingJet > 40) return;
 
   FillHistograms(theChannel, AtLeast3Leptons);
 
@@ -391,36 +405,11 @@ void AnalysisWZ::InsideLoop()
   FillHistograms(theChannel, HasWCandidate);
 
 
-  // Jet requirements
-  //----------------------------------------------------------------------------
-  Double_t leadingJetPt = 0;
-
-  if (closure_test)
-    {
-      for (UInt_t i=0; i<T_JetAKCHS_Px->size(); i++) {
-	
-	TLorentzVector Jet(T_JetAKCHS_Px->at(i),
-			   T_JetAKCHS_Py->at(i),
-			   T_JetAKCHS_Pz->at(i),
-			   T_JetAKCHS_Energy->at(i));
-
-	if (Jet.Pt() > leadingJetPt) leadingJetPt = Jet.Pt();
-      }
-    }
-
-  if (closure_test && leadingJetPt > 40) return;
-
-
   // MET
   //----------------------------------------------------------------------------
-  if (closure_test && T_METPFTypeI_ET > 25)
-    {
-      return;
-    }
-  else if (T_METPFTypeI_ET <= 30)
-    {
-      return;
-    }
+  Bool_t metPass = (closure_test) ? (T_METPFTypeI_ET < 25) : (T_METPFTypeI_ET > 30);
+
+  if (!metPass) return;
 
   efficiency_weight *= (dataDriven_weight_hi / dataDriven_weight_lo);
 
@@ -798,6 +787,7 @@ void AnalysisWZ::FillHistograms(UInt_t iChannel, UInt_t iCut)
   hPtLepton1   [iChannel][iCut]->Fill(AnalysisLeptons[0].v.Pt(), hweight);
   hPtLepton2   [iChannel][iCut]->Fill(AnalysisLeptons[1].v.Pt(), hweight);
   hPtLepton3   [iChannel][iCut]->Fill(AnalysisLeptons[2].v.Pt(), hweight);
+  hPtLeadingJet[iChannel][iCut]->Fill(ptLeadingJet,              hweight);
   hDPhiZLeptons[iChannel][iCut]->Fill(fabs(deltaPhi),            hweight);
   hPtZLepton1  [iChannel][iCut]->Fill(pt1,                       hweight);
   hPtZLepton2  [iChannel][iCut]->Fill(pt2,                       hweight);

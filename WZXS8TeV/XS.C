@@ -105,6 +105,7 @@ TString         process  [nProcesses];
 Color_t         color    [nProcesses];
 Double_t        systError[nProcesses];
 
+Bool_t         _closure_test;
 Bool_t         _normalizeMC2Data;
 Double_t       _luminosity;
 Double_t       _yoffset;
@@ -121,9 +122,10 @@ vector<UInt_t>  vprocess;
 // Member functions
 //------------------------------------------------------------------------------
 void     SetParameters            (UInt_t      cut,
-				   UInt_t      mode);
+				   UInt_t      mode,
+				   UInt_t      closure_test);
 
-void     ReadInputFiles           (UInt_t      channel);
+Int_t    ReadInputFiles           (UInt_t      channel);
 
 void     MeasureTheCrossSection   (UInt_t      channel);
 
@@ -181,21 +183,22 @@ TString  GuessLocalBasePath       ();
 //------------------------------------------------------------------------------
 // XS
 //------------------------------------------------------------------------------
-void XS(UInt_t cut   = AtLeast3Leptons,
-	UInt_t mode  = PPFmode,
-	Bool_t batch = false)
+void XS(UInt_t cut          = AtLeast3Leptons,
+	UInt_t mode         = PPFmode,
+	UInt_t closure_test = 1,
+	Bool_t batch        = false)
 {
   if (cut < AtLeast3Leptons) return;
 
   gROOT->SetBatch(batch);
 
-  SetParameters(cut, mode);
+  SetParameters(cut, mode, closure_test);
 
   for (UInt_t channel=0; channel<nChannels; channel++) {
 
     if (channel != MMM) continue;
 
-    ReadInputFiles(channel);
+    if (ReadInputFiles(channel) < 0) break;
     
     if (cut == MET) MeasureTheCrossSection(channel);
 
@@ -855,7 +858,9 @@ TLegend* DrawLegend(Float_t x1,
 //------------------------------------------------------------------------------
 // SetParameters
 //------------------------------------------------------------------------------
-void SetParameters(UInt_t cut, UInt_t mode)
+void SetParameters(UInt_t cut,
+		   UInt_t mode,
+		   UInt_t closure_test)
 {
   sChannel[MMM] = "MMM";
   sChannel[EEE] = "EEE";
@@ -953,10 +958,11 @@ void SetParameters(UInt_t cut, UInt_t mode)
   _luminosity       = 19602.0;  // 19468.3 for PU
   _yoffset          = 0.048;
   _verbosity        = 3;
-  _directory        = "Summer12_53X/WH/v2";
+  _directory        = "Summer12_53X/WH";
   _format           = "png";
   _cut              = cut;
   _mode             = mode;
+  _closure_test     = closure_test;
 
   if (_normalizeMC2Data) printf("\n WARNING: normalizing MC to data\n\n");
 
@@ -1035,7 +1041,7 @@ void SetParameters(UInt_t cut, UInt_t mode)
 //------------------------------------------------------------------------------
 // ReadInputFiles
 //------------------------------------------------------------------------------
-void ReadInputFiles(UInt_t channel)
+Int_t ReadInputFiles(UInt_t channel)
 {
   if (channel == EEE || channel == EEM)
     {
@@ -1058,7 +1064,9 @@ void ReadInputFiles(UInt_t channel)
 
     UInt_t j = vprocess.at(i);
 
-    input[j] = new TFile(path + process[j] + ".root");
+    TString suffix = (_closure_test) ? "_closure_test" : "";
+
+    input[j] = new TFile(path + process[j] + suffix + ".root");
 
 
     // Debug
@@ -1066,8 +1074,14 @@ void ReadInputFiles(UInt_t channel)
     TH1D* dummy = (TH1D*)input[j]->Get("hCounter_MMM_AtLeast3Leptons");
 
     if (!dummy)
-      printf(" [ReadInputFiles] The %s file is broken.\n", process[j].Data());
+      {
+	printf(" [ReadInputFiles] The %s file is broken or it does not exist.\n", process[j].Data());
+
+	return -1;
+      }
   }
+
+  return 0;
 }
 
 
