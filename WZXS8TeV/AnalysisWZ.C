@@ -270,6 +270,8 @@ void AnalysisWZ::InsideLoop()
   //----------------------------------------------------------------------------
   if (AnalysisLeptons.size() < 3) return;
 
+  if (closure_test && AnalysisLeptons.size() != 3) return;
+
   std::sort(AnalysisLeptons.begin(), AnalysisLeptons.end());
 
   std::reverse(AnalysisLeptons.begin(), AnalysisLeptons.end());
@@ -324,7 +326,7 @@ void AnalysisWZ::InsideLoop()
   efficiency_weight *= dataDriven_weight_lo;
 
 
-  // Save the leading jet pt
+  // Determine the leading jet pt
   //----------------------------------------------------------------------------
   for (UInt_t i=0; i<T_JetAKCHS_Px->size(); i++) {
 	
