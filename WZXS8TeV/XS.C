@@ -106,7 +106,6 @@ Color_t         color    [nProcesses];
 Double_t        systError[nProcesses];
 
 Bool_t         _closure_test;
-Bool_t         _normalizeMC2Data;
 Double_t       _luminosity;
 Double_t       _yoffset;
 Int_t          _verbosity;
@@ -185,7 +184,7 @@ TString  GuessLocalBasePath       ();
 //------------------------------------------------------------------------------
 void XS(UInt_t cut          = HasZCandidate,
 	UInt_t mode         = MCmode,
-	UInt_t closure_test = 0,
+	UInt_t closure_test = 1,
 	Bool_t batch        = true)
 {
   if (cut < AtLeast3Leptons) return;
@@ -402,7 +401,7 @@ void DrawHistogram(TString  hname,
 
   // Normalize MC to data
   //----------------------------------------------------------------------------
-  if (_normalizeMC2Data)
+  if (0)
     {
       for (UInt_t i=0; i<vprocess.size(); i++)
 	{
@@ -957,7 +956,6 @@ void SetParameters(UInt_t cut,
 
   for (UInt_t i=0; i<nProcesses; i++) systError[i] = 0.0;
 
-  _normalizeMC2Data = false;
   _luminosity       = 19602.0;  // 19468.3 for PU
   _yoffset          = 0.048;
   _verbosity        = 3;
@@ -967,11 +965,14 @@ void SetParameters(UInt_t cut,
   _mode             = mode;
   _closure_test     = closure_test;
 
-  if (_normalizeMC2Data) printf("\n WARNING: normalizing MC to data\n\n");
+  if (_closure_test) _directory += "/closure_test";
 
-  TString patch = (_normalizeMC2Data) ? "normalized/" : "";
+  _output = _format + "/" + _directory;
 
-  _output = _format + "/" + _directory + "/" + patch + sCut[_cut];
+  if (_mode == MCmode)  _output += "/MC/";
+  if (_mode == PPFmode) _output += "/PPF/";
+
+  _output += sCut[_cut];
 
   gInterpreter->ExecuteMacro("HiggsPaperStyle.C");
 
@@ -1067,9 +1068,7 @@ Int_t ReadInputFiles(UInt_t channel)
 
     UInt_t j = vprocess.at(i);
 
-    TString suffix = (_closure_test) ? "_closure_test" : "";
-
-    input[j] = new TFile(path + process[j] + suffix + ".root");
+    input[j] = new TFile(path + process[j] + ".root");
 
 
     // Debug

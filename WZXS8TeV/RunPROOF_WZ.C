@@ -88,12 +88,12 @@ void RunPROOF_WZ(TString  sample       = "DoubleMu",
   //----------------------------------------------------------------------------
   TString outputDir = "../WZXS8TeV/results/Summer12_53X/WH";
 
+  if (closure_test) outputDir += "/closure_test";
+
   gSystem->mkdir(outputDir, kTRUE);
 
   if (mode == PPF) sample += "_PPF";
   if (mode == PPP) sample += "_PPP";
-
-  if (closure_test) sample += "_closure_test";
 
   TString outputFile = outputDir + "/" + sample + ".root";
   

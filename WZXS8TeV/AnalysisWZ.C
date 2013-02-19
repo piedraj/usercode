@@ -130,13 +130,13 @@ void AnalysisWZ::InsideLoop()
 			      T_Muon_Pz->at(i),
 			      T_Muon_Energy->at(i));
     
-    if (MuonVector.Pt() <= 10) continue;
-
-    if (fabs(MuonVector.Eta()) >= 2.4) continue;
-
     Double_t pt = MuonVector.Pt();
 
     Double_t eta = fabs(MuonVector.Eta());
+
+    if (pt <= 10) continue;
+
+    if (eta >= 2.4) continue;
 
     Bool_t isnotglobal = ( T_Muon_IsAllStandAloneMuons->at(i)
 			   && !T_Muon_IsGlobalMuon->at(i)
@@ -205,13 +205,13 @@ void AnalysisWZ::InsideLoop()
 				  T_Elec_Pz->at(i),
 				  T_Elec_Energy->at(i));
 
-    if (ElectronVector.Pt() <= 10) continue;
-
-    if (fabs(ElectronVector.Eta()) >= 2.5) continue;
-
     Double_t pt = ElectronVector.Pt();
 
     Double_t eta = fabs(ElectronVector.Eta());
+
+    if (pt <= 10) continue;
+
+    if (eta >= 2.5) continue;
 
     if (!ElectronID(i)) continue;
 
@@ -280,13 +280,19 @@ void AnalysisWZ::InsideLoop()
   // Classify the channels
   //----------------------------------------------------------------------------
   UInt_t electronCounter = 0;
+  UInt_t tightCounter    = 0;
 
   for (UInt_t i=0; i<3; i++)
     {
       if (AnalysisLeptons[i].flavor == Electron) electronCounter++;
+      if (AnalysisLeptons[i].type   == Tight)    tightCounter++;
 
       sumCharges += AnalysisLeptons[i].charge;
     }
+
+  if (tightCounter < 2) return;
+
+  if (closure_test && tightCounter != 2) return;
 
   invMass3Lep = (AnalysisLeptons[0].v + AnalysisLeptons[1].v + AnalysisLeptons[2].v).M();
 
@@ -352,11 +358,6 @@ void AnalysisWZ::InsideLoop()
   
   if (AnalysisLeptons.size() > 3 & AnalysisLeptons[3].v.Pt() > 20) return;
   
-  if (AnalysisLeptons[0].type != Tight) return;
-  if (AnalysisLeptons[1].type != Tight) return;
-  
-  if (closure_test && AnalysisLeptons[2].type != Fail) return;
-
   FillHistograms(theChannel, AtLeast3Leptons);
 
 
@@ -395,7 +396,7 @@ void AnalysisWZ::InsideLoop()
 
   // Jet pt requirement
   //----------------------------------------------------------------------------
-  if (closure_test && ptLeadingJet > 40) return;
+  //  if (closure_test && ptLeadingJet > 40) return;
 
 
   // HasZCandidate
@@ -417,7 +418,9 @@ void AnalysisWZ::InsideLoop()
 
   // MET
   //----------------------------------------------------------------------------
-  Bool_t metPass = (closure_test) ? (T_METPFTypeI_ET < 25) : (T_METPFTypeI_ET > 30);
+  Bool_t metPass = (T_METPFTypeI_ET > 30);
+
+  if (closure_test) metPass = !metPass;
 
   if (!metPass) return;
 
@@ -749,13 +752,13 @@ void AnalysisWZ::FillChannelCounters(UInt_t iChannel, UInt_t iCut)
 //------------------------------------------------------------------------------
 Bool_t AnalysisWZ::FillCounters(UInt_t nElec, UInt_t nMuon, UInt_t iCut)
 {
-  if (nElec < 2 && nMuon < 2 && (nElec + nMuon) < 2) return false;
+  if (nElec + nMuon < 3) return false;
 
-  if (nElec >= 2) FillChannelCounters(EEE, iCut);
+  if (nElec >= 3) FillChannelCounters(EEE, iCut);
 
-  if (nMuon >= 2) FillChannelCounters(MMM, iCut);
+  if (nMuon >= 3) FillChannelCounters(MMM, iCut);
 
-  if (nElec + nMuon >= 2)
+  if (nElec + nMuon >= 3)
     {
       FillChannelCounters(EEM, iCut);
       FillChannelCounters(MME, iCut);
@@ -904,35 +907,33 @@ Double_t AnalysisWZ::GetPPFWeight(UInt_t jetPt)
   Double_t promptProbability[3];
   Double_t fakeProbability[3];
 
-  UInt_t ilepton = 0;
-  UInt_t ntight  = 0;
+  UInt_t ntight = 0;
 
-  for (std::vector<Lepton>::iterator lep_iterator=AnalysisLeptons.begin();
-       lep_iterator!=AnalysisLeptons.end(); lep_iterator++) {
+  for (UInt_t i=0; i<3; i++) {
     
-    Lepton lep = (*lep_iterator);
+    Lepton lep = AnalysisLeptons[i];
 
     Double_t f = (jetPt == LowPtJet) ? lep.f_lo : lep.f_hi;
 
     Double_t p = lep.p;
 
+    p = 1.0;  // TEMPORARY /////////////////////////////////////////////////////
+
     if (lep.type == Tight)
       {
 	ntight++;
 	
-	promptProbability[ilepton] = p * (1 - f);
-	fakeProbability[ilepton]   = f * (1 - p);
+	promptProbability[i] = p * (1 - f);
+	fakeProbability[i]   = f * (1 - p);
       }
     else if (lep.type == Fail)
       {
-	promptProbability[ilepton] = p * f;
-	fakeProbability[ilepton]   = p * f;
+	promptProbability[i] = p * f;
+	fakeProbability[i]   = p * f;
       }
 
-    promptProbability[ilepton] /= (p - f);
-    fakeProbability[ilepton]   /= (p - f);
-
-    if (++ilepton == 3) break;
+    promptProbability[i] /= (p - f);
+    fakeProbability[i]   /= (p - f);
   }
 
   Double_t PPF = promptProbability[0] * promptProbability[1] * fakeProbability[2];
@@ -954,32 +955,30 @@ Double_t AnalysisWZ::GetPPPWeight(UInt_t jetPt)
 {
   Double_t promptProbability[3];
 
-  UInt_t ilepton = 0;
-  UInt_t ntight  = 0;
+  UInt_t ntight = 0;
 
-  for (std::vector<Lepton>::iterator lep_iterator=AnalysisLeptons.begin();
-       lep_iterator!=AnalysisLeptons.end(); lep_iterator++) {
+  for (UInt_t i=0; i<3; i++) {
     
-    Lepton lep = (*lep_iterator);
+    Lepton lep = AnalysisLeptons[i];
 
     Double_t f = (jetPt == LowPtJet) ? lep.f_lo : lep.f_hi;
 
     Double_t p = lep.p;
 
+    p = 1.0;  // TEMPORARY /////////////////////////////////////////////////////
+
     if (lep.type == Tight)
       {
 	ntight++;
 
-	promptProbability[ilepton] = p * (1 - f);
+	promptProbability[i] = p * (1 - f);
       }
     else if (lep.type == Fail)
       {
-	promptProbability[ilepton] = p * f;
+	promptProbability[i] = p * f;
       }
 
-    promptProbability[ilepton] /= (p - f);
-
-    if (++ilepton == 3) break;
+    promptProbability[i] /= (p - f);
   }
 
   Double_t PPP = promptProbability[0] * promptProbability[1] * promptProbability[2];
