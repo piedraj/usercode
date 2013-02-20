@@ -221,13 +221,15 @@ void AnalysisWZ::InsideLoop()
 
     countPVElectrons++;
 
-    if (ElectronIsolation(i) == Rejected) continue;
+    //    if (ElectronIsolation(i) == Rejected) continue;
 
     countIsoElectrons++;
 
     UInt_t electron_type = ElectronBDT(i);
 
-    if (electron_type != ElectronIsolation(i)) continue;
+    //    if (electron_type != ElectronIsolation(i)) continue;
+
+    if (electron_type == Rejected) continue;  // PATCH -- Remove when ElectronIsolation is fixed
 	
     countIsoGoodElectrons++;
 
@@ -525,13 +527,13 @@ UInt_t AnalysisWZ::ElectronBDT(UInt_t iElec)
     {
       if      (eta <= 0.8)                {mvaCut = 0.00;}
       else if (eta > 0.8 && eta <= 1.479) {mvaCut = 0.10;}
-      else if (eta > 1.479)               {mvaCut = 0.62;}
+      else                                {mvaCut = 0.62;}
     }
   else
     {
       if      (eta <= 0.8)                 {mvaCut = 0.94;}
       else if (eta > 0.8 && eta <= 1.479 ) {mvaCut = 0.85;}
-      else if (eta > 1.479 )               {mvaCut = 0.92;}
+      else                                 {mvaCut = 0.92;}
     }
 
   if (T_Elec_MVA->at(iElec) > mvaCut)

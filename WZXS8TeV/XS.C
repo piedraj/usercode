@@ -183,7 +183,7 @@ TString  GuessLocalBasePath       ();
 // XS
 //------------------------------------------------------------------------------
 void XS(UInt_t cut          = HasZCandidate,
-	UInt_t mode         = MCmode,
+	UInt_t mode         = PPFmode,
 	UInt_t closure_test = 1,
 	Bool_t batch        = false)
 {
@@ -194,6 +194,8 @@ void XS(UInt_t cut          = HasZCandidate,
   SetParameters(cut, mode, closure_test);
 
   for (UInt_t channel=0; channel<nChannels; channel++) {
+
+    if (channel != MMM) continue;
 
     if (ReadInputFiles(channel) < 0) break;
     

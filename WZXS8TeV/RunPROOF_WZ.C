@@ -23,7 +23,7 @@ TString  dataPath       = "";
 
 void RunPROOF_WZ(TString  sample       = "DoubleMu",
 		 Int_t    mode         = RAW,
-		 Int_t    closure_test = 1,
+		 Int_t    closure_test = 0,
 		 Long64_t nEvents      = -1,
 		 Bool_t   update       = true)
 {
