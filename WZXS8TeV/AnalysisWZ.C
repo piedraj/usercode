@@ -33,7 +33,7 @@ void AnalysisWZ::Initialise()
       hCounterEff[i][j] = CreateH1D(TString("hCounterEff" + suffix), "", 3, 0, 3);
       hCounter   [i][j] = CreateH1D(TString("hCounter"    + suffix), "", 3, 0, 3);
 
-      if (j < AtLeast3Leptons) continue;
+      if (j < Exactly3Leptons) continue;
 
       hNPV         [i][j] = CreateH1D(TString("hNPV"          + suffix), "",  50,  0,  50);
       hMET         [i][j] = CreateH1D(TString("hMET"          + suffix), "", 200,  0, 200);
@@ -81,17 +81,16 @@ void AnalysisWZ::InsideLoop()
 {
   isData = (sample.Contains("DoubleElectron") || sample.Contains("DoubleMu")) ? 1 : 0;
 
-  pu_weight = (isData) ? 1.0 : fPUWeight->GetWeight((Int_t)T_Event_nTruePU);
+  pu_weight = (isData) ? 1. : fPUWeight->GetWeight((Int_t)T_Event_nTruePU);
 
   efficiency_weight = pu_weight;
 
   AnalysisLeptons.clear();
 
-  invMass2Lep  =  0;
-  invMass3Lep  =  0;
-  sumCharges   =  0;
-  ptLeadingJet =  0;
-  theChannel   = -1;
+  invMass2Lep  = 0.;
+  invMass3Lep  = 0.;
+  sumCharges   = 0.;
+  ptLeadingJet = 0.;
 
 
   // MC filters
@@ -105,7 +104,10 @@ void AnalysisWZ::InsideLoop()
 
   // AllEvents
   //----------------------------------------------------------------------------
-  if (!FillCounters(999, 999, AllEvents)) return;
+  UInt_t allElectrons = T_Elec_Px->size();
+  UInt_t allMuons     = T_Muon_Px->size();
+
+  if (!FillCounters(allElectrons, allMuons, AllEvents)) return;
 
 
   // HLT
@@ -113,7 +115,7 @@ void AnalysisWZ::InsideLoop()
   if (sample.Contains("DoubleMu")       && !T_passTriggerDoubleMu) return;
   if (sample.Contains("DoubleElectron") && !T_passTriggerDoubleEl) return;
 
-  if (!FillCounters(999, 999, HLT)) return;
+  if (!FillCounters(allElectrons, allMuons, HLT)) return;
 
 
   // Loop over muons
@@ -134,7 +136,7 @@ void AnalysisWZ::InsideLoop()
 
     Double_t eta = fabs(MuonVector.Eta());
 
-    if (pt <= 10) continue;
+    if (pt <= 10.) continue;
 
     if (eta >= 2.4) continue;
 
@@ -155,8 +157,6 @@ void AnalysisWZ::InsideLoop()
     if (T_Muon_MVARings->at(i) < -0.6) continue;
 
     UInt_t muon_type = MuonIsolation(i);
-
-    if (muon_type == Rejected) continue;
 
     if (muon_type != MuonCloseToPV(i)) continue;
 
@@ -209,7 +209,7 @@ void AnalysisWZ::InsideLoop()
 
     Double_t eta = fabs(ElectronVector.Eta());
 
-    if (pt <= 10) continue;
+    if (pt <= 10.) continue;
 
     if (eta >= 2.5) continue;
 
@@ -226,8 +226,6 @@ void AnalysisWZ::InsideLoop()
     countIsoElectrons++;
 
     UInt_t electron_type = ElectronBDT(i);
-
-    if (electron_type == Rejected) continue;
 
     if (electron_type != ElectronIsolation(i)) continue;
 	
@@ -260,17 +258,15 @@ void AnalysisWZ::InsideLoop()
 
   // Require at least 2 leptons
   //----------------------------------------------------------------------------
-  if (!FillCounters(countElectrons,        countMuons,        Has2Leptons))        return;
-  if (!FillCounters(countPVElectrons,      countPVMuons,      Has2PVLeptons))      return;
-  if (!FillCounters(countIsoElectrons,     countIsoMuons,     Has2IsoLeptons))     return;
-  if (!FillCounters(countIsoGoodElectrons, countIsoGoodMuons, Has2IsoGoodLeptons)) return;
+  if (!FillCounters(countElectrons,        countMuons,        Has3Leptons))        return;
+  if (!FillCounters(countPVElectrons,      countPVMuons,      Has3PVLeptons))      return;
+  if (!FillCounters(countIsoElectrons,     countIsoMuons,     Has3IsoLeptons))     return;
+  if (!FillCounters(countIsoGoodElectrons, countIsoGoodMuons, Has3IsoGoodLeptons)) return;
 
 
   // Sort the leptons by pt
   //----------------------------------------------------------------------------
-  if (AnalysisLeptons.size() < 3) return;
-
-  if (closure_test && AnalysisLeptons.size() != 3) return;
+  if (AnalysisLeptons.size() != 3) return;
 
   std::sort(AnalysisLeptons.begin(), AnalysisLeptons.end());
 
@@ -292,7 +288,7 @@ void AnalysisWZ::InsideLoop()
 
   if (tightCounter < 2) return;
 
-  if (closure_test && tightCounter != 2) return;
+  if (mode == PPF && tightCounter != 2) return;  // TEMPORARY //////////////////
 
   invMass3Lep = (AnalysisLeptons[0].v + AnalysisLeptons[1].v + AnalysisLeptons[2].v).M();
 
@@ -315,8 +311,8 @@ void AnalysisWZ::InsideLoop()
   //----------------------------------------------------------------------------
   if (mode == PPF)
     {
-      dataDriven_weight_lo = GetPPFWeight(LowPtJet);
-      dataDriven_weight_hi = GetPPFWeight(HighPtJet);
+      dataDriven_weight_lo = GetPPFWeightApprx(LowPtJet);
+      dataDriven_weight_hi = GetPPFWeightApprx(HighPtJet);
     }
   else if (mode == PPP)
     {
@@ -325,8 +321,8 @@ void AnalysisWZ::InsideLoop()
     }
   else
     {
-      dataDriven_weight_lo = 1.0;
-      dataDriven_weight_hi = 1.0;
+      dataDriven_weight_lo = 1.;
+      dataDriven_weight_hi = 1.;
     }
 
   efficiency_weight *= dataDriven_weight_lo;
@@ -350,15 +346,7 @@ void AnalysisWZ::InsideLoop()
   if (AnalysisLeptons[0].v.Pt() <= 20) return;
   if (AnalysisLeptons[1].v.Pt() <= 20) return;
 
-  Bool_t pt3pass = (AnalysisLeptons[2].v.Pt() > 20);
-
-  if (closure_test) pt3pass = !pt3pass;
-  
-  if (!pt3pass) return;
-  
-  if (AnalysisLeptons.size() > 3 & AnalysisLeptons[3].v.Pt() > 20) return;
-  
-  FillHistograms(theChannel, AtLeast3Leptons);
+  FillHistograms(theChannel, Exactly3Leptons);
 
 
   // Make Z and W candidates
@@ -391,17 +379,17 @@ void AnalysisWZ::InsideLoop()
     }
   }
 
-  if (invMass2Lep < 12) return;
+  if (invMass2Lep < 12.) return;
 
 
   // Jet pt requirement
   //----------------------------------------------------------------------------
-  //  if (closure_test && ptLeadingJet > 40) return;
+  //  if (closure_test && ptLeadingJet > 40.) return;
 
 
   // HasZCandidate
   //----------------------------------------------------------------------------
-  if (invMass2Lep < 71 || invMass2Lep > 111) return;
+  if (invMass2Lep < 71. || invMass2Lep > 111.) return;
 
   FillHistograms(theChannel, HasZCandidate);
 
@@ -552,7 +540,7 @@ UInt_t AnalysisWZ::ElectronBDT(UInt_t iElec)
     }
   else
     {
-      if (mode != RAW || closure_test)
+      if (mode != RAW)
 	{
 	  return Fail;
 	}
@@ -577,13 +565,13 @@ Bool_t AnalysisWZ::ElectronID(UInt_t iElec)
   Double_t trkIso03      = T_Elec_dr03TkSumPt  ->at(iElec);
   Double_t hadIso03      = T_Elec_dr03HcalSumEt->at(iElec);
   Double_t emIso03       = T_Elec_dr03EcalSumEt->at(iElec);
-  Double_t max_emIso03   = std::max(emIso03-1.0, 0.0);
+  Double_t max_emIso03   = std::max(emIso03-1., 0.);
 
   Bool_t pass = false;
 	
   if (fabs(T_Elec_SC_Eta->at(iElec)) < 1.479)
     {
-      pass = sigmaietaieta < 0.01
+      pass = sigmaietaieta   < 0.01
 	&& fabs(deltaPhiIn)  < 0.15
 	&& fabs(deltaEtaIn)  < 0.007
 	&& HtoE              < 0.12
@@ -594,7 +582,7 @@ Bool_t AnalysisWZ::ElectronID(UInt_t iElec)
     }
   else
     {
-      pass = sigmaietaieta < 0.03
+      pass = sigmaietaieta   < 0.03
 	&& fabs(deltaPhiIn)  < 0.1
 	&& fabs(deltaEtaIn)  < 0.009
 	&& HtoE              < 0.1
@@ -637,7 +625,7 @@ UInt_t AnalysisWZ::ElectronIsolation(UInt_t iElec)
     }
   else
     {
-      if (mode != RAW || closure_test)
+      if (mode != RAW)
 	{
 	  return Fail;
 	}
@@ -692,7 +680,7 @@ UInt_t AnalysisWZ::MuonCloseToPV(UInt_t iMuon)
     }
   else
     {
-      if (mode != RAW || closure_test)
+      if (mode != RAW)
 	{
 	  return Fail;
 	}
@@ -723,7 +711,7 @@ UInt_t AnalysisWZ::MuonIsolation(UInt_t iMuon)
     }
   else
     {
-      if (mode != RAW || closure_test)
+      if (mode != RAW)
 	{
 	  return Fail;
 	}
@@ -773,7 +761,7 @@ Bool_t AnalysisWZ::FillCounters(UInt_t nElec, UInt_t nMuon, UInt_t iCut)
 //------------------------------------------------------------------------------
 void AnalysisWZ::FillHistograms(UInt_t iChannel, UInt_t iCut)
 {
-  if (iCut < AtLeast3Leptons) return;
+  if (iCut < Exactly3Leptons) return;
 
   FillChannelCounters(iChannel, iCut);
 
@@ -917,8 +905,6 @@ Double_t AnalysisWZ::GetPPFWeight(UInt_t jetPt)
 
     Double_t p = lep.p;
 
-    p = 1.0;  // TEMPORARY /////////////////////////////////////////////////////
-
     if (lep.type == Tight)
       {
 	ntight++;
@@ -942,7 +928,7 @@ Double_t AnalysisWZ::GetPPFWeight(UInt_t jetPt)
 
   Double_t result = PPF + PFP + FPP;
 
-  if (ntight == 3) result *= -1.0;
+  if (ntight == 3) result *= -1.;
 
   return result;
 }
@@ -965,8 +951,6 @@ Double_t AnalysisWZ::GetPPPWeight(UInt_t jetPt)
 
     Double_t p = lep.p;
 
-    p = 1.0;  // TEMPORARY /////////////////////////////////////////////////////
-
     if (lep.type == Tight)
       {
 	ntight++;
@@ -983,9 +967,29 @@ Double_t AnalysisWZ::GetPPPWeight(UInt_t jetPt)
 
   Double_t PPP = promptProbability[0] * promptProbability[1] * promptProbability[2];
 
-  if (ntight == 2) PPP *= -1.0;
+  if (ntight == 2) PPP *= -1.;
 
   return PPP;
+}
+
+
+//------------------------------------------------------------------------------
+// GetPPFWeightApprx
+//------------------------------------------------------------------------------
+Double_t AnalysisWZ::GetPPFWeightApprx(UInt_t jetPt)
+{
+  Double_t weight = 1.;
+
+  for (UInt_t i=0; i<3; i++) {
+
+    Lepton lep = AnalysisLeptons[i];
+
+    Double_t f = (jetPt == LowPtJet) ? lep.f_lo : lep.f_hi;
+
+    if (lep.type == Fail) weight *= f / (1. - f);
+  }
+
+  return weight;
 }
 
 

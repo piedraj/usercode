@@ -31,11 +31,11 @@ const UInt_t nCuts = 10;
 enum {
   AllEvents,
   HLT,
-  Has2Leptons,
-  Has2PVLeptons,
-  Has2IsoLeptons,
-  Has2IsoGoodLeptons,
-  AtLeast3Leptons,
+  Has3Leptons,
+  Has3PVLeptons,
+  Has3IsoLeptons,
+  Has3IsoGoodLeptons,
+  Exactly3Leptons,
   HasZCandidate,
   HasWCandidate,
   MET
@@ -44,11 +44,11 @@ enum {
 TString sCut[] = {
   "AllEvents",
   "HLT",
-  "Has2Leptons",
-  "Has2PVLeptons",
-  "Has2IsoLeptons",
-  "Has2IsoGoodLeptons",
-  "AtLeast3Leptons",
+  "Has3Leptons",
+  "Has3PVLeptons",
+  "Has3IsoLeptons",
+  "Has3IsoGoodLeptons",
+  "Exactly3Leptons",
   "HasZCandidate",
   "HasWCandidate",
   "MET"
@@ -124,6 +124,7 @@ class AnalysisWZ: public CMSAnalysisSelectorMiniTrees
 
   Double_t     GetPPFWeight              (UInt_t  jetPt);
   Double_t     GetPPPWeight              (UInt_t  jetPt);
+  Double_t     GetPPFWeightApprx         (UInt_t  jetPt);
 
   TH2F*        LoadHistogram             (TString filename,
 					  TString hname,

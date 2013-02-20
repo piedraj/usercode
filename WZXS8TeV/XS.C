@@ -41,8 +41,8 @@ enum {MMM, EEE, MME, EEM};
 enum {
   AllEvents,
   HLT,
-  Has2IsoGoodLeptons,
-  AtLeast3Leptons,
+  Has3IsoGoodLeptons,
+  Exactly3Leptons,
   HasZCandidate,
   HasWCandidate,
   MET
@@ -185,9 +185,9 @@ TString  GuessLocalBasePath       ();
 void XS(UInt_t cut          = HasZCandidate,
 	UInt_t mode         = MCmode,
 	UInt_t closure_test = 1,
-	Bool_t batch        = true)
+	Bool_t batch        = false)
 {
-  if (cut < AtLeast3Leptons) return;
+  if (cut < Exactly3Leptons) return;
 
   gROOT->SetBatch(batch);
 
@@ -383,6 +383,8 @@ void DrawHistogram(TString  hname,
     if (ngroup > 0) hist[j]->Rebin(ngroup);
 
     if (j == Data) {
+      hist[j]->SetLineColor  (kBlack);
+      hist[j]->SetMarkerColor(kBlack);
       hist[j]->SetMarkerStyle(kFullCircle);
       hist[j]->SetTitle("");
     }
@@ -871,8 +873,8 @@ void SetParameters(UInt_t cut,
 
   sCut[AllEvents]          = "AllEvents";
   sCut[HLT]                = "HLT";
-  sCut[Has2IsoGoodLeptons] = "Has2IsoGoodLeptons";
-  sCut[AtLeast3Leptons]    = "AtLeast3Leptons";
+  sCut[Has3IsoGoodLeptons] = "Has3IsoGoodLeptons";
+  sCut[Exactly3Leptons]    = "Exactly3Leptons";
   sCut[HasZCandidate]      = "HasZCandidate";
   sCut[HasWCandidate]      = "HasWCandidate";
   sCut[MET]                = "MET";
@@ -1073,7 +1075,7 @@ Int_t ReadInputFiles(UInt_t channel)
 
     // Debug
     //--------------------------------------------------------------------------
-    TH1D* dummy = (TH1D*)input[j]->Get("hCounter_MMM_AtLeast3Leptons");
+    TH1D* dummy = (TH1D*)input[j]->Get("hCounter_MMM_Exactly3Leptons");
 
     if (!dummy)
       {
