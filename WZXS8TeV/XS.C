@@ -203,22 +203,25 @@ void XS(UInt_t cut          = HasZCandidate,
 
     TString suffix = "_" + sChannel[channel] + "_" + sCut[cut];
     
-    DrawHistogram("hNPV"          + suffix, "number of PV",               -1, 0, "NULL", linY, 0, 30);
-    DrawHistogram("hSumCharges"   + suffix, "q_{1} + q_{2} + q_{3}",      -1, 0, "NULL", linY);
-    DrawHistogram("hMET"          + suffix, "E_{T}^{miss}",                5, 0, "GeV",  linY);
-    DrawHistogram("hInvMass3Lep"  + suffix, "m_{#font[12]{3l}}",           5, 0, "GeV",  linY, 71, 300);
-    DrawHistogram("hPtLepton1"    + suffix, "p_{T}^{first lepton}",        5, 0, "GeV",  linY);
-    DrawHistogram("hPtLepton2"    + suffix, "p_{T}^{second lepton}",       5, 0, "GeV",  linY);
-    DrawHistogram("hPtLepton3"    + suffix, "p_{T}^{third lepton}",        5, 0, "GeV",  linY);
-    DrawHistogram("hPtLeadingJet" + suffix, "p_{T}^{first jet}",           5, 0, "GeV",  linY);
+    DrawHistogram("hNPV"          + suffix, "number of PV",          -1, 0, "NULL", linY, 0, 30);
+    DrawHistogram("hSumCharges"   + suffix, "q_{1} + q_{2} + q_{3}", -1, 0, "NULL", linY);
+    DrawHistogram("hMET"          + suffix, "E_{T}^{miss}",           5, 0, "GeV",  linY);
+    DrawHistogram("hInvMass3Lep"  + suffix, "m_{#font[12]{3l}}",      5, 0, "GeV",  linY, 71, 301);
+    DrawHistogram("hPtLepton1"    + suffix, "p_{T}^{first lepton}",   5, 0, "GeV",  linY);
+    DrawHistogram("hPtLepton2"    + suffix, "p_{T}^{second lepton}",  5, 0, "GeV",  linY);
+    DrawHistogram("hPtLepton3"    + suffix, "p_{T}^{third lepton}",   5, 0, "GeV",  linY);
+    DrawHistogram("hPtLeadingJet" + suffix, "p_{T}^{leading jet}",    5, 0, "GeV",  linY);
 
     if (cut < HasZCandidate) continue;
 
-    DrawHistogram("hInvMass2Lep"  + suffix, "m_{#font[12]{ll}}",          -1, 0, "GeV",  linY, 71, 111);
-    DrawHistogram("hDPhiZLeptons" + suffix, "#Delta#phi_{#font[12]{ll}}", 20, 1, "^{o}", linY);
-    DrawHistogram("hPtZLepton1"   + suffix, "p_{T}^{Z leading lepton}",    5, 0, "GeV",  linY);
-    DrawHistogram("hPtZLepton2"   + suffix, "p_{T}^{Z trailing lepton}",   5, 0, "GeV",  linY);
-    DrawHistogram("hPtWLepton"    + suffix, "p_{T}^{W lepton}",            5, 0, "GeV",  linY);
+    DrawHistogram("hInvMass2Lep"  + suffix, "m_{#font[12]{ll}}",                    -1, 0, "GeV",  linY, 71, 111);
+    DrawHistogram("hDPhiZLeptons" + suffix, "#Delta#phi_{#font[12]{ll}}",           20, 1, "^{o}", linY);
+    DrawHistogram("hPtZLepton1"   + suffix, "p_{T}^{Z leading lepton}",              5, 0, "GeV",  linY);
+    DrawHistogram("hPtZLepton2"   + suffix, "p_{T}^{Z trailing lepton}",             5, 0, "GeV",  linY);
+    DrawHistogram("hPtWLepton"    + suffix, "p_{T}^{W lepton}",                      5, 0, "GeV",  linY);
+    DrawHistogram("hDRWZLepton1"  + suffix, "#DeltaR(W lepton, Z leading lepton)",   5, 0, "NULL", linY);
+    DrawHistogram("hDRWZLepton2"  + suffix, "#DeltaR(W lepton, Z trailing lepton)",  5, 0, "NULL", linY);
+    DrawHistogram("hMtW"          + suffix, "m_{T}",                                 5, 0, "GeV",  linY);
   }
 }
 

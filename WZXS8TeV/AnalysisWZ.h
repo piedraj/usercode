@@ -153,6 +153,9 @@ class AnalysisWZ: public CMSAnalysisSelectorMiniTrees
   TH1D*                       hPtZLepton1  [nChannels][nCuts];
   TH1D*                       hPtZLepton2  [nChannels][nCuts];
   TH1D*                       hPtWLepton   [nChannels][nCuts];
+  TH1D*                       hDRWZLepton1 [nChannels][nCuts];
+  TH1D*                       hDRWZLepton2 [nChannels][nCuts];
+  TH1D*                       hMtW         [nChannels][nCuts];
 
 
   // Input parameters
@@ -180,6 +183,7 @@ class AnalysisWZ: public CMSAnalysisSelectorMiniTrees
   Bool_t                      isData;
   Double_t                    invMass2Lep;
   Double_t                    invMass3Lep;
+  Double_t                    transverseMass;
   Double_t                    sumCharges;
   Double_t                    ptLeadingJet;
   UInt_t                      theChannel;

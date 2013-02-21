@@ -51,6 +51,9 @@ void AnalysisWZ::Initialise()
       hPtZLepton1  [i][j] = CreateH1D(TString("hPtZLepton1"   + suffix), "", 200,  0, 200);
       hPtZLepton2  [i][j] = CreateH1D(TString("hPtZLepton2"   + suffix), "", 200,  0, 200);
       hPtWLepton   [i][j] = CreateH1D(TString("hPtWLepton"    + suffix), "", 200,  0, 200);    
+      hDRWZLepton1 [i][j] = CreateH1D(TString("hDRWZLepton1"  + suffix), "", 320,  0, 3.2);    
+      hDRWZLepton2 [i][j] = CreateH1D(TString("hDRWZLepton2"  + suffix), "", 320,  0, 3.2);    
+      hMtW         [i][j] = CreateH1D(TString("hMtW"          + suffix), "", 200,  0, 200);    
     }
   }
 
@@ -87,10 +90,11 @@ void AnalysisWZ::InsideLoop()
 
   AnalysisLeptons.clear();
 
-  invMass2Lep  = 0.;
-  invMass3Lep  = 0.;
-  sumCharges   = 0.;
-  ptLeadingJet = 0.;
+  invMass2Lep    = 0.;
+  invMass3Lep    = 0.;
+  transverseMass = 0.;
+  sumCharges     = 0.;
+  ptLeadingJet   = 0.;
 
 
   // MC filters
@@ -221,15 +225,13 @@ void AnalysisWZ::InsideLoop()
 
     countPVElectrons++;
 
-    //    if (ElectronIsolation(i) == Rejected) continue;
+    if (ElectronIsolation(i) == Rejected) continue;
 
     countIsoElectrons++;
 
     UInt_t electron_type = ElectronBDT(i);
 
-    //    if (electron_type != ElectronIsolation(i)) continue;
-
-    if (electron_type == Rejected) continue;  // PATCH -- Remove when ElectronIsolation is fixed
+    if (electron_type != ElectronIsolation(i)) continue;
 
     countIsoGoodElectrons++;
 
@@ -343,10 +345,16 @@ void AnalysisWZ::InsideLoop()
   }
 
 
-  // Require 2 leptons with pt > 20 GeV
+  // Additional requirements on the pt of the leptons
   //----------------------------------------------------------------------------
   if (AnalysisLeptons[0].v.Pt() <= 20) return;
   if (AnalysisLeptons[1].v.Pt() <= 20) return;
+
+  Bool_t pt3pass = (AnalysisLeptons[2].v.Pt() > 20);
+
+  if (closure_test) pt3pass = !pt3pass;
+
+  if (!pt3pass) return;
 
   FillHistograms(theChannel, Exactly3Leptons);
 
@@ -387,6 +395,19 @@ void AnalysisWZ::InsideLoop()
   // HasZCandidate
   //----------------------------------------------------------------------------
   if (invMass2Lep < 71. || invMass2Lep > 111.) return;
+
+
+  // Compute the W transverse mass
+  //----------------------------------------------------------------------------
+  const Double_t met  = T_METPFTypeI_ET;
+  const Double_t phi  = T_METPFTypeI_Phi;
+  const Double_t lWEt = WLepton.Et();
+
+  TLorentzVector metv(met*cos(phi), met*sin(phi), 0., 0.);
+
+  transverseMass = lWEt*lWEt + met*met - 2.*lWEt*met*cos(WLepton.Angle(metv.Vect()));
+  
+  transverseMass = sqrt(transverseMass);
 
   FillHistograms(theChannel, HasZCandidate);
 
@@ -665,11 +686,7 @@ UInt_t AnalysisWZ::ElectronIsolation(UInt_t iElec)
 
   Double_t relIso = (charged + max(0., neutral + photon - rho*AEff04)) / Elec.Pt();
 
-  Bool_t pass = (relIso < 0.15);
-
-  //  Bool_t pass = (T_Elec_pfComb->at(iElec) < 0.15);  // BROKEN
-
-  if (pass)
+  if (relIso < 0.15)
     {
       return Tight;
     }
@@ -829,23 +846,17 @@ void AnalysisWZ::FillHistograms(UInt_t iChannel, UInt_t iCut)
   if (iCut < HasZCandidate) return;
 
   Double_t deltaPhi = ZLepton1.DeltaPhi(ZLepton2);
-
-  Double_t pt1, pt2;
-  
-  if (ZLepton1.Pt() > ZLepton2.Pt())
-    {
-      pt1 = ZLepton1.Pt(); pt2 = ZLepton2.Pt();
-    }
-  else
-    {
-      pt1 = ZLepton2.Pt(); pt2 = ZLepton1.Pt();
-    }
+  Double_t deltaR1  = WLepton.DeltaR(ZLepton1);
+  Double_t deltaR2  = WLepton.DeltaR(ZLepton2);
 
   hInvMass2Lep [iChannel][iCut]->Fill(invMass2Lep,    hweight);
   hDPhiZLeptons[iChannel][iCut]->Fill(fabs(deltaPhi), hweight);
-  hPtZLepton1  [iChannel][iCut]->Fill(pt1,            hweight);
-  hPtZLepton2  [iChannel][iCut]->Fill(pt2,            hweight);
+  hPtZLepton1  [iChannel][iCut]->Fill(ZLepton1.Pt(),  hweight);
+  hPtZLepton2  [iChannel][iCut]->Fill(ZLepton2.Pt(),  hweight);
   hPtWLepton   [iChannel][iCut]->Fill(WLepton.Pt(),   hweight);
+  hDRWZLepton1 [iChannel][iCut]->Fill(deltaR1,        hweight);
+  hDRWZLepton2 [iChannel][iCut]->Fill(deltaR2,        hweight);
+  hMtW         [iChannel][iCut]->Fill(transverseMass, hweight);
 }
 
 
