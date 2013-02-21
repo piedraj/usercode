@@ -60,20 +60,17 @@ void AnalysisWZ::Initialise()
 
   // SF, FR and PR histograms
   //----------------------------------------------------------------------------
-  TString path1 = "/nfs/fanae/user/piedra/work/WZ/AnalysisVHCode/WManager/data/";
-  TString path2 = "/nfs/fanae/user/piedra/work/WZ/work/WManager/PR/";
+  MuonSF = LoadHistogram("MuSF_2012",  "muonDATAMCratio_All_selec",      "MuonSF");
+  ElecSF = LoadHistogram("EleSF_2012", "electronsDATAMCratio_All_selec", "ElecSF");
 
-  MuonSF = LoadHistogram(path1 + "MuSF_2012",  "muonDATAMCratio_All_selec",      "MuonSF");
-  ElecSF = LoadHistogram(path1 + "EleSF_2012", "electronsDATAMCratio_All_selec", "ElecSF");
+  MuonPR = LoadHistogram("prompt_rateMuons",     "effDATA_prompt_rate", "MuonPR");
+  ElecPR = LoadHistogram("prompt_rateElectrons", "effDATA_All_selec",   "ElecPR");
 
-  MuonPR = LoadHistogram(path2 + "prompt_rateMuons",     "effDATA_prompt_rate", "MuonPR");
-  ElecPR = LoadHistogram(path2 + "prompt_rateElectrons", "effDATA_All_selec",   "ElecPR");
+  MuonFR_lo = LoadHistogram("MuFR_2012_jet30",  "h_Muon_signal_pT_eta", "MuonFR_lo");
+  ElecFR_lo = LoadHistogram("EleFR_2012_jet35", "fakeElH2",             "ElecFR_lo");
 
-  MuonFR_lo = LoadHistogram(path1 + "MuFR_2012_jet30",  "h_Muon_signal_pT_eta", "MuonFR_lo");
-  ElecFR_lo = LoadHistogram(path1 + "EleFR_2012_jet35", "fakeElH2",             "ElecFR_lo");
-
-  MuonFR_hi = LoadHistogram(path1 + "MuFR_2012_jet50",  "h_Muon_signal_pT_eta", "MuonFR_hi");
-  ElecFR_hi = LoadHistogram(path1 + "EleFR_2012_jet50", "fakeElH2",             "ElecFR_hi");
+  MuonFR_hi = LoadHistogram("MuFR_2012_jet50",  "h_Muon_signal_pT_eta", "MuonFR_hi");
+  ElecFR_hi = LoadHistogram("EleFR_2012_jet50", "fakeElH2",             "ElecFR_hi");
 }
 
 
@@ -1061,7 +1058,7 @@ TH2F* AnalysisWZ::LoadHistogram(TString filename,
 				TString hname,
 				TString cname)
 {
-  TFile* inputfile = TFile::Open(filename + ".root");
+  TFile* inputfile = TFile::Open("LeptonScaleFactors/" + filename + ".root");
 
   TH2F* hist = (TH2F*)inputfile->Get(hname)->Clone(cname);
 
