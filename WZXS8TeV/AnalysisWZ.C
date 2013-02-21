@@ -384,11 +384,6 @@ void AnalysisWZ::InsideLoop()
   if (invMass2Lep < 12.) return;
 
 
-  // Jet pt requirement
-  //----------------------------------------------------------------------------
-  //  if (closure_test && ptLeadingJet > 40.) return;
-
-
   // HasZCandidate
   //----------------------------------------------------------------------------
   if (invMass2Lep < 71. || invMass2Lep > 111.) return;
@@ -398,10 +393,13 @@ void AnalysisWZ::InsideLoop()
 
   // HasWCandidate
   //----------------------------------------------------------------------------
-  if (!closure_test && WLepton.Pt() <= 20) return;
+  if (!closure_test)
+    {
+      if (WLepton.Pt() <= 20) return;
 
-  if (WLepton.DeltaR(ZLepton1) < 0.1) return;
-  if (WLepton.DeltaR(ZLepton2) < 0.1) return;
+      if (WLepton.DeltaR(ZLepton1) < 0.1) return;
+      if (WLepton.DeltaR(ZLepton2) < 0.1) return;
+    }
 
   FillHistograms(theChannel, HasWCandidate);
 
@@ -414,7 +412,10 @@ void AnalysisWZ::InsideLoop()
 
   if (!metPass) return;
 
-  efficiency_weight *= (dataDriven_weight_hi / dataDriven_weight_lo);
+  if (!closure_test)
+    {
+      efficiency_weight *= (dataDriven_weight_hi / dataDriven_weight_lo);
+    }
 
   FillHistograms(theChannel, MET);
 }
