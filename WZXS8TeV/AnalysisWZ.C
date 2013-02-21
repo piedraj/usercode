@@ -230,7 +230,7 @@ void AnalysisWZ::InsideLoop()
     //    if (electron_type != ElectronIsolation(i)) continue;
 
     if (electron_type == Rejected) continue;  // PATCH -- Remove when ElectronIsolation is fixed
-	
+
     countIsoGoodElectrons++;
 
     const Double_t scale_factor = ElecSF->GetBinContent(ElecSF->FindBin(pt,eta));
@@ -621,7 +621,54 @@ Bool_t AnalysisWZ::ElectronCloseToPV(UInt_t iElec)
 //------------------------------------------------------------------------------
 UInt_t AnalysisWZ::ElectronIsolation(UInt_t iElec) 
 {
-  if (T_Elec_pfComb->at(iElec) < 0.15)
+  TLorentzVector Elec(T_Elec_Px->at(iElec),
+		      T_Elec_Py->at(iElec),
+		      T_Elec_Pz->at(iElec),
+		      T_Elec_Energy->at(iElec));
+
+  Double_t AEff04 = 0.;
+
+  if (fabs(Elec.Eta()) < 1.0)
+    {
+      AEff04 = 0.21;  // ± 0.001
+    }
+  else if (fabs(Elec.Eta()) >= 1.0 && fabs(Elec.Eta()) < 1.479)
+    {
+      AEff04 = 0.21;  // ± 0.002
+    }
+  else if (fabs(Elec.Eta()) >= 1.479 && fabs(Elec.Eta()) < 2.0)
+    {
+      AEff04 = 0.11;  // ± 0.001
+    }
+  else if (fabs(Elec.Eta()) >= 2.0 && fabs(Elec.Eta()) < 2.2)
+    {
+      AEff04 = 0.14;  // ± 0.001
+    }
+  else if (fabs(Elec.Eta()) >= 2.2 && fabs(Elec.Eta()) < 2.3)
+    {
+      AEff04 = 0.18;  // ± 0.002
+    }
+  else if (fabs(Elec.Eta()) >= 2.3 && fabs(Elec.Eta()) < 2.4)
+    {
+      AEff04 = 0.19;  // ± 0.003
+    }
+  else if (fabs(Elec.Eta()) >= 2.4)
+    {
+      AEff04 = 0.26;  // ± 0.004
+    }
+
+  Double_t charged = T_Elec_chargedHadronIso->at(iElec);
+  Double_t neutral = T_Elec_neutralHadronIso->at(iElec);
+  Double_t photon  = T_Elec_photonIso->at(iElec);
+  Double_t rho     = T_Event_RhoIso;
+
+  Double_t relIso = (charged + max(0., neutral + photon - rho*AEff04)) / Elec.Pt();
+
+  Bool_t pass = (relIso < 0.15);
+
+  //  Bool_t pass = (T_Elec_pfComb->at(iElec) < 0.15);  // BROKEN
+
+  if (pass)
     {
       return Tight;
     }

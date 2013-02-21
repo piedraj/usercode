@@ -183,8 +183,8 @@ TString  GuessLocalBasePath       ();
 // XS
 //------------------------------------------------------------------------------
 void XS(UInt_t cut          = HasZCandidate,
-	UInt_t mode         = PPFmode,
-	UInt_t closure_test = 1,
+	UInt_t mode         = MCmode,
+	UInt_t closure_test = 0,
 	Bool_t batch        = false)
 {
   if (cut < Exactly3Leptons) return;
@@ -203,9 +203,8 @@ void XS(UInt_t cut          = HasZCandidate,
 
     TString suffix = "_" + sChannel[channel] + "_" + sCut[cut];
     
-    //    DrawHistogram("hNPV"          + suffix, "number of PV",               -1, 0, "NULL", linY, 0, 30);
-    //    DrawHistogram("hSumCharges"   + suffix, "q_{1} + q_{2} + q_{3}",      -1, 0, "NULL", linY);
-
+    DrawHistogram("hNPV"          + suffix, "number of PV",               -1, 0, "NULL", linY, 0, 30);
+    DrawHistogram("hSumCharges"   + suffix, "q_{1} + q_{2} + q_{3}",      -1, 0, "NULL", linY);
     DrawHistogram("hMET"          + suffix, "E_{T}^{miss}",                5, 0, "GeV",  linY);
     DrawHistogram("hInvMass3Lep"  + suffix, "m_{#font[12]{3l}}",           5, 0, "GeV",  linY, 71, 300);
     DrawHistogram("hPtLepton1"    + suffix, "p_{T}^{first lepton}",        5, 0, "GeV",  linY);
