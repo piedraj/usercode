@@ -70,3 +70,6 @@
  root -l -b -q RunPROOF_WZ.C\(\"TTWWJets\"\);          # line 59
  root -l -b -q RunPROOF_WZ.C\(\"TTGJets\"\);           # line 60
 
+ ./resetproof.sh -a
+ endproof
+
