@@ -40,27 +40,7 @@ cvs co -d PUWeight UserCode/IFCA-UO/Utils/PUWeight
 
 ################################################################################
 #
-# 2. Get the SF, FR and PR
-#
-################################################################################
-
-cd PAF
-mkdir LeptonScaleFactors
-cd LeptonScaleFactors
-
-wget www.hep.uniovi.es/piedra/LeptonScaleFactors/EleFR_2012_jet35.root
-wget www.hep.uniovi.es/piedra/LeptonScaleFactors/EleFR_2012_jet50.root
-wget www.hep.uniovi.es/piedra/LeptonScaleFactors/EleSF_2012.root
-wget www.hep.uniovi.es/piedra/LeptonScaleFactors/prompt_rateElectrons.root
-wget www.hep.uniovi.es/piedra/LeptonScaleFactors/MuFR_2012_jet30.root
-wget www.hep.uniovi.es/piedra/LeptonScaleFactors/MuFR_2012_jet50.root
-wget www.hep.uniovi.es/piedra/LeptonScaleFactors/MuSF_2012.root
-wget www.hep.uniovi.es/piedra/LeptonScaleFactors/prompt_rateMuons.root
-
-
-################################################################################
-#
-# 3. Produce the histograms
+# 2. Produce the histograms
 #
 ################################################################################
 
@@ -71,7 +51,7 @@ cd PAF
 
 ################################################################################
 #
-# 4. Draw the histograms and measure the WZ cross section
+# 3. Draw the histograms and measure the WZ cross section
 #
 ################################################################################
 

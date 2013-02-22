@@ -23,19 +23,19 @@ TString  dataPath       = "";
 
 void RunPROOF_WZ(TString  sample       = "DoubleMu",
 		 Int_t    mode         = RAW,
-		 Int_t    closure_test = 0,
+		 Int_t    closure_test = 1,
 		 Long64_t nEvents      = -1,
 		 Bool_t   update       = true)
 {
-  dataPath = GuessLocalBasePath();
+  dataPath = GuessLocalBasePath(1);
 
 
   // PROOF mode
   //----------------------------------------------------------------------------
   //  gPAFOptions->proofMode = kSequential;
   //  gPAFOptions->proofMode = kLite;
-  //  gPAFOptions->proofMode = kCluster;
-  gPAFOptions->proofMode = kPoD;
+  gPAFOptions->proofMode = kCluster;
+  //  gPAFOptions->proofMode = kPoD;
   gPAFOptions->NSlots    = 30;
 
 
@@ -114,9 +114,21 @@ void RunPROOF_WZ(TString  sample       = "DoubleMu",
 
   // Number of events (Long64_t)
   //----------------------------------------------------------------------------
+  if (nEvents == -1 && gPAFOptions->proofMode == kSequential)
+    {
+      TChain* chain = new TChain("Tree", "Tree");
+  
+      for (UInt_t i=0; i<gPAFOptions->dataFiles.size(); i++)
+	chain->Add(gPAFOptions->dataFiles[i]);
+
+      nEvents = chain->GetEntries();
+
+      printf("\n [RunPROOF_WZ] The number of events is %ld\n\n", nEvents);
+    }
+
   gPAFOptions->nEvents = nEvents;
 
-  
+
   // Name of analysis class
   //----------------------------------------------------------------------------
   gPAFOptions->myAnalysis = "AnalysisWZ";
@@ -168,11 +180,9 @@ vector<TString> GetRealDataFiles(const char* relativepath,
     fullpath + "/Tree_" + basefile + "B_4404.root " +
     fullpath + "/Tree_" + basefile + "B_4404_[0-9].root " +
     fullpath + "/Tree_" + basefile + "B_4404_[0-9][0-9].root " +
-    fullpath + "/Tree_" + basefile + "C_6807.root " +
-    fullpath + "/Tree_" + basefile + "C_6807_[0-9].root " +
-    fullpath + "/Tree_" + basefile + "C_6807_[0-9][0-9].root " +
-    fullpath + "/Tree_" + basefile + "C_91.root " +
-    fullpath + "/Tree_" + basefile + "C_ReReco11Dec_134.root " +
+    fullpath + "/Tree_" + basefile + "C_7032.root " +
+    fullpath + "/Tree_" + basefile + "C_7032_[0-9].root " +
+    fullpath + "/Tree_" + basefile + "C_7032_[0-9][0-9].root " +
     fullpath + "/Tree_" + basefile + "D_7274.root " +
     fullpath + "/Tree_" + basefile + "D_7274_[0-9].root " +
     fullpath + "/Tree_" + basefile + "D_7274_[0-9][0-9].root";
@@ -223,26 +233,36 @@ vector<TString> GetRealDataFiles(const char* relativepath,
 //------------------------------------------------------------------------------
 // GuessLocalBasePath
 //------------------------------------------------------------------------------
-TString GuessLocalBasePath()
+TString GuessLocalBasePath(Bool_t verbose)
 {
   TString host = gSystem->HostName();
 
+  TString localBasePath;
+
   if (host.Contains("geol.uniovi.es"))
     {
-      return TString("/hadoop");
+      localBasePath = TString("/hadoop");
     }
   else if (host.Contains("ciencias.uniovi.es"))
     {
-      return TString("/data");
+      localBasePath = TString("/data");
     }
   else if (host.Contains("ifca.es"))
     {
-      return TString("/gpfs/csic_projects/tier3data");
+      localBasePath = TString("/gpfs/csic_projects/tier3data");
     }
   else
     {
       cerr << "ERROR: Could not guess base path from host name " << host << endl;
 
-      return TString("");
+      localBasePath = TString("");
     }
+
+  if (verbose)
+    {
+      printf("\n [RunPROOF_WZ::GuessLocalBasePath] host = %s, localBasePath = %s\n\n",
+	     host.Data(), localBasePath.Data());
+    }
+
+  return localBasePath;
 }

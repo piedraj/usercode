@@ -1,25 +1,29 @@
 
  export RAW=0;
  export PPF=1;
-
+ 
  ./resetproof.sh -a
-
+ endproof
+ 
  root -l -b -q RunPROOF_WZ.C\(\"DoubleElectron\",RAW\)
  root -l -b -q RunPROOF_WZ.C\(\"DoubleElectron\",PPF\)
-
+ 
  ./resetproof.sh -a
-
+ endproof
+ 
  root -l -b -q RunPROOF_WZ.C\(\"DoubleMu\",RAW\)
  root -l -b -q RunPROOF_WZ.C\(\"DoubleMu\",PPF\)
-
+ 
  ./resetproof.sh -a
-
+ endproof
+ 
  root -l -b -q RunPROOF_WZ.C\(\"DYJets_Madgraph\"\);   # line  3
  root -l -b -q RunPROOF_WZ.C\(\"ZJets_Madgraph\"\);    # line  4
  root -l -b -q RunPROOF_WZ.C\(\"ZbbToLL\"\);           # line  5
-
+ 
  ./resetproof.sh -a
-
+ endproof
+ 
  root -l -b -q RunPROOF_WZ.C\(\"WbbToLNu\"\);          # line  7
  root -l -b -q RunPROOF_WZ.C\(\"WJets_Madgraph\"\);    # line  8
  root -l -b -q RunPROOF_WZ.C\(\"WGstarToElNuMad\"\);   # line  9
@@ -29,6 +33,7 @@
  root -l -b -q RunPROOF_WZ.C\(\"ZgammaToLLG\"\);       # line 13
 
  ./resetproof.sh -a
+ endproof
 
  root -l -b -q RunPROOF_WZ.C\(\"TTbar_Madgraph\"\);    # line 17
  root -l -b -q RunPROOF_WZ.C\(\"TW\"\);                # line 23
@@ -38,6 +43,7 @@
  root -l -b -q RunPROOF_WZ.C\(\"WZTo2L2QMad\"\);       # line 37
 
  ./resetproof.sh -a
+ endproof 
 
  root -l -b -q RunPROOF_WZ.C\(\"ZZTo2L2QMad\"\);       # line 38
 #root -l -b -q RunPROOF_WZ.C\(\"ZZ\"\);                # line 40 -- REPLACED
@@ -52,6 +58,7 @@
  root -l -b -q RunPROOF_WZ.C\(\"HZZ4L\"\);             # line 51
 
  ./resetproof.sh -a
+ endproof
 
  root -l -b -q RunPROOF_WZ.C\(\"WWGJets\"\);           # line 52
  root -l -b -q RunPROOF_WZ.C\(\"WZZJets\"\);           # line 53

@@ -51,8 +51,8 @@ void AnalysisWZ::Initialise()
       hPtZLepton1  [i][j] = CreateH1D(TString("hPtZLepton1"   + suffix), "", 200,  0, 200);
       hPtZLepton2  [i][j] = CreateH1D(TString("hPtZLepton2"   + suffix), "", 200,  0, 200);
       hPtWLepton   [i][j] = CreateH1D(TString("hPtWLepton"    + suffix), "", 200,  0, 200);    
-      hDRWZLepton1 [i][j] = CreateH1D(TString("hDRWZLepton1"  + suffix), "", 320,  0, 3.2);    
-      hDRWZLepton2 [i][j] = CreateH1D(TString("hDRWZLepton2"  + suffix), "", 320,  0, 3.2);    
+      hDRWZLepton1 [i][j] = CreateH1D(TString("hDRWZLepton1"  + suffix), "", 200,  0,   6);    
+      hDRWZLepton2 [i][j] = CreateH1D(TString("hDRWZLepton2"  + suffix), "", 200,  0,   6);    
       hMtW         [i][j] = CreateH1D(TString("hMtW"          + suffix), "", 200,  0, 200);    
     }
   }
@@ -62,10 +62,10 @@ void AnalysisWZ::Initialise()
   //----------------------------------------------------------------------------
   MuonSF = LoadHistogram("MuSF_2012",  "muonDATAMCratio_All_selec",      "MuonSF");
   ElecSF = LoadHistogram("EleSF_2012", "electronsDATAMCratio_All_selec", "ElecSF");
-
+  
   MuonPR = LoadHistogram("prompt_rateMuons",     "effDATA_prompt_rate", "MuonPR");
   ElecPR = LoadHistogram("prompt_rateElectrons", "effDATA_All_selec",   "ElecPR");
-
+  
   MuonFR_lo = LoadHistogram("MuFR_2012_jet30",  "h_Muon_signal_pT_eta", "MuonFR_lo");
   ElecFR_lo = LoadHistogram("EleFR_2012_jet35", "fakeElH2",             "ElecFR_lo");
 
@@ -168,8 +168,7 @@ void AnalysisWZ::InsideLoop()
     countIsoGoodMuons++;
 
     const Double_t scale_factor = MuonSF->GetBinContent(MuonSF->FindBin(pt,eta));
-
-    const Double_t prompt_rate = MuonPR->GetBinContent(MuonPR->FindBin(eta,pt));  // Inverted axis
+    const Double_t prompt_rate  = MuonPR->GetBinContent(MuonPR->FindBin(eta,pt));  // Inverted axis
 
     if (pt > 35) pt = 34;
 
@@ -233,8 +232,7 @@ void AnalysisWZ::InsideLoop()
     countIsoGoodElectrons++;
 
     const Double_t scale_factor = ElecSF->GetBinContent(ElecSF->FindBin(pt,eta));
-
-    const Double_t prompt_rate = ElecPR->GetBinContent(ElecPR->FindBin(eta,pt));  // Inverted axis
+    const Double_t prompt_rate  = ElecPR->GetBinContent(ElecPR->FindBin(eta,pt));  // Inverted axis
 
     if (pt > 35) pt = 34;
 
@@ -1058,7 +1056,7 @@ TH2F* AnalysisWZ::LoadHistogram(TString filename,
 				TString hname,
 				TString cname)
 {
-  TFile* inputfile = TFile::Open("LeptonScaleFactors/" + filename + ".root");
+  TFile* inputfile = TFile::Open("/gpfs/csic_users/piedra/work/PAF/LeptonScaleFactors/" + filename + ".root");
 
   TH2F* hist = (TH2F*)inputfile->Get(hname)->Clone(cname);
 
