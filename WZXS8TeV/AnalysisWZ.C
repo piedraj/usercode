@@ -450,11 +450,16 @@ void AnalysisWZ::InsideLoop()
   //----------------------------------------------------------------------------
   if (invMass2Lep < 76. || invMass2Lep > 106.) return;
 
-  if (T_METPFTypeI_ET < 50) return;
-
-  if (nbjets > 0) return;
+  if (T_METPFTypeI_ET < 40) return;
 
   FillHistograms(theChannel, SSLike);
+
+
+  // SSLikeAntiBtag
+  //----------------------------------------------------------------------------
+  if (nbjets > 0) return;
+
+  FillHistograms(theChannel, SSLikeAntiBtag);
 }
 
 
@@ -1077,16 +1082,9 @@ TH2F* AnalysisWZ::LoadHistogram(TString filename,
 				TString hname,
 				TString cname)
 {
-  TString host = gSystem->HostName();
+  //  TFile* inputfile = TFile::Open("/nfs/fanae/user/piedra/work/PAF/LeptonScaleFactors/" + filename + ".root");
 
-  TString home = "/nfs/fanae/user/piedra";
-  
-  if (host.Contains("ifca"))
-    {
-      home = "/gpfs/csic_users/piedra";
-    }
-  
-  TFile* inputfile = TFile::Open(home + "/work/PAF/LeptonScaleFactors/" + filename + ".root");
+  TFile* inputfile = TFile::Open("/gpfs/csic_users/piedra/work/PAF/LeptonScaleFactors/" + filename + ".root");
 
   TH2F* hist = (TH2F*)inputfile->Get(hname)->Clone(cname);
   
@@ -1095,5 +1093,4 @@ TH2F* AnalysisWZ::LoadHistogram(TString filename,
   inputfile->Close();
 
   return hist;
-
 }

@@ -33,7 +33,7 @@ const Double_t ngenWZphase = 1449067;  // (71 < mZ < 111 GeV)
 // Data members
 //------------------------------------------------------------------------------
 const UInt_t nChannels  =  4;
-const UInt_t nCuts      =  8;
+const UInt_t nCuts      =  9;
 const UInt_t nProcesses = 39;
 
 enum {MMM, EEE, MME, EEM};
@@ -46,7 +46,8 @@ enum {
   HasZCandidate,
   HasWCandidate,
   MET,
-  SSLike
+  SSLike,
+  SSLikeAntiBtag
 };
 
 enum {
@@ -878,6 +879,7 @@ void SetParameters(UInt_t cut,
   sCut[HasWCandidate]      = "HasWCandidate";
   sCut[MET]                = "MET";
   sCut[SSLike]             = "SSLike";
+  sCut[SSLikeAntiBtag]     = "SSLikeAntiBtag";
 
   process[DYJets_Madgraph]  = "DYJets_Madgraph";
   process[ZJets_Madgraph]   = "ZJets_Madgraph";

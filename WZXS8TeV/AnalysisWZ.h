@@ -26,7 +26,7 @@ enum {MMM, EEE, MME, EEM};
 TString sChannel[] = {"MMM", "EEE", "MME", "EEM"};
 
 
-const UInt_t nCuts = 11;
+const UInt_t nCuts = 12;
 
 enum {
   AllEvents,
@@ -39,7 +39,8 @@ enum {
   HasZCandidate,
   HasWCandidate,
   MET,
-  SSLike
+  SSLike,
+  SSLikeAntiBtag
 };
 
 TString sCut[] = {
@@ -53,7 +54,8 @@ TString sCut[] = {
   "HasZCandidate",
   "HasWCandidate",
   "MET",
-  "SSLike"
+  "SSLike",
+  "SSLikeAntiBtag"
 };
 
 
