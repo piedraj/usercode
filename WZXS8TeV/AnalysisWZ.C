@@ -1077,12 +1077,21 @@ TH2F* AnalysisWZ::LoadHistogram(TString filename,
 				TString hname,
 				TString cname)
 {
-  TFile* inputfile = TFile::Open("/gpfs/csic_users/piedra/work/PAF/LeptonScaleFactors/" + filename + ".root");
+  TString host = gSystem->HostName();
+
+  TString home = "/nfs/fanae/user/piedra";
+  
+  if (host.Contains("ifca"))
+    {
+      home = "/gpfs/csic_users/piedra";
+    }
+  
+  TFile* inputfile = TFile::Open(home + "/work/PAF/LeptonScaleFactors/" + filename + ".root");
 
   TH2F* hist = (TH2F*)inputfile->Get(hname)->Clone(cname);
-
+  
   hist->SetDirectory(0);
-
+  
   inputfile->Close();
 
   return hist;
