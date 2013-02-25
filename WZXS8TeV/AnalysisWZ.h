@@ -26,7 +26,7 @@ enum {MMM, EEE, MME, EEM};
 TString sChannel[] = {"MMM", "EEE", "MME", "EEM"};
 
 
-const UInt_t nCuts = 10;
+const UInt_t nCuts = 11;
 
 enum {
   AllEvents,
@@ -38,7 +38,8 @@ enum {
   Exactly3Leptons,
   HasZCandidate,
   HasWCandidate,
-  MET
+  MET,
+  SSLike
 };
 
 TString sCut[] = {
@@ -51,7 +52,8 @@ TString sCut[] = {
   "Exactly3Leptons",
   "HasZCandidate",
   "HasWCandidate",
-  "MET"
+  "MET",
+  "SSLike"
 };
 
 
@@ -186,6 +188,7 @@ class AnalysisWZ: public CMSAnalysisSelectorMiniTrees
   Double_t                    transverseMass;
   Double_t                    sumCharges;
   Double_t                    ptLeadingJet;
+  UInt_t                      nbjets;
   UInt_t                      theChannel;
 
   Double_t                    dataDriven_weight_lo;

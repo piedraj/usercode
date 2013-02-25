@@ -91,7 +91,6 @@ void AnalysisWZ::InsideLoop()
   invMass3Lep    = 0.;
   transverseMass = 0.;
   sumCharges     = 0.;
-  ptLeadingJet   = 0.;
 
 
   // MC filters
@@ -327,8 +326,11 @@ void AnalysisWZ::InsideLoop()
   efficiency_weight *= dataDriven_weight_lo;
 
 
-  // Determine the leading jet pt
+  // Deal with jets
   //----------------------------------------------------------------------------
+  nbjets       = 0;
+  ptLeadingJet = 0.;
+
   for (UInt_t i=0; i<T_JetAKCHS_Px->size(); i++) {
 	
     TLorentzVector Jet(T_JetAKCHS_Px->at(i),
@@ -337,6 +339,14 @@ void AnalysisWZ::InsideLoop()
 		       T_JetAKCHS_Energy->at(i));
     
     if (Jet.Pt() > ptLeadingJet) ptLeadingJet = Jet.Pt();
+
+    if (Jet.Pt() < 40) continue;
+
+    if (fabs(Jet.Eta()) > 2.4) continue;
+
+    if (T_JetAKCHS_Tag_CombSVtx->at(i) < 0.244) continue;
+
+    nbjets++;
   }
 
 
@@ -434,6 +444,17 @@ void AnalysisWZ::InsideLoop()
     }
 
   FillHistograms(theChannel, MET);
+
+
+  // SSLike
+  //----------------------------------------------------------------------------
+  if (invMass2Lep < 76. || invMass2Lep > 106.) return;
+
+  if (T_METPFTypeI_ET < 50) return;
+
+  if (nbjets > 0) return;
+
+  FillHistograms(theChannel, SSLike);
 }
 
 
