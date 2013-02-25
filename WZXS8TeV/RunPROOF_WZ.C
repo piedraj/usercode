@@ -27,14 +27,14 @@ void RunPROOF_WZ(TString  sample       = "DoubleMu",
 		 Long64_t nEvents      = -1,
 		 Bool_t   update       = true)
 {
-  dataPath = GuessLocalBasePath(1);
+  dataPath = GuessLocalBasePath();
 
 
   // PROOF mode
   //----------------------------------------------------------------------------
   //  gPAFOptions->proofMode = kSequential;
-  //  gPAFOptions->proofMode = kLite;
-  gPAFOptions->proofMode = kCluster;
+  gPAFOptions->proofMode = kLite;
+  //  gPAFOptions->proofMode = kCluster;
   //  gPAFOptions->proofMode = kPoD;
   gPAFOptions->NSlots    = 30;
 
@@ -233,35 +233,15 @@ vector<TString> GetRealDataFiles(const char* relativepath,
 //------------------------------------------------------------------------------
 // GuessLocalBasePath
 //------------------------------------------------------------------------------
-TString GuessLocalBasePath(Bool_t verbose)
+TString GuessLocalBasePath()
 {
   TString host = gSystem->HostName();
 
-  TString localBasePath;
+  TString localBasePath = "/pool/ciencias";
 
-  if (host.Contains("geol.uniovi.es"))
-    {
-      localBasePath = TString("/hadoop");
-    }
-  else if (host.Contains("ciencias.uniovi.es"))
-    {
-      localBasePath = TString("/data");
-    }
-  else if (host.Contains("ifca.es"))
+  if (host.Contains("ifca"))
     {
       localBasePath = TString("/gpfs/csic_projects/tier3data");
-    }
-  else
-    {
-      cerr << "ERROR: Could not guess base path from host name " << host << endl;
-
-      localBasePath = TString("");
-    }
-
-  if (verbose)
-    {
-      printf("\n [RunPROOF_WZ::GuessLocalBasePath] host = %s, localBasePath = %s\n\n",
-	     host.Data(), localBasePath.Data());
     }
 
   return localBasePath;

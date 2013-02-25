@@ -1095,4 +1095,5 @@ TH2F* AnalysisWZ::LoadHistogram(TString filename,
   inputfile->Close();
 
   return hist;
+
 }

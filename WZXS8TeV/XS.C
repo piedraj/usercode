@@ -33,7 +33,7 @@ const Double_t ngenWZphase = 1449067;  // (71 < mZ < 111 GeV)
 // Data members
 //------------------------------------------------------------------------------
 const UInt_t nChannels  =  4;
-const UInt_t nCuts      =  7;
+const UInt_t nCuts      =  8;
 const UInt_t nProcesses = 39;
 
 enum {MMM, EEE, MME, EEM};
@@ -45,7 +45,8 @@ enum {
   Exactly3Leptons,
   HasZCandidate,
   HasWCandidate,
-  MET
+  MET,
+  SSLike
 };
 
 enum {
@@ -126,7 +127,8 @@ void     SetParameters            (UInt_t      cut,
 
 Int_t    ReadInputFiles           (UInt_t      channel);
 
-void     MeasureTheCrossSection   (UInt_t      channel);
+void     MeasureTheCrossSection   (UInt_t      channel,
+				   UInt_t      cut);
 
 void     DrawHistogram            (TString     hname,
 				   TString     xtitle,
@@ -182,8 +184,8 @@ TString  GuessLocalBasePath       ();
 //------------------------------------------------------------------------------
 // XS
 //------------------------------------------------------------------------------
-void XS(UInt_t cut          = MET,
-	UInt_t mode         = MCmode,
+void XS(UInt_t cut          = SSLike,
+	UInt_t mode         = PPFmode,
 	UInt_t closure_test = 0,
 	Bool_t batch        = true)
 {
@@ -197,19 +199,17 @@ void XS(UInt_t cut          = MET,
 
     if (ReadInputFiles(channel) < 0) break;
     
-    if (cut == MET) MeasureTheCrossSection(channel);
+    if (cut >= MET) MeasureTheCrossSection(channel, cut);
 
     TString suffix = "_" + sChannel[channel] + "_" + sCut[cut];
     
-    //    DrawHistogram("hNPV"          + suffix, "number of PV",          -1, 0, "NULL", linY, 0, 30);
-    //    DrawHistogram("hSumCharges"   + suffix, "q_{1} + q_{2} + q_{3}", -1, 0, "NULL", linY);
-
-    DrawHistogram("hMET"          + suffix, "E_{T}^{miss}",          5, 0, "GeV", linY);
-    DrawHistogram("hInvMass3Lep"  + suffix, "m_{#font[12]{3l}}",     5, 0, "GeV", linY);
-    DrawHistogram("hPtLepton1"    + suffix, "p_{T}^{first lepton}",  5, 0, "GeV", linY);
-    DrawHistogram("hPtLepton2"    + suffix, "p_{T}^{second lepton}", 5, 0, "GeV", linY);
-    DrawHistogram("hPtLepton3"    + suffix, "p_{T}^{third lepton}",  5, 0, "GeV", linY);
-    DrawHistogram("hPtLeadingJet" + suffix, "p_{T}^{leading jet}",   5, 0, "GeV", linY);
+    DrawHistogram("hSumCharges"   + suffix, "q_{1} + q_{2} + q_{3}", -1, 0, "NULL", linY);
+    DrawHistogram("hMET"          + suffix, "E_{T}^{miss}",           5, 0, "GeV",  linY);
+    DrawHistogram("hInvMass3Lep"  + suffix, "m_{#font[12]{3l}}",      5, 0, "GeV",  linY);
+    DrawHistogram("hPtLepton1"    + suffix, "p_{T}^{first lepton}",   5, 0, "GeV",  linY);
+    DrawHistogram("hPtLepton2"    + suffix, "p_{T}^{second lepton}",  5, 0, "GeV",  linY);
+    DrawHistogram("hPtLepton3"    + suffix, "p_{T}^{third lepton}",   5, 0, "GeV",  linY);
+    DrawHistogram("hPtLeadingJet" + suffix, "p_{T}^{leading jet}",    5, 0, "GeV",  linY);
 
     if (cut < HasZCandidate) continue;
 
@@ -228,16 +228,15 @@ void XS(UInt_t cut          = MET,
 //------------------------------------------------------------------------------
 // MeasureTheCrossSection
 //------------------------------------------------------------------------------
-void MeasureTheCrossSection(UInt_t channel)
+void MeasureTheCrossSection(UInt_t channel, UInt_t cut)
 {
   Double_t ndata       = 0;
   Double_t nsignal     = 0;
   Double_t nbackground = 0;
-  Double_t nTTbar      = 0;
 
-  Double_t nWZ = ((TH1D*)input[WZTo3LNu]->Get("hCounterEff_" + sChannel[channel] + "_MET"))->Integral();
+  Double_t nWZ = ((TH1D*)input[WZTo3LNu]->Get("hCounterEff_" + sChannel[channel] + "_" + sCut[cut]))->Integral();
 
-  TString hname = "hCounter_" + sChannel[channel] + "_MET";
+  TString hname = "hCounter_" + sChannel[channel] + "_" + sCut[cut];
 
   for (UInt_t i=0; i<vprocess.size(); i++) {
 
@@ -253,8 +252,6 @@ void MeasureTheCrossSection(UInt_t channel)
     }
     else {
       nbackground += dummy->Integral();
-      if (j == TTbar_Madgraph)
-	nTTbar = dummy->Integral();
     }
   }
 
@@ -314,7 +311,6 @@ void MeasureTheCrossSection(UInt_t channel)
     printf("                               ndata = %5.1f +- %4.1f\n", ndata,             sqrt(ndata));
     printf("                 ndata - nbackground = %5.1f +- %4.1f\n", ndata-nbackground, sqrt(ndata+nbackground));
     printf("                             nsignal = %5.1f +- %4.1f\n", nsignal,           sqrt(nsignal));
-    printf("                              nTTbar = %5.1f +- %4.1f\n", nTTbar,            sqrt(nTTbar));
   }
 
   if (_verbosity > 0) {
@@ -881,6 +877,7 @@ void SetParameters(UInt_t cut,
   sCut[HasZCandidate]      = "HasZCandidate";
   sCut[HasWCandidate]      = "HasWCandidate";
   sCut[MET]                = "MET";
+  sCut[SSLike]             = "SSLike";
 
   process[DYJets_Madgraph]  = "DYJets_Madgraph";
   process[ZJets_Madgraph]   = "ZJets_Madgraph";
