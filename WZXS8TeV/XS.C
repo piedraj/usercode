@@ -33,15 +33,12 @@ const Double_t ngenWZphase = 1449067;  // (71 < mZ < 111 GeV)
 // Data members
 //------------------------------------------------------------------------------
 const UInt_t nChannels  =  4;
-const UInt_t nCuts      =  9;
+const UInt_t nCuts      =  6;
 const UInt_t nProcesses = 39;
 
 enum {MMM, EEE, MME, EEM};
 
 enum {
-  AllEvents,
-  HLT,
-  Has3IsoGoodLeptons,
   Exactly3Leptons,
   HasZCandidate,
   HasWCandidate,
@@ -190,8 +187,6 @@ void XS(UInt_t cut          = SSLike,
 	UInt_t closure_test = 0,
 	Bool_t batch        = true)
 {
-  if (cut < Exactly3Leptons) return;
-
   gROOT->SetBatch(batch);
 
   SetParameters(cut, mode, closure_test);

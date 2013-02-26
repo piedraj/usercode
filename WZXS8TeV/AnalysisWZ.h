@@ -26,15 +26,9 @@ enum {MMM, EEE, MME, EEM};
 TString sChannel[] = {"MMM", "EEE", "MME", "EEM"};
 
 
-const UInt_t nCuts = 12;
+const UInt_t nCuts = 6;
 
 enum {
-  AllEvents,
-  HLT,
-  Has3Leptons,
-  Has3PVLeptons,
-  Has3IsoLeptons,
-  Has3IsoGoodLeptons,
   Exactly3Leptons,
   HasZCandidate,
   HasWCandidate,
@@ -44,12 +38,6 @@ enum {
 };
 
 TString sCut[] = {
-  "AllEvents",
-  "HLT",
-  "Has3Leptons",
-  "Has3PVLeptons",
-  "Has3IsoLeptons",
-  "Has3IsoGoodLeptons",
   "Exactly3Leptons",
   "HasZCandidate",
   "HasWCandidate",
@@ -107,18 +95,14 @@ class AnalysisWZ: public CMSAnalysisSelectorMiniTrees
 			    
   Bool_t       ElectronID                (UInt_t  iElec);
   Bool_t       ElectronCloseToPV         (UInt_t  iElec);
-  UInt_t       ElectronBDT               (UInt_t  iElec);
-  UInt_t       ElectronIsolation         (UInt_t  iElec);
+  Bool_t       ElectronBDT               (UInt_t  iElec);
+  Bool_t       ElectronIsolation         (UInt_t  iElec);
 			    	      
   Bool_t       MuonID                    (UInt_t  iMuon);
-  UInt_t       MuonCloseToPV             (UInt_t  iMuon);
-  UInt_t       MuonIsolation             (UInt_t  iMuon);
+  Bool_t       MuonCloseToPV             (UInt_t  iMuon);
+  Bool_t       MuonIsolation             (UInt_t  iMuon);
   
   void         FillChannelCounters       (UInt_t  iChannel,
-					  UInt_t  iCut);
-
-  Bool_t       FillCounters              (UInt_t  nElec,
-					  UInt_t  nMuon,
 					  UInt_t  iCut);
 
   void         FillHistograms            (UInt_t  iChannel,
@@ -143,6 +127,11 @@ class AnalysisWZ: public CMSAnalysisSelectorMiniTrees
   TH1D*                       hCounterPU [nChannels][nCuts];
   TH1D*                       hCounterEff[nChannels][nCuts];
   TH1D*                       hCounter   [nChannels][nCuts];
+
+  TH1D*                       hCounterTTT[nChannels][nCuts];
+  TH1D*                       hCounterTTF[nChannels][nCuts];
+  TH1D*                       hCounterTFF[nChannels][nCuts];
+  TH1D*                       hCounterFFF[nChannels][nCuts];
 
   TH1D*                       hNPV         [nChannels][nCuts];
   TH1D*                       hMET         [nChannels][nCuts];
@@ -192,6 +181,8 @@ class AnalysisWZ: public CMSAnalysisSelectorMiniTrees
   Double_t                    ptLeadingJet;
   UInt_t                      nbjets;
   UInt_t                      theChannel;
+  UInt_t                      electronCounter;
+  UInt_t                      tightCounter;
 
   Double_t                    dataDriven_weight_lo;
   Double_t                    dataDriven_weight_hi;

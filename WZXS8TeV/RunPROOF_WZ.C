@@ -34,8 +34,8 @@ void RunPROOF_WZ(TString  sample       = "DoubleMu",
   //----------------------------------------------------------------------------
   //  gPAFOptions->proofMode = kSequential;
   //  gPAFOptions->proofMode = kLite;
-  gPAFOptions->proofMode = kCluster;
-  //  gPAFOptions->proofMode = kPoD;
+  //  gPAFOptions->proofMode = kCluster;
+  gPAFOptions->proofMode = kPoD;
   gPAFOptions->NSlots    = 30;
 
 

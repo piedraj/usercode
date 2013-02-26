@@ -33,7 +33,10 @@ void AnalysisWZ::Initialise()
       hCounterEff[i][j] = CreateH1D(TString("hCounterEff" + suffix), "", 3, 0, 3);
       hCounter   [i][j] = CreateH1D(TString("hCounter"    + suffix), "", 3, 0, 3);
 
-      if (j < Exactly3Leptons) continue;
+      hCounterTTT[i][j] = CreateH1D(TString("hCounterTTT" + suffix), "", 3, 0, 3);
+      hCounterTTF[i][j] = CreateH1D(TString("hCounterTTF" + suffix), "", 3, 0, 3);
+      hCounterTFF[i][j] = CreateH1D(TString("hCounterTFF" + suffix), "", 3, 0, 3);
+      hCounterFFF[i][j] = CreateH1D(TString("hCounterFFF" + suffix), "", 3, 0, 3);
 
       hNPV         [i][j] = CreateH1D(TString("hNPV"          + suffix), "",  50,  0,  50);
       hMET         [i][j] = CreateH1D(TString("hMET"          + suffix), "", 200,  0, 200);
@@ -87,10 +90,12 @@ void AnalysisWZ::InsideLoop()
 
   AnalysisLeptons.clear();
 
-  invMass2Lep    = 0.;
-  invMass3Lep    = 0.;
-  transverseMass = 0.;
-  sumCharges     = 0.;
+  invMass2Lep     = 999.;
+  invMass3Lep     = 999.;
+  transverseMass  = 999.;
+  sumCharges      = 0.;
+  electronCounter = 0;
+  tightCounter    = 0;
 
 
   // MC filters
@@ -102,29 +107,14 @@ void AnalysisWZ::InsideLoop()
   if (sample.Contains("WJets_Madgraph") && T_Gen_bSt3_Px->size() > 0) return;
 
 
-  // AllEvents
-  //----------------------------------------------------------------------------
-  UInt_t allElectrons = T_Elec_Px->size();
-  UInt_t allMuons     = T_Muon_Px->size();
-
-  if (!FillCounters(allElectrons, allMuons, AllEvents)) return;
-
-
   // HLT
   //----------------------------------------------------------------------------
   if (sample.Contains("DoubleMu")       && !T_passTriggerDoubleMu) return;
   if (sample.Contains("DoubleElectron") && !T_passTriggerDoubleEl) return;
 
-  if (!FillCounters(allElectrons, allMuons, HLT)) return;
-
 
   // Loop over muons
   //----------------------------------------------------------------------------
-  UInt_t countMuons        = 0;
-  UInt_t countPVMuons      = 0;
-  UInt_t countIsoMuons     = 0;
-  UInt_t countIsoGoodMuons = 0;
-
   for (UInt_t i=0; i<T_Muon_Px->size(); i++) {
 
     TLorentzVector MuonVector(T_Muon_Px->at(i),
@@ -146,25 +136,15 @@ void AnalysisWZ::InsideLoop()
 
     if (isnotglobal) continue;
 
-    countMuons++;
-
     if (fabs(T_Muon_IP2DBiasedPV->at(i)) > 0.2) continue;
 
-    if (MuonCloseToPV(i) == Rejected) continue;
-
-    countPVMuons++;
+    if (fabs(T_Muon_dzPVBiasedPV->at(i)) > 0.1) continue;
 
     if (T_Muon_MVARings->at(i) < -0.6) continue;
 
-    UInt_t muon_type = MuonIsolation(i);
-
-    if (muon_type != MuonCloseToPV(i)) continue;
-
-    countIsoMuons++;
-
     if (!MuonID(i)) continue;
 
-    countIsoGoodMuons++;
+    UInt_t muon_type = (MuonCloseToPV(i) && MuonIsolation(i)) ? Tight : Fail;
 
     const Double_t scale_factor = MuonSF->GetBinContent(MuonSF->FindBin(pt,eta));
     const Double_t prompt_rate  = MuonPR->GetBinContent(MuonPR->FindBin(eta,pt));  // Inverted axis
@@ -192,11 +172,6 @@ void AnalysisWZ::InsideLoop()
 
   // Loop over electrons
   //----------------------------------------------------------------------------
-  UInt_t countElectrons        = 0;
-  UInt_t countPVElectrons      = 0;
-  UInt_t countIsoElectrons     = 0;
-  UInt_t countIsoGoodElectrons = 0;
-
   for (UInt_t i=0; i<T_Elec_Px->size(); i++) {
 
     TLorentzVector ElectronVector(T_Elec_Px->at(i),
@@ -214,21 +189,9 @@ void AnalysisWZ::InsideLoop()
 
     if (!ElectronID(i)) continue;
 
-    countElectrons++;
-
     if (!ElectronCloseToPV(i)) continue;
 
-    countPVElectrons++;
-
-    if (ElectronIsolation(i) == Rejected) continue;
-
-    countIsoElectrons++;
-
-    UInt_t electron_type = ElectronBDT(i);
-
-    if (electron_type != ElectronIsolation(i)) continue;
-
-    countIsoGoodElectrons++;
+    UInt_t electron_type = (ElectronBDT(i) && ElectronIsolation(i)) ? Tight : Fail;
 
     const Double_t scale_factor = ElecSF->GetBinContent(ElecSF->FindBin(pt,eta));
     const Double_t prompt_rate  = ElecPR->GetBinContent(ElecPR->FindBin(eta,pt));  // Inverted axis
@@ -254,14 +217,6 @@ void AnalysisWZ::InsideLoop()
   }
 
 
-  // Require at least 2 leptons
-  //----------------------------------------------------------------------------
-  if (!FillCounters(countElectrons,        countMuons,        Has3Leptons))        return;
-  if (!FillCounters(countPVElectrons,      countPVMuons,      Has3PVLeptons))      return;
-  if (!FillCounters(countIsoElectrons,     countIsoMuons,     Has3IsoLeptons))     return;
-  if (!FillCounters(countIsoGoodElectrons, countIsoGoodMuons, Has3IsoGoodLeptons)) return;
-
-
   // Sort the leptons by pt
   //----------------------------------------------------------------------------
   if (AnalysisLeptons.size() != 3) return;
@@ -270,12 +225,15 @@ void AnalysisWZ::InsideLoop()
 
   std::reverse(AnalysisLeptons.begin(), AnalysisLeptons.end());
 
+  Bool_t pt3pass = (AnalysisLeptons[2].v.Pt() > 20.);
+
+  if (closure_test) pt3pass = !pt3pass;
+
+  if (!pt3pass) return;
+
 
   // Classify the channels
   //----------------------------------------------------------------------------
-  UInt_t electronCounter = 0;
-  UInt_t tightCounter    = 0;
-
   for (UInt_t i=0; i<3; i++)
     {
       if (AnalysisLeptons[i].flavor == Electron) electronCounter++;
@@ -284,9 +242,7 @@ void AnalysisWZ::InsideLoop()
       sumCharges += AnalysisLeptons[i].charge;
     }
 
-  if (tightCounter < 2) return;
-
-  if (mode == PPF && tightCounter != 2) return;  // TEMPORARY //////////////////
+  if (mode == RAW && tightCounter != 3) return;
 
   invMass3Lep = (AnalysisLeptons[0].v + AnalysisLeptons[1].v + AnalysisLeptons[2].v).M();
 
@@ -307,7 +263,7 @@ void AnalysisWZ::InsideLoop()
 
   // Data-driven estimates
   //----------------------------------------------------------------------------
-  if (mode == PPF)
+  if (mode == PPF && tightCounter == 2)
     {
       dataDriven_weight_lo = GetPPFWeightApprx(LowPtJet);
       dataDriven_weight_hi = GetPPFWeightApprx(HighPtJet);
@@ -350,17 +306,8 @@ void AnalysisWZ::InsideLoop()
   }
 
 
-  // Additional requirements on the pt of the leptons
+  // Fill histograms with exactly 3 leptons
   //----------------------------------------------------------------------------
-  if (AnalysisLeptons[0].v.Pt() <= 20) return;
-  if (AnalysisLeptons[1].v.Pt() <= 20) return;
-
-  Bool_t pt3pass = (AnalysisLeptons[2].v.Pt() > 20);
-
-  if (closure_test) pt3pass = !pt3pass;
-
-  if (!pt3pass) return;
-
   FillHistograms(theChannel, Exactly3Leptons);
 
 
@@ -368,8 +315,12 @@ void AnalysisWZ::InsideLoop()
   //----------------------------------------------------------------------------
   for (UInt_t i=0; i<3; i++) {
 
+    if (closure_test && i != 0) continue;
+
     for (UInt_t j=i+1; j<3; j++) {
       
+      if (closure_test && j != 1) continue;
+
       if (AnalysisLeptons[i].flavor != AnalysisLeptons[j].flavor) continue;
 
       if (AnalysisLeptons[i].charge * AnalysisLeptons[j].charge > 0) continue;
@@ -400,6 +351,8 @@ void AnalysisWZ::InsideLoop()
   // HasZCandidate
   //----------------------------------------------------------------------------
   if (invMass2Lep < 71. || invMass2Lep > 111.) return;
+
+  if (closure_test && fabs(invMass2Lep - Z_MASS) > 15.) return;
 
 
   // Compute the W transverse mass
@@ -448,7 +401,7 @@ void AnalysisWZ::InsideLoop()
 
   // SSLike
   //----------------------------------------------------------------------------
-  if (invMass2Lep < 76. || invMass2Lep > 106.) return;
+  if (fabs(invMass2Lep - Z_MASS) > 15.) return;
 
   if (T_METPFTypeI_ET < 40) return;
 
@@ -477,6 +430,11 @@ void AnalysisWZ::SetDataMembersAtTermination()
       hCounterPU [i][j] = (TH1D*)FindOutput(TString("hCounterPU"  + suffix));
       hCounterEff[i][j] = (TH1D*)FindOutput(TString("hCounterEff" + suffix));
       hCounter   [i][j] = (TH1D*)FindOutput(TString("hCounter"    + suffix));
+
+      hCounterTTT[i][j] = (TH1D*)FindOutput(TString("hCounterTTT" + suffix));
+      hCounterTTF[i][j] = (TH1D*)FindOutput(TString("hCounterTTF" + suffix));
+      hCounterTFF[i][j] = (TH1D*)FindOutput(TString("hCounterTFF" + suffix));
+      hCounterFFF[i][j] = (TH1D*)FindOutput(TString("hCounterFFF" + suffix));
     }
   }
 }
@@ -493,6 +451,9 @@ void AnalysisWZ::Summary()
 
   outputfile.open(Form("%s/%s.txt", directory.Data(), sample.Data()));
 
+
+  // PU weights applied
+  //----------------------------------------------------------------------------
   outputfile << Form("\n %39s results with %7.1f pb [PU weight applied]\n",
 		     sample.Data(), luminosity);
 
@@ -514,7 +475,7 @@ void AnalysisWZ::Summary()
   }
 
 
-  // All weights
+  // All weights applied
   //----------------------------------------------------------------------------
   outputfile << Form("\n %39s results with %7.1f pb [all weights applied]\n",
 		     sample.Data(), luminosity);
@@ -536,6 +497,48 @@ void AnalysisWZ::Summary()
     outputfile << "\n";
   }
 
+
+  // No weights applied
+  //----------------------------------------------------------------------------
+  UInt_t closure_test_cut = MET;
+
+  outputfile << Form("\n %39s results with %7.1f pb [no weights applied]\n",
+		     sample.Data(), luminosity);
+
+  outputfile << Form("\n %18s  %10s %10s %10s %10s\n",
+		     " ",
+		     sChannel[0].Data(),
+		     sChannel[1].Data(),
+		     sChannel[2].Data(),
+		     sChannel[3].Data());
+
+  outputfile << Form(" %18s:", "TTT");
+  
+  for (UInt_t j=0; j<nChannels; j++) outputfile << Form(" %10.0f", hCounterTTT[j][closure_test_cut]->Integral());
+
+  outputfile << "\n";
+
+  outputfile << Form(" %18s:", "TTF");
+  
+  for (UInt_t j=0; j<nChannels; j++) outputfile << Form(" %10.0f", hCounterTTF[j][closure_test_cut]->Integral());
+
+  outputfile << "\n";
+
+  outputfile << Form(" %18s:", "TFF");
+  
+  for (UInt_t j=0; j<nChannels; j++) outputfile << Form(" %10.0f", hCounterTFF[j][closure_test_cut]->Integral());
+
+  outputfile << "\n";
+
+  outputfile << Form(" %18s:", "FFF");
+  
+  for (UInt_t j=0; j<nChannels; j++) outputfile << Form(" %10.0f", hCounterFFF[j][closure_test_cut]->Integral());
+
+  outputfile << "\n";
+
+
+  // We are done
+  //----------------------------------------------------------------------------
   outputfile << "\n";
 
   outputfile.close();
@@ -560,7 +563,7 @@ void AnalysisWZ::GetParameters()
 //------------------------------------------------------------------------------
 // ElectronBDT
 //------------------------------------------------------------------------------
-UInt_t AnalysisWZ::ElectronBDT(UInt_t iElec)
+Bool_t AnalysisWZ::ElectronBDT(UInt_t iElec)
 {
   Double_t eta = fabs(T_Elec_SC_Eta->at(iElec));
 	
@@ -579,21 +582,9 @@ UInt_t AnalysisWZ::ElectronBDT(UInt_t iElec)
       else                                 {mvaCut = 0.92;}
     }
 
-  if (T_Elec_MVA->at(iElec) > mvaCut)
-    {
-      return Tight;
-    }
-  else
-    {
-      if (mode != RAW)
-	{
-	  return Fail;
-	}
-      else
-	{
-	  return Rejected;
-	}
-    }
+  Bool_t pass = (T_Elec_MVA->at(iElec) > mvaCut);
+  
+  return pass;
 }
 
 
@@ -662,7 +653,7 @@ Bool_t AnalysisWZ::ElectronCloseToPV(UInt_t iElec)
 //------------------------------------------------------------------------------
 // ElectronIsolation
 //------------------------------------------------------------------------------
-UInt_t AnalysisWZ::ElectronIsolation(UInt_t iElec) 
+Bool_t AnalysisWZ::ElectronIsolation(UInt_t iElec) 
 {
   TLorentzVector Elec(T_Elec_Px->at(iElec),
 		      T_Elec_Py->at(iElec),
@@ -707,21 +698,9 @@ UInt_t AnalysisWZ::ElectronIsolation(UInt_t iElec)
 
   Double_t relIso = (charged + max(0., neutral + photon - rho*AEff04)) / Elec.Pt();
 
-  if (relIso < 0.15)
-    {
-      return Tight;
-    }
-  else
-    {
-      if (mode != RAW)
-	{
-	  return Fail;
-	}
-      else
-	{
-	  return Rejected;
-	}
-    }
+  Bool_t pass = (relIso < 0.15);
+
+  return pass;
 }
 
 
@@ -756,58 +735,32 @@ Bool_t AnalysisWZ::MuonID(UInt_t iMuon)
 //------------------------------------------------------------------------------
 // MuonCloseToPV
 //------------------------------------------------------------------------------
-UInt_t AnalysisWZ::MuonCloseToPV(UInt_t iMuon)
+Bool_t AnalysisWZ::MuonCloseToPV(UInt_t iMuon)
 {
-  if (fabs(T_Muon_dzPVBiasedPV->at(iMuon)) > 0.1) return Rejected;
-
   Double_t MaxMuIP = (T_Muon_Pt->at(iMuon) < 20) ? 0.01 : 0.02;
 
-  if (fabs(T_Muon_IP2DBiasedPV->at(iMuon)) <= MaxMuIP)
-    {
-      return Tight;
-    }
-  else
-    {
-      if (mode != RAW)
-	{
-	  return Fail;
-	}
-      else
-	{
-	  return Rejected;
-	}
-    }
+  Bool_t pass = (fabs(T_Muon_IP2DBiasedPV->at(iMuon)) <= MaxMuIP);
+
+  return pass;
 }
 
 
 //------------------------------------------------------------------------------
 // MuonIsolation
 //------------------------------------------------------------------------------
-UInt_t AnalysisWZ::MuonIsolation(UInt_t iMuon) 
+Bool_t AnalysisWZ::MuonIsolation(UInt_t iMuon) 
 {
-  Double_t mueta = T_Muon_Eta->at(iMuon);
-  Double_t mupt  = T_Muon_Pt ->at(iMuon);
+  Double_t eta = T_Muon_Eta->at(iMuon);
+  Double_t pt  = T_Muon_Pt ->at(iMuon);
 
   Double_t isoCut = -1;
 
-  if (mupt <= 20) isoCut = (fabs(mueta) < 1.479) ? 0.82 : 0.86;
-  else            isoCut = (fabs(mueta) < 1.479) ? 0.86 : 0.82;
+  if (pt <= 20) isoCut = (fabs(eta) < 1.479) ? 0.82 : 0.86;
+  else          isoCut = (fabs(eta) < 1.479) ? 0.86 : 0.82;
 
-  if (T_Muon_MVARings->at(iMuon) >= isoCut)
-    {
-      return Tight;
-    }
-  else
-    {
-      if (mode != RAW)
-	{
-	  return Fail;
-	}
-      else
-	{
-	  return Rejected;
-	}
-    }
+  Bool_t pass = (T_Muon_MVARings->at(iMuon) >= isoCut);
+
+  return pass;
 }
 
 
@@ -824,34 +777,16 @@ void AnalysisWZ::FillChannelCounters(UInt_t iChannel, UInt_t iCut)
 
 
 //------------------------------------------------------------------------------
-// FillCounters
-//------------------------------------------------------------------------------
-Bool_t AnalysisWZ::FillCounters(UInt_t nElec, UInt_t nMuon, UInt_t iCut)
-{
-  if (nElec + nMuon < 3) return false;
-
-  if (nElec >= 3) FillChannelCounters(EEE, iCut);
-
-  if (nMuon >= 3) FillChannelCounters(MMM, iCut);
-
-  if (nElec + nMuon >= 3)
-    {
-      FillChannelCounters(EEM, iCut);
-      FillChannelCounters(MME, iCut);
-    }
-
-  return true;
-}
-
-
-//------------------------------------------------------------------------------
 // FillHistograms
 //------------------------------------------------------------------------------
 void AnalysisWZ::FillHistograms(UInt_t iChannel, UInt_t iCut)
 {
-  if (iCut < Exactly3Leptons) return;
-
   FillChannelCounters(iChannel, iCut);
+
+  if      (tightCounter == 3) hCounterTTT[iChannel][iCut]->Fill(1);
+  else if (tightCounter == 2) hCounterTTF[iChannel][iCut]->Fill(1);
+  else if (tightCounter == 1) hCounterTFF[iChannel][iCut]->Fill(1);
+  else if (tightCounter == 0) hCounterFFF[iChannel][iCut]->Fill(1);
 
   Double_t hweight = efficiency_weight * xs_weight;
   
@@ -977,8 +912,6 @@ Double_t AnalysisWZ::GetPPFWeight(UInt_t jetPt)
   Double_t promptProbability[3];
   Double_t fakeProbability[3];
 
-  UInt_t ntight = 0;
-
   for (UInt_t i=0; i<3; i++) {
     
     Lepton lep = AnalysisLeptons[i];
@@ -989,8 +922,6 @@ Double_t AnalysisWZ::GetPPFWeight(UInt_t jetPt)
 
     if (lep.type == Tight)
       {
-	ntight++;
-	
 	promptProbability[i] = p * (1 - f);
 	fakeProbability[i]   = f * (1 - p);
       }
@@ -1010,7 +941,7 @@ Double_t AnalysisWZ::GetPPFWeight(UInt_t jetPt)
 
   Double_t result = PPF + PFP + FPP;
 
-  if (ntight == 3) result *= -1.;
+  if (tightCounter == 3) result *= -1.;
 
   return result;
 }
@@ -1023,8 +954,6 @@ Double_t AnalysisWZ::GetPPPWeight(UInt_t jetPt)
 {
   Double_t promptProbability[3];
 
-  UInt_t ntight = 0;
-
   for (UInt_t i=0; i<3; i++) {
     
     Lepton lep = AnalysisLeptons[i];
@@ -1035,8 +964,6 @@ Double_t AnalysisWZ::GetPPPWeight(UInt_t jetPt)
 
     if (lep.type == Tight)
       {
-	ntight++;
-
 	promptProbability[i] = p * (1 - f);
       }
     else if (lep.type == Fail)
@@ -1049,7 +976,7 @@ Double_t AnalysisWZ::GetPPPWeight(UInt_t jetPt)
 
   Double_t PPP = promptProbability[0] * promptProbability[1] * promptProbability[2];
 
-  if (ntight == 2) PPP *= -1.;
+  if (tightCounter == 2) PPP *= -1.;
 
   return PPP;
 }
@@ -1082,9 +1009,9 @@ TH2F* AnalysisWZ::LoadHistogram(TString filename,
 				TString hname,
 				TString cname)
 {
-  //  TFile* inputfile = TFile::Open("/nfs/fanae/user/piedra/work/PAF/LeptonScaleFactors/" + filename + ".root");
+  TFile* inputfile = TFile::Open("/nfs/fanae/user/piedra/work/PAF/LeptonScaleFactors/" + filename + ".root");
 
-  TFile* inputfile = TFile::Open("/gpfs/csic_users/piedra/work/PAF/LeptonScaleFactors/" + filename + ".root");
+  //  TFile* inputfile = TFile::Open("/gpfs/csic_users/piedra/work/PAF/LeptonScaleFactors/" + filename + ".root");
 
   TH2F* hist = (TH2F*)inputfile->Get(hname)->Clone(cname);
   
