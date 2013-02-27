@@ -182,10 +182,10 @@ TString  GuessLocalBasePath       ();
 //------------------------------------------------------------------------------
 // XS
 //------------------------------------------------------------------------------
-void XS(UInt_t cut          = SSLike,
+void XS(UInt_t cut          = MET,
 	UInt_t mode         = PPFmode,
 	UInt_t closure_test = 0,
-	Bool_t batch        = true)
+	Bool_t batch        = false)
 {
   gROOT->SetBatch(batch);
 
@@ -201,7 +201,7 @@ void XS(UInt_t cut          = SSLike,
     
     DrawHistogram("hSumCharges"   + suffix, "q_{1} + q_{2} + q_{3}", -1, 0, "NULL", linY);
     DrawHistogram("hMET"          + suffix, "E_{T}^{miss}",           5, 0, "GeV",  linY);
-    DrawHistogram("hInvMass3Lep"  + suffix, "m_{#font[12]{3l}}",      5, 0, "GeV",  linY);
+    DrawHistogram("hInvMass3Lep"  + suffix, "m_{#font[12]{3l}}",      5, 0, "GeV",  linY);  // 71, 211, 0, 110, false);
     DrawHistogram("hPtLepton1"    + suffix, "p_{T}^{first lepton}",   5, 0, "GeV",  linY);
     DrawHistogram("hPtLepton2"    + suffix, "p_{T}^{second lepton}",  5, 0, "GeV",  linY);
     DrawHistogram("hPtLepton3"    + suffix, "p_{T}^{third lepton}",   5, 0, "GeV",  linY);
@@ -866,9 +866,6 @@ void SetParameters(UInt_t cut,
   sChannel[MME] = "MME";
   sChannel[EEM] = "EEM";
 
-  sCut[AllEvents]          = "AllEvents";
-  sCut[HLT]                = "HLT";
-  sCut[Has3IsoGoodLeptons] = "Has3IsoGoodLeptons";
   sCut[Exactly3Leptons]    = "Exactly3Leptons";
   sCut[HasZCandidate]      = "HasZCandidate";
   sCut[HasWCandidate]      = "HasWCandidate";

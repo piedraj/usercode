@@ -242,6 +242,7 @@ void AnalysisWZ::InsideLoop()
       sumCharges += AnalysisLeptons[i].charge;
     }
 
+  if (mode == PPF && tightCounter != 2) return;
   if (mode == RAW && tightCounter != 3) return;
 
   invMass3Lep = (AnalysisLeptons[0].v + AnalysisLeptons[1].v + AnalysisLeptons[2].v).M();
@@ -263,7 +264,7 @@ void AnalysisWZ::InsideLoop()
 
   // Data-driven estimates
   //----------------------------------------------------------------------------
-  if (mode == PPF && tightCounter == 2)
+  if (mode == PPF)
     {
       dataDriven_weight_lo = GetPPFWeightApprx(LowPtJet);
       dataDriven_weight_hi = GetPPFWeightApprx(HighPtJet);

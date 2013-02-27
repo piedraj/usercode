@@ -5,7 +5,7 @@ Double_t xs7tevErrorStat[nchannels] = { 1.22,  2.20,  2.99,  2.32,  2.61};
 Double_t xs7tevErrorSyst[nchannels] = { 0.71,  0.74,  0.98,  0.71,  0.72};
 Double_t xs7tevErrorLumi[nchannels] = { 0.45,  0.47,  0.52,  0.43,  0.44};
 
-Double_t xs8tev         [nchannels] = {999, 24.8, 23.2, 22.6, 24.7};
+Double_t xs8tev         [nchannels] = {999, 23.6, 25.0, 23.0, 25.0};
 Double_t xs8tevErrorStat[nchannels] = {999,  1.8,  2.6,  2.0,  2.4};
 Double_t xs8tevErrorSyst[nchannels] = {999,  0.0,  0.0,  0.0,  0.0};
 Double_t xs8tevErrorLumi[nchannels] = {999,  1.1,  1.0,  1.0,  1.1};
