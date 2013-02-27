@@ -27,36 +27,34 @@ void AnalysisWZ::Initialise()
     for (UInt_t j=0; j<nCuts; j++) {
 
       TString suffix = "_" + sChannel[i] + "_" + sCut[j];
+      
+      for (UInt_t k=0; k<nCompositions; k++) {
 
-      hCounterRaw[i][j] = CreateH1D(TString("hCounterRaw" + suffix), "", 3, 0, 3);
-      hCounterPU [i][j] = CreateH1D(TString("hCounterPU"  + suffix), "", 3, 0, 3);
-      hCounterEff[i][j] = CreateH1D(TString("hCounterEff" + suffix), "", 3, 0, 3);
-      hCounter   [i][j] = CreateH1D(TString("hCounter"    + suffix), "", 3, 0, 3);
+	hCounterRaw[i][j][k] = CreateH1D("hCounterRaw" + suffix + "_" + sComposition[k], "", 3, 0, 3);
+	hCounterPU [i][j][k] = CreateH1D("hCounterPU"  + suffix + "_" + sComposition[k], "", 3, 0, 3);
+	hCounterEff[i][j][k] = CreateH1D("hCounterEff" + suffix + "_" + sComposition[k], "", 3, 0, 3);
+	hCounter   [i][j][k] = CreateH1D("hCounter"    + suffix + "_" + sComposition[k], "", 3, 0, 3);
+      }
 
-      hCounterTTT[i][j] = CreateH1D(TString("hCounterTTT" + suffix), "", 3, 0, 3);
-      hCounterTTF[i][j] = CreateH1D(TString("hCounterTTF" + suffix), "", 3, 0, 3);
-      hCounterTFF[i][j] = CreateH1D(TString("hCounterTFF" + suffix), "", 3, 0, 3);
-      hCounterFFF[i][j] = CreateH1D(TString("hCounterFFF" + suffix), "", 3, 0, 3);
-
-      hNPV         [i][j] = CreateH1D(TString("hNPV"          + suffix), "",  50,  0,  50);
-      hMET         [i][j] = CreateH1D(TString("hMET"          + suffix), "", 200,  0, 200);
-      hSumCharges  [i][j] = CreateH1D(TString("hSumCharges"   + suffix), "",   9, -4,   5);
-      hInvMass3Lep [i][j] = CreateH1D(TString("hInvMass3Lep"  + suffix), "", 400,  0, 400);
-      hPtLepton1   [i][j] = CreateH1D(TString("hPtLepton1"    + suffix), "", 200,  0, 200);
-      hPtLepton2   [i][j] = CreateH1D(TString("hPtLepton2"    + suffix), "", 200,  0, 200);
-      hPtLepton3   [i][j] = CreateH1D(TString("hPtLepton3"    + suffix), "", 200,  0, 200);    
-      hPtLeadingJet[i][j] = CreateH1D(TString("hPtLeadingJet" + suffix), "", 200,  0, 200);    
-
+      hNPV         [i][j] = CreateH1D("hNPV"          + suffix, "",  50,  0,  50);
+      hMET         [i][j] = CreateH1D("hMET"          + suffix, "", 200,  0, 200);
+      hSumCharges  [i][j] = CreateH1D("hSumCharges"   + suffix, "",   9, -4,   5);
+      hInvMass3Lep [i][j] = CreateH1D("hInvMass3Lep"  + suffix, "", 400,  0, 400);
+      hPtLepton1   [i][j] = CreateH1D("hPtLepton1"    + suffix, "", 200,  0, 200);
+      hPtLepton2   [i][j] = CreateH1D("hPtLepton2"    + suffix, "", 200,  0, 200);
+      hPtLepton3   [i][j] = CreateH1D("hPtLepton3"    + suffix, "", 200,  0, 200);    
+      hPtLeadingJet[i][j] = CreateH1D("hPtLeadingJet" + suffix, "", 200,  0, 200);    
+      
       if (j < HasZCandidate) continue;
-
-      hInvMass2Lep [i][j] = CreateH1D(TString("hInvMass2Lep"  + suffix), "", 200,  0, 200);
-      hDPhiZLeptons[i][j] = CreateH1D(TString("hDPhiZLeptons" + suffix), "", 320,  0, 3.2);    
-      hPtZLepton1  [i][j] = CreateH1D(TString("hPtZLepton1"   + suffix), "", 200,  0, 200);
-      hPtZLepton2  [i][j] = CreateH1D(TString("hPtZLepton2"   + suffix), "", 200,  0, 200);
-      hPtWLepton   [i][j] = CreateH1D(TString("hPtWLepton"    + suffix), "", 200,  0, 200);    
-      hDRWZLepton1 [i][j] = CreateH1D(TString("hDRWZLepton1"  + suffix), "", 200,  0,   6);    
-      hDRWZLepton2 [i][j] = CreateH1D(TString("hDRWZLepton2"  + suffix), "", 200,  0,   6);    
-      hMtW         [i][j] = CreateH1D(TString("hMtW"          + suffix), "", 200,  0, 200);    
+      
+      hInvMass2Lep [i][j] = CreateH1D("hInvMass2Lep"  + suffix, "", 200,  0, 200);
+      hDPhiZLeptons[i][j] = CreateH1D("hDPhiZLeptons" + suffix, "", 320,  0, 3.2);    
+      hPtZLepton1  [i][j] = CreateH1D("hPtZLepton1"   + suffix, "", 200,  0, 200);
+      hPtZLepton2  [i][j] = CreateH1D("hPtZLepton2"   + suffix, "", 200,  0, 200);
+      hPtWLepton   [i][j] = CreateH1D("hPtWLepton"    + suffix, "", 200,  0, 200);    
+      hDRWZLepton1 [i][j] = CreateH1D("hDRWZLepton1"  + suffix, "", 200,  0,   6);    
+      hDRWZLepton2 [i][j] = CreateH1D("hDRWZLepton2"  + suffix, "", 200,  0,   6);    
+      hMtW         [i][j] = CreateH1D("hMtW"          + suffix, "", 200,  0, 200);    
     }
   }
 
@@ -90,12 +88,14 @@ void AnalysisWZ::InsideLoop()
 
   AnalysisLeptons.clear();
 
-  invMass2Lep     = 999.;
-  invMass3Lep     = 999.;
-  transverseMass  = 999.;
-  sumCharges      = 0.;
-  electronCounter = 0;
-  tightCounter    = 0;
+  invMass2Lep          = 999.;
+  invMass3Lep          = 999.;
+  transverseMass       = 999.;
+  sumCharges           = 0.;
+  electronCounter      = 0;
+  tightCounter         = 0;
+  dataDriven_weight_lo = 1.;
+  dataDriven_weight_hi = 1.;
 
 
   // MC filters
@@ -146,8 +146,11 @@ void AnalysisWZ::InsideLoop()
 
     UInt_t muon_type = (MuonCloseToPV(i) && MuonIsolation(i)) ? Tight : Fail;
 
-    const Double_t scale_factor = MuonSF->GetBinContent(MuonSF->FindBin(pt,eta));
-    const Double_t prompt_rate  = MuonPR->GetBinContent(MuonPR->FindBin(eta,pt));  // Inverted axis
+    const Double_t SF_ptMax = MuonSF->GetXaxis()->GetBinCenter(MuonSF->GetNbinsX());
+    const Double_t PR_ptMax = MuonPR->GetYaxis()->GetBinCenter(MuonPR->GetNbinsY());
+
+    const Double_t scale_factor = MuonSF->GetBinContent(MuonSF->FindBin(min(pt,SF_ptMax),eta));
+    const Double_t prompt_rate  = MuonPR->GetBinContent(MuonPR->FindBin(eta,min(pt,PR_ptMax)));
 
     if (pt > 35) pt = 34;
 
@@ -193,8 +196,11 @@ void AnalysisWZ::InsideLoop()
 
     UInt_t electron_type = (ElectronBDT(i) && ElectronIsolation(i)) ? Tight : Fail;
 
-    const Double_t scale_factor = ElecSF->GetBinContent(ElecSF->FindBin(pt,eta));
-    const Double_t prompt_rate  = ElecPR->GetBinContent(ElecPR->FindBin(eta,pt));  // Inverted axis
+    const Double_t SF_ptMax = ElecSF->GetXaxis()->GetBinCenter(ElecSF->GetNbinsX());
+    const Double_t PR_ptMax = ElecPR->GetYaxis()->GetBinCenter(ElecPR->GetNbinsY());
+
+    const Double_t scale_factor = ElecSF->GetBinContent(ElecSF->FindBin(min(pt,SF_ptMax),eta));
+    const Double_t prompt_rate  = ElecPR->GetBinContent(ElecPR->FindBin(eta,min(pt,PR_ptMax)));
 
     if (pt > 35) pt = 34;
 
@@ -242,7 +248,6 @@ void AnalysisWZ::InsideLoop()
       sumCharges += AnalysisLeptons[i].charge;
     }
 
-  if (mode == PPF && tightCounter != 2) return;
   if (mode == RAW && tightCounter != 3) return;
 
   invMass3Lep = (AnalysisLeptons[0].v + AnalysisLeptons[1].v + AnalysisLeptons[2].v).M();
@@ -266,21 +271,14 @@ void AnalysisWZ::InsideLoop()
   //----------------------------------------------------------------------------
   if (mode == PPF)
     {
-      dataDriven_weight_lo = GetPPFWeightApprx(LowPtJet);
-      dataDriven_weight_hi = GetPPFWeightApprx(HighPtJet);
+      dataDriven_weight_lo = GetPPFWeight(LowPtJet);
+      dataDriven_weight_hi = GetPPFWeight(HighPtJet);
     }
   else if (mode == PPP)
     {
       dataDriven_weight_lo = GetPPPWeight(LowPtJet);
       dataDriven_weight_hi = GetPPPWeight(HighPtJet);
     }
-  else
-    {
-      dataDriven_weight_lo = 1.;
-      dataDriven_weight_hi = 1.;
-    }
-
-  efficiency_weight *= dataDriven_weight_lo;
 
 
   // Deal with jets
@@ -309,7 +307,7 @@ void AnalysisWZ::InsideLoop()
 
   // Fill histograms with exactly 3 leptons
   //----------------------------------------------------------------------------
-  FillHistograms(theChannel, Exactly3Leptons);
+  FillHistograms(theChannel, Exactly3Leptons, dataDriven_weight_lo);
 
 
   // Make Z and W candidates
@@ -368,7 +366,7 @@ void AnalysisWZ::InsideLoop()
   
   transverseMass = sqrt(transverseMass);
 
-  FillHistograms(theChannel, HasZCandidate);
+  FillHistograms(theChannel, HasZCandidate, dataDriven_weight_lo);
 
 
   // HasWCandidate
@@ -381,7 +379,7 @@ void AnalysisWZ::InsideLoop()
       if (WLepton.DeltaR(ZLepton2) < 0.1) return;
     }
 
-  FillHistograms(theChannel, HasWCandidate);
+  FillHistograms(theChannel, HasWCandidate, dataDriven_weight_lo);
 
 
   // MET
@@ -392,12 +390,8 @@ void AnalysisWZ::InsideLoop()
 
   if (!metPass) return;
 
-  if (!closure_test)
-    {
-      efficiency_weight *= (dataDriven_weight_hi / dataDriven_weight_lo);
-    }
-
-  FillHistograms(theChannel, MET);
+  if (closure_test) FillHistograms(theChannel, MET, dataDriven_weight_lo);
+  else              FillHistograms(theChannel, MET, dataDriven_weight_hi);
 
 
   // SSLike
@@ -406,14 +400,14 @@ void AnalysisWZ::InsideLoop()
 
   if (T_METPFTypeI_ET < 40) return;
 
-  FillHistograms(theChannel, SSLike);
+  FillHistograms(theChannel, SSLike, dataDriven_weight_hi);
 
 
   // SSLikeAntiBtag
   //----------------------------------------------------------------------------
   if (nbjets > 0) return;
 
-  FillHistograms(theChannel, SSLikeAntiBtag);
+  FillHistograms(theChannel, SSLikeAntiBtag, dataDriven_weight_hi);
 }
 
 
@@ -424,18 +418,15 @@ void AnalysisWZ::SetDataMembersAtTermination()
 {
   for (UInt_t i=0; i<nChannels; i++) {
     for (UInt_t j=0; j<nCuts; j++) {
+      for (UInt_t k=0; k<nCompositions; k++) {
 
-      TString suffix = "_" + sChannel[i] + "_" + sCut[j];
+	TString suffix = "_" + sChannel[i] + "_" + sCut[j] + "_" + sComposition[k];
 
-      hCounterRaw[i][j] = (TH1D*)FindOutput(TString("hCounterRaw" + suffix));
-      hCounterPU [i][j] = (TH1D*)FindOutput(TString("hCounterPU"  + suffix));
-      hCounterEff[i][j] = (TH1D*)FindOutput(TString("hCounterEff" + suffix));
-      hCounter   [i][j] = (TH1D*)FindOutput(TString("hCounter"    + suffix));
-
-      hCounterTTT[i][j] = (TH1D*)FindOutput(TString("hCounterTTT" + suffix));
-      hCounterTTF[i][j] = (TH1D*)FindOutput(TString("hCounterTTF" + suffix));
-      hCounterTFF[i][j] = (TH1D*)FindOutput(TString("hCounterTFF" + suffix));
-      hCounterFFF[i][j] = (TH1D*)FindOutput(TString("hCounterFFF" + suffix));
+	hCounterRaw[i][j][k] = (TH1D*)FindOutput("hCounterRaw" + suffix);
+	hCounterPU [i][j][k] = (TH1D*)FindOutput("hCounterPU"  + suffix);
+	hCounterEff[i][j][k] = (TH1D*)FindOutput("hCounterEff" + suffix);
+	hCounter   [i][j][k] = (TH1D*)FindOutput("hCounter"    + suffix);
+      }
     }
   }
 }
@@ -448,40 +439,25 @@ void AnalysisWZ::Summary()
 {
   GetParameters();
 
-  ofstream outputfile;
-
   outputfile.open(Form("%s/%s.txt", directory.Data(), sample.Data()));
 
+  outputfile << Form("\n %39s results with %7.1f pb\n", sample.Data(), luminosity);
 
-  // PU weights applied
-  //----------------------------------------------------------------------------
-  outputfile << Form("\n %39s results with %7.1f pb [PU weight applied]\n",
-		     sample.Data(), luminosity);
+  CounterSummary("No weights");
+  CounterSummary("All weights");
 
-  outputfile << Form("\n %18s  %10s %10s %10s %10s\n",
-		     " ",
-		     sChannel[0].Data(),
-		     sChannel[1].Data(),
-		     sChannel[2].Data(),
-		     sChannel[3].Data());
-
-  for (UInt_t i=0; i<nCuts; i++) {
-    
-    outputfile << Form(" %18s:", sCut[i].Data());
-
-    for (UInt_t j=0; j<nChannels; j++)
-      outputfile << Form(" %10.0f", hCounterPU[j][i]->Integral());
-
-    outputfile << "\n";
-  }
+  outputfile.close();
+}
 
 
-  // All weights applied
-  //----------------------------------------------------------------------------
-  outputfile << Form("\n %39s results with %7.1f pb [all weights applied]\n",
-		     sample.Data(), luminosity);
+//------------------------------------------------------------------------------
+// CounterSummary
+//------------------------------------------------------------------------------
+void AnalysisWZ::CounterSummary(TString title)
+{
+  outputfile << Form("\n %30s [%s]\n", " ", title.Data());
 
-  outputfile << Form("\n %18s  %10s %10s %10s %10s\n",
+  outputfile << Form("\n %23s %10s %10s %10s %10s\n",
 		     " ",
 		     sChannel[0].Data(),
 		     sChannel[1].Data(),
@@ -490,59 +466,29 @@ void AnalysisWZ::Summary()
 
   for (UInt_t i=0; i<nCuts; i++) {
       
-    outputfile << Form(" %18s:", sCut[i].Data());
+    for (UInt_t k=nCompositions; k-- > 0; ) {
 
-    for (UInt_t j=0; j<nChannels; j++)
-      outputfile << Form(" %10.0f", hCounter[j][i]->Integral());
-    
+      TString cut = (k == nCompositions-1) ? sCut[i] : "";
+
+      outputfile << Form(" %19s", cut.Data());
+
+      for (UInt_t j=0; j<nChannels; j++) {
+
+	TString composition = (j == 0) ? sComposition[k] + " " : "";
+
+	Float_t integral = hCounter[j][i][k]->Integral();
+
+	if      (title.Contains("No")) integral = hCounterRaw[j][i][k]->Integral();
+	else if (title.Contains("PU")) integral = hCounterPU [j][i][k]->Integral();
+
+	outputfile << Form(" %s%10.0f", composition.Data(), integral);
+      }
+      
+      outputfile << "\n";
+    }
+
     outputfile << "\n";
   }
-
-
-  // No weights applied
-  //----------------------------------------------------------------------------
-  UInt_t closure_test_cut = MET;
-
-  outputfile << Form("\n %39s results with %7.1f pb [no weights applied]\n",
-		     sample.Data(), luminosity);
-
-  outputfile << Form("\n %18s  %10s %10s %10s %10s\n",
-		     " ",
-		     sChannel[0].Data(),
-		     sChannel[1].Data(),
-		     sChannel[2].Data(),
-		     sChannel[3].Data());
-
-  outputfile << Form(" %18s:", "TTT");
-  
-  for (UInt_t j=0; j<nChannels; j++) outputfile << Form(" %10.0f", hCounterTTT[j][closure_test_cut]->Integral());
-
-  outputfile << "\n";
-
-  outputfile << Form(" %18s:", "TTF");
-  
-  for (UInt_t j=0; j<nChannels; j++) outputfile << Form(" %10.0f", hCounterTTF[j][closure_test_cut]->Integral());
-
-  outputfile << "\n";
-
-  outputfile << Form(" %18s:", "TFF");
-  
-  for (UInt_t j=0; j<nChannels; j++) outputfile << Form(" %10.0f", hCounterTFF[j][closure_test_cut]->Integral());
-
-  outputfile << "\n";
-
-  outputfile << Form(" %18s:", "FFF");
-  
-  for (UInt_t j=0; j<nChannels; j++) outputfile << Form(" %10.0f", hCounterFFF[j][closure_test_cut]->Integral());
-
-  outputfile << "\n";
-
-
-  // We are done
-  //----------------------------------------------------------------------------
-  outputfile << "\n";
-
-  outputfile.close();
 }
 
 
@@ -768,28 +714,34 @@ Bool_t AnalysisWZ::MuonIsolation(UInt_t iMuon)
 //------------------------------------------------------------------------------
 // FillChannelCounters
 //------------------------------------------------------------------------------
-void AnalysisWZ::FillChannelCounters(UInt_t iChannel, UInt_t iCut)
+void AnalysisWZ::FillChannelCounters(UInt_t   iChannel,
+				     UInt_t   iCut,
+				     Double_t dataDriven_weight)
 {
-  hCounterRaw[iChannel][iCut]->Fill(1);
-  hCounterPU [iChannel][iCut]->Fill(1, pu_weight);
-  hCounterEff[iChannel][iCut]->Fill(1, efficiency_weight);
-  hCounter   [iChannel][iCut]->Fill(1, efficiency_weight * xs_weight);
+  Double_t hweight = efficiency_weight * xs_weight * dataDriven_weight;
+
+  hCounterRaw[iChannel][iCut][tightCounter]->Fill(1);
+  hCounterPU [iChannel][iCut][tightCounter]->Fill(1, pu_weight);
+  hCounterEff[iChannel][iCut][tightCounter]->Fill(1, efficiency_weight);
+  hCounter   [iChannel][iCut][tightCounter]->Fill(1, hweight);
+
+  hCounterRaw[iChannel][iCut][LLL]->Fill(1);
+  hCounterPU [iChannel][iCut][LLL]->Fill(1, pu_weight);
+  hCounterEff[iChannel][iCut][LLL]->Fill(1, efficiency_weight);
+  hCounter   [iChannel][iCut][LLL]->Fill(1, hweight);
 }
 
 
 //------------------------------------------------------------------------------
 // FillHistograms
 //------------------------------------------------------------------------------
-void AnalysisWZ::FillHistograms(UInt_t iChannel, UInt_t iCut)
+void AnalysisWZ::FillHistograms(UInt_t   iChannel,
+				UInt_t   iCut,
+				Double_t dataDriven_weight)
 {
-  FillChannelCounters(iChannel, iCut);
+  FillChannelCounters(iChannel, iCut, dataDriven_weight);
 
-  if      (tightCounter == 3) hCounterTTT[iChannel][iCut]->Fill(1);
-  else if (tightCounter == 2) hCounterTTF[iChannel][iCut]->Fill(1);
-  else if (tightCounter == 1) hCounterTFF[iChannel][iCut]->Fill(1);
-  else if (tightCounter == 0) hCounterFFF[iChannel][iCut]->Fill(1);
-
-  Double_t hweight = efficiency_weight * xs_weight;
+  Double_t hweight = efficiency_weight * xs_weight * dataDriven_weight;
   
   hNPV         [iChannel][iCut]->Fill(T_Vertex_z->size(),        hweight);
   hMET         [iChannel][iCut]->Fill(T_METPFTypeI_ET,           hweight);
@@ -942,6 +894,7 @@ Double_t AnalysisWZ::GetPPFWeight(UInt_t jetPt)
 
   Double_t result = PPF + PFP + FPP;
 
+  if (tightCounter == 1) result *= -1.;
   if (tightCounter == 3) result *= -1.;
 
   return result;
@@ -977,6 +930,7 @@ Double_t AnalysisWZ::GetPPPWeight(UInt_t jetPt)
 
   Double_t PPP = promptProbability[0] * promptProbability[1] * promptProbability[2];
 
+  if (tightCounter == 0) PPP *= -1.;
   if (tightCounter == 2) PPP *= -1.;
 
   return PPP;

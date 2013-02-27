@@ -195,7 +195,7 @@ void XS(UInt_t cut          = MET,
 
     if (ReadInputFiles(channel) < 0) break;
     
-    if (cut >= MET) MeasureTheCrossSection(channel, cut);
+    if (cut >= MET && !closure_test) MeasureTheCrossSection(channel, cut);
 
     TString suffix = "_" + sChannel[channel] + "_" + sCut[cut];
     
@@ -230,15 +230,15 @@ void MeasureTheCrossSection(UInt_t channel, UInt_t cut)
   Double_t nsignal     = 0;
   Double_t nbackground = 0;
 
-  Double_t nWZ = ((TH1D*)input[WZTo3LNu]->Get("hCounterEff_" + sChannel[channel] + "_" + sCut[cut]))->Integral();
+  TString suffix = "_" + sChannel[channel] + "_" + sCut[cut] + "_TTT";
 
-  TString hname = "hCounter_" + sChannel[channel] + "_" + sCut[cut];
+  Double_t nWZ = ((TH1D*)input[WZTo3LNu]->Get("hCounterEff" + suffix))->Integral();
 
   for (UInt_t i=0; i<vprocess.size(); i++) {
 
     UInt_t j = vprocess.at(i);
 
-    TH1D* dummy = (TH1D*)input[j]->Get(hname);
+    TH1D* dummy = (TH1D*)input[j]->Get("hCounter" + suffix);
 
     if (j == Data) {
       ndata = dummy->Integral();

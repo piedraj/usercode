@@ -17,13 +17,21 @@
 #include <vector>
 
 
-const Double_t Z_MASS = 91.1876;  // GeV
+const Double_t Z_MASS = 91.1876;  // [GeV]
+
 
 const UInt_t nChannels = 4;
 
 enum {MMM, EEE, MME, EEM};
 
 TString sChannel[] = {"MMM", "EEE", "MME", "EEM"};
+
+
+const UInt_t nCompositions = 5;
+
+enum {FFF, TFF, TTF, TTT, LLL};
+
+TString sComposition[] = {"FFF", "TFF", "TTF", "TTT", "LLL"};
 
 
 const UInt_t nCuts = 6;
@@ -49,7 +57,7 @@ TString sCut[] = {
 
 enum {Muon, Electron};
 
-enum {Rejected, Tight, Fail};
+enum {Tight, Fail};
 
 enum {RAW, PPF, PPP};
 
@@ -59,7 +67,7 @@ struct Lepton
 {
   UInt_t         index;
   UInt_t         flavor;  // Muon, Electron
-  UInt_t         type;    // Rejected, Tight, Fail
+  UInt_t         type;    // Tight, Fail
   Double_t       charge;
   Double_t       SF;
   Double_t       f_lo;    // fake rate with low  pt jet
@@ -93,45 +101,44 @@ class AnalysisWZ: public CMSAnalysisSelectorMiniTrees
   //----------------------------------------------------------------------------
   void         GetParameters             ();
 			    
-  Bool_t       ElectronID                (UInt_t  iElec);
-  Bool_t       ElectronCloseToPV         (UInt_t  iElec);
-  Bool_t       ElectronBDT               (UInt_t  iElec);
-  Bool_t       ElectronIsolation         (UInt_t  iElec);
+  Bool_t       ElectronID                (UInt_t   iElec);
+  Bool_t       ElectronCloseToPV         (UInt_t   iElec);
+  Bool_t       ElectronBDT               (UInt_t   iElec);
+  Bool_t       ElectronIsolation         (UInt_t   iElec);
 			    	      
-  Bool_t       MuonID                    (UInt_t  iMuon);
-  Bool_t       MuonCloseToPV             (UInt_t  iMuon);
-  Bool_t       MuonIsolation             (UInt_t  iMuon);
+  Bool_t       MuonID                    (UInt_t   iMuon);
+  Bool_t       MuonCloseToPV             (UInt_t   iMuon);
+  Bool_t       MuonIsolation             (UInt_t   iMuon);
   
-  void         FillChannelCounters       (UInt_t  iChannel,
-					  UInt_t  iCut);
+  void         FillChannelCounters       (UInt_t   iChannel,
+					  UInt_t   iCut,
+					  Double_t dataDriven_weight);
 
-  void         FillHistograms            (UInt_t  iChannel,
-  					  UInt_t  iCut);
+  void         FillHistograms            (UInt_t   iChannel,
+  					  UInt_t   iCut,
+					  Double_t dataDriven_weight);
 
   const Bool_t WgammaFilter              () const;
 
-  Double_t     GetPPFWeight              (UInt_t  jetPt);
-  Double_t     GetPPPWeight              (UInt_t  jetPt);
-  Double_t     GetPPFWeightApprx         (UInt_t  jetPt);
+  Double_t     GetPPFWeight              (UInt_t   jetPt);
+  Double_t     GetPPPWeight              (UInt_t   jetPt);
+  Double_t     GetPPFWeightApprx         (UInt_t   jetPt);
 
-  TH2F*        LoadHistogram             (TString filename,
-					  TString hname,
-					  TString cname);
+  TH2F*        LoadHistogram             (TString  filename,
+					  TString  hname,
+					  TString  cname);
+
+  void         CounterSummary            (TString  title);
 
 
  public:
   
   // Histograms
   //----------------------------------------------------------------------------
-  TH1D*                       hCounterRaw[nChannels][nCuts];
-  TH1D*                       hCounterPU [nChannels][nCuts];
-  TH1D*                       hCounterEff[nChannels][nCuts];
-  TH1D*                       hCounter   [nChannels][nCuts];
-
-  TH1D*                       hCounterTTT[nChannels][nCuts];
-  TH1D*                       hCounterTTF[nChannels][nCuts];
-  TH1D*                       hCounterTFF[nChannels][nCuts];
-  TH1D*                       hCounterFFF[nChannels][nCuts];
+  TH1D*                       hCounterRaw[nChannels][nCuts][nCompositions];
+  TH1D*                       hCounterPU [nChannels][nCuts][nCompositions];
+  TH1D*                       hCounterEff[nChannels][nCuts][nCompositions];
+  TH1D*                       hCounter   [nChannels][nCuts][nCompositions];
 
   TH1D*                       hNPV         [nChannels][nCuts];
   TH1D*                       hMET         [nChannels][nCuts];
@@ -186,6 +193,8 @@ class AnalysisWZ: public CMSAnalysisSelectorMiniTrees
 
   Double_t                    dataDriven_weight_lo;
   Double_t                    dataDriven_weight_hi;
+
+  ofstream                    outputfile;
 
 
   // SF, FR and PR
