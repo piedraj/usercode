@@ -61,17 +61,15 @@ void AnalysisWZ::Initialise()
 
   // SF, FR and PR histograms
   //----------------------------------------------------------------------------
-  MuonSF = LoadHistogram("MuSF_2012",  "muonDATAMCratio_All_selec",      "MuonSF");
-  ElecSF = LoadHistogram("EleSF_2012", "electronsDATAMCratio_All_selec", "ElecSF");
-  
-  MuonPR = LoadHistogram("prompt_rateMuons",     "effDATA_prompt_rate", "MuonPR");
-  ElecPR = LoadHistogram("prompt_rateElectrons", "effDATA_All_selec",   "ElecPR");
-  
-  MuonFR_lo = LoadHistogram("MuFR_2012_jet30",  "h_Muon_signal_pT_eta", "MuonFR_lo");
-  ElecFR_lo = LoadHistogram("EleFR_2012_jet35", "fakeElH2",             "ElecFR_lo");
+  MuonSF = LoadHistogram("MuSF_2012",  "h2inverted", "MuonSF");
+  ElecSF = LoadHistogram("EleSF_2012", "h2inverted", "ElecSF");
+  MuonPR = LoadHistogram("MuPR_2012",  "h2inverted", "MuonPR");
+  ElecPR = LoadHistogram("ElePR_2012", "h2inverted", "ElecPR");
 
-  MuonFR_hi = LoadHistogram("MuFR_2012_jet50",  "h_Muon_signal_pT_eta", "MuonFR_hi");
-  ElecFR_hi = LoadHistogram("EleFR_2012_jet50", "fakeElH2",             "ElecFR_hi");
+  MuonFR_lo = LoadHistogram("MuFR_Moriond13_jet30_EWKcorr",  "FR_pT_eta_EWKcorr", "MuonFR_lo");
+  ElecFR_lo = LoadHistogram("EleFR_Moriond13_jet35_EWKcorr", "fakeElH2",          "ElecFR_lo");
+  MuonFR_hi = LoadHistogram("MuFR_Moriond13_jet50_EWKcorr",  "FR_pT_eta_EWKcorr", "MuonFR_hi");
+  ElecFR_hi = LoadHistogram("EleFR_Moriond13_jet50_EWKcorr", "fakeElH2",          "ElecFR_hi");
 }
 
 
@@ -147,10 +145,10 @@ void AnalysisWZ::InsideLoop()
     UInt_t muon_type = (MuonCloseToPV(i) && MuonIsolation(i)) ? Tight : Fail;
 
     const Double_t SF_ptMax = MuonSF->GetXaxis()->GetBinCenter(MuonSF->GetNbinsX());
-    const Double_t PR_ptMax = MuonPR->GetYaxis()->GetBinCenter(MuonPR->GetNbinsY());
+    const Double_t PR_ptMax = MuonPR->GetYaxis()->GetBinCenter(MuonPR->GetNbinsX());
 
     const Double_t scale_factor = MuonSF->GetBinContent(MuonSF->FindBin(min(pt,SF_ptMax),eta));
-    const Double_t prompt_rate  = MuonPR->GetBinContent(MuonPR->FindBin(eta,min(pt,PR_ptMax)));
+    const Double_t prompt_rate  = MuonPR->GetBinContent(MuonPR->FindBin(min(pt,PR_ptMax),eta));
 
     if (pt > 35) pt = 34;
 
@@ -197,10 +195,10 @@ void AnalysisWZ::InsideLoop()
     UInt_t electron_type = (ElectronBDT(i) && ElectronIsolation(i)) ? Tight : Fail;
 
     const Double_t SF_ptMax = ElecSF->GetXaxis()->GetBinCenter(ElecSF->GetNbinsX());
-    const Double_t PR_ptMax = ElecPR->GetYaxis()->GetBinCenter(ElecPR->GetNbinsY());
+    const Double_t PR_ptMax = ElecPR->GetYaxis()->GetBinCenter(ElecPR->GetNbinsX());
 
     const Double_t scale_factor = ElecSF->GetBinContent(ElecSF->FindBin(min(pt,SF_ptMax),eta));
-    const Double_t prompt_rate  = ElecPR->GetBinContent(ElecPR->FindBin(eta,min(pt,PR_ptMax)));
+    const Double_t prompt_rate  = ElecPR->GetBinContent(ElecPR->FindBin(min(pt,PR_ptMax),eta));
 
     if (pt > 35) pt = 34;
 

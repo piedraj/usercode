@@ -48,14 +48,14 @@ cd PAF
 mkdir LeptonScaleFactors
 cd LeptonScaleFactors
 
-wget www.hep.uniovi.es/piedra/LeptonScaleFactors/EleFR_2012_jet35.root
-wget www.hep.uniovi.es/piedra/LeptonScaleFactors/EleFR_2012_jet50.root
-wget www.hep.uniovi.es/piedra/LeptonScaleFactors/EleSF_2012.root
-wget www.hep.uniovi.es/piedra/LeptonScaleFactors/prompt_rateElectrons.root
-wget www.hep.uniovi.es/piedra/LeptonScaleFactors/MuFR_2012_jet30.root
-wget www.hep.uniovi.es/piedra/LeptonScaleFactors/MuFR_2012_jet50.root
 wget www.hep.uniovi.es/piedra/LeptonScaleFactors/MuSF_2012.root
-wget www.hep.uniovi.es/piedra/LeptonScaleFactors/prompt_rateMuons.root
+wget www.hep.uniovi.es/piedra/LeptonScaleFactors/EleSF_2012.root
+wget www.hep.uniovi.es/piedra/LeptonScaleFactors/MuPR_2012.root
+wget www.hep.uniovi.es/piedra/LeptonScaleFactors/ElePR_2012.root
+wget www.hep.uniovi.es/piedra/LeptonScaleFactors/MuFR_Moriond13_jet30_EWKcorr.root
+wget www.hep.uniovi.es/piedra/LeptonScaleFactors/EleFR_Moriond13_jet35_EWKcorr.root
+wget www.hep.uniovi.es/piedra/LeptonScaleFactors/MuFR_Moriond13_jet50_EWKcorr.root
+wget www.hep.uniovi.es/piedra/LeptonScaleFactors/EleFR_Moriond13_jet50_EWKcorr.root
 
 
 ################################################################################

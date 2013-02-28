@@ -66,17 +66,15 @@ void drawScaleFactors()
 
   // SF, FR and PR histograms
   //----------------------------------------------------------------------------
-  MuonSF = LoadHistogram("MuSF_2012",  "muonDATAMCratio_All_selec",      "MuonSF");
-  ElecSF = LoadHistogram("EleSF_2012", "electronsDATAMCratio_All_selec", "ElecSF");
+  MuonSF = LoadHistogram("MuSF_2012",  "h2inverted", "MuonSF");
+  ElecSF = LoadHistogram("EleSF_2012", "h2inverted", "ElecSF");
+  MuonPR = LoadHistogram("MuPR_2012",  "h2inverted", "MuonPR");
+  ElecPR = LoadHistogram("ElePR_2012", "h2inverted", "ElecPR");
 
-  MuonPR = LoadHistogram("prompt_rateMuons",     "effDATA_prompt_rate", "MuonPR");
-  ElecPR = LoadHistogram("prompt_rateElectrons", "effDATA_All_selec",   "ElecPR");
-
-  MuonFR_lo = LoadHistogram("MuFR_2012_jet30",  "h_Muon_signal_pT_eta", "MuonFR_lo");
-  ElecFR_lo = LoadHistogram("EleFR_2012_jet35", "fakeElH2",             "ElecFR_lo");
-
-  MuonFR_hi = LoadHistogram("MuFR_2012_jet50",  "h_Muon_signal_pT_eta", "MuonFR_hi");
-  ElecFR_hi = LoadHistogram("EleFR_2012_jet50", "fakeElH2",             "ElecFR_hi");
+  MuonFR_lo = LoadHistogram("MuFR_Moriond13_jet30_EWKcorr",  "FR_pT_eta_EWKcorr", "MuonFR_lo");
+  ElecFR_lo = LoadHistogram("EleFR_Moriond13_jet35_EWKcorr", "fakeElH2",          "ElecFR_lo");
+  MuonFR_hi = LoadHistogram("MuFR_Moriond13_jet50_EWKcorr",  "FR_pT_eta_EWKcorr", "MuonFR_hi");
+  ElecFR_hi = LoadHistogram("EleFR_Moriond13_jet50_EWKcorr", "fakeElH2",          "ElecFR_hi");
 
   DrawIt(MuonSF,    "2012 muon SF");
   DrawIt(ElecSF,    "2012 electron SF");
@@ -98,18 +96,15 @@ void DrawIt(TH2F* h, TString title)
 
   TCanvas* canvas = new TCanvas(name, name, 600, 600);
 
-  if (name.Contains("PR")) canvas->SetLogy();
+  if (name.Contains("PR")) canvas->SetLogx();
   if (name.Contains("SF")) canvas->SetLogx();
 
   canvas->SetLeftMargin (0.9 * canvas->GetLeftMargin());
   canvas->SetRightMargin(3.5 * canvas->GetRightMargin());
   canvas->SetTopMargin  (1.2 * canvas->GetTopMargin());
 
-  TString xtitle = (name.Contains("PR")) ? "#eta" : "p_{T} [GeV]";
-  TString ytitle = (name.Contains("PR")) ? "p_{T} [GeV]" : "#eta";
-
-  TH2FAxisFonts(h, "x", xtitle);
-  TH2FAxisFonts(h, "y", ytitle);
+  TH2FAxisFonts(h, "x", "p_{T} [GeV]");
+  TH2FAxisFonts(h, "y", "#eta");
 
   h->Draw("colz");
 
