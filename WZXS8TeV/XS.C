@@ -178,6 +178,8 @@ Double_t Yield                    (TH1*        h);
 
 TString  GuessLocalBasePath       ();
 
+void     MakeDirectory            ();
+
 
 //------------------------------------------------------------------------------
 // XS
@@ -185,7 +187,7 @@ TString  GuessLocalBasePath       ();
 void XS(UInt_t cut          = MET,
 	UInt_t mode         = PPFmode,
 	UInt_t closure_test = 0,
-	Bool_t batch        = false)
+	Bool_t batch        = true)
 {
   gROOT->SetBatch(batch);
 
@@ -952,31 +954,21 @@ void SetParameters(UInt_t cut,
 
   for (UInt_t i=0; i<nProcesses; i++) systError[i] = 0.0;
 
-  _luminosity       = 19602.0;  // 19468.3 for PU
-  _yoffset          = 0.048;
-  _verbosity        = 3;
-  _directory        = "Summer12_53X/WH";
-  _format           = "png";
-  _cut              = cut;
-  _mode             = mode;
-  _closure_test     = closure_test;
+  _luminosity   = 19602.0;  // 19468.3 for PU
+  _yoffset      = 0.048;
+  _verbosity    = 3;
+  _format       = "png";
+  _cut          = cut;
+  _mode         = mode;
+  _closure_test = closure_test;
 
-  if (_closure_test) _directory += "/closure_test";
-
-  _output = _format + "/" + _directory;
-
-  if (_mode == MCmode)  _output += "/MC/";
-  if (_mode == PPFmode) _output += "/PPF/";
-
-  _output += sCut[_cut];
+  MakeDirectory();
 
   gInterpreter->ExecuteMacro("HiggsPaperStyle.C");
 
   gStyle->SetHatchesLineWidth(  1);
   gStyle->SetHatchesSpacing  (0.7);
   
-  gSystem->mkdir(_output, kTRUE);
-
   TH1::SetDefaultSumw2();
 
   vprocess.clear();
@@ -1069,7 +1061,7 @@ Int_t ReadInputFiles(UInt_t channel)
 
     // Debug
     //--------------------------------------------------------------------------
-    TH1D* dummy = (TH1D*)input[j]->Get("hCounter_MMM_Exactly3Leptons");
+    TH1D* dummy = (TH1D*)input[j]->Get("hCounter_MMM_Exactly3Leptons_TTT");
 
     if (!dummy)
       {
@@ -1115,4 +1107,42 @@ TString GuessLocalBasePath()
 
       return TString("");
     }
+}
+
+
+//------------------------------------------------------------------------------
+// MakeDirectory
+//------------------------------------------------------------------------------
+void MakeDirectory()
+{
+  _directory = "Summer12_53X/WH";
+
+  gSystem->mkdir(_format + "/" + _directory, kTRUE);
+
+  gSystem->Exec(Form("cp index.php %s/.", _format.Data()));
+
+  gSystem->Exec(Form("cp index.php %s/Summer12_53X/.", _format.Data()));
+
+  gSystem->Exec(Form("cp index.php %s/%s/.", _format.Data(), _directory.Data()));
+
+  if (_closure_test) _directory += "/closure_test";
+
+  _output = _format + "/" + _directory;
+
+  gSystem->mkdir(_output, kTRUE);
+
+  gSystem->Exec(Form("cp index.php %s/.", _output.Data()));
+
+  if (_mode == MCmode)  _output += "/MC";
+  if (_mode == PPFmode) _output += "/PPF";
+
+  gSystem->mkdir(_output, kTRUE);
+
+  gSystem->Exec(Form("cp index.php %s/.", _output.Data()));
+
+  _output += "/" + sCut[_cut];
+
+  gSystem->mkdir(_output, kTRUE);
+
+  gSystem->Exec(Form("cp index.php %s/.", _output.Data()));
 }

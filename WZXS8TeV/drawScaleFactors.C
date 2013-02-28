@@ -34,10 +34,6 @@ void DrawTLatex    (Double_t    x,
 		    Short_t     align,
 		    const char* text);
 
-void setupGreyScale();
-
-void setupColors   ();
-
 TH2F* LoadHistogram(TString     filename,
 		    TString     hname,
 		    TString     cname);
@@ -59,31 +55,28 @@ void drawScaleFactors()
 
   gSystem->mkdir("png/ScaleFactors", kTRUE);
 
+  gSystem->Exec("cp index.php png/.");
+
+  gSystem->Exec("cp index.php png/ScaleFactors/.");
+
   gStyle->SetOptStat(0);
 
   gStyle->SetPalette(1,0);
 
-  //  setupGreyScale();
-
-  //  setupColors();
-
 
   // SF, FR and PR histograms
   //----------------------------------------------------------------------------
-  TString path1 = "/nfs/fanae/user/piedra/work/WZ/AnalysisVHCode/WManager/data/";
-  TString path2 = "/nfs/fanae/user/piedra/work/WZ/work/WManager/PR/";
+  MuonSF = LoadHistogram("MuSF_2012",  "muonDATAMCratio_All_selec",      "MuonSF");
+  ElecSF = LoadHistogram("EleSF_2012", "electronsDATAMCratio_All_selec", "ElecSF");
 
-  MuonSF = LoadHistogram(path1 + "MuSF_2012",  "muonDATAMCratio_All_selec",      "MuonSF");
-  ElecSF = LoadHistogram(path1 + "EleSF_2012", "electronsDATAMCratio_All_selec", "ElecSF");
+  MuonPR = LoadHistogram("prompt_rateMuons",     "effDATA_prompt_rate", "MuonPR");
+  ElecPR = LoadHistogram("prompt_rateElectrons", "effDATA_All_selec",   "ElecPR");
 
-  MuonPR = LoadHistogram(path2 + "prompt_rateMuons",     "effDATA_prompt_rate", "MuonPR");
-  ElecPR = LoadHistogram(path2 + "prompt_rateElectrons", "effDATA_All_selec",   "ElecPR");
+  MuonFR_lo = LoadHistogram("MuFR_2012_jet30",  "h_Muon_signal_pT_eta", "MuonFR_lo");
+  ElecFR_lo = LoadHistogram("EleFR_2012_jet35", "fakeElH2",             "ElecFR_lo");
 
-  MuonFR_lo = LoadHistogram(path1 + "MuFR_2012_jet30",  "h_Muon_signal_pT_eta", "MuonFR_lo");
-  ElecFR_lo = LoadHistogram(path1 + "EleFR_2012_jet35", "fakeElH2",             "ElecFR_lo");
-
-  MuonFR_hi = LoadHistogram(path1 + "MuFR_2012_jet50",  "h_Muon_signal_pT_eta", "MuonFR_hi");
-  ElecFR_hi = LoadHistogram(path1 + "EleFR_2012_jet50", "fakeElH2",             "ElecFR_hi");
+  MuonFR_hi = LoadHistogram("MuFR_2012_jet50",  "h_Muon_signal_pT_eta", "MuonFR_hi");
+  ElecFR_hi = LoadHistogram("EleFR_2012_jet50", "fakeElH2",             "ElecFR_hi");
 
   DrawIt(MuonSF,    "2012 muon SF");
   DrawIt(ElecSF,    "2012 electron SF");
@@ -226,66 +219,15 @@ void DrawTLatex(Double_t    x,
 
 
 //------------------------------------------------------------------------------
-// setupGreyScale
-//------------------------------------------------------------------------------
-void setupGreyScale() 
-{
-  const Int_t Number  =  10;
-  const Int_t NColors = 100;
-
-  Double_t Red  [Number];
-  Double_t Green[Number];
-  Double_t Blue [Number];
-  Double_t Stops[Number];
-  
-  Double_t dcol = 1. / Number;
-  Double_t grey = 1.;
-
-  for (Int_t j=0; j<Number; j++) {
-
-    Stops[j] = Double_t(j) / Double_t(Number - 1);
-
-    Red  [j] = grey;
-    Blue [j] = grey;
-    Green[j] = grey;
-
-    grey = grey - dcol;
-  }
-
-  TColor::CreateGradientColorTable(Number, Stops, Red, Green, Blue, NColors);
-
-  gStyle->SetNumberContours(NColors);
-}
-
-
-//------------------------------------------------------------------------------
-// setupColors
-//------------------------------------------------------------------------------
-void setupColors()
-{
-  const Int_t NRGBs = 5;
-  const Int_t NCont = 255;
-  
-  Double_t stops[NRGBs] = {0.00, 0.0625, 0.25, 0.5625, 1.00};
-  Double_t red  [NRGBs] = {0.00, 0.00,   0.87, 1.00,   0.51};
-  Double_t green[NRGBs] = {0.00, 0.81,   1.00, 0.20,   0.00};
-  Double_t blue [NRGBs] = {0.51, 1.00,   0.12, 0.00,   0.00};
-  
-  TColor::CreateGradientColorTable(NRGBs, stops, red, green, blue, NCont);
-  gStyle->SetNumberContours(NCont);
-}
-
-
-//------------------------------------------------------------------------------
 // LoadHistogram
 //------------------------------------------------------------------------------
 TH2F* LoadHistogram(TString filename,
 		    TString hname,
 		    TString cname)
 {
-  printf("%s.root\n", filename.Data());
+  TFile* inputfile = TFile::Open("/nfs/fanae/user/piedra/work/PAF/LeptonScaleFactors/" + filename + ".root");
 
-  TFile* inputfile = TFile::Open(filename + ".root");
+  //  TFile* inputfile = TFile::Open("/gpfs/csic_users/piedra/work/PAF/LeptonScaleFactors/" + filename + ".root");
 
   TH2F* hist = (TH2F*)inputfile->Get(hname)->Clone(cname);
 
