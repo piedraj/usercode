@@ -4,13 +4,13 @@
  
  ./resetproof.sh -a; endproof;
  
- root -l -b -q RunPROOF_WZ.C\(\"DoubleElectron\",RAW\)
- root -l -b -q RunPROOF_WZ.C\(\"DoubleElectron\",PPF\)
+ root -l -b -q RunPROOF_WZ.C\(\"DoubleElectron\",RAW\);
+ root -l -b -q RunPROOF_WZ.C\(\"DoubleElectron\",PPF\);
  
  ./resetproof.sh -a; endproof;
  
- root -l -b -q RunPROOF_WZ.C\(\"DoubleMu\",RAW\)
- root -l -b -q RunPROOF_WZ.C\(\"DoubleMu\",PPF\)
+ root -l -b -q RunPROOF_WZ.C\(\"DoubleMu\",RAW\);
+ root -l -b -q RunPROOF_WZ.C\(\"DoubleMu\",PPF\);
  
  ./resetproof.sh -a; endproof;
  
@@ -34,34 +34,35 @@
  root -l -b -q RunPROOF_WZ.C\(\"TW\"\);                # line 23
  root -l -b -q RunPROOF_WZ.C\(\"TbarW\"\);             # line 24
  root -l -b -q RunPROOF_WZ.C\(\"WW\"\);                # line 34
- root -l -b -q RunPROOF_WZ.C\(\"WZTo3LNu\"\);          # line 36
- root -l -b -q RunPROOF_WZ.C\(\"WZTo2L2QMad\"\);       # line 37
+ root -l -b -q RunPROOF_WZ.C\(\"WZTo3LNu\"\);          # line 36 ( W -> lnu, Z -> ll )
+ root -l -b -q RunPROOF_WZ.C\(\"WZTo2L2QMad\"\);       # line 37 ( W -> qq,  Z -> ll )
+ root -l -b -q RunPROOF_WZ.C\(\"WZTo2QLNuMad\"\);      # line 38 ( W -> lnu, Z -> bb )
  
  ./resetproof.sh -a; endproof;
  
- root -l -b -q RunPROOF_WZ.C\(\"ZZTo2L2QMad\"\);       # line 38
- root -l -b -q RunPROOF_WZ.C\(\"ZZ\"\);                # line 40 -- REPLACED
- root -l -b -q RunPROOF_WZ.C\(\"ggZZ2L2L\"\);          # line 43
- root -l -b -q RunPROOF_WZ.C\(\"ggZZ4L\"\);            # line 44
- root -l -b -q RunPROOF_WZ.C\(\"ZZ2Mu2Tau\"\);         # line 45
- root -l -b -q RunPROOF_WZ.C\(\"ZZ4E\"\);              # line 46
- root -l -b -q RunPROOF_WZ.C\(\"ZZ2E2Tau\"\);          # line 47
- root -l -b -q RunPROOF_WZ.C\(\"ZZ4Mu\"\);             # line 48
- root -l -b -q RunPROOF_WZ.C\(\"ZZ2E2Mu\"\);           # line 49
- root -l -b -q RunPROOF_WZ.C\(\"ZZ4Tau\"\);            # line 50
- root -l -b -q RunPROOF_WZ.C\(\"HZZ4L\"\);             # line 51
+ root -l -b -q RunPROOF_WZ.C\(\"ZZTo2L2QMad\"\);       # line 39
+ root -l -b -q RunPROOF_WZ.C\(\"ZZ\"\);                # line 41
+ root -l -b -q RunPROOF_WZ.C\(\"ggZZ2L2L\"\);          # line 44
+ root -l -b -q RunPROOF_WZ.C\(\"ggZZ4L\"\);            # line 45
+ root -l -b -q RunPROOF_WZ.C\(\"ZZ2Mu2Tau\"\);         # line 46
+ root -l -b -q RunPROOF_WZ.C\(\"ZZ4E\"\);              # line 47
+ root -l -b -q RunPROOF_WZ.C\(\"ZZ2E2Tau\"\);          # line 48
+ root -l -b -q RunPROOF_WZ.C\(\"ZZ4Mu\"\);             # line 49
+ root -l -b -q RunPROOF_WZ.C\(\"ZZ2E2Mu\"\);           # line 50
+ root -l -b -q RunPROOF_WZ.C\(\"ZZ4Tau\"\);            # line 51
+ root -l -b -q RunPROOF_WZ.C\(\"HZZ4L\"\);             # line 52
 
  ./resetproof.sh -a; endproof;
 
- root -l -b -q RunPROOF_WZ.C\(\"WWGJets\"\);           # line 52
- root -l -b -q RunPROOF_WZ.C\(\"WZZJets\"\);           # line 53
- root -l -b -q RunPROOF_WZ.C\(\"ZZZJets\"\);           # line 54
- root -l -b -q RunPROOF_WZ.C\(\"WWZJets\"\);           # line 55
- root -l -b -q RunPROOF_WZ.C\(\"WWWJets\"\);           # line 56
- root -l -b -q RunPROOF_WZ.C\(\"TTWJets\"\);           # line 57
- root -l -b -q RunPROOF_WZ.C\(\"TTZJets\"\);           # line 58
- root -l -b -q RunPROOF_WZ.C\(\"TTWWJets\"\);          # line 59
- root -l -b -q RunPROOF_WZ.C\(\"TTGJets\"\);           # line 60
+ root -l -b -q RunPROOF_WZ.C\(\"WWGJets\"\);           # line 53
+ root -l -b -q RunPROOF_WZ.C\(\"WZZJets\"\);           # line 54
+ root -l -b -q RunPROOF_WZ.C\(\"ZZZJets\"\);           # line 55
+ root -l -b -q RunPROOF_WZ.C\(\"WWZJets\"\);           # line 56
+ root -l -b -q RunPROOF_WZ.C\(\"WWWJets\"\);           # line 57
+ root -l -b -q RunPROOF_WZ.C\(\"TTWJets\"\);           # line 58
+ root -l -b -q RunPROOF_WZ.C\(\"TTZJets\"\);           # line 59
+ root -l -b -q RunPROOF_WZ.C\(\"TTWWJets\"\);          # line 60
+ root -l -b -q RunPROOF_WZ.C\(\"TTGJets\"\);           # line 61
 
  ./resetproof.sh -a; endproof;
 

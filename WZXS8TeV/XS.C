@@ -37,7 +37,7 @@ const Double_t ngenWZphase = 1449067;  // (71 < mZ < 111 GeV)
 //------------------------------------------------------------------------------
 const UInt_t nChannels  =  4;
 const UInt_t nCuts      =  6;
-const UInt_t nProcesses = 39;
+const UInt_t nProcesses = 40;
 
 enum {MMM, EEE, MME, EEM};
 
@@ -70,6 +70,7 @@ enum {
   WW,
   WZTo3LNu,
   WZTo2L2QMad,
+  WZTo2QLNuMad,
   ZZTo2L2QMad,
   ZZ,  // Not used
   ggZZ2L2L,
@@ -203,7 +204,7 @@ void     Inclusive                ();
 //------------------------------------------------------------------------------
 // XS
 //------------------------------------------------------------------------------
-void XS(UInt_t cut          = MET,
+void XS(UInt_t cut          = SSLikeAntiBtag,
 	UInt_t mode         = PPFmode,
 	UInt_t closure_test = 0,
 	Bool_t batch        = true)
@@ -273,7 +274,7 @@ void MeasureTheCrossSection(UInt_t channel, UInt_t cut)
 
   TString suffix = "_" + sChannel[channel] + "_" + sCut[cut] + "_TTT";
 
-  Double_t nWZ = ((TH1D*)input[WZTo3LNu]->Get("hCounterEff" + suffix))->Integral();
+  Double_t nWZ = Yield((TH1D*)input[WZTo3LNu]->Get("hCounterEff" + suffix));
 
   for (UInt_t i=0; i<vprocess.size(); i++) {
 
@@ -282,13 +283,13 @@ void MeasureTheCrossSection(UInt_t channel, UInt_t cut)
     TH1D* dummy = (TH1D*)input[j]->Get("hCounter" + suffix);
 
     if (j == Data) {
-      ndata = dummy->Integral();
+      ndata = Yield(dummy);
     }
     else if (j == WZTo3LNu) {
-      nsignal = dummy->Integral();
+      nsignal = Yield(dummy);
     }
     else {
-      nbackground += dummy->Integral();
+      nbackground += Yield(dummy);
     }
   }
 
@@ -434,7 +435,7 @@ void DrawHistogram(TString  hname,
     }
     else {
 
-      mcIntegral += hist[j]->Integral();
+      mcIntegral += Yield(hist[j]);
 
       hist[j]->SetFillColor(color[j]);
       hist[j]->SetFillStyle(1001);
@@ -455,7 +456,7 @@ void DrawHistogram(TString  hname,
         
 	  if (j != Data && mcIntegral > 0)
 	    {
-	      hist[j]->Scale(hist[Data]->Integral() / mcIntegral);
+	      hist[j]->Scale(Yield(hist[Data]) / mcIntegral);
 	    }
 	}
     }
@@ -598,6 +599,7 @@ void DrawHistogram(TString  hname,
 
       WVYield += Yield(hist[WW]);
       WVYield += Yield(hist[WZTo2L2QMad]);
+      WVYield += Yield(hist[WZTo2QLNuMad]);
       WVYield += Yield(hist[WbbToLNu]);
       WVYield += Yield(hist[WJets_Madgraph]);
       WVYield += Yield(hist[WGstarToElNuMad]);
@@ -936,6 +938,7 @@ void SetParameters(UInt_t cut,
   process[WW]               = "WW";
   process[WZTo3LNu]         = "WZTo3LNu";
   process[WZTo2L2QMad]      = "WZTo2L2QMad";
+  process[WZTo2QLNuMad]     = "WZTo2QLNuMad";
   process[ZZTo2L2QMad]      = "ZZTo2L2QMad";
   process[ZZ]               = "ZZ";
   process[ggZZ2L2L]         = "ggZZ2L2L";
@@ -971,6 +974,7 @@ void SetParameters(UInt_t cut,
   color[WgammaToLNuG]     = kAzure;     // WV
   color[WW]               = kAzure;     // WV
   color[WZTo2L2QMad]      = kAzure;     // WV
+  color[WZTo2QLNuMad]     = kAzure;     // WV
   color[TTbar_Madgraph]   = kAzure-9;   // top
   color[TW]               = kAzure-9;   // top
   color[TbarW]            = kAzure-9;   // top
@@ -999,7 +1003,7 @@ void SetParameters(UInt_t cut,
 
   for (UInt_t i=0; i<nProcesses; i++) systError[i] = 0.0;
 
-  _luminosity   = 19602.0;  // 19468.3 for PU
+  _luminosity   = 19602.0;  // pb
   _yoffset      = 0.048;
   _verbosity    = 0;
   _format       = "png";
@@ -1036,6 +1040,7 @@ void SetParameters(UInt_t cut,
       vprocess.push_back(WgammaToLNuG);
       vprocess.push_back(WW);
       vprocess.push_back(WZTo2L2QMad);
+      vprocess.push_back(WZTo2QLNuMad);
 
       if (mode == MCmode)
 	{

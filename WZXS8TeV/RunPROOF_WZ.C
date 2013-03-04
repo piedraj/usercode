@@ -16,7 +16,8 @@ enum {RAW, PPF, PPP};
 
 
 Double_t G_Event_Weight = 1;
-Double_t G_Event_Lumi   = 19468.3;  // pb
+Double_t luminosity     = 19602.0;  // pb
+Double_t pu_luminosity  = 19468.3;  // pb
 TProof*  proof          = 0;
 TString  dataPath       = "";
 
@@ -72,11 +73,11 @@ void RunPROOF_WZ(TString  sample       = "DoubleMu",
 
     gPAFOptions->dataFiles = dm->GetFiles();
 
-     G_Event_Weight = dm->GetCrossSection() * G_Event_Lumi / dm->GetEventsInTheSample();
+     G_Event_Weight = dm->GetCrossSection() * luminosity / dm->GetEventsInTheSample();
 
     cout << endl;
     cout << "      x-section = " << dm->GetCrossSection()      << endl;
-    cout << "     luminosity = " << G_Event_Lumi               << endl;
+    cout << "     luminosity = " << luminosity                 << endl;
     cout << "        nevents = " << dm->GetEventsInTheSample() << endl;
     cout << " base file name = " << dm->GetBaseFileName()      << endl;
     cout << "         weight = " << G_Event_Weight             << endl;
@@ -104,12 +105,13 @@ void RunPROOF_WZ(TString  sample       = "DoubleMu",
   //----------------------------------------------------------------------------
   gPAFOptions->inputParameters = new InputParameters();
 
-  gPAFOptions->inputParameters->SetNamedString("directory",    outputDir.Data());
-  gPAFOptions->inputParameters->SetNamedString("sample",       sample.Data());
-  gPAFOptions->inputParameters->SetNamedDouble("xs_weight",    G_Event_Weight);
-  gPAFOptions->inputParameters->SetNamedDouble("luminosity",   G_Event_Lumi);
-  gPAFOptions->inputParameters->SetNamedInt   ("mode",         mode);
-  gPAFOptions->inputParameters->SetNamedInt   ("closure_test", closure_test);
+  gPAFOptions->inputParameters->SetNamedString("directory",     outputDir.Data());
+  gPAFOptions->inputParameters->SetNamedString("sample",        sample.Data());
+  gPAFOptions->inputParameters->SetNamedDouble("xs_weight",     G_Event_Weight);
+  gPAFOptions->inputParameters->SetNamedDouble("luminosity",    luminosity);
+  gPAFOptions->inputParameters->SetNamedDouble("pu_luminosity", pu_luminosity);
+  gPAFOptions->inputParameters->SetNamedInt   ("mode",          mode);
+  gPAFOptions->inputParameters->SetNamedInt   ("closure_test",  closure_test);
 
 
   // Number of events (Long64_t)

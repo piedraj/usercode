@@ -20,6 +20,18 @@
 const Double_t Z_MASS = 91.1876;  // [GeV]
 
 
+// Input parameters for the WZ cross section
+//------------------------------------------------------------------------------
+const Double_t xsWplusZ    = 13.89;  // pb (MCFM with 71 < mZ < 111 GeV)
+const Double_t xsWminusZ   =  8.06;  // pb (MCFM with 71 < mZ < 111 GeV)
+const Double_t W2e         = 0.1075;
+const Double_t W2m         = 0.1057;
+const Double_t W2tau       = 0.1125;
+const Double_t Z2ll        = 0.033658;
+const Double_t WZ23lnu     = 3 * Z2ll * (W2e + W2m + W2tau);
+const Double_t ngenWZphase = 1449067;  // (71 < mZ < 111 GeV)
+
+
 const UInt_t nChannels = 4;
 
 enum {MMM, EEE, MME, EEM};
@@ -169,6 +181,7 @@ class AnalysisWZ: public CMSAnalysisSelectorMiniTrees
   Double_t                    pu_weight;
   Double_t                    xs_weight;
   Double_t                    luminosity;
+  Double_t                    pu_luminosity;
   PUWeight*                   fPUWeight;
 
 

@@ -16,7 +16,7 @@ void AnalysisWZ::Initialise()
 {
   GetParameters();
 
-  fPUWeight = new PUWeight(luminosity, Summer12_53X, "2012"); 
+  fPUWeight = new PUWeight(pu_luminosity, Summer12_53X, "2012"); 
 
 
   // Histograms
@@ -498,10 +498,16 @@ void AnalysisWZ::GetParameters()
   directory = GetInputParameters()->TheNamedString("directory");
   sample    = GetInputParameters()->TheNamedString("sample");
 
-  GetInputParameters()->TheNamedInt   ("mode",         mode);
-  GetInputParameters()->TheNamedInt   ("closure_test", closure_test);
-  GetInputParameters()->TheNamedDouble("xs_weight",    xs_weight);
-  GetInputParameters()->TheNamedDouble("luminosity",   luminosity);
+  GetInputParameters()->TheNamedInt   ("mode",          mode);
+  GetInputParameters()->TheNamedInt   ("closure_test",  closure_test);
+  GetInputParameters()->TheNamedDouble("xs_weight",     xs_weight);
+  GetInputParameters()->TheNamedDouble("luminosity",    luminosity);
+  GetInputParameters()->TheNamedDouble("pu_luminosity", pu_luminosity);
+
+  if (sample.Contains("WZTo3LNu"))
+    {
+      xs_weight = (xsWplusZ + xsWminusZ) * WZ23lnu * luminosity / ngenWZphase;
+    }
 }
 
 
