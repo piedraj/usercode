@@ -145,7 +145,7 @@ void AnalysisWZ::InsideLoop()
     UInt_t muon_type = (MuonCloseToPV(i) && MuonIsolation(i)) ? Tight : Fail;
 
     const Double_t SF_ptMax = MuonSF->GetXaxis()->GetBinCenter(MuonSF->GetNbinsX());
-    const Double_t PR_ptMax = MuonPR->GetYaxis()->GetBinCenter(MuonPR->GetNbinsX());
+    const Double_t PR_ptMax = MuonPR->GetXaxis()->GetBinCenter(MuonPR->GetNbinsX());
 
     const Double_t scale_factor = MuonSF->GetBinContent(MuonSF->FindBin(min(pt,SF_ptMax),eta));
     const Double_t prompt_rate  = MuonPR->GetBinContent(MuonPR->FindBin(min(pt,PR_ptMax),eta));
@@ -195,7 +195,7 @@ void AnalysisWZ::InsideLoop()
     UInt_t electron_type = (ElectronBDT(i) && ElectronIsolation(i)) ? Tight : Fail;
 
     const Double_t SF_ptMax = ElecSF->GetXaxis()->GetBinCenter(ElecSF->GetNbinsX());
-    const Double_t PR_ptMax = ElecPR->GetYaxis()->GetBinCenter(ElecPR->GetNbinsX());
+    const Double_t PR_ptMax = ElecPR->GetXaxis()->GetBinCenter(ElecPR->GetNbinsX());
 
     const Double_t scale_factor = ElecSF->GetBinContent(ElecSF->FindBin(min(pt,SF_ptMax),eta));
     const Double_t prompt_rate  = ElecPR->GetBinContent(ElecPR->FindBin(min(pt,PR_ptMax),eta));

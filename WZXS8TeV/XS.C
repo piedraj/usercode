@@ -1,11 +1,14 @@
 #include "TCanvas.h"
 #include "TFile.h"
 #include "TFrame.h"
+#include "TGraphErrors.h"
 #include "TH1.h"
+#include "TH2.h"
 #include "THStack.h"
 #include "TInterpreter.h"
 #include "TLatex.h"
 #include "TLegend.h"
+#include "TLine.h"
 #include "TMath.h"
 #include "TROOT.h"
 #include "TStyle.h"
@@ -117,6 +120,15 @@ UInt_t         _mode;
 vector<UInt_t>  vprocess;
 
 
+// Save the cross section
+//------------------------------------------------------------------------------
+TString         sChannelLabel[nChannels+1];
+Double_t        xsValue      [nChannels+1];
+Double_t        xsErrorStat  [nChannels+1];
+Double_t        xsErrorSyst  [nChannels+1];
+Double_t        xsErrorLumi  [nChannels+1];
+
+
 // Member functions
 //------------------------------------------------------------------------------
 void     SetParameters            (UInt_t      cut,
@@ -129,6 +141,8 @@ void     MeasureTheCrossSection   (UInt_t      channel,
 				   UInt_t      cut);
 
 void     DrawHistogram            (TString     hname,
+				   UInt_t      channel,
+				   UInt_t      cut,
 				   TString     xtitle,
 				   Int_t       ngroup       = -1,
 				   Int_t       precision    =  0,
@@ -163,7 +177,8 @@ void     DrawTLatex               (Double_t    x,
 				   Double_t    y,
 				   Double_t    tsize,
 				   Short_t     align,
-				   const char* text);
+				   const char* text,
+				   Bool_t      setndc = true);
 
 TLegend* DrawLegend               (Float_t     x1,
 				   Float_t     y1,
@@ -179,6 +194,10 @@ Double_t Yield                    (TH1*        h);
 TString  GuessLocalBasePath       ();
 
 void     MakeDirectory            ();
+
+void     Ratios                   (UInt_t      cut);
+
+void     Inclusive                ();
 
 
 //------------------------------------------------------------------------------
@@ -197,29 +216,45 @@ void XS(UInt_t cut          = MET,
 
     if (ReadInputFiles(channel) < 0) break;
     
-    if (cut >= MET && !closure_test) MeasureTheCrossSection(channel, cut);
+    MeasureTheCrossSection(channel, cut);
 
-    TString suffix = "_" + sChannel[channel] + "_" + sCut[cut];
-    
-    DrawHistogram("hSumCharges"   + suffix, "q_{1} + q_{2} + q_{3}", -1, 0, "NULL", linY);
-    DrawHistogram("hMET"          + suffix, "E_{T}^{miss}",           5, 0, "GeV",  linY);
-    DrawHistogram("hInvMass3Lep"  + suffix, "m_{#font[12]{3l}}",      5, 0, "GeV",  linY);  // 71, 211, 0, 110, false);
-    DrawHistogram("hPtLepton1"    + suffix, "p_{T}^{first lepton}",   5, 0, "GeV",  linY);
-    DrawHistogram("hPtLepton2"    + suffix, "p_{T}^{second lepton}",  5, 0, "GeV",  linY);
-    DrawHistogram("hPtLepton3"    + suffix, "p_{T}^{third lepton}",   5, 0, "GeV",  linY);
-    DrawHistogram("hPtLeadingJet" + suffix, "p_{T}^{leading jet}",    5, 0, "GeV",  linY);
+    DrawHistogram("hSumCharges", channel, cut, "q_{1} + q_{2} + q_{3}");
 
-    if (cut < HasZCandidate) continue;
+    if (closure_test)
+      {
+	DrawHistogram("hInvMass2Lep",  channel, cut, "m_{#font[12]{ll}}",                    -1, 0, "GeV",  linY, 76, 106);
+	DrawHistogram("hInvMass3Lep",  channel, cut, "m_{#font[12]{3l}}",                     2, 0, "GeV",  linY, 60, 200);
+	DrawHistogram("hPtLeadingJet", channel, cut, "p_{T}^{leading jet}",                   2, 0, "GeV",  linY,  0, 125);
+	DrawHistogram("hPtZLepton1",   channel, cut, "p_{T}^{Z leading lepton}",              2, 0, "GeV",  linY,  0, 125);
+	DrawHistogram("hPtZLepton2",   channel, cut, "p_{T}^{Z trailing lepton}",             2, 0, "GeV",  linY,  0, 125);
+	DrawHistogram("hMtW",          channel, cut, "m_{T}^{W}",                             2, 0, "GeV",  linY,  0,  50);
+	DrawHistogram("hDPhiZLeptons", channel, cut, "#Delta#phi_{#font[12]{ll}}",           10, 1, "^{o}", linY);
+	DrawHistogram("hDRWZLepton1",  channel, cut, "#DeltaR(W lepton, Z leading lepton)",   5, 1, "NULL", linY);
+	DrawHistogram("hDRWZLepton2",  channel, cut, "#DeltaR(W lepton, Z trailing lepton)",  5, 1, "NULL", linY);
+      }
+    else
+      {
+	DrawHistogram("hMET",          channel, cut, "E_{T}^{miss}",          5, 0, "GeV", linY);
+	DrawHistogram("hInvMass3Lep",  channel, cut, "m_{#font[12]{3l}}",     5, 0, "GeV", linY, 60, 350);
+	DrawHistogram("hPtLepton1",    channel, cut, "p_{T}^{first lepton}",  5, 0, "GeV", linY);
+	DrawHistogram("hPtLepton2",    channel, cut, "p_{T}^{second lepton}", 5, 0, "GeV", linY);
+	DrawHistogram("hPtLepton3",    channel, cut, "p_{T}^{third lepton}",  5, 0, "GeV", linY);
+	DrawHistogram("hPtLeadingJet", channel, cut, "p_{T}^{leading jet}",   5, 0, "GeV", linY);
 
-    DrawHistogram("hInvMass2Lep"  + suffix, "m_{#font[12]{ll}}",                    -1, 0, "GeV",  linY, 71, 111);
-    DrawHistogram("hDPhiZLeptons" + suffix, "#Delta#phi_{#font[12]{ll}}",           10, 1, "^{o}", linY);
-    DrawHistogram("hPtZLepton1"   + suffix, "p_{T}^{Z leading lepton}",              5, 0, "GeV",  linY);
-    DrawHistogram("hPtZLepton2"   + suffix, "p_{T}^{Z trailing lepton}",             5, 0, "GeV",  linY);
-    DrawHistogram("hPtWLepton"    + suffix, "p_{T}^{W lepton}",                      5, 0, "GeV",  linY);
-    DrawHistogram("hDRWZLepton1"  + suffix, "#DeltaR(W lepton, Z leading lepton)",   5, 1, "NULL", linY);
-    DrawHistogram("hDRWZLepton2"  + suffix, "#DeltaR(W lepton, Z trailing lepton)",  5, 1, "NULL", linY);
-    DrawHistogram("hMtW"          + suffix, "m_{T}^{W}",                             5, 0, "GeV",  linY);
+	if (cut < HasZCandidate) continue;
+
+	DrawHistogram("hInvMass2Lep",  channel, cut, "m_{#font[12]{ll}}",                    -1, 0, "GeV",  linY, 71, 111);
+	DrawHistogram("hDPhiZLeptons", channel, cut, "#Delta#phi_{#font[12]{ll}}",           10, 1, "^{o}", linY);
+	DrawHistogram("hPtZLepton1",   channel, cut, "p_{T}^{Z leading lepton}",              5, 0, "GeV",  linY);
+	DrawHistogram("hPtZLepton2",   channel, cut, "p_{T}^{Z trailing lepton}",             5, 0, "GeV",  linY);
+	DrawHistogram("hPtWLepton",    channel, cut, "p_{T}^{W lepton}",                      5, 0, "GeV",  linY);
+	DrawHistogram("hDRWZLepton1",  channel, cut, "#DeltaR(W lepton, Z leading lepton)",   5, 1, "NULL", linY);
+	DrawHistogram("hDRWZLepton2",  channel, cut, "#DeltaR(W lepton, Z trailing lepton)",  5, 1, "NULL", linY);
+	DrawHistogram("hMtW",          channel, cut, "m_{T}^{W}",                             5, 0, "GeV",  linY);
+      }
   }
+
+  Ratios(cut);
 }
 
 
@@ -228,6 +263,10 @@ void XS(UInt_t cut          = MET,
 //------------------------------------------------------------------------------
 void MeasureTheCrossSection(UInt_t channel, UInt_t cut)
 {
+  if (cut < MET) return;
+
+  if (_closure_test) return;
+
   Double_t ndata       = 0;
   Double_t nsignal     = 0;
   Double_t nbackground = 0;
@@ -258,7 +297,7 @@ void MeasureTheCrossSection(UInt_t channel, UInt_t cut)
   //----------------------------------------------------------------------------
   Double_t efficiency = nWZ / ngenWZphase;
 
-  Double_t xs = (ndata - nbackground) / (_luminosity * efficiency * WZ23lnu);
+  xsValue[channel] = (ndata - nbackground) / (_luminosity * efficiency * WZ23lnu);
 
 
   // Relative errors
@@ -277,9 +316,9 @@ void MeasureTheCrossSection(UInt_t channel, UInt_t cut)
 
   // Absolute errors
   //----------------------------------------------------------------------------
-  Double_t xsErrorSyst = xs * xsRelativeErrorSyst / 1e2;  // pb
-  Double_t xsErrorStat = xs * xsRelativeErrorStat / 1e2;  // pb
-  Double_t xsErrorLumi = xs * xsRelativeErrorLumi / 1e2;  // pb
+  xsErrorStat[channel] = xsValue[channel] * xsRelativeErrorStat / 1e2;  // pb
+  xsErrorSyst[channel] = xsValue[channel] * xsRelativeErrorSyst / 1e2;  // pb
+  xsErrorLumi[channel] = xsValue[channel] * xsRelativeErrorLumi / 1e2;  // pb
 
 
   // Print the results
@@ -313,7 +352,11 @@ void MeasureTheCrossSection(UInt_t channel, UInt_t cut)
 
   if (_verbosity > 0) {
     printf("\n");
-    printf("                         measured xs = %.2f +- %.2f (stat) +- %.2f (syst) +- %.2f (lumi) pb\n", xs, xsErrorStat, xsErrorSyst, xsErrorLumi);
+    printf("                         measured xs = %.2f +- %.2f (stat) +- %.2f (syst) +- %.2f (lumi) pb\n",
+	   xsValue    [channel],
+	   xsErrorStat[channel],
+	   xsErrorSyst[channel],
+	   xsErrorLumi[channel]);
     printf("                              NLO xs = %.2f pb (MCFM with 71 < mZ < 111 GeV)\n", xsWplusZ + xsWminusZ);
     printf("\n");
   }
@@ -324,6 +367,8 @@ void MeasureTheCrossSection(UInt_t channel, UInt_t cut)
 // DrawHistogram
 //------------------------------------------------------------------------------
 void DrawHistogram(TString  hname,
+		   UInt_t   channel,
+		   UInt_t   cut,
 		   TString  xtitle,
 		   Int_t    ngroup,
 		   Int_t    precision,
@@ -335,6 +380,8 @@ void DrawHistogram(TString  hname,
 		   Double_t ymax,
 		   Bool_t   moveOverflow)
 {
+  hname += "_" + sChannel[channel] + "_" + sCut[cut];
+
   TCanvas* canvas = new TCanvas(hname, hname, 550, 900);
 
   TPad* pad1 = new TPad("pad1", "pad1", 0, 0.44, 1, 1.00);
@@ -517,7 +564,7 @@ void DrawHistogram(TString  hname,
 	{
 	  Double_t TopYield   = 0.0;
 	  Double_t ZJetsYield = 0.0;
-
+	  
 	  TopYield += Yield(hist[TTbar_Madgraph]);
 	  TopYield += Yield(hist[TW]);
 	  TopYield += Yield(hist[TbarW]);
@@ -578,16 +625,7 @@ void DrawHistogram(TString  hname,
 
   // CMS titles
   //----------------------------------------------------------------------------
-  TString leftTitle = "CMS preliminary";
-
-  if (hname.Contains("MMM")) leftTitle = "#mu#mu#mu";
-  if (hname.Contains("EEE")) leftTitle = "eee";
-  if (hname.Contains("MME")) leftTitle = "#mu#mue";
-  if (hname.Contains("EEM")) leftTitle = "ee#mu";
-
-  if (hname.Contains("NPV") && hname.Contains("NoCuts")) leftTitle = "";
-
-  DrawTLatex(0.185, 0.975, 0.05, 13, leftTitle.Data());
+  DrawTLatex(0.185, 0.975, 0.05, 13, sChannelLabel[channel]);
   DrawTLatex(0.940, 0.983, 0.05, 33, Form("#sqrt{s} = 8 TeV, L = %.1f fb^{-1}", _luminosity/1e3));
 
 
@@ -813,14 +851,15 @@ void DrawTLatex(Double_t    x,
 		Double_t    y,
 		Double_t    tsize,
 		Short_t     align,
-		const char* text)
+		const char* text,
+		Bool_t      setndc)
 {
   TLatex* tl = new TLatex(x, y, text);
 
-  tl->SetNDC();
-  tl->SetTextAlign(align);
-  tl->SetTextFont (   42);
-  tl->SetTextSize (tsize);
+  tl->SetNDC      (setndc);
+  tl->SetTextAlign( align);
+  tl->SetTextFont (    42);
+  tl->SetTextSize ( tsize);
 
   tl->Draw("same");
 }
@@ -863,6 +902,12 @@ void SetParameters(UInt_t cut,
 		   UInt_t mode,
 		   UInt_t closure_test)
 {
+  sChannelLabel[MMM]       = "#mu#mu#mu";
+  sChannelLabel[EEE]       = "eee";
+  sChannelLabel[MME]       = "#mu#mue";
+  sChannelLabel[EEM]       = "ee#mu";
+  sChannelLabel[nChannels] = "inclusive";
+
   sChannel[MMM] = "MMM";
   sChannel[EEE] = "EEE";
   sChannel[MME] = "MME";
@@ -956,7 +1001,7 @@ void SetParameters(UInt_t cut,
 
   _luminosity   = 19602.0;  // 19468.3 for PU
   _yoffset      = 0.048;
-  _verbosity    = 3;
+  _verbosity    = 0;
   _format       = "png";
   _cut          = cut;
   _mode         = mode;
@@ -966,6 +1011,7 @@ void SetParameters(UInt_t cut,
 
   gInterpreter->ExecuteMacro("HiggsPaperStyle.C");
 
+  gStyle->SetEndErrorSize    (  5);
   gStyle->SetHatchesLineWidth(  1);
   gStyle->SetHatchesSpacing  (0.7);
   
@@ -1065,7 +1111,8 @@ Int_t ReadInputFiles(UInt_t channel)
 
     if (!dummy)
       {
-	printf(" [ReadInputFiles] The %s file is broken or it does not exist.\n", process[j].Data());
+	printf(" [ReadInputFiles] The %s file is broken or it does not exist.\n",
+	       process[j].Data());
 
 	return -1;
       }
@@ -1145,4 +1192,179 @@ void MakeDirectory()
   gSystem->mkdir(_output, kTRUE);
 
   gSystem->Exec(Form("cp index.php %s/.", _output.Data()));
+}
+
+
+//------------------------------------------------------------------------------
+// Ratios
+//------------------------------------------------------------------------------
+void Ratios(UInt_t cut)
+{
+  if (cut < MET) return;
+
+  if (_closure_test) return;
+
+  Inclusive();
+
+  TGraphErrors* gStat = new TGraphErrors(nChannels+1);
+  TGraphErrors* gSyst = new TGraphErrors(nChannels+1);
+  TGraphErrors* gLumi = new TGraphErrors(nChannels+1);
+
+  for (UInt_t i=0; i<nChannels+1; i++) {
+
+    Double_t f = xsValue[i] / (xsWplusZ + xsWminusZ);
+
+    Double_t errorSquared = (xsErrorStat[i] * xsErrorStat[i]);
+
+    gStat->SetPointError(i, f * sqrt(errorSquared) / xsValue[i], 0.0);
+
+    errorSquared += (xsErrorSyst[i] * xsErrorSyst[i]);
+
+    gSyst->SetPointError(i, f * sqrt(errorSquared) / xsValue[i], 0.0);
+
+    errorSquared += (xsErrorLumi[i] * xsErrorLumi[i]);
+
+    gLumi->SetPointError(i, f * sqrt(errorSquared) / xsValue[i], 0.0);
+
+    gStat->SetPoint(i, f, i+1);
+    gSyst->SetPoint(i, f, i+1);
+    gLumi->SetPoint(i, f, i+1);
+  }
+
+
+  // Cosmetics
+  //----------------------------------------------------------------------------
+  gStat->SetLineWidth  (2);
+  gStat->SetMarkerSize (1.3);
+  gStat->SetMarkerStyle(kFullCircle);
+
+  gSyst->SetLineColor  (kRed);
+  gSyst->SetLineWidth  (2);
+  gSyst->SetMarkerSize (1.3);
+  gSyst->SetMarkerStyle(kFullCircle);
+
+  gLumi->SetLineColor  (kBlue);
+  gLumi->SetLineWidth  (2);
+  gLumi->SetMarkerSize (1.3);
+  gLumi->SetMarkerStyle(kFullCircle);
+
+
+  // Draw
+  //----------------------------------------------------------------------------
+  TCanvas* canvas = new TCanvas("ratios_" + sCut[cut],
+				"ratios_" + sCut[cut]);
+
+  canvas->SetLeftMargin(canvas->GetRightMargin());
+
+  Double_t xmin = 0.6;
+  Double_t xmax = 2.2;
+  Double_t ymin = 0.50;
+  Double_t ymax = nChannels+1 + ymin;
+  
+  TH2F* dummy = new TH2F("dummy", "",
+			 100, xmin, xmax,
+			 100, ymin, ymax);
+
+  dummy->Draw();
+  
+  
+  // Vertical line at 1
+  //----------------------------------------------------------------------------
+  TLine* line = new TLine(1.0, ymin, 1.0, ymax);
+
+  line->SetLineWidth(2);
+
+  line->Draw("same");
+
+
+  // Ratios
+  //----------------------------------------------------------------------------
+  gLumi->Draw("p||,same");
+  gSyst->Draw("p||,same");
+  gStat->Draw("p,same");
+
+
+  // Labels
+  //----------------------------------------------------------------------------
+  for (UInt_t i=0; i<nChannels+1; i++) {
+
+    Double_t x = gStat->GetX()[i];
+    Double_t y = gStat->GetY()[i];
+
+    DrawTLatex(xmin+0.05, y, 0.035, 12, Form("%s", sChannelLabel[i].Data()), 0);
+
+    Double_t gStatError  = gStat->GetErrorX(i);
+    Double_t gSystError  = gSyst->GetErrorX(i);
+    Double_t gLumiError  = gLumi->GetErrorX(i);
+
+    gLumiError = sqrt(gLumiError*gLumiError - gSystError*gSystError);
+    gSystError = sqrt(gSystError*gSystError - gStatError*gStatError);
+
+    DrawTLatex(xmax-0.05, y, 0.035, 32, Form("%.2f #pm %.2f #pm %.2f #pm %.2f",
+					     x, gStatError, gSystError, gLumiError), 0);
+  }
+
+  DrawTLatex(0.940, 0.983, 0.05, 33,
+	     Form("#sqrt{s} = 8 TeV, L = %.1f fb^{-1}", _luminosity/1e3));
+
+  dummy->GetXaxis()->CenterTitle();
+  dummy->GetXaxis()->SetTitleOffset(1.4);
+  dummy->GetXaxis()->SetTitle("#sigma_{WZ}^{exp} / #sigma_{WZ}^{theo}");
+  dummy->GetYaxis()->SetTitle("");
+
+
+  // Remove y-axis labels
+  //----------------------------------------------------------------------------
+  TAxis* yaxis = dummy->GetYaxis();
+  
+  for (Int_t j=1; j<yaxis->GetNbins(); j++) yaxis->SetBinLabel(j, "");
+
+
+  // Save
+  //----------------------------------------------------------------------------
+  canvas->Update();
+  canvas->GetFrame()->DrawClone();
+  canvas->RedrawAxis();
+
+  canvas->SaveAs(Form("%s/ratios_%s.%s",
+		      _output.Data(),
+		      sCut[cut].Data(),
+		      _format.Data()));
+}
+
+
+//------------------------------------------------------------------------------
+// Inclusive
+//------------------------------------------------------------------------------
+void Inclusive()
+{
+  Double_t x     = 0;
+  Double_t stat  = 0;
+  Double_t syst  = 0;
+  Double_t lumi  = 0;
+  Double_t total = 0;
+
+  for (UInt_t i=0; i<nChannels; i++) {
+
+    Double_t xsErrorTotal = 0;
+
+    xsErrorTotal += (xsErrorStat[i] * xsErrorStat[i]);
+    xsErrorTotal += (xsErrorSyst[i] * xsErrorSyst[i]);
+    xsErrorTotal += (xsErrorLumi[i] * xsErrorLumi[i]);
+
+    xsErrorTotal = sqrt(xsErrorTotal);
+
+    x += (xsValue[i] / xsErrorTotal / xsErrorTotal);
+
+    stat  += (1. / xsErrorStat[i]  / xsErrorStat[i]);
+    syst  += (1. / xsErrorSyst[i]  / xsErrorSyst[i]);
+    lumi  += (1. / xsErrorLumi[i]  / xsErrorLumi[i]);
+    total += (1. / xsErrorTotal    / xsErrorTotal);
+  }
+
+  xsValue[nChannels] = x / total;
+
+  xsErrorStat[nChannels] = 1. / sqrt(stat);
+  xsErrorSyst[nChannels] = 1. / sqrt(syst);
+  xsErrorLumi[nChannels] = 1. / sqrt(lumi);
 }

@@ -1,4 +1,6 @@
 
+ rm -rf png
+
  root -l -b -q XS.C+\(MET,MCmode,1,1\)
  root -l -b -q XS.C+\(MET,PPFmode,1,1\)
 
