@@ -61,7 +61,7 @@ void RunPROOF_WZ(TString  sample       = "DoubleMu",
 
   if (sample.Contains("DoubleElectron") || sample.Contains("DoubleMu")) {
 
-    gPAFOptions->dataFiles = GetRealDataFiles("MC_Summer12_53X/WH", sample.Data());
+    gPAFOptions->dataFiles = GetRealDataFiles("MC_Summer12_53X/WH/CalibratedE", sample.Data());
   }
   else {
 

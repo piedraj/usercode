@@ -1,0 +1,43 @@
+\documentclass[a4paper]{article}
+
+\usepackage{graphicx}
+
+\begin{document}
+
+%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+% mmm
+%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+\begin{table}[ht]
+\begin{center}
+\begin{tabular}{l|r|r|r|r|r}
+\hline
+\multicolumn{6}{c}{$\mu\mu\mu$ channel}\\
+process & 3 leptons & Z & MET & SS-like & SS-like tight\\
+\hline
+\input{tex/MMM_ppf}
+\hline
+\hline
+\multicolumn{6}{c}{eee channel}\\
+process & 3 leptons & Z & MET & SS-like & SS-like tight\\
+\hline
+\input{tex/EEE_ppf}
+\hline
+\hline
+\multicolumn{6}{c}{$\mu\mu$e channel}\\
+process & 3 leptons & Z & MET & SS-like & SS-like tight\\
+\hline
+\input{tex/MME_ppf}
+\hline
+\hline
+\multicolumn{6}{c}{ee$\mu$ channel}\\
+process & 3 leptons & Z & MET & SS-like & SS-like tight\\
+\hline
+\input{tex/EEM_ppf}
+\hline
+\end{tabular}
+\caption{WZ analysis yields.}
+\label{tab:wz_yields}
+\end{center}
+\end{table}
+
+\end{document}

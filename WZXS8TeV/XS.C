@@ -14,6 +14,8 @@
 #include "TStyle.h"
 #include "TSystem.h"
 #include "TTree.h"
+#include <fstream>
+#include <iostream>
 #include <vector>
 
 
@@ -36,7 +38,7 @@ const Double_t ngenWZphase = 1449067;  // (71 < mZ < 111 GeV)
 // Data members
 //------------------------------------------------------------------------------
 const UInt_t nChannels  =  4;
-const UInt_t nCuts      =  6;
+const UInt_t nCuts      =  5;
 const UInt_t nProcesses = 40;
 
 enum {MMM, EEE, MME, EEM};
@@ -44,7 +46,6 @@ enum {MMM, EEE, MME, EEM};
 enum {
   Exactly3Leptons,
   HasZCandidate,
-  HasWCandidate,
   MET,
   SSLike,
   SSLikeAntiBtag
@@ -141,6 +142,8 @@ Int_t    ReadInputFiles           (UInt_t      channel);
 void     MeasureTheCrossSection   (UInt_t      channel,
 				   UInt_t      cut);
 
+void     PrintLatexTable          (UInt_t      channel);
+
 void     DrawHistogram            (TString     hname,
 				   UInt_t      channel,
 				   UInt_t      cut,
@@ -216,6 +219,8 @@ void XS(UInt_t cut          = SSLikeAntiBtag,
   for (UInt_t channel=0; channel<nChannels; channel++) {
 
     if (ReadInputFiles(channel) < 0) break;
+
+    PrintLatexTable(channel);
     
     MeasureTheCrossSection(channel, cut);
 
@@ -272,7 +277,7 @@ void MeasureTheCrossSection(UInt_t channel, UInt_t cut)
   Double_t nsignal     = 0;
   Double_t nbackground = 0;
 
-  TString suffix = "_" + sChannel[channel] + "_" + sCut[cut] + "_TTT";
+  TString suffix = "_" + sChannel[channel] + "_" + sCut[cut] + "_LLL";
 
   Double_t nWZ = Yield((TH1D*)input[WZTo3LNu]->Get("hCounterEff" + suffix));
 
@@ -361,6 +366,159 @@ void MeasureTheCrossSection(UInt_t channel, UInt_t cut)
     printf("                              NLO xs = %.2f pb (MCFM with 71 < mZ < 111 GeV)\n", xsWplusZ + xsWminusZ);
     printf("\n");
   }
+}
+
+
+//------------------------------------------------------------------------------
+// PrintLatexTable
+//------------------------------------------------------------------------------
+void PrintLatexTable(UInt_t channel)
+{
+  ofstream outputfile;
+
+  TString suffix = (_mode == MCmode) ? "mc" : "ppf";
+
+  outputfile.open(Form("tex/%s_%s.tex", sChannel[channel].Data(), suffix.Data()));
+
+  Double_t nData [nCuts];
+  Double_t nWZ   [nCuts];
+  Double_t nZZ   [nCuts];
+  Double_t nWV   [nCuts];
+  Double_t nVVV  [nCuts];
+  Double_t nTop  [nCuts];
+  Double_t nZJets[nCuts];
+  Double_t nFakes[nCuts];
+  Double_t nBkg  [nCuts];
+
+  Double_t eData [nCuts];
+  Double_t eWZ   [nCuts];
+  Double_t eZZ   [nCuts];
+  Double_t eWV   [nCuts];
+  Double_t eVVV  [nCuts];
+  Double_t eTop  [nCuts];
+  Double_t eZJets[nCuts];
+  Double_t eFakes[nCuts];
+  Double_t eBkg  [nCuts];
+
+  for (UInt_t i=0; i<nCuts; i++)
+    {
+      nData [i] = 0.;
+      nWZ   [i] = 0.;
+      nZZ   [i] = 0.;
+      nWV   [i] = 0.;
+      nVVV  [i] = 0.;
+      nTop  [i] = 0.;
+      nZJets[i] = 0.;
+      nFakes[i] = 0.;
+      nBkg  [i] = 0.;
+
+      eData [i] = 0.;
+      eWZ   [i] = 0.;
+      eZZ   [i] = 0.;
+      eWV   [i] = 0.;
+      eVVV  [i] = 0.;
+      eTop  [i] = 0.;
+      eZJets[i] = 0.;
+      eFakes[i] = 0.;
+      eBkg  [i] = 0.;
+  
+      TH1D* hist[nProcesses];
+
+      for (UInt_t j=0; j<vprocess.size(); j++)
+	{
+	  UInt_t k = vprocess.at(j);
+
+	  TString hname = "hCounter_" + sChannel[channel] + "_" + sCut[i] + "_LLL";
+
+	  hist[k] = (TH1D*)input[k]->Get(hname);
+	  hist[k]->SetName(hname + "_" + process[k]);
+	}
+
+      nData[i] = Yield(hist[Data]);
+      eData[i] = sqrt(nData[i]);
+
+      nWZ[i] = Yield(hist[WZTo3LNu]);
+      eWZ[i] = sqrt(nWZ[i]);
+
+      nZZ[i] += Yield(hist[ZgammaToLLG]);
+      nZZ[i] += Yield(hist[ggZZ2L2L]);
+      nZZ[i] += Yield(hist[ggZZ4L]);
+      nZZ[i] += Yield(hist[ZZ2Mu2Tau]);
+      nZZ[i] += Yield(hist[ZZ4E]);
+      nZZ[i] += Yield(hist[ZZ2E2Tau]);
+      nZZ[i] += Yield(hist[ZZ4Mu]);
+      nZZ[i] += Yield(hist[ZZ2E2Mu]);
+      nZZ[i] += Yield(hist[ZZ4Tau]);
+      nZZ[i] += Yield(hist[HZZ4L]);
+      eZZ[i]  = sqrt(nZZ[i]);
+    
+      nWV[i] += Yield(hist[WW]);
+      nWV[i] += Yield(hist[WZTo2L2QMad]);
+      nWV[i] += Yield(hist[WZTo2QLNuMad]);
+      nWV[i] += Yield(hist[WbbToLNu]);
+      nWV[i] += Yield(hist[WJets_Madgraph]);
+      nWV[i] += Yield(hist[WGstarToElNuMad]);
+      nWV[i] += Yield(hist[WGstarToMuNuMad]);
+      nWV[i] += Yield(hist[WGstarToTauNuMad]);
+      nWV[i] += Yield(hist[WgammaToLNuG]);
+      eWV[i]  = sqrt(nWV[i]);
+    
+      nVVV[i] += Yield(hist[WWGJets]);
+      nVVV[i] += Yield(hist[WZZJets]);
+      nVVV[i] += Yield(hist[ZZZJets]);
+      nVVV[i] += Yield(hist[WWZJets]);
+      nVVV[i] += Yield(hist[WWWJets]);
+      nVVV[i] += Yield(hist[TTWJets]);
+      nVVV[i] += Yield(hist[TTZJets]);
+      nVVV[i] += Yield(hist[TTWWJets]);
+      nVVV[i] += Yield(hist[TTGJets]);
+      eVVV[i]  = sqrt(nVVV[i]);
+
+      if (_mode == MCmode)
+	{
+	  nTop[i] += Yield(hist[TTbar_Madgraph]);
+	  nTop[i] += Yield(hist[TW]);
+	  nTop[i] += Yield(hist[TbarW]);
+	  eTop[i]  = sqrt(nTop[i]);
+
+	  nZJets[i] += Yield(hist[DYJets_Madgraph]);
+	  nZJets[i] += Yield(hist[ZJets_Madgraph]);
+	  nZJets[i] += Yield(hist[ZbbToLL]);
+	  eZJets[i]  = sqrt(nZJets[i]);
+
+	  nBkg[i] = nZZ[i] + nWV[i] + nVVV[i] + nTop[i] + nZJets[i];
+	  eBkg[i] = sqrt(nBkg[i]);
+	}
+      else if (_mode == PPFmode)
+	{
+	  nFakes[i] = Yield(hist[DataPPF]);
+	  eFakes[i] = sqrt(nFakes[i]);
+
+	  nBkg[i] = nZZ[i] + nWV[i] + nVVV[i] + nFakes[i];
+	  eBkg[i] = sqrt(nBkg[i]);
+	}
+    }
+
+  
+  // Print
+  //----------------------------------------------------------------------------
+  if (_mode == MCmode)  {outputfile << Form(" %-20s", "top");         for (UInt_t i=0; i<nCuts; i++) outputfile << Form(" & %3.0f $\\pm$ %2.0f", nTop[i],   eTop[i]);   outputfile << "\\\\\n";}
+  if (_mode == MCmode)  {outputfile << Form(" %-20s", "Z+jets");      for (UInt_t i=0; i<nCuts; i++) outputfile << Form(" & %3.0f $\\pm$ %2.0f", nZJets[i], eZJets[i]); outputfile << "\\\\\n";}
+  if (_mode == PPFmode) {outputfile << Form(" %-20s", "data-driven"); for (UInt_t i=0; i<nCuts; i++) outputfile << Form(" & %3.0f $\\pm$ %2.0f", nFakes[i], eFakes[i]); outputfile << "\\\\\n";}
+
+  outputfile << Form(" %-20s", "ZZ");          for (UInt_t i=0; i<nCuts; i++) outputfile << Form(" & %3.0f $\\pm$ %2.0f", nZZ[i],  eZZ[i]);  outputfile << "\\\\\n";
+  outputfile << Form(" %-20s", "WV");          for (UInt_t i=0; i<nCuts; i++) outputfile << Form(" & %3.0f $\\pm$ %2.0f", nWV[i],  eWV[i]);  outputfile << "\\\\\n";
+  outputfile << Form(" %-20s", "VVV");         for (UInt_t i=0; i<nCuts; i++) outputfile << Form(" & %3.0f $\\pm$ %2.0f", nVVV[i], eVVV[i]); outputfile << "\\\\\n";
+  outputfile << Form(" %-20s", "backgrounds"); for (UInt_t i=0; i<nCuts; i++) outputfile << Form(" & %3.0f $\\pm$ %2.0f", nBkg[i], eBkg[i]); outputfile << "\\\\\n";
+  outputfile << Form(" %-20s", "WZ");          for (UInt_t i=0; i<nCuts; i++) outputfile << Form(" & %3.0f $\\pm$ %2.0f", nWZ[i],  eWZ[i]);  outputfile << "\\\\\n";
+
+  outputfile << " \\hline\n";
+
+  outputfile << Form(" %-20s", "WZ + backgrounds"); for (UInt_t i=0; i<nCuts; i++) outputfile << Form(" & %3.0f $\\pm$ %2.0f", nBkg[i]+nWZ[i], sqrt(nBkg[i]+nWZ[i])); outputfile << "\\\\\n";
+  outputfile << Form(" %-20s", "data");             for (UInt_t i=0; i<nCuts; i++) outputfile << Form(" & %3.0f $\\pm$ %2.0f", nData[i],       eData[i]);             outputfile << "\\\\\n";
+  outputfile << Form(" %-20s", "S/B");              for (UInt_t i=0; i<nCuts; i++) outputfile << Form(" & %.1f",               nWZ[i] / nBkg[i]);                     outputfile << "\\\\\n";
+
+  outputfile.close();
 }
 
 
@@ -582,9 +740,9 @@ void DrawHistogram(TString  hname,
 	  DrawLegend(x0 - 0.49, y0 - ndelta, hist[DataPPF], Form(" data-driven (%.0f)", Yield(hist[DataPPF])), "f"); ndelta += delta;
 	}
 
-      Double_t ZZYield      = 0.0;
-      Double_t WVYield      = 0.0;
-      Double_t VVVJetsYield = 0.0;
+      Double_t ZZYield  = 0.0;
+      Double_t WVYield  = 0.0;
+      Double_t VVVYield = 0.0;
 
       ZZYield += Yield(hist[ZgammaToLLG]);
       ZZYield += Yield(hist[ggZZ2L2L]);
@@ -607,21 +765,21 @@ void DrawHistogram(TString  hname,
       WVYield += Yield(hist[WGstarToTauNuMad]);
       WVYield += Yield(hist[WgammaToLNuG]);
 
-      VVVJetsYield += Yield(hist[WWGJets]);
-      VVVJetsYield += Yield(hist[WZZJets]);
-      VVVJetsYield += Yield(hist[ZZZJets]);
-      VVVJetsYield += Yield(hist[WWZJets]);
-      VVVJetsYield += Yield(hist[WWWJets]);
-      VVVJetsYield += Yield(hist[TTWJets]);
-      VVVJetsYield += Yield(hist[TTZJets]);
-      VVVJetsYield += Yield(hist[TTWWJets]);
-      VVVJetsYield += Yield(hist[TTGJets]);
+      VVVYield += Yield(hist[WWGJets]);
+      VVVYield += Yield(hist[WZZJets]);
+      VVVYield += Yield(hist[ZZZJets]);
+      VVVYield += Yield(hist[WWZJets]);
+      VVVYield += Yield(hist[WWWJets]);
+      VVVYield += Yield(hist[TTWJets]);
+      VVVYield += Yield(hist[TTZJets]);
+      VVVYield += Yield(hist[TTWWJets]);
+      VVVYield += Yield(hist[TTGJets]);
       
       ndelta = 0;
 
-      DrawLegend(x0 - 0.23, y0 - ndelta, hist[ggZZ2L2L], Form(" ZZ (%.0f)",  ZZYield),      "f"); ndelta += delta;
-      DrawLegend(x0 - 0.23, y0 - ndelta, hist[WW],       Form(" WV (%.0f)",  WVYield),      "f"); ndelta += delta;
-      DrawLegend(x0 - 0.23, y0 - ndelta, hist[WWGJets],  Form(" VVV (%.0f)", VVVJetsYield), "f"); ndelta += delta;
+      DrawLegend(x0 - 0.23, y0 - ndelta, hist[ggZZ2L2L], Form(" ZZ (%.0f)",  ZZYield),  "f"); ndelta += delta;
+      DrawLegend(x0 - 0.23, y0 - ndelta, hist[WW],       Form(" WV (%.0f)",  WVYield),  "f"); ndelta += delta;
+      DrawLegend(x0 - 0.23, y0 - ndelta, hist[WWGJets],  Form(" VVV (%.0f)", VVVYield), "f"); ndelta += delta;
     }
 
 
@@ -915,12 +1073,11 @@ void SetParameters(UInt_t cut,
   sChannel[MME] = "MME";
   sChannel[EEM] = "EEM";
 
-  sCut[Exactly3Leptons]    = "Exactly3Leptons";
-  sCut[HasZCandidate]      = "HasZCandidate";
-  sCut[HasWCandidate]      = "HasWCandidate";
-  sCut[MET]                = "MET";
-  sCut[SSLike]             = "SSLike";
-  sCut[SSLikeAntiBtag]     = "SSLikeAntiBtag";
+  sCut[Exactly3Leptons] = "Exactly3Leptons";
+  sCut[HasZCandidate]   = "HasZCandidate";
+  sCut[MET]             = "MET";
+  sCut[SSLike]          = "SSLike";
+  sCut[SSLikeAntiBtag]  = "SSLikeAntiBtag";
 
   process[DYJets_Madgraph]  = "DYJets_Madgraph";
   process[ZJets_Madgraph]   = "ZJets_Madgraph";
@@ -1168,6 +1325,8 @@ TString GuessLocalBasePath()
 void MakeDirectory()
 {
   _directory = "Summer12_53X/WH";
+  
+  gSystem->mkdir("tex");
 
   gSystem->mkdir(_format + "/" + _directory, kTRUE);
 
