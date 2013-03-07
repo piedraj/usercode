@@ -66,10 +66,13 @@ void AnalysisWZ::Initialise()
   MuonPR = LoadHistogram("MuPR_2012",  "h2inverted", "MuonPR");
   ElecPR = LoadHistogram("ElePR_2012", "h2inverted", "ElecPR");
 
-  MuonFR_lo = LoadHistogram("MuFR_Moriond13_jet30_EWKcorr",  "FR_pT_eta_EWKcorr", "MuonFR_lo");
-  ElecFR_lo = LoadHistogram("EleFR_Moriond13_jet35_EWKcorr", "fakeElH2",          "ElecFR_lo");
-  MuonFR_hi = LoadHistogram("MuFR_Moriond13_jet50_EWKcorr",  "FR_pT_eta_EWKcorr", "MuonFR_hi");
-  ElecFR_hi = LoadHistogram("EleFR_Moriond13_jet50_EWKcorr", "fakeElH2",          "ElecFR_hi");
+  MuonFR[Jet15] = LoadHistogram("MuFR_Moriond13_jet15_EWKcorr", "FR_pT_eta_EWKcorr", "MuonFR_Jet15");
+  MuonFR[Jet30] = LoadHistogram("MuFR_Moriond13_jet30_EWKcorr", "FR_pT_eta_EWKcorr", "MuonFR_Jet30");
+  MuonFR[Jet50] = LoadHistogram("MuFR_Moriond13_jet50_EWKcorr", "FR_pT_eta_EWKcorr", "MuonFR_Jet50");
+
+  ElecFR[Jet15] = LoadHistogram("EleFR_Moriond13_jet15_EWKcorr", "fakeElH2", "ElecFR_Jet15");
+  ElecFR[Jet30] = LoadHistogram("EleFR_Moriond13_jet35_EWKcorr", "fakeElH2", "ElecFR_Jet30");
+  ElecFR[Jet50] = LoadHistogram("EleFR_Moriond13_jet50_EWKcorr", "fakeElH2", "ElecFR_Jet50");
 }
 
 
@@ -86,14 +89,14 @@ void AnalysisWZ::InsideLoop()
 
   AnalysisLeptons.clear();
 
-  invMass2Lep          = 999.;
-  invMass3Lep          = 999.;
-  transverseMass       = 999.;
-  sumCharges           = 0.;
-  electronCounter      = 0;
-  tightCounter         = 0;
-  dataDriven_weight_lo = 1.;
-  dataDriven_weight_hi = 1.;
+  invMass2Lep     = 999.;
+  invMass3Lep     = 999.;
+  transverseMass  = 999.;
+  sumCharges      = 0.;
+  electronCounter = 0;
+  tightCounter    = 0;
+
+  for (UInt_t j=0; j<nFakeRates; j++) dataDriven_weight[j] = 1.;
 
 
   // MC filters
@@ -144,16 +147,8 @@ void AnalysisWZ::InsideLoop()
 
     UInt_t muon_type = (MuonCloseToPV(i) && MuonIsolation(i)) ? Tight : Fail;
 
-    const Double_t SF_ptMax = MuonSF->GetXaxis()->GetBinCenter(MuonSF->GetNbinsX());
-    const Double_t PR_ptMax = MuonPR->GetXaxis()->GetBinCenter(MuonPR->GetNbinsX());
-
-    const Double_t scale_factor = MuonSF->GetBinContent(MuonSF->FindBin(min(pt,SF_ptMax),eta));
-    const Double_t prompt_rate  = MuonPR->GetBinContent(MuonPR->FindBin(min(pt,PR_ptMax),eta));
-
-    if (pt > 35) pt = 34;
-
-    const Double_t fake_rate_lo = MuonFR_lo->GetBinContent(MuonFR_lo->FindBin(pt,eta));
-    const Double_t fake_rate_hi = MuonFR_hi->GetBinContent(MuonFR_hi->FindBin(pt,eta));
+    const Double_t sfMax = MuonSF->GetXaxis()->GetBinCenter(MuonSF->GetNbinsX());
+    const Double_t prMax = MuonPR->GetXaxis()->GetBinCenter(MuonPR->GetNbinsX());
 
     Lepton AnalysisMuon;
 
@@ -161,11 +156,12 @@ void AnalysisWZ::InsideLoop()
     AnalysisMuon.flavor = Muon;
     AnalysisMuon.type   = muon_type;
     AnalysisMuon.charge = T_Muon_Charge->at(i);
-    AnalysisMuon.SF     = scale_factor;
-    AnalysisMuon.f_lo   = fake_rate_lo;
-    AnalysisMuon.f_hi   = fake_rate_hi;
-    AnalysisMuon.p      = prompt_rate;
     AnalysisMuon.v      = MuonVector;
+    AnalysisMuon.sf     = MuonSF->GetBinContent(MuonSF->FindBin(min(pt,sfMax),eta));
+    AnalysisMuon.pr     = MuonPR->GetBinContent(MuonPR->FindBin(min(pt,prMax),eta));
+
+    for (UInt_t j=0; j<nFakeRates; j++)
+      AnalysisMuon.fr[j] = MuonFR[j]->GetBinContent(MuonFR[j]->FindBin(min(pt,35.),eta));
 
     AnalysisLeptons.push_back(AnalysisMuon);
   }
@@ -194,16 +190,8 @@ void AnalysisWZ::InsideLoop()
 
     UInt_t electron_type = (ElectronBDT(i) && ElectronIsolation(i)) ? Tight : Fail;
 
-    const Double_t SF_ptMax = ElecSF->GetXaxis()->GetBinCenter(ElecSF->GetNbinsX());
-    const Double_t PR_ptMax = ElecPR->GetXaxis()->GetBinCenter(ElecPR->GetNbinsX());
-
-    const Double_t scale_factor = ElecSF->GetBinContent(ElecSF->FindBin(min(pt,SF_ptMax),eta));
-    const Double_t prompt_rate  = ElecPR->GetBinContent(ElecPR->FindBin(min(pt,PR_ptMax),eta));
-
-    if (pt > 35) pt = 34;
-
-    const Double_t fake_rate_lo = ElecFR_lo->GetBinContent(ElecFR_lo->FindBin(pt,eta));
-    const Double_t fake_rate_hi = ElecFR_hi->GetBinContent(ElecFR_hi->FindBin(pt,eta));
+    const Double_t sfMax = ElecSF->GetXaxis()->GetBinCenter(ElecSF->GetNbinsX());
+    const Double_t prMax = ElecPR->GetXaxis()->GetBinCenter(ElecPR->GetNbinsX());
 
     Lepton AnalysisElectron;
     
@@ -211,12 +199,13 @@ void AnalysisWZ::InsideLoop()
     AnalysisElectron.flavor = Electron;
     AnalysisElectron.type   = electron_type;
     AnalysisElectron.charge = T_Elec_Charge->at(i);
-    AnalysisElectron.SF     = scale_factor;
-    AnalysisElectron.f_lo   = fake_rate_lo;
-    AnalysisElectron.f_hi   = fake_rate_hi;
-    AnalysisElectron.p      = prompt_rate;
     AnalysisElectron.v      = ElectronVector;
-    
+    AnalysisElectron.sf     = ElecSF->GetBinContent(ElecSF->FindBin(min(pt,sfMax),eta));
+    AnalysisElectron.pr     = ElecPR->GetBinContent(ElecPR->FindBin(min(pt,prMax),eta));
+
+    for (UInt_t j=0; j<nFakeRates; j++)
+      AnalysisElectron.fr[j] = ElecFR[j]->GetBinContent(ElecFR[j]->FindBin(min(pt,35.),eta));
+
     AnalysisLeptons.push_back(AnalysisElectron);
   }
 
@@ -262,20 +251,18 @@ void AnalysisWZ::InsideLoop()
   // Apply lepton SF
   //----------------------------------------------------------------------------
   if (!isData)
-    for (UInt_t i=0; i<3; i++) efficiency_weight *= AnalysisLeptons[i].SF;
+    for (UInt_t i=0; i<3; i++) efficiency_weight *= AnalysisLeptons[i].sf;
 
 
   // Data-driven estimates
   //----------------------------------------------------------------------------
   if (mode == PPF)
     {
-      dataDriven_weight_lo = GetPPFWeight(LowPtJet);
-      dataDriven_weight_hi = GetPPFWeight(HighPtJet);
+      for (UInt_t j=0; j<nFakeRates; j++) dataDriven_weight[j] = GetPPFWeight(j);
     }
   else if (mode == PPP)
     {
-      dataDriven_weight_lo = GetPPPWeight(LowPtJet);
-      dataDriven_weight_hi = GetPPPWeight(HighPtJet);
+      for (UInt_t j=0; j<nFakeRates; j++) dataDriven_weight[j] = GetPPPWeight(j);
     }
 
 
@@ -305,7 +292,7 @@ void AnalysisWZ::InsideLoop()
 
   // Fill histograms with exactly 3 leptons
   //----------------------------------------------------------------------------
-  FillHistograms(theChannel, Exactly3Leptons, dataDriven_weight_lo);
+  FillHistograms(theChannel, Exactly3Leptons, dataDriven_weight[Jet30]);
 
 
   // Make Z and W candidates
@@ -364,7 +351,7 @@ void AnalysisWZ::InsideLoop()
   
   transverseMass = sqrt(transverseMass);
 
-  FillHistograms(theChannel, HasZCandidate, dataDriven_weight_lo);
+  FillHistograms(theChannel, HasZCandidate, dataDriven_weight[Jet30]);
 
 
   // HasWCandidate
@@ -377,7 +364,7 @@ void AnalysisWZ::InsideLoop()
       if (WLepton.DeltaR(ZLepton2) < 0.1) return;
     }
 
-  FillHistograms(theChannel, HasWCandidate, dataDriven_weight_lo);
+  FillHistograms(theChannel, HasWCandidate, dataDriven_weight[Jet30]);
 
 
   // MET
@@ -388,8 +375,8 @@ void AnalysisWZ::InsideLoop()
 
   if (!metPass) return;
 
-  if (closure_test) FillHistograms(theChannel, MET, dataDriven_weight_lo);
-  else              FillHistograms(theChannel, MET, dataDriven_weight_hi);
+  if (closure_test) FillHistograms(theChannel, MET, dataDriven_weight[Jet30]);
+  else              FillHistograms(theChannel, MET, dataDriven_weight[Jet50]);
 
 
   // SSLike
@@ -398,14 +385,14 @@ void AnalysisWZ::InsideLoop()
 
   if (T_METPFTypeI_ET < 40) return;
 
-  FillHistograms(theChannel, SSLike, dataDriven_weight_hi);
+  FillHistograms(theChannel, SSLike, dataDriven_weight[Jet50]);
 
 
   // SSLikeAntiBtag
   //----------------------------------------------------------------------------
   if (nbjets > 0) return;
 
-  FillHistograms(theChannel, SSLikeAntiBtag, dataDriven_weight_hi);
+  FillHistograms(theChannel, SSLikeAntiBtag, dataDriven_weight[Jet50]);
 }
 
 
@@ -720,9 +707,9 @@ Bool_t AnalysisWZ::MuonIsolation(UInt_t iMuon)
 //------------------------------------------------------------------------------
 void AnalysisWZ::FillChannelCounters(UInt_t   iChannel,
 				     UInt_t   iCut,
-				     Double_t dataDriven_weight)
+				     Double_t dd_weight)
 {
-  Double_t hweight = efficiency_weight * xs_weight * dataDriven_weight;
+  Double_t hweight = efficiency_weight * xs_weight * dd_weight;
 
   hCounterRaw[iChannel][iCut][tightCounter]->Fill(1);
   hCounterPU [iChannel][iCut][tightCounter]->Fill(1, pu_weight);
@@ -741,11 +728,11 @@ void AnalysisWZ::FillChannelCounters(UInt_t   iChannel,
 //------------------------------------------------------------------------------
 void AnalysisWZ::FillHistograms(UInt_t   iChannel,
 				UInt_t   iCut,
-				Double_t dataDriven_weight)
+				Double_t dd_weight)
 {
-  FillChannelCounters(iChannel, iCut, dataDriven_weight);
+  FillChannelCounters(iChannel, iCut, dd_weight);
 
-  Double_t hweight = efficiency_weight * xs_weight * dataDriven_weight;
+  Double_t hweight = efficiency_weight * xs_weight * dd_weight;
   
   hNPV         [iChannel][iCut]->Fill(T_Vertex_z->size(),        hweight);
   hMET         [iChannel][iCut]->Fill(T_METPFTypeI_ET,           hweight);
@@ -873,9 +860,8 @@ Double_t AnalysisWZ::GetPPFWeight(UInt_t jetPt)
     
     Lepton lep = AnalysisLeptons[i];
 
-    Double_t f = (jetPt == LowPtJet) ? lep.f_lo : lep.f_hi;
-
-    Double_t p = lep.p;
+    Double_t f = lep.fr[jetPt];
+    Double_t p = lep.pr;
 
     if (lep.type == Tight)
       {
@@ -916,9 +902,8 @@ Double_t AnalysisWZ::GetPPPWeight(UInt_t jetPt)
     
     Lepton lep = AnalysisLeptons[i];
 
-    Double_t f = (jetPt == LowPtJet) ? lep.f_lo : lep.f_hi;
-
-    Double_t p = lep.p;
+    Double_t f = lep.fr[jetPt];
+    Double_t p = lep.pr;
 
     if (lep.type == Tight)
       {
@@ -952,7 +937,7 @@ Double_t AnalysisWZ::GetPPFWeightApprx(UInt_t jetPt)
 
     Lepton lep = AnalysisLeptons[i];
 
-    Double_t f = (jetPt == LowPtJet) ? lep.f_lo : lep.f_hi;
+    Double_t f = lep.fr[jetPt];
 
     if (lep.type == Fail) weight *= f / (1. - f);
   }

@@ -52,9 +52,11 @@ wget www.hep.uniovi.es/piedra/LeptonScaleFactors/MuSF_2012.root
 wget www.hep.uniovi.es/piedra/LeptonScaleFactors/EleSF_2012.root
 wget www.hep.uniovi.es/piedra/LeptonScaleFactors/MuPR_2012.root
 wget www.hep.uniovi.es/piedra/LeptonScaleFactors/ElePR_2012.root
+wget www.hep.uniovi.es/piedra/LeptonScaleFactors/MuFR_Moriond13_jet15_EWKcorr.root
 wget www.hep.uniovi.es/piedra/LeptonScaleFactors/MuFR_Moriond13_jet30_EWKcorr.root
-wget www.hep.uniovi.es/piedra/LeptonScaleFactors/EleFR_Moriond13_jet35_EWKcorr.root
 wget www.hep.uniovi.es/piedra/LeptonScaleFactors/MuFR_Moriond13_jet50_EWKcorr.root
+wget www.hep.uniovi.es/piedra/LeptonScaleFactors/EleFR_Moriond13_jet15_EWKcorr.root
+wget www.hep.uniovi.es/piedra/LeptonScaleFactors/EleFR_Moriond13_jet35_EWKcorr.root
 wget www.hep.uniovi.es/piedra/LeptonScaleFactors/EleFR_Moriond13_jet50_EWKcorr.root
 
 

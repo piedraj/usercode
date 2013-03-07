@@ -1,8 +1,10 @@
 //------------------------------------------------------------------------------
 //
+// scp lxplus.cern.ch:/afs/cern.ch/work/c/calderon/public/LatinoTrees/leptonEffAndFakesHWW/MuFR_Moriond13_jet15_EWKcorr.root             ~/www/LeptonScaleFactors/.
 // scp lxplus.cern.ch:/afs/cern.ch/work/c/calderon/public/LatinoTrees/leptonEffAndFakesHWW/MuFR_Moriond13_jet30_EWKcorr.root             ~/www/LeptonScaleFactors/.
 // scp lxplus.cern.ch:/afs/cern.ch/work/c/calderon/public/LatinoTrees/leptonEffAndFakesHWW/MuFR_Moriond13_jet50_EWKcorr.root             ~/www/LeptonScaleFactors/.
 // scp lxplus.cern.ch:/afs/cern.ch/work/c/calderon/public/LatinoTrees/leptonEffAndFakesHWW/fakerates_trigger_Moriond13_ewksub.root       ~/www/LeptonScaleFactors/.
+// scp lxplus.cern.ch:/afs/cern.ch/work/c/calderon/public/LatinoTrees/leptonEffAndFakesHWW/fakerates_trigger_Moriond13_ewksub_jet15.root ~/www/LeptonScaleFactors/.
 // scp lxplus.cern.ch:/afs/cern.ch/work/c/calderon/public/LatinoTrees/leptonEffAndFakesHWW/fakerates_trigger_Moriond13_ewksub_jet50.root ~/www/LeptonScaleFactors/.
 //
 // scp lxplus.cern.ch:/afs/cern.ch/user/h/hbrun/www/promptRateAll2012/prompt_rateMuons.root     ~/www/LeptonScaleFactors/.
@@ -28,6 +30,7 @@ Float_t etaBinsElFake[etaBinsSizeElFake+1] = {0.0, 1.0, 1.479, 2.0, 2.5};
 void getScaleFactors()
 {
   MakeElectronFR("fakerates_trigger_Moriond13_ewksub");
+  MakeElectronFR("fakerates_trigger_Moriond13_ewksub_jet15");
   MakeElectronFR("fakerates_trigger_Moriond13_ewksub_jet50");
 
   Invert("prompt_rateMuons",     "effDATA_prompt_rate",      "MuPR");
@@ -42,8 +45,11 @@ void getScaleFactors()
 //------------------------------------------------------------------------------
 void MakeElectronFR(TString filename)
 {
-  TString jetpt = (filename.Contains("50")) ? "jet50" : "jet35";
-  
+  TString jetpt = "jet35";
+ 
+  if (filename.Contains("jet15")) jetpt = "jet15";
+  if (filename.Contains("jet50")) jetpt = "jet50";
+ 
   TH2F* fakeElH2 = new TH2F("fakeElH2_" + jetpt,
 			    "fakeElH2_" + jetpt,
 			    ptBinsSizeElFake, ptBinsElFake,

@@ -73,7 +73,9 @@ enum {Tight, Fail};
 
 enum {RAW, PPF, PPP};
 
-enum {LowPtJet, HighPtJet};
+const UInt_t nFakeRates = 3;
+
+enum {Jet15, Jet30, Jet50};
 
 struct Lepton
 {
@@ -81,10 +83,9 @@ struct Lepton
   UInt_t         flavor;  // Muon, Electron
   UInt_t         type;    // Tight, Fail
   Double_t       charge;
-  Double_t       SF;
-  Double_t       f_lo;    // fake rate with low  pt jet
-  Double_t       f_hi;    // fake rate with high pt jet
-  Double_t       p;       // prompt rate
+  Double_t       sf;
+  Double_t       fr[nFakeRates];
+  Double_t       pr;
   TLorentzVector v;
 
   Bool_t operator<(const Lepton& a) const
@@ -124,11 +125,11 @@ class AnalysisWZ: public CMSAnalysisSelectorMiniTrees
   
   void         FillChannelCounters       (UInt_t   iChannel,
 					  UInt_t   iCut,
-					  Double_t dataDriven_weight);
+					  Double_t dd_weight);
 
   void         FillHistograms            (UInt_t   iChannel,
   					  UInt_t   iCut,
-					  Double_t dataDriven_weight);
+					  Double_t dd_weight);
 
   const Bool_t WgammaFilter              () const;
 
@@ -204,8 +205,7 @@ class AnalysisWZ: public CMSAnalysisSelectorMiniTrees
   UInt_t                      electronCounter;
   UInt_t                      tightCounter;
 
-  Double_t                    dataDriven_weight_lo;
-  Double_t                    dataDriven_weight_hi;
+  Double_t                    dataDriven_weight[nFakeRates];
 
   ofstream                    outputfile;
 
@@ -213,14 +213,12 @@ class AnalysisWZ: public CMSAnalysisSelectorMiniTrees
   // SF, FR and PR
   //----------------------------------------------------------------------------
   TH2F*                       MuonSF;
-  TH2F*                       MuonFR_lo;  // jet pt = 30 GeV
-  TH2F*                       MuonFR_hi;  // jet pt = 50 GeV
-  TH2F*                       MuonPR;
-
   TH2F*                       ElecSF;
-  TH2F*                       ElecFR_lo;  // jet pt = 35 GeV
-  TH2F*                       ElecFR_hi;  // jet pt = 50 GeV
+  TH2F*                       MuonPR;
   TH2F*                       ElecPR;
+
+  TH2F*                       MuonFR[nFakeRates];
+  TH2F*                       ElecFR[nFakeRates];
 
 
   ClassDef(AnalysisWZ, 0);

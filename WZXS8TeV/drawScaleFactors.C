@@ -43,10 +43,12 @@ TH2F* MuonSF;
 TH2F* ElecSF;
 TH2F* MuonPR;
 TH2F* ElecPR;
-TH2F* MuonFR_lo;
-TH2F* ElecFR_lo;
-TH2F* MuonFR_hi;
-TH2F* ElecFR_hi;
+TH2F* MuonFR_15;
+TH2F* MuonFR_30;
+TH2F* MuonFR_50;
+TH2F* ElecFR_15;
+TH2F* ElecFR_35;
+TH2F* ElecFR_50;
 
 
 void drawScaleFactors()
@@ -71,19 +73,24 @@ void drawScaleFactors()
   MuonPR = LoadHistogram("MuPR_2012",  "h2inverted", "MuonPR");
   ElecPR = LoadHistogram("ElePR_2012", "h2inverted", "ElecPR");
 
-  MuonFR_lo = LoadHistogram("MuFR_Moriond13_jet30_EWKcorr",  "FR_pT_eta_EWKcorr", "MuonFR_lo");
-  ElecFR_lo = LoadHistogram("EleFR_Moriond13_jet35_EWKcorr", "fakeElH2",          "ElecFR_lo");
-  MuonFR_hi = LoadHistogram("MuFR_Moriond13_jet50_EWKcorr",  "FR_pT_eta_EWKcorr", "MuonFR_hi");
-  ElecFR_hi = LoadHistogram("EleFR_Moriond13_jet50_EWKcorr", "fakeElH2",          "ElecFR_hi");
+  MuonFR_15 = LoadHistogram("MuFR_Moriond13_jet15_EWKcorr", "FR_pT_eta_EWKcorr", "MuonFR_15");
+  MuonFR_30 = LoadHistogram("MuFR_Moriond13_jet30_EWKcorr", "FR_pT_eta_EWKcorr", "MuonFR_30");
+  MuonFR_50 = LoadHistogram("MuFR_Moriond13_jet50_EWKcorr", "FR_pT_eta_EWKcorr", "MuonFR_50");
+
+  ElecFR_15 = LoadHistogram("EleFR_Moriond13_jet15_EWKcorr", "fakeElH2", "ElecFR_15");
+  ElecFR_35 = LoadHistogram("EleFR_Moriond13_jet35_EWKcorr", "fakeElH2", "ElecFR_35");
+  ElecFR_50 = LoadHistogram("EleFR_Moriond13_jet50_EWKcorr", "fakeElH2", "ElecFR_50");
 
   DrawIt(MuonSF,    "2012 muon SF");
   DrawIt(ElecSF,    "2012 electron SF");
   DrawIt(MuonPR,    "2012 muon PR");
   DrawIt(ElecPR,    "2012 electron PR");
-  DrawIt(MuonFR_lo, "2012 muon FR jet30");
-  DrawIt(ElecFR_lo, "2012 electron FR jet35");
-  DrawIt(MuonFR_hi, "2012 muon FR jet50");
-  DrawIt(ElecFR_hi, "2012 electron FR jet50");
+  DrawIt(MuonFR_15, "2012 muon FR jet15");
+  DrawIt(MuonFR_30, "2012 muon FR jet30");
+  DrawIt(MuonFR_50, "2012 muon FR jet50");
+  DrawIt(ElecFR_15, "2012 electron FR jet15");
+  DrawIt(ElecFR_35, "2012 electron FR jet35");
+  DrawIt(ElecFR_50, "2012 electron FR jet50");
 }
 
 
