@@ -194,6 +194,7 @@ void drawDistributions(Int_t    njet       = 0,
   //----------------------------------------------------------------------------
   if (1) {
     DrawNM1("hDeltaPhiLeptons", "#Delta#phi_{#font[12]{ll}}", -1, 1, "^{o}");
+    DrawNM1("hMinv",            "m_{#font[12]{ll}}",           4, 0, "GeV");
   }
 }
 
