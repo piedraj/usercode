@@ -39,7 +39,7 @@ const Double_t ngenWZphase = 1449067;  // (71 < mZ < 111 GeV)
 //------------------------------------------------------------------------------
 const UInt_t nChannels  =  4;
 const UInt_t nCuts      =  5;
-const UInt_t nProcesses = 40;
+const UInt_t nProcesses = 39;
 
 enum {MMM, EEE, MME, EEM};
 
@@ -73,7 +73,6 @@ enum {
   WZTo2L2QMad,
   WZTo2QLNuMad,
   ZZTo2L2QMad,
-  ZZ,  // Not used
   ggZZ2L2L,
   ggZZ4L,
   ZZ2Mu2Tau,
@@ -162,7 +161,6 @@ Double_t GetMaximumIncludingErrors(TH1*        h,
 				   Double_t    xmin = -999,
 				   Double_t    xmax = -999);
 
-
 void     MoveOverflowBins         (TH1*        h,
 				   Double_t    xmin = -999,
 				   Double_t    xmax = -999);
@@ -199,15 +197,19 @@ TString  GuessLocalBasePath       ();
 
 void     MakeDirectory            ();
 
-void     Ratios                   (UInt_t      cut);
+void     DrawRatios               (UInt_t      cut);
 
-void     Inclusive                ();
+void     DrawCrossSections        (UInt_t      cut);
+
+void     Inclusive                (UInt_t      cut);
+
+void     Systematics              ();
 
 
 //------------------------------------------------------------------------------
 // XS
 //------------------------------------------------------------------------------
-void XS(UInt_t cut          = SSLikeAntiBtag,
+void XS(UInt_t cut          = MET,
 	UInt_t mode         = PPFmode,
 	UInt_t closure_test = 0,
 	Bool_t batch        = true)
@@ -246,9 +248,9 @@ void XS(UInt_t cut          = SSLikeAntiBtag,
 	DrawHistogram("hPtLepton2",    channel, cut, "p_{T}^{second lepton}", 5, 0, "GeV", linY);
 	DrawHistogram("hPtLepton3",    channel, cut, "p_{T}^{third lepton}",  5, 0, "GeV", linY);
 	DrawHistogram("hPtLeadingJet", channel, cut, "p_{T}^{leading jet}",   5, 0, "GeV", linY);
-
+	
 	if (cut < HasZCandidate) continue;
-
+	
 	DrawHistogram("hInvMass2Lep",  channel, cut, "m_{#font[12]{ll}}",                    -1, 0, "GeV",  linY, 71, 111);
 	DrawHistogram("hDPhiZLeptons", channel, cut, "#Delta#phi_{#font[12]{ll}}",           10, 1, "^{o}", linY);
 	DrawHistogram("hPtZLepton1",   channel, cut, "p_{T}^{Z leading lepton}",              5, 0, "GeV",  linY);
@@ -260,7 +262,11 @@ void XS(UInt_t cut          = SSLikeAntiBtag,
       }
   }
 
-  Ratios(cut);
+  Inclusive(cut);
+  
+  DrawRatios(cut);
+
+  DrawCrossSections(cut);
 }
 
 
@@ -276,6 +282,7 @@ void MeasureTheCrossSection(UInt_t channel, UInt_t cut)
   Double_t ndata       = 0;
   Double_t nsignal     = 0;
   Double_t nbackground = 0;
+  Double_t ebackground = 0;
 
   TString suffix = "_" + sChannel[channel] + "_" + sCut[cut] + "_LLL";
 
@@ -287,16 +294,25 @@ void MeasureTheCrossSection(UInt_t channel, UInt_t cut)
 
     TH1D* dummy = (TH1D*)input[j]->Get("hCounter" + suffix);
 
-    if (j == Data) {
-      ndata = Yield(dummy);
-    }
-    else if (j == WZTo3LNu) {
-      nsignal = Yield(dummy);
-    }
-    else {
-      nbackground += Yield(dummy);
-    }
+    if (j == Data)
+      {
+	ndata = Yield(dummy);
+      }
+    else if (j == WZTo3LNu)
+      {
+	nsignal = Yield(dummy);
+      }
+    else
+      {
+	nbackground += Yield(dummy);
+
+	ebackground += Yield(dummy);
+
+	ebackground += ((Yield(dummy)*systError[j]/1e2) * (Yield(dummy)*systError[j]/1e2));
+      }
   }
+
+  ebackground = sqrt(ebackground);
 
 
   // Estimate the cross section
@@ -308,8 +324,8 @@ void MeasureTheCrossSection(UInt_t channel, UInt_t cut)
 
   // Relative errors
   //----------------------------------------------------------------------------
-  Double_t xsRelativeErrorBackground = 0.0;
-  Double_t xsRelativeErrorEfficiency = 0.0;
+  Double_t xsRelativeErrorBackground = ebackground;
+  Double_t xsRelativeErrorEfficiency = systError[WZTo3LNu];
 
   Double_t xsRelativeErrorSyst = 0;
   xsRelativeErrorSyst += (xsRelativeErrorBackground * xsRelativeErrorBackground);
@@ -541,11 +557,10 @@ void DrawHistogram(TString  hname,
 {
   hname += "_" + sChannel[channel] + "_" + sCut[cut];
 
-  TCanvas* canvas = new TCanvas(hname, hname, 550, 900);
+  TCanvas* canvas = new TCanvas(hname, hname, 550, 720);
 
-  TPad* pad1 = new TPad("pad1", "pad1", 0, 0.44, 1, 1.00);
-  TPad* pad2 = new TPad("pad1", "pad1", 0, 0.22, 1, 0.44);
-  TPad* pad3 = new TPad("pad1", "pad1", 0, 0.00, 1, 0.22);
+  TPad* pad1 = new TPad("pad1", "pad1", 0, 0.3, 1, 1.0);
+  TPad* pad2 = new TPad("pad2", "pad2", 0, 0.0, 1, 0.3);
 
   pad1->SetTopMargin   (0.08);
   pad1->SetBottomMargin(0.02);
@@ -555,10 +570,6 @@ void DrawHistogram(TString  hname,
   pad2->SetBottomMargin(0.35);
   pad2->Draw();
 
-  pad3->SetTopMargin   (0.03);
-  pad3->SetBottomMargin(0.35);
-  pad3->Draw();
-
 
   //----------------------------------------------------------------------------
   // pad1
@@ -566,8 +577,6 @@ void DrawHistogram(TString  hname,
   pad1->cd();
   
   pad1->SetLogy(setLogy);
-
-  Double_t mcIntegral = 0;
 
   THStack* hstack = new THStack(hname, hname);
 
@@ -585,39 +594,22 @@ void DrawHistogram(TString  hname,
     
     if (ngroup > 0) hist[j]->Rebin(ngroup);
 
-    if (j == Data) {
-      hist[j]->SetLineColor  (kBlack);
-      hist[j]->SetMarkerColor(kBlack);
-      hist[j]->SetMarkerStyle(kFullCircle);
-      hist[j]->SetTitle("");
-    }
-    else {
+    if (j == Data)
+      {
+	hist[j]->SetLineColor  (kBlack);
+	hist[j]->SetMarkerColor(kBlack);
+	hist[j]->SetMarkerStyle(kFullCircle);
+	hist[j]->SetTitle("");
+      }
+    else
+      {
+	hist[j]->SetFillColor(color[j]);
+	hist[j]->SetFillStyle(1001);
+	hist[j]->SetLineColor(color[j]);
 
-      mcIntegral += Yield(hist[j]);
-
-      hist[j]->SetFillColor(color[j]);
-      hist[j]->SetFillStyle(1001);
-      hist[j]->SetLineColor(color[j]);
-
-      hstack->Add(hist[j]);
-    }
+	hstack->Add(hist[j]);
+      }
   }
-
-
-  // Normalize MC to data
-  //----------------------------------------------------------------------------
-  if (0)
-    {
-      for (UInt_t i=0; i<vprocess.size(); i++)
-	{
-	  UInt_t j = vprocess.at(i);
-        
-	  if (j != Data && mcIntegral > 0)
-	    {
-	      hist[j]->Scale(Yield(hist[Data]) / mcIntegral);
-	    }
-	}
-    }
 
 
   // All MC
@@ -645,7 +637,7 @@ void DrawHistogram(TString  hname,
       
       binValue += binContent;
       binError += (hist[j]->GetBinError(ibin) * hist[j]->GetBinError(ibin));
-      binError += (systError[j]*binContent * systError[j]*binContent);
+      binError += (systError[j]*binContent/1e2 * systError[j]*binContent/1e2);
     }
     
     binError = sqrt(binError);
@@ -826,31 +818,10 @@ void DrawHistogram(TString  hname,
   uncertainty->GetYaxis()->SetRangeUser(0, 2.5);
 
 
-  //----------------------------------------------------------------------------
-  // pad3
-  //----------------------------------------------------------------------------
-  pad3->cd();
-
-  TH1D* hdeviations = new TH1D("hdeviations", "", 25, 0, 2.5);
-
-  hdeviations->SetName("hdeviations_" + hname);
-
-  for (Int_t i=1; i<=ratio->GetNbinsX(); i++)
-    if (ratio->GetBinContent(i) > 0) hdeviations->Fill(ratio->GetBinContent(i));
-
-  hdeviations->Draw("hist");
-
-  hdeviations->SetFillColor(kGray+2);
-  hdeviations->SetFillStyle(3354);
-  hdeviations->SetLineColor(0);
-  hdeviations->SetLineWidth(0);
-
-
   // Save
   //----------------------------------------------------------------------------
   pad2->cd(); SetAxis(uncertainty, hist[Data]->GetXaxis()->GetTitle(), "data / prediction", 0.10, 0.8);
   pad1->cd(); SetAxis(hist[Data], "", hist[Data]->GetYaxis()->GetTitle(),                   0.05, 1.6);
-  pad3->cd(); SetAxis(hdeviations, "data / prediction", "entries / bin",                    0.10, 0.8);
 
   canvas->cd();
 
@@ -1097,7 +1068,6 @@ void SetParameters(UInt_t cut,
   process[WZTo2L2QMad]      = "WZTo2L2QMad";
   process[WZTo2QLNuMad]     = "WZTo2QLNuMad";
   process[ZZTo2L2QMad]      = "ZZTo2L2QMad";
-  process[ZZ]               = "ZZ";
   process[ggZZ2L2L]         = "ggZZ2L2L";
   process[ggZZ4L]           = "ggZZ4L";
   process[ZZ2Mu2Tau]        = "ZZ2Mu2Tau";
@@ -1138,7 +1108,6 @@ void SetParameters(UInt_t cut,
   color[WZTo3LNu]         = kOrange-2;  // WZ
   color[ZZTo2L2QMad]      = kRed+1;     // ZZ
   color[ZgammaToLLG]      = kRed+1;     // ZZ
-  color[ZZ]               = kRed+1;     // ZZ
   color[ggZZ2L2L]         = kRed+1;     // ZZ
   color[ggZZ4L]           = kRed+1;     // ZZ
   color[ZZ2Mu2Tau]        = kRed+1;     // ZZ
@@ -1158,7 +1127,7 @@ void SetParameters(UInt_t cut,
   color[TTWWJets]         = kBlack;     // VVV
   color[TTGJets]          = kBlack;     // VVV
 
-  for (UInt_t i=0; i<nProcesses; i++) systError[i] = 0.0;
+  Systematics();
 
   _luminosity   = 19602.0;  // pb
   _yoffset      = 0.048;
@@ -1360,16 +1329,10 @@ void MakeDirectory()
 
 
 //------------------------------------------------------------------------------
-// Ratios
+// DrawRatios
 //------------------------------------------------------------------------------
-void Ratios(UInt_t cut)
+void DrawRatios(UInt_t cut)
 {
-  if (cut < MET) return;
-
-  if (_closure_test) return;
-
-  Inclusive();
-
   TGraphErrors* gStat = new TGraphErrors(nChannels+1);
   TGraphErrors* gSyst = new TGraphErrors(nChannels+1);
   TGraphErrors* gLumi = new TGraphErrors(nChannels+1);
@@ -1425,7 +1388,7 @@ void Ratios(UInt_t cut)
   Double_t ymin = 0.50;
   Double_t ymax = nChannels+1 + ymin;
   
-  TH2F* dummy = new TH2F("dummy", "",
+  TH2F* dummy = new TH2F("dummy_ratios", "",
 			 100, xmin, xmax,
 			 100, ymin, ymax);
 
@@ -1436,15 +1399,17 @@ void Ratios(UInt_t cut)
   //----------------------------------------------------------------------------
   TLine* line = new TLine(1.0, ymin, 1.0, ymax);
 
-  line->SetLineWidth(2);
+  line->SetLineColor(kGray+2);
+  line->SetLineStyle(3);
+  line->SetLineWidth(3);
 
   line->Draw("same");
 
 
   // Ratios
   //----------------------------------------------------------------------------
-  gLumi->Draw("p||,same");
-  gSyst->Draw("p||,same");
+  gLumi->Draw("p,same");
+  gSyst->Draw("p,same");
   gStat->Draw("p,same");
 
 
@@ -1498,10 +1463,147 @@ void Ratios(UInt_t cut)
 
 
 //------------------------------------------------------------------------------
+// DrawCrossSections
+//------------------------------------------------------------------------------
+void DrawCrossSections(UInt_t cut)
+{
+  TGraphErrors* gStat = new TGraphErrors(nChannels+1);
+  TGraphErrors* gSyst = new TGraphErrors(nChannels+1);
+  TGraphErrors* gLumi = new TGraphErrors(nChannels+1);
+
+  for (UInt_t i=0; i<nChannels+1; i++) {
+
+    Double_t errorSquared = (xsErrorStat[i] * xsErrorStat[i]);
+
+    gStat->SetPointError(i, sqrt(errorSquared), 0.0);
+
+    errorSquared += (xsErrorSyst[i] * xsErrorSyst[i]);
+
+    gSyst->SetPointError(i, sqrt(errorSquared), 0.0);
+
+    errorSquared += (xsErrorLumi[i] * xsErrorLumi[i]);
+
+    gLumi->SetPointError(i, sqrt(errorSquared), 0.0);
+
+    gStat->SetPoint(i, xsValue[i], i+1);
+    gSyst->SetPoint(i, xsValue[i], i+1);
+    gLumi->SetPoint(i, xsValue[i], i+1);
+  }
+
+
+  // Cosmetics
+  //----------------------------------------------------------------------------
+  gStat->SetLineWidth  (2);
+  gStat->SetMarkerSize (1.3);
+  gStat->SetMarkerStyle(kFullCircle);
+
+  gSyst->SetLineColor  (kRed);
+  gSyst->SetLineWidth  (2);
+  gSyst->SetMarkerSize (1.3);
+  gSyst->SetMarkerStyle(kFullCircle);
+
+  gLumi->SetLineColor  (kBlue);
+  gLumi->SetLineWidth  (2);
+  gLumi->SetMarkerSize (1.3);
+  gLumi->SetMarkerStyle(kFullCircle);
+
+
+  // Draw
+  //----------------------------------------------------------------------------
+  TCanvas* canvas = new TCanvas("xs_" + sCut[cut],
+				"xs_" + sCut[cut]);
+
+  canvas->SetLeftMargin(canvas->GetRightMargin());
+
+  Double_t xmin = (xsWplusZ + xsWminusZ) -  8.;
+  Double_t xmax = (xsWplusZ + xsWminusZ) + 25.;
+  Double_t ymin = 0.50;
+  Double_t ymax = nChannels+1 + ymin;
+  
+  TH2F* dummy = new TH2F("dummy_xs", "",
+			 100, xmin, xmax,
+			 100, ymin, ymax);
+
+  dummy->Draw();
+  
+  
+  // NLO WZ cross-section
+  //----------------------------------------------------------------------------
+  TLine* line = new TLine(xsWplusZ+xsWminusZ, ymin,
+			  xsWplusZ+xsWminusZ, ymax);
+
+  line->SetLineColor(kGray+2);
+  line->SetLineStyle(3);
+  line->SetLineWidth(3);
+
+  line->Draw("same");
+
+
+  // Cross sections
+  //----------------------------------------------------------------------------
+  gLumi->Draw("p,same");
+  gSyst->Draw("p,same");
+  gStat->Draw("p,same");
+
+
+  // Labels
+  //----------------------------------------------------------------------------
+  for (UInt_t i=0; i<nChannels+1; i++) {
+
+    Double_t x = gStat->GetX()[i];
+    Double_t y = gStat->GetY()[i];
+
+    DrawTLatex(xmin+1., y, 0.035, 12, Form("%s", sChannelLabel[i].Data()), 0);
+
+    Double_t gStatError  = gStat->GetErrorX(i);
+    Double_t gSystError  = gSyst->GetErrorX(i);
+    Double_t gLumiError  = gLumi->GetErrorX(i);
+
+    gLumiError = sqrt(gLumiError*gLumiError - gSystError*gSystError);
+    gSystError = sqrt(gSystError*gSystError - gStatError*gStatError);
+
+    DrawTLatex(xmax-1., y, 0.035, 32, Form("%.2f #pm %.2f #pm %.2f #pm %.2f",
+					    x, gStatError, gSystError, gLumiError), 0);
+  }
+
+  DrawTLatex(0.940, 0.983, 0.05, 33,
+	     Form("#sqrt{s} = 8 TeV, L = %.1f fb^{-1}", _luminosity/1e3));
+
+  dummy->GetXaxis()->CenterTitle();
+  dummy->GetXaxis()->SetTitleOffset(1.4);
+  dummy->GetXaxis()->SetTitle("#sigma_{WZ} [pb]");
+  dummy->GetYaxis()->SetTitle("");
+
+
+  // Remove y-axis labels
+  //----------------------------------------------------------------------------
+  TAxis* yaxis = dummy->GetYaxis();
+  
+  for (Int_t j=1; j<yaxis->GetNbins(); j++) yaxis->SetBinLabel(j, "");
+
+
+  // Save
+  //----------------------------------------------------------------------------
+  canvas->Update();
+  canvas->GetFrame()->DrawClone();
+  canvas->RedrawAxis();
+
+  canvas->SaveAs(Form("%s/xs_%s.%s",
+		      _output.Data(),
+		      sCut[cut].Data(),
+		      _format.Data()));
+}
+
+
+//------------------------------------------------------------------------------
 // Inclusive
 //------------------------------------------------------------------------------
-void Inclusive()
+void Inclusive(UInt_t cut)
 {
+  if (cut < MET) return;
+
+  if (_closure_test) return;
+
   Double_t x     = 0;
   Double_t stat  = 0;
   Double_t syst  = 0;
@@ -1531,4 +1633,16 @@ void Inclusive()
   xsErrorStat[nChannels] = 1. / sqrt(stat);
   xsErrorSyst[nChannels] = 1. / sqrt(syst);
   xsErrorLumi[nChannels] = 1. / sqrt(lumi);
+}
+
+
+//------------------------------------------------------------------------------
+// Systematics
+//------------------------------------------------------------------------------
+void Systematics()
+{
+  for (UInt_t i=0; i<nProcesses; i++) systError[i] = 0.0;
+
+  systError[DataPPF]  = 36.;
+  systError[WZTo3LNu] =  0.;
 }

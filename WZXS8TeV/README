@@ -79,5 +79,5 @@ cd PAF
 
 cd WZXS8TeV
 
-root -l XS.C+
+./runXS.sh
 

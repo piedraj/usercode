@@ -23,6 +23,9 @@
  root -l -b -q drawScaleFactors.C+
 
  pdflatex mc_samples_wz8tev.tex
+ pdflatex mc_samples_wz8tev.tex
+
+ pdflatex yields.tex
  pdflatex yields.tex
 
  rm -rf *aux
