@@ -72,6 +72,7 @@ Bool_t   _dataDriven;
 Bool_t   _savePlots;
 Bool_t   _setLogy;
 
+
 // Scale factors
 //------------------------------------------------------------------------------
 Double_t ttScale[] = {1.10, 1.10, 1.10, 1.10};
@@ -80,11 +81,58 @@ Double_t WWScale[] = {1.14, 0.92, 1.02, 1.08};
 Double_t ZjScale[] = {3.70, 4.20, 1.80, 4.00};
 
 
+// Levels
+//------------------------------------------------------------------------------
+const UInt_t nLevels = 11;
+
+enum {
+  Trigger,
+  MetCut,
+  LowMinv,
+  ZVeto,
+  pMetCut,
+  JetVeto,
+  DeltaPhiJet,
+  SoftMuVeto,
+  ExtraLepton,
+  Ptll,
+  TopTagging
+};
+
+const TString sLevel[nLevels] = {
+  "Trigger",
+  "MetCut",
+  "LowMinv",
+  "ZVeto",
+  "pMetCut",
+  "JetVeto",
+  "DeltaPhiJet",
+  "SoftMuVeto",
+  "ExtraLepton",
+  "Ptll",
+  "TopTagging"
+};
+
+const TString NM1Label[nLevels] = {
+  "",
+  "(no loose MET cut) ",
+  "(no low m_{#font[12]{ll}} cut) ",
+  "(no Z veto) ",
+  "(no minmet cut) ",
+  "(no jet veto) ",
+  "(no #Delta#phi_{#font[12]{ll}} cut) ",
+  "(no soft #mu veto) ",
+  "(no extra lepton veto) ",
+  "(no p_{T}^{#font[12]{ll}} cut) ",
+  "(no top veto) "
+};
+
+
 //------------------------------------------------------------------------------
 // drawDistributions
 //------------------------------------------------------------------------------
 void drawDistributions(Int_t    njet       = 0,
-		       TString  channel    = "SF",
+		       TString  channel    = "OF",
 		       Double_t luminosity = 19468,
 		       TString  format     = "png",
 		       Bool_t   drawRatio  = true,
@@ -135,12 +183,45 @@ void drawDistributions(Int_t    njet       = 0,
   // PAS distributions
   //----------------------------------------------------------------------------
   if (1) {
-    DrawHistogram("hPtLepton1WWLevel",  "p_{T}^{max}",           5, 0, "GeV",  0, 160);
-    DrawHistogram("hPtLepton2WWLevel",  "p_{T}^{min}",           5, 0, "GeV", 15,  80);
-    DrawHistogram("hPtDiLeptonWWLevel", "p_{T}^{#font[12]{ll}}", 5, 0, "GeV", 40, 120);
-    DrawHistogram("hMinvWWLevel",       "m_{#font[12]{ll}}",     5, 0, "GeV");
+    DrawHistogram("hPtLepton1TopTagging",  "p_{T}^{max}",           5, 0, "GeV",  0, 160);
+    DrawHistogram("hPtLepton2TopTagging",  "p_{T}^{min}",           5, 0, "GeV", 15,  80);
+    DrawHistogram("hPtDiLeptonTopTagging", "p_{T}^{#font[12]{ll}}", 5, 0, "GeV", 40, 120);
+    DrawHistogram("hMinvTopTagging",       "m_{#font[12]{ll}}",     5, 0, "GeV");
+  }
+
+
+  // N-1 distributions
+  //----------------------------------------------------------------------------
+  if (1) {
+    DrawNM1("hDeltaPhiLeptons", "#Delta#phi_{#font[12]{ll}}", -1, 1, "^{o}");
   }
 }
+
+
+//------------------------------------------------------------------------------
+// DrawNM1
+//------------------------------------------------------------------------------
+void DrawNM1(TString  hname,
+	     TString  xtitle,
+	     Int_t    ngroup       = -1,
+	     Int_t    precision    = 1,
+	     TString  units        = "NULL",
+	     Double_t xmin         = -999,
+	     Double_t xmax         =  999,
+	     Bool_t   moveOverflow = false)
+{
+  for (UInt_t i=0; i<nLevels; i++)
+    {
+      DrawHistogram(hname + sLevel[i] + "_NM1",
+		    NM1Label[i] + xtitle,
+		    ngroup,
+		    precision,
+		    units,
+		    xmin,
+		    xmax,
+		    moveOverflow);
+    }
+} 
 
 
 //------------------------------------------------------------------------------

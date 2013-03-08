@@ -8,14 +8,144 @@
 #include <iostream>
 
 
-const Double_t ZMASS = 91.1876;
+// Constants
+//------------------------------------------------------------------------------
+const Bool_t runAtOviedo = true;
+
+const Double_t ZMASS = 91.1876;  // GeV
 
 const UInt_t numberMetCuts = 5;
 
-Double_t MetCut[] = {20, 25, 30, 45, 1000};
+const Double_t MetCut[numberMetCuts] = {20, 25, 30, 45, 1000};  // GeV
 
-Bool_t runAtOviedo = true;
-Bool_t runAtIfca   = !runAtOviedo;
+const UInt_t nLevels = 11;
+
+enum {
+  TriggerLevel,
+  MetCutLevel,
+  LowMinvLevel,
+  ZVetoLevel,
+  pMetCutLevel,
+  JetVetoLevel,
+  DeltaPhiJetLevel,
+  SoftMuVetoLevel,
+  ExtraLeptonLevel,
+  PtllLevel,
+  TopTaggingLevel
+};
+
+const TString sLevel[nLevels] = {
+  "Trigger",
+  "MetCut",
+  "LowMinv",
+  "ZVeto",
+  "pMetCut",
+  "JetVeto",
+  "DeltaPhiJet",
+  "SoftMuVeto",
+  "ExtraLepton",
+  "Ptll",
+  "TopTagging"
+};
+
+
+// Member functions
+//------------------------------------------------------------------------------
+void    FillHistograms(UInt_t level,
+		       UInt_t check);
+
+
+// Data members
+//------------------------------------------------------------------------------
+TH1F*   hWeff           [nLevels];
+TH1F*   hW              [nLevels];
+TH1F*   hPtLepton1      [nLevels];
+TH1F*   hPtLepton2      [nLevels];
+TH1F*   hPtDiLepton     [nLevels];
+TH1F*   hMinv           [nLevels];
+TH1F*   hMt             [nLevels];
+TH1F*   hNJets30        [nLevels];
+TH1F*   hpfMet          [nLevels];
+TH1F*   hppfMet         [nLevels];
+TH1F*   hchMet          [nLevels];
+TH1F*   hpchMet         [nLevels];
+TH1F*   hpminMet        [nLevels];
+TH1F*   hDeltaRLeptons  [nLevels];
+TH1F*   hDeltaPhiLeptons[nLevels];
+TH1F*   hDPhiPtllJet    [nLevels];
+
+TH1F*   hWeff_NM1           [nLevels];
+TH1F*   hW_NM1              [nLevels];
+TH1F*   hPtLepton1_NM1      [nLevels];
+TH1F*   hPtLepton2_NM1      [nLevels];
+TH1F*   hPtDiLepton_NM1     [nLevels];
+TH1F*   hMinv_NM1           [nLevels];
+TH1F*   hMt_NM1             [nLevels];
+TH1F*   hNJets30_NM1        [nLevels];
+TH1F*   hpfMet_NM1          [nLevels];
+TH1F*   hppfMet_NM1         [nLevels];
+TH1F*   hchMet_NM1          [nLevels];
+TH1F*   hpchMet_NM1         [nLevels];
+TH1F*   hpminMet_NM1        [nLevels];
+TH1F*   hDeltaRLeptons_NM1  [nLevels];
+TH1F*   hDeltaPhiLeptons_NM1[nLevels];
+TH1F*   hDPhiPtllJet_NM1    [nLevels];
+
+Float_t efficiencyW;
+Float_t totalW;
+
+
+// Tree variables
+//------------------------------------------------------------------------------
+Float_t baseW;
+Float_t channel;
+Float_t chmet;
+Float_t dataset;
+Float_t dphill;
+Float_t dphilljet;
+Float_t dphilljetjet;
+Float_t drll;
+Float_t effW;
+Float_t fakeW;
+Float_t jeteta1;
+Float_t jeteta2;
+Float_t jeteta3;
+Float_t jetpt1;
+Float_t jetpt2;
+Float_t jetpt3;
+Float_t jettche1;
+Float_t jettche2;
+Float_t mctruth;
+Float_t mll;
+Float_t mpmet;
+Float_t mth;
+Float_t nbjet;
+Float_t nbjettche;
+Float_t nextra;
+Float_t njet;
+Float_t nvtx;
+Float_t pchmet;
+Float_t pfmet;
+Float_t ppfmet;
+Float_t pt1;
+Float_t pt2;
+Float_t puW;
+Float_t ch1;
+Float_t ch2;
+Float_t ptll;
+Float_t softtche;
+Float_t trigger;
+Float_t triggW;
+Int_t   bveto;
+Int_t   bveto_ip;
+Int_t   bveto_mu;
+Int_t   bveto_nj30;
+Int_t   dphiveto;
+Int_t   sameflav;
+Int_t   zveto;
+UInt_t  event;
+UInt_t  lumi;
+UInt_t  run;
 
 
 //------------------------------------------------------------------------------
@@ -36,67 +166,43 @@ void LatinosTreeScript(Float_t luminosity,
   TFile* output = new TFile(path + theSample + ".root", "recreate");
 
 
-  // Counting histograms
+  // Histograms
   //----------------------------------------------------------------------------
-  TH1F* hWTrigger     = new TH1F("hWTrigger",     "", 3, 0, 3);
-  TH1F* hWMetCut      = new TH1F("hWMetCut",      "", 3, 0, 3);
-  TH1F* hWLowMinv     = new TH1F("hWLowMinv",     "", 3, 0, 3);
-  TH1F* hWZVeto       = new TH1F("hWZVeto",       "", 3, 0, 3);
-  TH1F* hWpMetCut     = new TH1F("hWpMetCut",     "", 3, 0, 3);
-  TH1F* hWJetVeto     = new TH1F("hWJetVeto",     "", 3, 0, 3);
-  TH1F* hWDeltaPhiJet = new TH1F("hWDeltaPhiJet", "", 3, 0, 3);
-  TH1F* hWSoftMuVeto  = new TH1F("hWSoftMuVeto",  "", 3, 0, 3); 
-  TH1F* hWExtraLepton = new TH1F("hWExtraLepton", "", 3, 0, 3);
-  TH1F* hWPtll        = new TH1F("hWPtll",        "", 3, 0, 3);
-  TH1F* hWTopTagging  = new TH1F("hWTopTagging",  "", 3, 0, 3);
+  for (UInt_t i=0; i<nLevels; i++) {
+    hWeff           [i] = new TH1F("hWeff"            + sLevel[i], "",   3, 0,   3);
+    hW              [i] = new TH1F("hW"               + sLevel[i], "",   3, 0,   3);
+    hPtLepton1      [i] = new TH1F("hPtLepton1"       + sLevel[i], "", 200, 0, 200);
+    hPtLepton2      [i] = new TH1F("hPtLepton2"       + sLevel[i], "", 200, 0, 200);
+    hPtDiLepton     [i] = new TH1F("hPtDiLepton"      + sLevel[i], "", 200, 0, 200);
+    hMinv           [i] = new TH1F("hMinv"            + sLevel[i], "", 200, 0, 200);
+    hMt             [i] = new TH1F("hMt"              + sLevel[i], "", 250, 0, 250);
+    hNJets30        [i] = new TH1F("hNJetsPF30"       + sLevel[i], "",  10, 0,  10);
+    hpfMet          [i] = new TH1F("hpfMet"           + sLevel[i], "", 150, 0, 150);
+    hppfMet         [i] = new TH1F("hppfMet"          + sLevel[i], "", 150, 0, 150);
+    hchMet          [i] = new TH1F("hchMet"           + sLevel[i], "", 150, 0, 150);
+    hpchMet         [i] = new TH1F("hpchMet"          + sLevel[i], "", 150, 0, 150);
+    hpminMet        [i] = new TH1F("hpminMet"         + sLevel[i], "", 150, 0, 150);
+    hDeltaRLeptons  [i] = new TH1F("hDeltaRLeptons"   + sLevel[i], "",  50, 0,   5);
+    hDeltaPhiLeptons[i] = new TH1F("hDeltaPhiLeptons" + sLevel[i], "",  32, 0, 3.2);
+    hDPhiPtllJet    [i] = new TH1F("hDPhiPtllJet"     + sLevel[i], "",  32, 0, 3.2);
 
-  TH1F* hWeffTrigger     = new TH1F("hWeffTrigger",     "", 3, 0, 3);
-  TH1F* hWeffMetCut      = new TH1F("hWeffMetCut",      "", 3, 0, 3);
-  TH1F* hWeffLowMinv     = new TH1F("hWeffLowMinv",     "", 3, 0, 3);
-  TH1F* hWeffZVeto       = new TH1F("hWeffZVeto",       "", 3, 0, 3);
-  TH1F* hWeffpMetCut     = new TH1F("hWeffpMetCut",     "", 3, 0, 3);
-  TH1F* hWeffJetVeto     = new TH1F("hWeffJetVeto",     "", 3, 0, 3);
-  TH1F* hWeffDeltaPhiJet = new TH1F("hWeffDeltaPhiJet", "", 3, 0, 3);
-  TH1F* hWeffSoftMuVeto  = new TH1F("hWeffSoftMuVeto",  "", 3, 0, 3); 
-  TH1F* hWeffExtraLepton = new TH1F("hWeffExtraLepton", "", 3, 0, 3);
-  TH1F* hWeffPtll        = new TH1F("hWeffPtll",        "", 3, 0, 3);
-  TH1F* hWeffTopTagging  = new TH1F("hWeffTopTagging",  "", 3, 0, 3);
-
-
-  // WW level histograms
-  //----------------------------------------------------------------------------
-  TH1F* hPtLepton1WWLevel       = new TH1F("hPtLepton1WWLevel",       "", 200, 0, 200);
-  TH1F* hPtLepton2WWLevel       = new TH1F("hPtLepton2WWLevel",       "", 200, 0, 200);
-  TH1F* hPtDiLeptonWWLevel      = new TH1F("hPtDiLeptonWWLevel",      "", 200, 0, 200);
-  TH1F* hMinvWWLevel            = new TH1F("hMinvWWLevel",            "", 200, 0, 200);
-  TH1F* hMtWWLevel              = new TH1F("hMtWWLevel",              "", 250, 0, 250);
-  TH1F* hNJets30WWLevel         = new TH1F("hNJetsPF30WWLevel",       "",  10, 0,  10);
-  TH1F* hpfMetWWLevel           = new TH1F("hpfMetWWLevel",           "", 150, 0, 150);
-  TH1F* hppfMetWWLevel          = new TH1F("hppfMetWWLevel",          "", 150, 0, 150);
-  TH1F* hchMetWWLevel           = new TH1F("hchMetWWLevel",           "", 150, 0, 150);
-  TH1F* hpchMetWWLevel          = new TH1F("hpchMetWWLevel",          "", 150, 0, 150);
-  TH1F* hpminMetWWLevel         = new TH1F("hpminMetWWLevel",         "", 150, 0, 150);
-  TH1F* hDeltaRLeptonsWWLevel   = new TH1F("hDeltaRLeptonsWWLevel",   "",  50, 0,   5);
-  TH1F* hDeltaPhiLeptonsWWLevel = new TH1F("hDeltaPhiLeptonsWWLevel", "",  32, 0, 3.2);
-  TH1F* hDPhiPtllJetWWLevel     = new TH1F("hDPhiPtllJetWWLevel",     "",  32, 0, 3.2);
-
-
-  // TwoLeptons level histograms
-  //----------------------------------------------------------------------------
-  TH1F* hPtLepton1TwoLeptonsLevel       = new TH1F("hPtLepton1TwoLeptonsLevel",       "", 200, 0, 200);
-  TH1F* hPtLepton2TwoLeptonsLevel       = new TH1F("hPtLepton2TwoLeptonsLevel",       "", 200, 0, 200);
-  TH1F* hPtDiLeptonTwoLeptonsLevel      = new TH1F("hPtDiLeptonTwoLeptonsLevel",      "", 200, 0, 200);
-  TH1F* hMinvTwoLeptonsLevel            = new TH1F("hMinvTwoLeptonsLevel",            "", 200, 0, 200);
-  TH1F* hMtTwoLeptonsLevel              = new TH1F("hMtTwoLeptonsLevel",              "", 250, 0, 250);
-  TH1F* hNJets30TwoLeptonsLevel         = new TH1F("hNJetsPF30TwoLeptonsLevel",       "",  10, 0,  10);
-  TH1F* hpfMetTwoLeptonsLevel           = new TH1F("hpfMetTwoLeptonsLevel",           "", 150, 0, 150);
-  TH1F* hppfMetTwoLeptonsLevel          = new TH1F("hppfMetTwoLeptonsLevel",          "", 150, 0, 150);
-  TH1F* hchMetTwoLeptonsLevel           = new TH1F("hchMetTwoLeptonsLevel",           "", 150, 0, 150);
-  TH1F* hpchMetTwoLeptonsLevel          = new TH1F("hpchMetTwoLeptonsLevel",          "", 150, 0, 150);
-  TH1F* hpminMetTwoLeptonsLevel         = new TH1F("hpminMetTwoLeptonsLevel",         "", 150, 0, 150);
-  TH1F* hDeltaRLeptonsTwoLeptonsLevel   = new TH1F("hDeltaRLeptonsTwoLeptonsLevel",   "",  50, 0,   5);
-  TH1F* hDeltaPhiLeptonsTwoLeptonsLevel = new TH1F("hDeltaPhiLeptonsTwoLeptonsLevel", "",  32, 0, 3.2);
-  TH1F* hDPhiPtllJetTwoLeptonsLevel     = new TH1F("hDPhiPtllJetTwoLeptonsLevel",     "",  32, 0, 3.2);
+    hWeff_NM1           [i] = new TH1F("hWeff"            + sLevel[i] + "_NM1", "",   3, 0,   3);
+    hW_NM1              [i] = new TH1F("hW"               + sLevel[i] + "_NM1", "",   3, 0,   3);
+    hPtLepton1_NM1      [i] = new TH1F("hPtLepton1"       + sLevel[i] + "_NM1", "", 200, 0, 200);
+    hPtLepton2_NM1      [i] = new TH1F("hPtLepton2"       + sLevel[i] + "_NM1", "", 200, 0, 200);
+    hPtDiLepton_NM1     [i] = new TH1F("hPtDiLepton"      + sLevel[i] + "_NM1", "", 200, 0, 200);
+    hMinv_NM1           [i] = new TH1F("hMinv"            + sLevel[i] + "_NM1", "", 200, 0, 200);
+    hMt_NM1             [i] = new TH1F("hMt"              + sLevel[i] + "_NM1", "", 250, 0, 250);
+    hNJets30_NM1        [i] = new TH1F("hNJetsPF30"       + sLevel[i] + "_NM1", "",  10, 0,  10);
+    hpfMet_NM1          [i] = new TH1F("hpfMet"           + sLevel[i] + "_NM1", "", 150, 0, 150);
+    hppfMet_NM1         [i] = new TH1F("hppfMet"          + sLevel[i] + "_NM1", "", 150, 0, 150);
+    hchMet_NM1          [i] = new TH1F("hchMet"           + sLevel[i] + "_NM1", "", 150, 0, 150);
+    hpchMet_NM1         [i] = new TH1F("hpchMet"          + sLevel[i] + "_NM1", "", 150, 0, 150);
+    hpminMet_NM1        [i] = new TH1F("hpminMet"         + sLevel[i] + "_NM1", "", 150, 0, 150);
+    hDeltaRLeptons_NM1  [i] = new TH1F("hDeltaRLeptons"   + sLevel[i] + "_NM1", "",  50, 0,   5);
+    hDeltaPhiLeptons_NM1[i] = new TH1F("hDeltaPhiLeptons" + sLevel[i] + "_NM1", "",  32, 0, 3.2);
+    hDPhiPtllJet_NM1    [i] = new TH1F("hDPhiPtllJet"     + sLevel[i] + "_NM1", "",  32, 0, 3.2);
+  }
 
 
   // Data-driven methods: Z+jets
@@ -132,8 +238,8 @@ void LatinosTreeScript(Float_t luminosity,
   //----------------------------------------------------------------------------
   TString filesPath;
 
-  if (runAtOviedo) filesPath = "/data/LatinosSkims/ReducedTrees/R53X_S1_V08_S2_V09_S3_V13/";
-  if (runAtIfca)   filesPath = "/gpfs/csic_projects/tier3data/LatinosSkims/ReducedTrees/R53X_S1_V08_S2_V09_S3_V13/";
+  if (runAtOviedo) filesPath = "/pool/ciencias/LatinosSkims/ReducedTrees/R53X_S1_V08_S2_V09_S3_V13/";
+  else             filesPath = "/gpfs/csic_projects/tier3data/LatinosSkims/ReducedTrees/R53X_S1_V08_S2_V09_S3_V13/";
 
   TChain* tree = new TChain("latino", "latino");
 
@@ -198,60 +304,56 @@ void LatinosTreeScript(Float_t luminosity,
 
   // Declaration of leaf types
   //----------------------------------------------------------------------------
-  Float_t baseW;        tree->SetBranchAddress("baseW"       , &baseW);
-  Float_t channel;      tree->SetBranchAddress("channel"     , &channel);
-  Float_t chmet;        tree->SetBranchAddress("chmet"       , &chmet);
-  Float_t dataset;      tree->SetBranchAddress("dataset"     , &dataset);
-  Float_t dphill;       tree->SetBranchAddress("dphill"      , &dphill);
-  Float_t dphilljet;    tree->SetBranchAddress("dphilljet"   , &dphilljet);
-  Float_t dphilljetjet; tree->SetBranchAddress("dphilljetjet", &dphilljetjet);
-  Float_t drll;         tree->SetBranchAddress("drll"        , &drll);
-  Float_t effW;         tree->SetBranchAddress("effW"        , &effW);
-  Float_t jeteta1;      tree->SetBranchAddress("jeteta1"     , &jeteta1);
-  Float_t jeteta2;      tree->SetBranchAddress("jeteta2"     , &jeteta2);
-  Float_t jeteta3;      tree->SetBranchAddress("jeteta3"     , &jeteta3);
-  Float_t jetpt1;       tree->SetBranchAddress("jetpt1"      , &jetpt1);
-  Float_t jetpt2;       tree->SetBranchAddress("jetpt2"      , &jetpt2);
-  Float_t jetpt3;       tree->SetBranchAddress("jetpt3"      , &jetpt3);
-  Float_t jettche1;     tree->SetBranchAddress("jettche1"    , &jettche1);
-  Float_t jettche2;     tree->SetBranchAddress("jettche2"    , &jettche2);
-  Float_t mctruth;      tree->SetBranchAddress("mctruth"     , &mctruth);
-  Float_t mll;          tree->SetBranchAddress("mll"         , &mll);
-  Float_t mpmet;        tree->SetBranchAddress("mpmet"       , &mpmet); 
-  Float_t mth;          tree->SetBranchAddress("mth"         , &mth);
-  Float_t nbjet;        tree->SetBranchAddress("nbjet"       , &nbjet);
-  Float_t nbjettche;    tree->SetBranchAddress("nbjettche"   , &nbjettche);
-  Float_t nextra;       tree->SetBranchAddress("nextra"      , &nextra);
-  Float_t njet;         tree->SetBranchAddress("njet"        , &njet);
-  Float_t nvtx;         tree->SetBranchAddress("nvtx"        , &nvtx);
-  Float_t pchmet;       tree->SetBranchAddress("pchmet"      , &pchmet);
-  Float_t pfmet;        tree->SetBranchAddress("pfmet"       , &pfmet);
-  Float_t ppfmet;       tree->SetBranchAddress("ppfmet"      , &ppfmet);
-  Float_t pt1;          tree->SetBranchAddress("pt1"         , &pt1);
-  Float_t pt2;          tree->SetBranchAddress("pt2"         , &pt2);
-  Float_t ch1;          tree->SetBranchAddress("ch1"         , &ch1);
-  Float_t ch2;          tree->SetBranchAddress("ch2"         , &ch2);
-  Float_t ptll;         tree->SetBranchAddress("ptll"        , &ptll);
-  Float_t softtche;     tree->SetBranchAddress("softtche"    , &softtche);
-  Float_t trigger;      tree->SetBranchAddress("trigger"     , &trigger);
-  Float_t triggW;       tree->SetBranchAddress("triggW"      , &triggW);
-  Int_t   bveto;        tree->SetBranchAddress("bveto"       , &bveto);
-  Int_t   bveto_ip;     tree->SetBranchAddress("bveto_ip"    , &bveto_ip);
-  Int_t   bveto_mu;     tree->SetBranchAddress("bveto_mu"    , &bveto_mu);
-  Int_t   bveto_nj30;   tree->SetBranchAddress("bveto_nj30"  , &bveto_nj30);
-  Int_t   dphiveto;     tree->SetBranchAddress("dphiveto"    , &dphiveto);
-  Int_t   sameflav;     tree->SetBranchAddress("sameflav"    , &sameflav);
-  Int_t   zveto;        tree->SetBranchAddress("zveto"       , &zveto);
-  UInt_t  event;        tree->SetBranchAddress("event"       , &event);
-  UInt_t  lumi;         tree->SetBranchAddress("lumi"        , &lumi);
-  UInt_t  run;          tree->SetBranchAddress("run"         , &run);
+  tree->SetBranchAddress("baseW",        &baseW);
+  tree->SetBranchAddress("channel",      &channel);
+  tree->SetBranchAddress("chmet",        &chmet);
+  tree->SetBranchAddress("dataset",      &dataset);
+  tree->SetBranchAddress("dphill",       &dphill);
+  tree->SetBranchAddress("dphilljet",    &dphilljet);
+  tree->SetBranchAddress("dphilljetjet", &dphilljetjet);
+  tree->SetBranchAddress("drll",         &drll);
+  tree->SetBranchAddress("effW",         &effW);
+  tree->SetBranchAddress("jeteta1",      &jeteta1);
+  tree->SetBranchAddress("jeteta2",      &jeteta2);
+  tree->SetBranchAddress("jeteta3",      &jeteta3);
+  tree->SetBranchAddress("jetpt1",       &jetpt1);
+  tree->SetBranchAddress("jetpt2",       &jetpt2);
+  tree->SetBranchAddress("jetpt3",       &jetpt3);
+  tree->SetBranchAddress("jettche1",     &jettche1);
+  tree->SetBranchAddress("jettche2",     &jettche2);
+  tree->SetBranchAddress("mctruth",      &mctruth);
+  tree->SetBranchAddress("mll",          &mll);
+  tree->SetBranchAddress("mpmet",        &mpmet); 
+  tree->SetBranchAddress("mth",          &mth);
+  tree->SetBranchAddress("nbjet",        &nbjet);
+  tree->SetBranchAddress("nbjettche",    &nbjettche);
+  tree->SetBranchAddress("nextra",       &nextra);
+  tree->SetBranchAddress("njet",         &njet);
+  tree->SetBranchAddress("nvtx",         &nvtx);
+  tree->SetBranchAddress("pchmet",       &pchmet);
+  tree->SetBranchAddress("pfmet",        &pfmet);
+  tree->SetBranchAddress("ppfmet",       &ppfmet);
+  tree->SetBranchAddress("pt1",          &pt1);
+  tree->SetBranchAddress("pt2",          &pt2);
+  tree->SetBranchAddress("ch1",          &ch1);
+  tree->SetBranchAddress("ch2",          &ch2);
+  tree->SetBranchAddress("ptll",         &ptll);
+  tree->SetBranchAddress("softtche",     &softtche);
+  tree->SetBranchAddress("trigger",      &trigger);
+  tree->SetBranchAddress("triggW",       &triggW);
+  tree->SetBranchAddress("bveto",        &bveto);
+  tree->SetBranchAddress("bveto_ip",     &bveto_ip);
+  tree->SetBranchAddress("bveto_mu",     &bveto_mu);
+  tree->SetBranchAddress("bveto_nj30",   &bveto_nj30);
+  tree->SetBranchAddress("dphiveto",     &dphiveto);
+  tree->SetBranchAddress("sameflav",     &sameflav);
+  tree->SetBranchAddress("zveto",        &zveto);
+  tree->SetBranchAddress("event",        &event);
+  tree->SetBranchAddress("lumi",         &lumi);
+  tree->SetBranchAddress("run",          &run);
 
-  Float_t fakeW;
-  
   if (theSample.Contains("WJetsFakes"))
     tree->SetBranchAddress("fakeW", &fakeW);
-
-  Float_t puW;
   
   if (!theSample.Contains("WJetsFakes") && !theSample.Contains("Data"))
     tree->SetBranchAddress("puW", &puW);
@@ -275,17 +377,23 @@ void LatinosTreeScript(Float_t luminosity,
     
     tree->GetEntry(ievent);
     
-    Double_t efficiencyW = effW * triggW;
-    Double_t totalW      = -999;
+    efficiencyW = effW * triggW;
+    totalW      = -999;
 
     if (theSample.Contains("Data"))
-      totalW = 1.0;
+      {
+	totalW = 1.0;
+      }
     else if (theSample.Contains("WJetsFakes"))
-      totalW = fakeW;
-    else {
-      efficiencyW = puW * effW * triggW;
-      totalW      = (1 + 0.6 * (dataset >= 82 && dataset <= 84)) * baseW * efficiencyW * luminosity;
-    }
+      {
+	totalW = fakeW;
+      }
+    else
+      {
+	efficiencyW = puW * effW * triggW;
+
+	totalW = (1 + 0.6 * (dataset >= 82 && dataset <= 84)) * baseW * efficiencyW * luminosity;
+      }
 
 
     // Help variables
@@ -303,90 +411,51 @@ void LatinosTreeScript(Float_t luminosity,
 
     // The selection begins here
     //--------------------------------------------------------------------------
-    if (theSample == "DY" && mctruth == 2) continue;
-    if (run == 201191) continue;
-    if (trigger != 1) continue;
-    if (pt2 <= 20) continue;
-    if (ch1*ch2 > 0) continue;
+    Bool_t accept_WGstar = (chmet < (0.75*pt1+100) && chmet < (0.75*jetpt1+100));
+
+    if ((dataset == 36 || dataset == 37) && mctruth == 2)                    continue;
+    if (dataset == 82 && !accept_WGstar)                                     continue;
     if (dataset == 86 && (flavorChannel == "MuMu" || flavorChannel == "EE")) continue;
+    if ((SelectedChannel != -1) && (channel != SelectedChannel))             continue;
+    if (run == 201191)                                                       continue;
+    if (!trigger)                                                            continue;
+    if (pt2 <= 20)                                                           continue;
+    if (ch1*ch2 > 0)                                                         continue;
 
-    if ((SelectedChannel == -1) || (channel == SelectedChannel)) {
+
+    //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    //
+    // Data-driven methods
+    //
+    //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    if (pfmet > 20 && mpmet > 20 && mll > 12 && ptll > 45 && nextra == 0 && (dphiv || !sameflav)) {
 
 
       //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
       //
-      // Data-driven methods
+      // Z+jets
       //
       //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-      if (pfmet > 20 && mpmet > 20 && mll > 12 && ptll > 45 && nextra == 0 && (dphiv || !sameflav)) {
+      if (dphiv && jetbin == jetChannel && bveto_mu && (bveto_ip && (nbjettche == 0 || njet > 3))) {
 
 
-	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-	//
-	// Z+jets
-	//
-	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-	if (dphiv && jetbin == jetChannel && bveto_mu && (bveto_ip && (nbjettche == 0 || njet > 3))) {
-
-
-	  // Loop over the metvar bins
-	  //--------------------------------------------------------------------
-	  for (size_t mc=0; mc<numberMetCuts; mc ++) {
-	    
-	    if (metvar > MetCut[mc] && fabs(mll - ZMASS) < 7.5) {
-	      hNinLooseZevents[mc]->Fill(1,totalW);
-	    }
-
-	    if (metvar > MetCut[mc] && metvar < MetCut[mc+1]) {   
-	      if (fabs(mll - ZMASS) < 7.5) {
-		hNinZevents[mc]   ->Fill(  1, totalW);
-		hMassInZevents[mc]->Fill(mll, totalW);
-	      }
-	      else if (fabs(mll - ZMASS) > 15) {  
-		hNoutZevents[mc]   ->Fill(  1, totalW);
-		hMassOutZevents[mc]->Fill(mll, totalW);
-	      }
-	    }
-	  }
-	}
-
-
-	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-	//
-	// Top
-	//
-	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-	if (zveto && metvar > (20 + 25*sameflav)) {
-	  
-	  // btag_eff denominator
-	  if ((jetChannel == 0 && njet == 1 && nbjet == 1) ||
-	      (jetChannel == 1 && njet == 2 && jettche2 > 2.1) ||
-	      (jetChannel == 2)) {
-
-	    hNTopControlRegion->Fill(1, totalW);
-	    hbTagDisNTopControlRegion->Fill(jettche2, totalW);
-	    
-	    // btag_eff numerator
-	    if ((jetChannel == 0 && !bveto_nj30) ||
-		(jetChannel == 1 && jettche1 > 2.1) ||
-		(jetChannel == 2)) {
-	      
-	      hNTopTaggedTopControlRegion->Fill(1, totalW);
-	      hbTagDisNTopTaggedTopControlRegion->Fill(jettche2, totalW);
-	    }
-	  }
-	}
-	
-	// Top-tagged events for ttbar estimation
+	// Loop over the metvar bins
 	//----------------------------------------------------------------------
-	if (zveto && metvar > (20 + 25*sameflav)) {
-
-	  if ((jetChannel == 0 && njet == 0 && !bveto) ||
-	      (jetChannel == 1 && njet == 1 && bveto && jettche1 > 2.1) ||
-	      (jetChannel == 2)) {
+	for (size_t mc=0; mc<numberMetCuts; mc ++) {
 	    
-	    hTopTaggedEvents->Fill(1, totalW);
-	    hbTagDisTopTaggedEvents->Fill(jettche2, totalW);
+	  if (metvar > MetCut[mc] && fabs(mll - ZMASS) < 7.5) {
+	    hNinLooseZevents[mc]->Fill(1,totalW);
+	  }
+
+	  if (metvar > MetCut[mc] && metvar < MetCut[mc+1]) {   
+	    if (fabs(mll - ZMASS) < 7.5) {
+	      hNinZevents[mc]   ->Fill(  1, totalW);
+	      hMassInZevents[mc]->Fill(mll, totalW);
+	    }
+	    else if (fabs(mll - ZMASS) > 15) {  
+	      hNoutZevents[mc]   ->Fill(  1, totalW);
+	      hMassOutZevents[mc]->Fill(mll, totalW);
+	    }
 	  }
 	}
       }
@@ -394,91 +463,112 @@ void LatinosTreeScript(Float_t luminosity,
 
       //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
       //
-      // Main analysis
+      // Top
       //
       //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-      hWTrigger   ->Fill(1, totalW); 
-      hWeffTrigger->Fill(1, efficiencyW);
-      
-      if (pfmet > 20 && mpmet > 20 && (dataset != 82 || (chmet < (0.75*pt1+100) && chmet < (0.75*jetpt1+100)))) {
+      if (zveto && metvar > (20 + 25*sameflav)) {
 	  
-	hWMetCut->Fill(1, totalW);
-	hWeffMetCut->Fill(1, efficiencyW);
+	// btag_eff denominator
+	if ((jetChannel == 0 && njet == 1 && nbjet == 1) ||
+	    (jetChannel == 1 && njet == 2 && jettche2 > 2.1) ||
+	    (jetChannel == 2)) {
+	  
+	  hNTopControlRegion->Fill(1, totalW);
+	  hbTagDisNTopControlRegion->Fill(jettche2, totalW);
+	    
+	  // btag_eff numerator
+	  if ((jetChannel == 0 && !bveto_nj30) ||
+	      (jetChannel == 1 && jettche1 > 2.1) ||
+	      (jetChannel == 2)) {
+	    
+	    hNTopTaggedTopControlRegion->Fill(1, totalW);
+	    hbTagDisNTopTaggedTopControlRegion->Fill(jettche2, totalW);
+	  }
+	}
+      }
 	
-	if (mll > 12) {
+      // Top-tagged events for ttbar estimation
+      //----------------------------------------------------------------------~~
+      if (zveto && metvar > (20 + 25*sameflav)) {
+
+	if ((jetChannel == 0 && njet == 0 && !bveto) ||
+	    (jetChannel == 1 && njet == 1 && bveto && jettche1 > 2.1) ||
+	    (jetChannel == 2)) {
+	  
+	  hTopTaggedEvents->Fill(1, totalW);
+	  hbTagDisTopTaggedEvents->Fill(jettche2, totalW);
+	}
+      }
+    }
+
+
+    //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    //
+    // Main analysis
+    //
+    //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    for (UInt_t ilevel=0; ilevel<nLevels; ilevel++) {
+
+      FillHistograms(TriggerLevel, ilevel);
+
+      if ((pfmet > 20 && mpmet > 20) || (ilevel == MetCutLevel)) {
+      
+	FillHistograms(MetCutLevel, ilevel);
+
+	if ((mll > 12) || (ilevel == LowMinvLevel)) {
+    
+	  FillHistograms(LowMinvLevel, ilevel);
+
+	  if (zveto || (ilevel == ZVetoLevel)) {
+    
+	    FillHistograms(ZVetoLevel, ilevel);
 	    
-	  hWLowMinv->Fill(1, totalW);
-	  hWeffLowMinv->Fill(1, efficiencyW);
+	    if ((metvar > (20 + 25*sameflav)) || (ilevel == pMetCutLevel)) {
+    
+	      FillHistograms(pMetCutLevel, ilevel);
 
-	  hPtLepton1TwoLeptonsLevel      ->Fill(pt1,       totalW);
-	  hPtLepton2TwoLeptonsLevel      ->Fill(pt2,       totalW);
-	  hPtDiLeptonTwoLeptonsLevel     ->Fill(ptll,      totalW);
-	  hMinvTwoLeptonsLevel           ->Fill(mll,       totalW);
-	  hMtTwoLeptonsLevel             ->Fill(mth,       totalW);
-	  hNJets30TwoLeptonsLevel        ->Fill(njet,      totalW);
-	  hpfMetTwoLeptonsLevel          ->Fill(pfmet,     totalW);
-	  hppfMetTwoLeptonsLevel         ->Fill(ppfmet,    totalW);
-	  hchMetTwoLeptonsLevel          ->Fill(chmet,     totalW);
-	  hpchMetTwoLeptonsLevel         ->Fill(pchmet,    totalW);
-	  hpminMetTwoLeptonsLevel        ->Fill(mpmet,     totalW);
-	  hDeltaRLeptonsTwoLeptonsLevel  ->Fill(drll,      totalW);
-	  hDeltaPhiLeptonsTwoLeptonsLevel->Fill(dphill,    totalW);
-	  hDPhiPtllJetTwoLeptonsLevel    ->Fill(dphilljet, totalW);
-	    
-	  if (zveto) {
-	      
-	    hWZVeto->Fill(1, totalW); 
-	    hWeffZVeto->Fill(1, efficiencyW); 
+	      if ((jetbin == jetChannel) || (ilevel == JetVetoLevel)) {
+    
+		FillHistograms(JetVetoLevel, ilevel);
 
-	    if (metvar > (20 + 25*sameflav)){
-		
-	      hWpMetCut->Fill(1, totalW);
-	      hWeffpMetCut->Fill(1, efficiencyW);
+		if (dphiv || !sameflav || (ilevel == DeltaPhiJetLevel)) {
+    
+		  FillHistograms(DeltaPhiJetLevel, ilevel);
 
-	      if (jetbin == jetChannel) {
+		  if (bveto_mu || (ilevel == SoftMuVetoLevel)) {
+    
+		    FillHistograms(SoftMuVetoLevel, ilevel);
 
-		hWJetVeto->Fill(1, totalW);
-		hWeffJetVeto->Fill(1, efficiencyW);
+		    if ((nextra == 0) || (ilevel == ExtraLeptonLevel)) {
+    
+		      FillHistograms(ExtraLeptonLevel, ilevel);
 
-		if (dphiv || !sameflav) {
-		    
-		  hWDeltaPhiJet->Fill(1, totalW);
-		  hWeffDeltaPhiJet->Fill(1, efficiencyW);
+		      if ((ptll > 45) || (ilevel == PtllLevel)) {
+    
+			FillHistograms(PtllLevel, ilevel);
 
-		  if (bveto_mu) {
-		      
-		    hWSoftMuVeto->Fill(1, totalW);
-		    hWeffSoftMuVeto->Fill(1, efficiencyW);
-		      
-		    if (nextra == 0) {
+			Bool_t top_veto = (bveto_ip && (nbjettche == 0 || njet > 3) && (njet <= 1 || vbfsel));
 			
-		      hWExtraLepton->Fill(1, totalW);
-		      hWeffExtraLepton->Fill(1, efficiencyW);
-			
-		      if (ptll > 45) {
+			if (top_veto || (ilevel == TopTaggingLevel)) {
+    
+			  FillHistograms(TopTaggingLevel, ilevel);
 			  
-			hWPtll->Fill(1, totalW);
-			hWeffPtll->Fill(1, efficiencyW);
-
-			if (bveto_ip && (nbjettche == 0 || njet > 3) && (njet <= 1 || vbfsel)) {
-			    
-			  hWTopTagging->Fill(1, totalW);
-			  hWeffTopTagging->Fill(1, efficiencyW);
-			  
-			  hPtLepton1WWLevel      ->Fill(pt1,       totalW);
-			  hPtLepton2WWLevel      ->Fill(pt2,       totalW);
-			  hPtDiLeptonWWLevel     ->Fill(ptll,      totalW);
-			  hMinvWWLevel           ->Fill(mll,       totalW);
-			  hMtWWLevel             ->Fill(mth,       totalW);
-			  hNJets30WWLevel        ->Fill(njet,      totalW);
-			  hpfMetWWLevel          ->Fill(pfmet,     totalW);
-			  hppfMetWWLevel         ->Fill(ppfmet,    totalW);
-			  hchMetWWLevel          ->Fill(chmet,     totalW);
-			  hpchMetWWLevel         ->Fill(pchmet,    totalW);
-			  hpminMetWWLevel        ->Fill(mpmet,     totalW);
-			  hDeltaRLeptonsWWLevel  ->Fill(drll,      totalW);
-			  hDeltaPhiLeptonsWWLevel->Fill(dphill,    totalW);
-			  hDPhiPtllJetWWLevel    ->Fill(dphilljet, totalW);
+			  hWeff_NM1           [ilevel]->Fill(1,         efficiencyW);
+			  hW_NM1              [ilevel]->Fill(1,         totalW);
+			  hPtLepton1_NM1      [ilevel]->Fill(pt1,       totalW);
+			  hPtLepton2_NM1      [ilevel]->Fill(pt2,       totalW);
+			  hPtDiLepton_NM1     [ilevel]->Fill(ptll,      totalW);
+			  hMinv_NM1           [ilevel]->Fill(mll,       totalW);
+			  hMt_NM1             [ilevel]->Fill(mth,       totalW);
+			  hNJets30_NM1        [ilevel]->Fill(njet,      totalW);
+			  hpfMet_NM1          [ilevel]->Fill(pfmet,     totalW);
+			  hppfMet_NM1         [ilevel]->Fill(ppfmet,    totalW);
+			  hchMet_NM1          [ilevel]->Fill(chmet,     totalW);
+			  hpchMet_NM1         [ilevel]->Fill(pchmet,    totalW);
+			  hpminMet_NM1        [ilevel]->Fill(mpmet,     totalW);
+			  hDeltaRLeptons_NM1  [ilevel]->Fill(drll,      totalW);
+			  hDeltaPhiLeptons_NM1[ilevel]->Fill(dphill,    totalW);
+			  hDPhiPtllJet_NM1    [ilevel]->Fill(dphilljet, totalW);
 			}
 		      }
 		    }
@@ -492,40 +582,28 @@ void LatinosTreeScript(Float_t luminosity,
     }
   }
 
-
+  
   // Print
   //----------------------------------------------------------------------------
   if (verbose) {
-    cout << endl;
-    cout << " Expected number of RAW events for " << theSample.Data() << endl;
-    cout << " ------------------+-----------" << endl;
-    cout << " trigger           | " << hWTrigger    ->GetEntries() << endl;
-    cout << " MET cut           | " << hWMetCut     ->GetEntries() << endl;
-    cout << " low minv cut      | " << hWLowMinv    ->GetEntries() << endl;
-    cout << " Z veto            | " << hWZVeto      ->GetEntries() << endl;
-    cout << " projected MET cut | " << hWpMetCut    ->GetEntries() << endl;
-    cout << " jet veto          | " << hWJetVeto    ->GetEntries() << endl;
-    cout << " DeltaPhiJet veto  | " << hWDeltaPhiJet->GetEntries() << endl;
-    cout << " soft muon veto    | " << hWSoftMuVeto ->GetEntries() << endl;
-    cout << " extra lepton veto | " << hWExtraLepton->GetEntries() << endl;
-    cout << " top tagging       | " << hWTopTagging ->GetEntries() << endl;
-    cout << endl;
+    
+    printf("\n Expected number of RAW events for %s\n", theSample.Data());
+    printf(" -------------------+-----------\n");
+
+    for (UInt_t i=0; i<nLevels; i++)
+      printf(" %18s | %.0f\n", sLevel[i].Data(), hW[i]->GetEntries());
+
+    printf("\n");
 
     if (!theSample.Contains("Data")) {
-      cout << endl;
-      cout << " Normalized to " << luminosity << " 1/fb" << endl;
-      cout << " ------------------+-----------" << endl;
-      cout << " trigger           | " << hWTrigger    ->GetSumOfWeights() << endl;
-      cout << " MET cut           | " << hWMetCut     ->GetSumOfWeights() << endl;
-      cout << " low minv cut      | " << hWLowMinv    ->GetSumOfWeights() << endl;
-      cout << " Z veto            | " << hWZVeto      ->GetSumOfWeights() << endl;
-      cout << " projected MET cut | " << hWpMetCut    ->GetSumOfWeights() << endl;
-      cout << " jet veto          | " << hWJetVeto    ->GetSumOfWeights() << endl;
-      cout << " DeltaPhiJet veto  | " << hWDeltaPhiJet->GetSumOfWeights() << endl;
-      cout << " soft muon veto    | " << hWSoftMuVeto ->GetSumOfWeights() << endl;
-      cout << " extra lepton veto | " << hWExtraLepton->GetSumOfWeights() << endl;
-      cout << " top tagging       | " << hWTopTagging ->GetSumOfWeights() << endl; 
-      cout << endl;
+
+      printf("\n Normalized to %.3f 1/fb\n", luminosity);
+      printf(" -------------------+-----------\n");
+      
+      for (UInt_t i=0; i<nLevels; i++)
+	printf(" %18s | %.0f\n", sLevel[i].Data(), hW[i]->GetSumOfWeights());
+      
+      printf("\n");
     }
   }
 
@@ -535,4 +613,30 @@ void LatinosTreeScript(Float_t luminosity,
   output->cd();
   output->Write("", TObject::kOverwrite);
   output->Close();
+}
+
+
+//------------------------------------------------------------------------------
+// FillHistograms
+//------------------------------------------------------------------------------
+void FillHistograms(UInt_t level, UInt_t check)
+{
+  if (check != 0) return;
+
+  hWeff           [level]->Fill(1,         efficiencyW);
+  hW              [level]->Fill(1,         totalW);
+  hPtLepton1      [level]->Fill(pt1,       totalW);
+  hPtLepton2      [level]->Fill(pt2,       totalW);
+  hPtDiLepton     [level]->Fill(ptll,      totalW);
+  hMinv           [level]->Fill(mll,       totalW);
+  hMt             [level]->Fill(mth,       totalW);
+  hNJets30        [level]->Fill(njet,      totalW);
+  hpfMet          [level]->Fill(pfmet,     totalW);
+  hppfMet         [level]->Fill(ppfmet,    totalW);
+  hchMet          [level]->Fill(chmet,     totalW);
+  hpchMet         [level]->Fill(pchmet,    totalW);
+  hpminMet        [level]->Fill(mpmet,     totalW);
+  hDeltaRLeptons  [level]->Fill(drll,      totalW);
+  hDeltaPhiLeptons[level]->Fill(dphill,    totalW);
+  hDPhiPtllJet    [level]->Fill(dphilljet, totalW);
 }
