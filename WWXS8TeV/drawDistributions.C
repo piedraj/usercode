@@ -75,7 +75,7 @@ Bool_t   _setLogy;
 //------------------------------------------------------------------------------
 Double_t ttScale[] = {1.10, 1.10, 1.10, 1.10};
 Double_t tWScale[] = {1.10, 1.10, 1.10, 1.10};
-Double_t WWScale[] = {1.14, 0.92, 1.02, 1.08};
+Double_t WWScale[] = {1.00, 0.92, 1.02, 1.08};
 Double_t ZjScale[] = {3.70, 4.20, 1.80, 4.00};
 
 
@@ -177,7 +177,7 @@ void drawDistributions(Int_t    njet       = 0,
 
   // PAS distributions
   //----------------------------------------------------------------------------
-  if (0) {
+  if (1) {
     DrawHistogram("hPtLepton1TopTagging",  "p_{T}^{max}",           5, 0, "GeV",  0, 160);
     DrawHistogram("hPtLepton2TopTagging",  "p_{T}^{min}",           5, 0, "GeV", 15,  80);
     DrawHistogram("hPtDiLeptonTopTagging", "p_{T}^{#font[12]{ll}}", 5, 0, "GeV", 40, 120);
@@ -190,6 +190,8 @@ void drawDistributions(Int_t    njet       = 0,
   if (1) {
     DrawNM1("hDeltaPhiLeptons", "#Delta#phi_{#font[12]{ll}}", -1, 1, "^{o}");
     DrawNM1("hMinv",            "m_{#font[12]{ll}}",           4, 0, "GeV");
+    DrawNM1("hPtDiLepton",      "p_{T}^{#font[12]{ll}}",       4, 0, "GeV", 0, 120);
+    DrawNM1("hNJetsPF30",       "N_{jets}",                   -1, 0, "NULL");
   }
 }
 
@@ -203,8 +205,7 @@ void DrawNM1(TString  hname,
 	     Int_t    precision    = 1,
 	     TString  units        = "NULL",
 	     Double_t xmin         = -999,
-	     Double_t xmax         =  999,
-	     Bool_t   moveOverflow = false)
+	     Double_t xmax         =  999)
 {
   for (UInt_t i=0; i<nLevels; i++)
     {
@@ -214,8 +215,7 @@ void DrawNM1(TString  hname,
 		    precision,
 		    units,
 		    xmin,
-		    xmax,
-		    moveOverflow);
+		    xmax);
     }
 } 
 
@@ -262,11 +262,11 @@ void DrawHistogram(TString  hname,
     hist[ip] = (TH1F*)input[ip]->Get(hname);
     hist[ip]->SetName(hname + process[ip]);
 
-    if (ngroup > 0) hist[ip]->Rebin(ngroup);
-    
     if (moveOverflow) MoveOverflowBins  (hist[ip], xmin, xmax);
     else              ZeroOutOfRangeBins(hist[ip], xmin, xmax);
 
+    if (ngroup > 0) hist[ip]->Rebin(ngroup);
+    
     if (ip == iData) {
       hist[ip]->SetMarkerStyle(kFullCircle);
     }
