@@ -17,9 +17,6 @@ const Double_t qqWW_xs = nlo8tev * BR_WW_to_lnln * 0.97;
 const Double_t NTotalggWW =  109987;
 const Double_t NTotalqqWW = 1933235;
 
-const Double_t NFiducialggWW =   67977;  // pt > 20, |eta| < 2.5
-const Double_t NFiducialqqWW = 1050807;  // pt > 20, |eta| < 2.5
-
 
 const UInt_t Nsyst = 11;
 
@@ -34,7 +31,10 @@ Double_t SystematicsWg  [Nsyst] = {      1.5,      2.0,         1.5,        2.0,
 Double_t SystematicsH125[Nsyst] = {      1.5,      2.0,         1.5,        2.5,    2.0,        4.7,  2.3,  0.0,   2.3,           1.5,      1.1}; // [*]
 
 
-// [*] Using SystematicsqqWW as a reasonable placeholder
+// [*] Using SystematicsqqWW as placeholder
+
+
+TString analysisLevel;
 
 
 //------------------------------------------------------------------------------
@@ -47,16 +47,23 @@ void XS(Double_t &xsValue,
 	Double_t  luminosity,
 	Int_t     njet,
 	TString   channel,
+	TString   cutLevel,
+	Bool_t    useNM1,
 	TString   directory,
 	Bool_t    useDataDriven,
-	Int_t     printLevel,
-	Bool_t    fiducialXS)
+	Int_t     printLevel)
 {
+  analysisLevel = cutLevel;
+
+  if (useNM1) analysisLevel += "_NM1";
+
   TString dyChannel = "SF";
 
-  printf("\n");
-  printf("   WWFull xs = %.2f pb;   WWto2L xs = %.2f pb\n", nlo8tev, nlo8tev*BR_WW_to_lnln);
-  printf(" qqWWFull xs = %.2f pb; qqWWto2L xs = %.2f pb\n", nlo8tev*0.97, nlo8tev*0.97*BR_WW_to_lnln);
+  if (channel.Contains("All") && printLevel > 0) {
+    printf("\n");
+    printf("   WWFull xs = %.2f pb;   WWto2L xs = %.2f pb\n", nlo8tev, nlo8tev*BR_WW_to_lnln);
+    printf(" qqWWFull xs = %.2f pb; qqWWto2L xs = %.2f pb\n", nlo8tev*0.97, nlo8tev*0.97*BR_WW_to_lnln);
+  }
 
   if (channel.Contains("EE"))   dyChannel = "EE";
   if (channel.Contains("MuMu")) dyChannel = "MuMu";
@@ -131,20 +138,20 @@ void XS(Double_t &xsValue,
   // Estimate WW cross-section
   //
   //----------------------------------------------------------------------------
-  TH1F* hNWW       = (TH1F*) inputWW      ->Get("hWTopTagging");
-  TH1F* hNggWW     = (TH1F*) inputggWW    ->Get("hWTopTagging");
-  TH1F* hNqqWW     = (TH1F*) inputqqWW    ->Get("hWTopTagging");
-  TH1F* hNTT       = (TH1F*) inputTT      ->Get("hWTopTagging");
-  TH1F* hNTW       = (TH1F*) inputTW      ->Get("hWTopTagging");
-  TH1F* hNWj       = (TH1F*) inputWj      ->Get("hWTopTagging");
-  TH1F* hNWZ       = (TH1F*) inputWZ      ->Get("hWTopTagging");
-  TH1F* hNZZ       = (TH1F*) inputZZ      ->Get("hWTopTagging");
-  TH1F* hNDY       = (TH1F*) inputDY      ->Get("hWTopTagging");
-  TH1F* hNDYtautau = (TH1F*) inputDYtautau->Get("hWTopTagging");
-  TH1F* hNWg       = (TH1F*) inputWg      ->Get("hWTopTagging");
-  TH1F* hNH125     = (TH1F*) inputH125    ->Get("hWTopTagging");
-  TH1F* hNData     = (TH1F*) inputData    ->Get("hWTopTagging");
-  TH1F* hNDYOF     = (TH1F*) inputDYOF    ->Get("hWTopTagging");
+  TH1F* hNWW       = (TH1F*) inputWW      ->Get("hW" + analysisLevel);
+  TH1F* hNggWW     = (TH1F*) inputggWW    ->Get("hW" + analysisLevel);
+  TH1F* hNqqWW     = (TH1F*) inputqqWW    ->Get("hW" + analysisLevel);
+  TH1F* hNTT       = (TH1F*) inputTT      ->Get("hW" + analysisLevel);
+  TH1F* hNTW       = (TH1F*) inputTW      ->Get("hW" + analysisLevel);
+  TH1F* hNWj       = (TH1F*) inputWj      ->Get("hW" + analysisLevel);
+  TH1F* hNWZ       = (TH1F*) inputWZ      ->Get("hW" + analysisLevel);
+  TH1F* hNZZ       = (TH1F*) inputZZ      ->Get("hW" + analysisLevel);
+  TH1F* hNDY       = (TH1F*) inputDY      ->Get("hW" + analysisLevel);
+  TH1F* hNDYtautau = (TH1F*) inputDYtautau->Get("hW" + analysisLevel);
+  TH1F* hNWg       = (TH1F*) inputWg      ->Get("hW" + analysisLevel);
+  TH1F* hNH125     = (TH1F*) inputH125    ->Get("hW" + analysisLevel);
+  TH1F* hNData     = (TH1F*) inputData    ->Get("hW" + analysisLevel);
+  TH1F* hNDYOF     = (TH1F*) inputDYOF    ->Get("hW" + analysisLevel);
 
 
   // Yields
@@ -161,18 +168,7 @@ void XS(Double_t &xsValue,
   Double_t NData[]     = {hNData    ->GetBinContent(2), hNData    ->GetBinError(2)};
 
 
-  // [*] Andrea: a normalization uncertainty of 50% has been added on final estimation of dytautau.
-
-
-  // Apply Z -> tautau scale factor (1.33 +- 0.266) from TOP-12-007
-  //----------------------------------------------------------------------------
-  if (channel.Contains("OF")  ||
-      channel.Contains("MuE") ||
-      channel.Contains("EMu")) {
-    
-    NDYtautau[0] *= 1.0;  // 1.33;
-    NDYtautau[1] *= 1.0;  // 1.33;
-  }
+  // [*] Andrea: A normalization uncertainty of 50% has been added on final estimation of dytautau.
 
 
   // Top yields for the non-inclusive channels
@@ -261,11 +257,11 @@ void XS(Double_t &xsValue,
   // Estimate WW efficiency
   //
   //----------------------------------------------------------------------------
-  TH1F* hgg = (TH1F*) inputggWW->Get("hWeffTopTagging");
-  TH1F* hqq = (TH1F*) inputqqWW->Get("hWeffTopTagging");
+  TH1F* hgg = (TH1F*) inputggWW->Get("hWeff" + analysisLevel);
+  TH1F* hqq = (TH1F*) inputqqWW->Get("hWeff" + analysisLevel);
 
-  Double_t NGenggWW = (fiducialXS) ? NFiducialggWW : NTotalggWW;
-  Double_t NGenqqWW = (fiducialXS) ? NFiducialqqWW : NTotalqqWW;
+  Double_t NGenggWW = NTotalggWW;
+  Double_t NGenqqWW = NTotalqqWW;
 
   Double_t f_gg = ggWW_xs / (ggWW_xs + qqWW_xs);
   Double_t f_qq = 1 - f_gg;
@@ -303,7 +299,7 @@ void XS(Double_t &xsValue,
   //----------------------------------------------------------------------------
   Double_t xs = (NData[0] - Background) / (luminosity * WW_efficiency);
 
-  if (!fiducialXS) xs /= BR_WW_to_lnln;
+  xs /= BR_WW_to_lnln;
 
 
   // Relative errors
@@ -365,8 +361,8 @@ void XS(Double_t &xsValue,
     printf(" -------------------------------------------------\n");
   }
 
-  printf("       sigmaWW(%s) = %5.2f +- %5.2f (stat.) +- %5.2f (syst.) +- %5.2f (lumi.) pb\n",
-    	 channel.Data(), xsValue, xsStat, xsSyst, xsLumi);
+  printf("       sigmaWW(%s,%s) = %5.2f +- %5.2f (stat.) +- %5.2f (syst.) +- %5.2f (lumi.) pb\n",
+    	 channel.Data(), analysisLevel.Data(), xsValue, xsStat, xsSyst, xsLumi);
 
 
   // Difference wrt. the theoretical value
@@ -381,17 +377,6 @@ void XS(Double_t &xsValue,
     printf("\n       sigma(NLO) = %.2f + %.2f - %.2f pb\n", nlo8tev, nlo8tevPlus, nlo8tevMinus);
     printf("\n       sigmaWW(%s) - sigma(NLO) = %.2f +- %.2f pb", channel.Data(), deltaXS, deltaXSErr);
     printf(" = (%.0f +- %.0f)\%s of the theoretical value\n\n", 1e2*deltaXS/nlo8tev, 1e2*deltaXSErr/nlo8tev, "%");
-  }
-
-
-  // Fiducial efficiency
-  //----------------------------------------------------------------------------
-  if (fiducialXS && printLevel > 0) {
-    printf("\n pt > 20 GeV and |eta| < 2.5 fiducial efficiency\n");
-    printf(" -------------------------------------------------\n");
-    printf("       eff(gg to WW) = %.1f %s\n", 1e2 * ratioValue(NFiducialggWW, NTotalggWW), "%");
-    printf("       eff(qq to WW) = %.1f %s\n", 1e2 * ratioValue(NFiducialqqWW, NTotalqqWW), "%");
-    printf("\n");
   }
 
 

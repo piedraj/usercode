@@ -1,7 +1,7 @@
 const UInt_t nchannels = 7;
 
 TString channel     [nchannels] = {"All", "SF", "OF", "MuMu",   "EE", "EMu",  "MuE" };
-TString channelLabel[nchannels] = {"all", "SF", "OF", "#mu#mu", "ee", "e#mu", "#mue"};
+TString channelLabel[nchannels] = {"all", "SF", "DF", "#mu#mu", "ee", "e#mu", "#mue"};
 
 
 // NLO WW cross-section
@@ -36,10 +36,11 @@ enum {SILENT, NOTE, DEBUG};
 void runXS(Int_t    njet          = 0,
 	   Int_t    ichannel      = All,
 	   Double_t luminosity    = 19468,
-	   Int_t    printLevel    = NOTE,
+	   TString  cutLevel      = "TopTagging",
+	   Bool_t   useNM1        = false,
+	   Int_t    printLevel    = SILENT,
 	   Bool_t   useDataDriven = true,  // false => DY and Top from MC
 	   Bool_t   drawTheXS     = false,
-	   Bool_t   fiducialXS    = false,
 	   Double_t yMin          = -999,
 	   Double_t yMax          = -999)
 {
@@ -76,10 +77,11 @@ void runXS(Int_t    njet          = 0,
        luminosity,
        njet,
        channel[thechannel],
+       cutLevel,
+       useNM1,
        directory,
        useDataDriven,
-       printLevel,
-       fiducialXS);
+       printLevel);
 
     gStat->SetPoint(i, i, xsValue);
     gSyst->SetPoint(i, i, xsValue);
@@ -126,8 +128,7 @@ void DrawXS(Int_t    ichannel,
   gSyst->SetLineWidth(2);
   gStat->SetLineWidth(2);
 
-
-  TCanvas* canvas = new TCanvas("wwxs", "wwxs");
+ TCanvas* canvas = new TCanvas("wwxs", "wwxs");
   
   TMultiGraph* mg = new TMultiGraph();
 
