@@ -67,9 +67,7 @@ TString  _channel;
 Int_t    _njet;
 Double_t _luminosity;
 TString  _format;
-Bool_t   _drawRatio;
 Bool_t   _dataDriven;
-Bool_t   _savePlots;
 Bool_t   _setLogy;
 
 
@@ -137,16 +135,13 @@ void drawDistributions(Int_t    njet       = 0,
 		       TString  format     = "png",
 		       Bool_t   drawRatio  = true,
 		       Bool_t   dataDriven = true,
-		       Bool_t   savePlots  = true,
 		       Bool_t   setLogy    = false)
 {
   _channel    = channel;
   _njet       = njet;
   _luminosity = luminosity;
   _format     = format;
-  _drawRatio  = drawRatio;
   _dataDriven = dataDriven;
-  _savePlots  = savePlots;
   _setLogy    = setLogy;
 
   gSystem->mkdir(_format, kTRUE);
@@ -182,7 +177,7 @@ void drawDistributions(Int_t    njet       = 0,
 
   // PAS distributions
   //----------------------------------------------------------------------------
-  if (1) {
+  if (0) {
     DrawHistogram("hPtLepton1TopTagging",  "p_{T}^{max}",           5, 0, "GeV",  0, 160);
     DrawHistogram("hPtLepton2TopTagging",  "p_{T}^{min}",           5, 0, "GeV", 15,  80);
     DrawHistogram("hPtDiLeptonTopTagging", "p_{T}^{#font[12]{ll}}", 5, 0, "GeV", 40, 120);
@@ -237,28 +232,18 @@ void DrawHistogram(TString  hname,
 		   Double_t xmax         =  999,
 		   Bool_t   moveOverflow = true)
 {
-  TCanvas* canvas;
+  TCanvas* canvas = new TCanvas(hname, hname, 550, 720);
 
-  TPad* pad1;
-  TPad* pad2;
+  TPad* pad1 = new TPad("pad1", "pad1", 0, 0.3, 1, 1.0);
+  TPad* pad2 = new TPad("pad2", "pad2", 0, 0.0, 1, 0.3); 
 
-  if (_drawRatio) {
-    canvas = new TCanvas(hname, hname, 550, 1.2*600);
-
-    pad1 = new TPad("pad1", "pad1", 0, 0.3, 1, 1);
-    pad1->SetTopMargin   (0.05);
-    pad1->SetBottomMargin(0.02);
-    pad1->Draw();
-
-    pad2 = new TPad("pad2", "pad2", 0, 0, 1, 0.3); 
-    pad2->SetTopMargin   (0.08);
-    pad2->SetBottomMargin(0.35);
-    pad2->Draw();
-  }
-  else {
-    canvas = new TCanvas(hname, hname, 550, 600);
-    pad1 = (TPad*)canvas->GetPad(0);
-  }
+  pad1->SetTopMargin   (0.08);
+  pad1->SetBottomMargin(0.02);
+  pad1->Draw();
+      
+  pad2->SetTopMargin   (0.08);
+  pad2->SetBottomMargin(0.35);
+  pad2->Draw();
 
 
   //----------------------------------------------------------------------------
@@ -384,97 +369,104 @@ void DrawHistogram(TString  hname,
 
   // Legend
   //----------------------------------------------------------------------------
-  Double_t yoffset = (_drawRatio) ? 0.054 : 0.048;
-  Double_t x0      = (_drawRatio) ? 0.370 : 0.400; 
+  Double_t x0      = 0.720; 
+  Double_t y0      = 0.834; 
+  Double_t yoffset = 0.048;
+  Double_t delta   = yoffset + 0.001;
+  Double_t ndelta  = 0;
 
-  TString allmcTitle = (_dataDriven) ? " stat #oplus syst" : " #sigma_{stat}";
+  Double_t YieldTop   = Yield(hist[itt]) + Yield(hist[itW]);
+  Double_t YieldVV    = Yield(hist[iWZ]) + Yield(hist[iZZ]) + Yield(hist[iWg]);
+  Double_t YieldZJets = Yield(hist[iDY]) + Yield(hist[iDYtau]);
 
-  DrawLegend(0.23, 0.74 + 2.*(yoffset+0.001), hist[iData], " data",    "lp", 0.035, 0.2, yoffset);
-  DrawLegend(0.23, 0.74 + 1.*(yoffset+0.001), hist[iWW],   " WW",      "f",  0.035, 0.2, yoffset);
-  DrawLegend(0.23, 0.74,                      hist[iWZ],   " VV",      "f",  0.035, 0.2, yoffset);
-  DrawLegend(0.23, 0.74 - 1.*(yoffset+0.001), hist[iH125], " Higgs",   "f",  0.035, 0.2, yoffset);
-  DrawLegend(  x0, 0.74 + 2.*(yoffset+0.001), hist[iDY],   " Z+jets",  "f",  0.035, 0.2, yoffset);
-  DrawLegend(  x0, 0.74 + 1.*(yoffset+0.001), hist[iWj],   " W+jets",  "f",  0.035, 0.2, yoffset);
-  DrawLegend(  x0, 0.74,                      hist[itt],   " top",     "f",  0.035, 0.2, yoffset);
-  DrawLegend(  x0, 0.74 - 1.*(yoffset+0.001), allmc,       allmcTitle, "f",  0.035, 0.2, yoffset);
+  DrawLegend(x0 - 0.49, y0 - ndelta, hist[iData], Form(" data (%.0f)", Yield(hist[iData])), "lp", 0.03, 0.2, yoffset); ndelta += delta;
+  DrawLegend(x0 - 0.49, y0 - ndelta, allmc,       Form(" all (%.0f)",  Yield(allmc)),       "f",  0.03, 0.2, yoffset); ndelta += delta;
+  DrawLegend(x0 - 0.49, y0 - ndelta, hist[iWW],   Form(" WW (%.0f)",   Yield(hist[iWW])),   "f",  0.03, 0.2, yoffset); ndelta += delta;
+  DrawLegend(x0 - 0.49, y0 - ndelta, hist[iWZ],   Form(" VV (%.0f)",   YieldVV),            "f",  0.03, 0.2, yoffset); ndelta += delta;
+
+  ndelta = 0;
+
+  DrawLegend(x0 - 0.23, y0 - ndelta, hist[iDY],   Form(" Z+jets (%.0f)", YieldZJets),         "f",  0.03, 0.2, yoffset); ndelta += delta;
+  DrawLegend(x0 - 0.23, y0 - ndelta, hist[iWj],   Form(" W+jets (%.0f)", Yield(hist[iWj])),   "f",  0.03, 0.2, yoffset); ndelta += delta;
+  DrawLegend(x0 - 0.23, y0 - ndelta, hist[itt],   Form(" top (%.0f)",    YieldTop),           "f",  0.03, 0.2, yoffset); ndelta += delta;
+  DrawLegend(x0 - 0.23, y0 - ndelta, hist[iH125], Form(" Higgs (%.0f)",  Yield(hist[iH125])), "f",  0.03, 0.2, yoffset); ndelta += delta;
 
 
   // Additional titles
   //----------------------------------------------------------------------------
-  Double_t deltaY = (_drawRatio) ? 0.02 : 0.0;
+  TString channelLabel = "ee/#mu#mu/e#mu/#mue";
 
-  DrawTLatex(0.9, 0.860 + deltaY, 0.04, "CMS preliminary");
-  DrawTLatex(0.9, 0.815 + deltaY, 0.03, Form("L = %.3f fb^{-1}", _luminosity/1e3));
+  if (_channel == "EE")   channelLabel = "ee";
+  if (_channel == "MuMu") channelLabel = "#mu#mu";
+  if (_channel == "EMu")  channelLabel = "e#mu";
+  if (_channel == "MuE")  channelLabel = "#mue";
+  if (_channel == "SF")   channelLabel = "ee/#mu#mu";
+  if (_channel == "OF")   channelLabel = "e#mu/#mue";
 
-  if (_dataDriven) {
-    DrawTLatex(0.9, 0.770 + deltaY, 0.03, "data-driven normalization");
-  }
+  channelLabel += Form(" (%d", _njet);
+
+  if (_njet == 0) channelLabel += "-jets)";
+  if (_njet == 1) channelLabel += "-jet)";
+  if (_njet >= 2) channelLabel += "-jets)";
+
+  DrawTLatex(0.185, 0.975, 0.05, 13, channelLabel.Data());
+  DrawTLatex(0.940, 0.983, 0.05, 33, Form("L = %.1f fb^{-1}", _luminosity/1e3));
 
 
   //----------------------------------------------------------------------------
   // pad2
   //----------------------------------------------------------------------------
-  if (_drawRatio) {
-
-    pad2->cd();
+  pad2->cd();
     
-    TH1F* ratio       = hist[iData]->Clone("ratio");
-    TH1F* uncertainty = allmc->Clone("uncertainty");
-
-    for (UInt_t ibin=1; ibin<=ratio->GetNbinsX(); ibin++) {
-
-      Double_t mcValue = allmc->GetBinContent(ibin);
-      Double_t mcError = allmc->GetBinError  (ibin);
-
-      Double_t dtValue = ratio->GetBinContent(ibin);
-      Double_t dtError = ratio->GetBinError  (ibin);
-
-      Double_t ratioValue       = (mcValue > 0) ? dtValue/mcValue : 0.0;
-      Double_t ratioError       = (mcValue > 0) ? dtError/mcValue : 0.0;
-      Double_t uncertaintyError = (mcValue > 0) ? mcError/mcValue : 0.0;
-
-      ratio->SetBinContent(ibin, ratioValue);
-      ratio->SetBinError  (ibin, ratioError);
-
-      uncertainty->SetBinContent(ibin, 1.0);
-      uncertainty->SetBinError  (ibin, uncertaintyError);
-    }
-
-
-    TAxis* uaxis = (TAxis*)uncertainty->GetXaxis();
+  TH1F* ratio       = hist[iData]->Clone("ratio");
+  TH1F* uncertainty = allmc->Clone("uncertainty");
     
-    uaxis->SetRangeUser(xmin, xmax);
-    
-    
-    uncertainty->Draw("e2");
-    ratio      ->Draw("ep,same");
+  for (UInt_t ibin=1; ibin<=ratio->GetNbinsX(); ibin++) {
 
-    uncertainty->GetYaxis()->SetRangeUser(0, 2.5);
+    Double_t mcValue = allmc->GetBinContent(ibin);
+    Double_t mcError = allmc->GetBinError  (ibin);
+    
+    Double_t dtValue = ratio->GetBinContent(ibin);
+    Double_t dtError = ratio->GetBinError  (ibin);
 
-    Pad2TAxis(uncertainty, hist[iData]->GetXaxis()->GetTitle(), "data / prediction");
+    Double_t ratioValue       = (mcValue > 0) ? dtValue/mcValue : 0.0;
+    Double_t ratioError       = (mcValue > 0) ? dtError/mcValue : 0.0;
+    Double_t uncertaintyError = (mcValue > 0) ? mcError/mcValue : 0.0;
+
+    ratio->SetBinContent(ibin, ratioValue);
+    ratio->SetBinError  (ibin, ratioError);
+
+    uncertainty->SetBinContent(ibin, 1.0);
+    uncertainty->SetBinError  (ibin, uncertaintyError);
   }
+
+
+  TAxis* uaxis = (TAxis*)uncertainty->GetXaxis();
+    
+  uaxis->SetRangeUser(xmin, xmax);
+    
+    
+  uncertainty->Draw("e2");
+  ratio      ->Draw("ep,same");
+
+  uncertainty->GetYaxis()->SetRangeUser(0, 2.5);
 
 
   // Save
   //----------------------------------------------------------------------------
-  pad1->cd();
-  pad1->GetFrame()->DrawClone();
-  pad1->RedrawAxis();
+  pad2->cd(); SetAxis(uncertainty, hist[iData]->GetXaxis()->GetTitle(), "data / prediction", 0.10, 0.8);
+  pad1->cd(); SetAxis(hist[iData], "", hist[iData]->GetYaxis()->GetTitle(),                  0.05, 1.6);
 
-  if (_drawRatio) {
-    pad2->cd();
-    pad2->GetFrame()->DrawClone();
-    pad2->RedrawAxis();
-  }
+  canvas->cd();
 
-  if (_savePlots) {
-    canvas->cd();
-    canvas->SaveAs(Form("%s/%s_%djet.%s",
-			_format.Data(),
-			hname.Data(),
-			_njet,
-			_format.Data()));
-  }
+  TString suffixLogy = (_setLogy) ? "_log" : "";
+
+  canvas->SaveAs(Form("%s/%s_%djet%s.%s",
+		      _format.Data(),
+		      hname.Data(),
+		      _njet,
+		      suffixLogy.Data(),
+		      _format.Data()));
 }
 
 
@@ -579,43 +571,70 @@ void ZeroOutOfRangeBins(TH1* h, Double_t xmin, Double_t xmax) const
 //------------------------------------------------------------------------------
 // DrawTLatex
 //------------------------------------------------------------------------------
-void DrawTLatex(Double_t x, Double_t y, Double_t tsize, const char* text)
+void DrawTLatex(Double_t    x,
+		Double_t    y,
+		Double_t    tsize,
+		Short_t     align,
+		const char* text,
+		Bool_t      setndc = true)
 {
   TLatex* tl = new TLatex(x, y, text);
 
-  tl->SetNDC();
-  tl->SetTextAlign(   32);
-  tl->SetTextFont (   42);
-  tl->SetTextSize (tsize);
+  tl->SetNDC      (setndc);
+  tl->SetTextAlign( align);
+  tl->SetTextFont (    42);
+  tl->SetTextSize ( tsize);
 
   tl->Draw("same");
 }
 
 
 //------------------------------------------------------------------------------
-// Pad2TAxis
+// SetAxis
 //------------------------------------------------------------------------------
-void Pad2TAxis(TH1* hist, TString xtitle, TString ytitle)
+void SetAxis(TH1*    hist,
+	     TString xtitle,
+	     TString ytitle,
+	     Float_t size,
+	     Float_t offset)
 {
   TAxis* xaxis = (TAxis*)hist->GetXaxis();
   TAxis* yaxis = (TAxis*)hist->GetYaxis();
 
-  xaxis->SetLabelFont  (    42);
-  xaxis->SetLabelOffset( 0.025);
-  xaxis->SetLabelSize  (   0.1);
-  xaxis->SetNdivisions (   505);
-  xaxis->SetTitle      (xtitle);
-  xaxis->SetTitleFont  (    42);
-  xaxis->SetTitleOffset(  1.35);
-  xaxis->SetTitleSize  (  0.11);
-  
-  yaxis->CenterTitle   (      );
-  yaxis->SetLabelFont  (    42);
-  yaxis->SetLabelOffset(  0.02);
-  yaxis->SetLabelSize  (   0.1);
-  yaxis->SetNdivisions (   505);
-  yaxis->SetTitle      (ytitle);
-  yaxis->SetTitleFont  (    42);
-  yaxis->SetTitleOffset(  0.75);
-  yaxis->SetTitleSize  (  0.11);
+  xaxis->SetLabelFont(42);
+  yaxis->SetLabelFont(42);
+  xaxis->SetTitleFont(42);
+  yaxis->SetTitleFont(42);
+
+  xaxis->SetLabelOffset(0.025);
+  yaxis->SetLabelOffset(0.025);
+  xaxis->SetTitleOffset(1.4);
+  yaxis->SetTitleOffset(offset);
+
+  xaxis->SetLabelSize(size);
+  yaxis->SetLabelSize(size);
+  xaxis->SetTitleSize(size);
+  yaxis->SetTitleSize(size);
+
+  xaxis->SetTitle(xtitle);
+  yaxis->SetTitle(ytitle);
+
+  xaxis->SetNdivisions(505);
+  yaxis->SetNdivisions(505);
+
+  yaxis->CenterTitle();
+
+  gPad->GetFrame()->DrawClone();
+  gPad->RedrawAxis();
+}
+
+
+//------------------------------------------------------------------------------
+// Yield
+//------------------------------------------------------------------------------
+Double_t Yield(TH1* h)
+{
+  Int_t nbins = h->GetNbinsX();
+
+  return h->Integral(0, nbins+1);
 }
