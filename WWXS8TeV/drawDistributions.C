@@ -64,9 +64,10 @@ systError[iH125]  =  2.7 /  36.1;
 // Settings
 //------------------------------------------------------------------------------
 TString  _channel;
+TString  _format;
+TString  _output;
 Int_t    _njet;
 Double_t _luminosity;
-TString  _format;
 Bool_t   _dataDriven;
 Bool_t   _setLogy;
 
@@ -144,7 +145,7 @@ void drawDistributions(Int_t    njet       = 0,
   _dataDriven = dataDriven;
   _setLogy    = setLogy;
 
-  gSystem->mkdir(_format, kTRUE);
+  MakeDirectory();
 
   gStyle->SetHatchesLineWidth(1.00);
   gStyle->SetHatchesSpacing  (0.55);
@@ -198,6 +199,25 @@ void drawDistributions(Int_t    njet       = 0,
 
 
 //------------------------------------------------------------------------------
+// MakeDirectory
+//------------------------------------------------------------------------------
+void MakeDirectory()
+{
+  _output = Form("%s/%djet/%s", _format.Data(), _njet, _channel.Data());
+
+  gSystem->Exec(Form("rm -rf %s", _output.Data()));
+
+  gSystem->mkdir(_output, kTRUE);
+
+  gSystem->Exec(Form("cp index.php %s/.", _format.Data()));
+
+  gSystem->Exec(Form("cp index.php %s/%djet/.", _format.Data(), _njet));
+
+  gSystem->Exec(Form("cp index.php %s/.", _output.Data()));
+}
+
+
+//------------------------------------------------------------------------------
 // DrawNM1
 //------------------------------------------------------------------------------
 void DrawNM1(TString  hname,
@@ -210,6 +230,9 @@ void DrawNM1(TString  hname,
 {
   for (UInt_t i=0; i<nLevels; i++)
     {
+      if (hname.Contains("PtDiLepton") && !sLevel[i].Contains("Ptll"))    continue;
+      if (hname.Contains("NJetsPF30")  && !sLevel[i].Contains("JetVeto")) continue;
+
       DrawHistogram(hname + sLevel[i] + "_NM1",
 		    NM1Label[i] + xtitle,
 		    ngroup,
@@ -462,10 +485,9 @@ void DrawHistogram(TString  hname,
 
   TString suffixLogy = (_setLogy) ? "_log" : "";
 
-  canvas->SaveAs(Form("%s/%s_%djet%s.%s",
-		      _format.Data(),
+  canvas->SaveAs(Form("%s/%s%s.%s",
+		      _output.Data(),
 		      hname.Data(),
-		      _njet,
 		      suffixLogy.Data(),
 		      _format.Data()));
 }
