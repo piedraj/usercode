@@ -130,7 +130,7 @@ const TString NM1Label[nLevels] = {
 // drawDistributions
 //------------------------------------------------------------------------------
 void drawDistributions(Int_t    njet       = 0,
-		       TString  channel    = "OF",
+		       TString  channel    = "All",
 		       Double_t luminosity = 19468,
 		       TString  format     = "png",
 		       Bool_t   drawRatio  = true,
@@ -178,17 +178,18 @@ void drawDistributions(Int_t    njet       = 0,
   // PAS distributions
   //----------------------------------------------------------------------------
   if (1) {
-    DrawHistogram("hPtLepton1TopTagging",  "p_{T}^{max}",           5, 0, "GeV",  0, 160);
-    DrawHistogram("hPtLepton2TopTagging",  "p_{T}^{min}",           5, 0, "GeV", 15,  80);
-    DrawHistogram("hPtDiLeptonTopTagging", "p_{T}^{#font[12]{ll}}", 5, 0, "GeV", 40, 120);
-    DrawHistogram("hMinvTopTagging",       "m_{#font[12]{ll}}",     5, 0, "GeV");
+    DrawHistogram("hPtLepton1TopTagging",       "p_{T}^{max}",                 5, 0, "GeV",  0, 160);
+    DrawHistogram("hPtLepton2TopTagging",       "p_{T}^{min}",                 5, 0, "GeV", 15,  80);
+    DrawHistogram("hPtDiLeptonTopTagging",      "p_{T}^{#font[12]{ll}}",       5, 0, "GeV", 40, 120);
+    DrawHistogram("hMinvTopTagging",            "m_{#font[12]{ll}}",           5, 0, "GeV");
+    DrawHistogram("hDeltaPhiLeptonsTopTagging", "#Delta#phi_{#font[12]{ll}}", -1, 1, "rad");
   }
 
 
   // N-1 distributions
   //----------------------------------------------------------------------------
   if (1) {
-    DrawNM1("hDeltaPhiLeptons", "#Delta#phi_{#font[12]{ll}}", -1, 1, "^{o}");
+    DrawNM1("hDeltaPhiLeptons", "#Delta#phi_{#font[12]{ll}}", -1, 1, "rad");
     DrawNM1("hMinv",            "m_{#font[12]{ll}}",           4, 0, "GeV");
     DrawNM1("hPtDiLepton",      "p_{T}^{#font[12]{ll}}",       4, 0, "GeV", 0, 120);
     DrawNM1("hNJetsPF30",       "N_{jets}",                   -1, 0, "NULL");
