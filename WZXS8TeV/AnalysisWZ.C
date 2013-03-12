@@ -334,7 +334,7 @@ void AnalysisWZ::InsideLoop()
 
   // HasZCandidate
   //----------------------------------------------------------------------------
-  if (invMass2Lep < 71. || invMass2Lep > 111.) return;
+  if (fabs(invMass2Lep - Z_MASS) > 20.) return;
 
   if (closure_test && fabs(invMass2Lep - Z_MASS) > 15.) return;
 
@@ -369,7 +369,7 @@ void AnalysisWZ::InsideLoop()
 
   // MET
   //----------------------------------------------------------------------------
-  Bool_t metPass = (T_METPFTypeI_ET > 30);
+  Bool_t metPass = (T_METPFTypeI_ET > 30.);
 
   if (closure_test) metPass = !metPass;
 
@@ -379,17 +379,33 @@ void AnalysisWZ::InsideLoop()
   else              FillHistograms(theChannel, MET, dataDriven_weight[Jet50]);
 
 
-  // SSLike
+  // Scan
   //----------------------------------------------------------------------------
-  if (fabs(invMass2Lep - Z_MASS) > 15.) return;
+  if (fabs(invMass2Lep - Z_MASS) < 20. && T_METPFTypeI_ET > 30.) FillHistograms(theChannel, mll20_MET30, dataDriven_weight[Jet50]);
+  if (fabs(invMass2Lep - Z_MASS) < 20. && T_METPFTypeI_ET > 35.) FillHistograms(theChannel, mll20_MET35, dataDriven_weight[Jet50]);
+  if (fabs(invMass2Lep - Z_MASS) < 20. && T_METPFTypeI_ET > 40.) FillHistograms(theChannel, mll20_MET40, dataDriven_weight[Jet50]);
+  if (fabs(invMass2Lep - Z_MASS) < 20. && T_METPFTypeI_ET > 45.) FillHistograms(theChannel, mll20_MET45, dataDriven_weight[Jet50]);
+  if (fabs(invMass2Lep - Z_MASS) < 20. && T_METPFTypeI_ET > 50.) FillHistograms(theChannel, mll20_MET50, dataDriven_weight[Jet50]);
 
-  if (T_METPFTypeI_ET < 40) return;
+  if (fabs(invMass2Lep - Z_MASS) < 15. && T_METPFTypeI_ET > 30.) FillHistograms(theChannel, mll15_MET30, dataDriven_weight[Jet50]);
+  if (fabs(invMass2Lep - Z_MASS) < 15. && T_METPFTypeI_ET > 35.) FillHistograms(theChannel, mll15_MET35, dataDriven_weight[Jet50]);
+  if (fabs(invMass2Lep - Z_MASS) < 15. && T_METPFTypeI_ET > 40.) FillHistograms(theChannel, mll15_MET40, dataDriven_weight[Jet50]);
+  if (fabs(invMass2Lep - Z_MASS) < 15. && T_METPFTypeI_ET > 45.) FillHistograms(theChannel, mll15_MET45, dataDriven_weight[Jet50]);
+  if (fabs(invMass2Lep - Z_MASS) < 15. && T_METPFTypeI_ET > 50.) FillHistograms(theChannel, mll15_MET50, dataDriven_weight[Jet50]);
 
-  FillHistograms(theChannel, SSLike, dataDriven_weight[Jet50]);
+  if (fabs(invMass2Lep - Z_MASS) < 10. && T_METPFTypeI_ET > 30.) FillHistograms(theChannel, mll10_MET30, dataDriven_weight[Jet50]);
+  if (fabs(invMass2Lep - Z_MASS) < 10. && T_METPFTypeI_ET > 35.) FillHistograms(theChannel, mll10_MET35, dataDriven_weight[Jet50]);
+  if (fabs(invMass2Lep - Z_MASS) < 10. && T_METPFTypeI_ET > 40.) FillHistograms(theChannel, mll10_MET40, dataDriven_weight[Jet50]);
+  if (fabs(invMass2Lep - Z_MASS) < 10. && T_METPFTypeI_ET > 45.) FillHistograms(theChannel, mll10_MET45, dataDriven_weight[Jet50]);
+  if (fabs(invMass2Lep - Z_MASS) < 10. && T_METPFTypeI_ET > 50.) FillHistograms(theChannel, mll10_MET50, dataDriven_weight[Jet50]);
 
 
   // SSLikeAntiBtag
   //----------------------------------------------------------------------------
+  if (fabs(invMass2Lep - Z_MASS) > 15.) return;
+
+  if (T_METPFTypeI_ET < 40.) return;
+
   if (nbjets > 0) return;
 
   FillHistograms(theChannel, SSLikeAntiBtag, dataDriven_weight[Jet50]);

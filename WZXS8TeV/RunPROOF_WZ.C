@@ -59,30 +59,34 @@ void RunPROOF_WZ(TString  sample       = "DoubleMu",
   //----------------------------------------------------------------------------
   gROOT->LoadMacro("../DatasetManager/DatasetManager.C+");
 
-  if (sample.Contains("DoubleElectron") || sample.Contains("DoubleMu")) {
+  if (sample.Contains("DoubleElectron"))
+    {
+      gPAFOptions->dataFiles = GetRealDataFiles("MC_Summer12_53X/WH/CalibratedE", sample.Data());
+    }
+  else if (sample.Contains("DoubleMu"))
+    {
+      gPAFOptions->dataFiles = GetRealDataFiles("MC_Summer12_53X/WH", sample.Data());
+    }
+  else
+    {
+      DatasetManager* dm = new DatasetManager("Summer12_53X", "WH");
 
-    gPAFOptions->dataFiles = GetRealDataFiles("MC_Summer12_53X/WH/CalibratedE", sample.Data());
-  }
-  else {
+      if (update) dm->RedownloadFiles();
 
-    DatasetManager* dm = new DatasetManager("Summer12_53X", "WH");
+      dm->LoadDataset(sample);
 
-    if (update) dm->RedownloadFiles();
+      gPAFOptions->dataFiles = dm->GetFiles();
 
-    dm->LoadDataset(sample);
+      G_Event_Weight = dm->GetCrossSection() * luminosity / dm->GetEventsInTheSample();
 
-    gPAFOptions->dataFiles = dm->GetFiles();
-
-     G_Event_Weight = dm->GetCrossSection() * luminosity / dm->GetEventsInTheSample();
-
-    cout << endl;
-    cout << "      x-section = " << dm->GetCrossSection()      << endl;
-    cout << "     luminosity = " << luminosity                 << endl;
-    cout << "        nevents = " << dm->GetEventsInTheSample() << endl;
-    cout << " base file name = " << dm->GetBaseFileName()      << endl;
-    cout << "         weight = " << G_Event_Weight             << endl;
-    cout << endl;
-  }
+      cout << endl;
+      cout << "      x-section = " << dm->GetCrossSection()      << endl;
+      cout << "     luminosity = " << luminosity                 << endl;
+      cout << "        nevents = " << dm->GetEventsInTheSample() << endl;
+      cout << " base file name = " << dm->GetBaseFileName()      << endl;
+      cout << "         weight = " << G_Event_Weight             << endl;
+      cout << endl;
+    }
 
 
   // Output file name

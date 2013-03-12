@@ -1,4 +1,5 @@
 
+ rm -rf pdf
  rm -rf png
  rm -rf tex
 
@@ -14,9 +15,6 @@
  root -l -b -q XS.C+\(MET,MCmode,0,1\)
  root -l -b -q XS.C+\(MET,PPFmode,0,1\)
 
- root -l -b -q XS.C+\(SSLike,MCmode,0,1\)
- root -l -b -q XS.C+\(SSLike,PPFmode,0,1\)
-
  root -l -b -q XS.C+\(SSLikeAntiBtag,MCmode,0,1\)
  root -l -b -q XS.C+\(SSLikeAntiBtag,PPFmode,0,1\)
 
@@ -27,6 +25,9 @@
 
  pdflatex yields.tex
  pdflatex yields.tex
+
+ mv mc_samples_wz8tev.pdf pdf/.
+ mv yields.pdf            pdf/.
 
  rm -rf *aux
  rm -rf *d

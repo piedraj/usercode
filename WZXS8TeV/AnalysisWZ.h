@@ -46,14 +46,16 @@ enum {FFF, TFF, TTF, TTT, LLL};
 TString sComposition[] = {"FFF", "TFF", "TTF", "TTT", "LLL"};
 
 
-const UInt_t nCuts = 6;
+const UInt_t nCuts = 20;
 
 enum {
   Exactly3Leptons,
   HasZCandidate,
   HasWCandidate,
   MET,
-  SSLike,
+  mll20_MET30, mll20_MET35, mll20_MET40, mll20_MET45, mll20_MET50,
+  mll15_MET30, mll15_MET35, mll15_MET40, mll15_MET45, mll15_MET50,
+  mll10_MET30, mll10_MET35, mll10_MET40, mll10_MET45, mll10_MET50,
   SSLikeAntiBtag
 };
 
@@ -62,7 +64,9 @@ TString sCut[] = {
   "HasZCandidate",
   "HasWCandidate",
   "MET",
-  "SSLike",
+  "mll20_MET30", "mll20_MET35", "mll20_MET40", "mll20_MET45", "mll20_MET50",
+  "mll15_MET30", "mll15_MET35", "mll15_MET40", "mll15_MET45", "mll15_MET50",
+  "mll10_MET30", "mll10_MET35", "mll10_MET40", "mll10_MET45", "mll10_MET50",
   "SSLikeAntiBtag"
 };
 

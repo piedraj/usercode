@@ -10,6 +10,7 @@
 #include "TLegend.h"
 #include "TLine.h"
 #include "TMath.h"
+#include "TMultiGraph.h"
 #include "TROOT.h"
 #include "TStyle.h"
 #include "TSystem.h"
@@ -37,9 +38,10 @@ const Double_t ngenWZphase = 1449067;  // (71 < mZ < 111 GeV)
 
 // Data members
 //------------------------------------------------------------------------------
-const UInt_t nChannels  =  4;
-const UInt_t nCuts      =  5;
-const UInt_t nProcesses = 39;
+const UInt_t nChannels   =  4;
+const UInt_t nCuts       =  4;
+const UInt_t nScanPoints = 16;
+const UInt_t nProcesses  = 39;
 
 enum {MMM, EEE, MME, EEM};
 
@@ -47,8 +49,26 @@ enum {
   Exactly3Leptons,
   HasZCandidate,
   MET,
-  SSLike,
   SSLikeAntiBtag
+};
+
+enum {
+  mll20_MET30,
+  mll20_MET35,
+  mll20_MET40,
+  mll20_MET45,
+  mll20_MET50,
+  mll15_MET30,
+  mll15_MET35,
+  mll15_MET40,
+  mll15_MET45,
+  mll15_MET50,
+  mll10_MET30,
+  mll10_MET35,
+  mll10_MET40,
+  mll10_MET45,
+  mll10_MET50,
+  mll15_MET40_antiBtag
 };
 
 enum {
@@ -101,12 +121,13 @@ enum {MCmode, PPFmode, PPPmode};
 
 // Settings
 //------------------------------------------------------------------------------
-TString         sChannel [nChannels];
-TString         sCut     [nCuts];
-TFile*          input    [nProcesses];
-TString         process  [nProcesses];
-Color_t         color    [nProcesses];
-Double_t        systError[nProcesses];
+TString         sChannel  [nChannels];
+TString         sCut      [nCuts];
+TString         sScanPoint[nScanPoints];
+TFile*          input     [nProcesses];
+TString         process   [nProcesses];
+Color_t         color     [nProcesses];
+Double_t        systError [nProcesses];
 
 Bool_t         _closure_test;
 Double_t       _luminosity;
@@ -132,78 +153,88 @@ Double_t        xsErrorLumi  [nChannels+1];
 
 // Member functions
 //------------------------------------------------------------------------------
-void     SetParameters            (UInt_t      cut,
-				   UInt_t      mode,
-				   UInt_t      closure_test);
+void     SetParameters            (UInt_t        cut,
+				   UInt_t        mode,
+				   UInt_t        closure_test);
 
-Int_t    ReadInputFiles           (UInt_t      channel);
+Int_t    ReadInputFiles           (UInt_t        channel);
 
-void     MeasureTheCrossSection   (UInt_t      channel,
-				   UInt_t      cut);
+void     MeasureTheCrossSection   (UInt_t        channel,
+				   UInt_t        cut);
 
-void     PrintLatexTable          (UInt_t      channel);
+void     PrintLatexTable          (UInt_t        channel);
 
-void     DrawHistogram            (TString     hname,
-				   UInt_t      channel,
-				   UInt_t      cut,
-				   TString     xtitle,
-				   Int_t       ngroup       = -1,
-				   Int_t       precision    =  0,
-				   TString     units        = "NULL",
-				   Bool_t      setLogy      = false,
-				   Double_t    xmin         = -999,
-				   Double_t    xmax         = -999,
-				   Double_t    ymin         = -999,
-				   Double_t    ymax         = -999,
-				   Bool_t      moveOverflow = true);
+void     Scan                     ();
 
-Double_t GetMaximumIncludingErrors(TH1*        h,
-				   Double_t    xmin = -999,
-				   Double_t    xmax = -999);
+void     DrawHistogram            (TString       hname,
+				   UInt_t        channel,
+				   UInt_t        cut,
+				   TString       xtitle,
+				   Int_t         ngroup       = -1,
+				   Int_t         precision    =  0,
+				   TString       units        = "NULL",
+				   Bool_t        setLogy      = false,
+				   Double_t      xmin         = -999,
+				   Double_t      xmax         = -999,
+				   Double_t      ymin         = -999,
+				   Double_t      ymax         = -999,
+				   Bool_t        moveOverflow = true);
 
-void     MoveOverflowBins         (TH1*        h,
-				   Double_t    xmin = -999,
-				   Double_t    xmax = -999);
+Double_t GetMaximumIncludingErrors(TH1*          h,
+				   Double_t      xmin = -999,
+				   Double_t      xmax = -999);
 
-void     ZeroOutOfRangeBins       (TH1*        h,
-				   Double_t    xmin = -999,
-				   Double_t    xmax = -999);
+void     MoveOverflowBins         (TH1*          h,
+				   Double_t      xmin = -999,
+				   Double_t      xmax = -999);
 
-void     SetAxis                  (TH1*        hist,
-				   TString     xtitle,
-				   TString     ytitle,
-				   Float_t     size,
-				   Float_t     offset);
+void     ZeroOutOfRangeBins       (TH1*          h,
+				   Double_t      xmin = -999,
+				   Double_t      xmax = -999);
 
-void     DrawTLatex               (Double_t    x,
-				   Double_t    y,
-				   Double_t    tsize,
-				   Short_t     align,
-				   const char* text,
-				   Bool_t      setndc = true);
+void     SetAxis                  (TH1*          hist,
+				   TString       xtitle,
+				   TString       ytitle,
+				   Float_t       size,
+				   Float_t       offset);
 
-TLegend* DrawLegend               (Float_t     x1,
-				   Float_t     y1,
-				   TH1*        hist,
-				   TString     label,
-				   TString     option,
-				   Float_t     tsize   = 0.03,
-				   Float_t     xoffset = 0.200,
-				   Float_t     yoffset = _yoffset);
+void     DrawTLatex               (Double_t      x,
+				   Double_t      y,
+				   Double_t      tsize,
+				   Short_t       align,
+				   const char*   text,
+				   Bool_t        setndc = true);
 
-Double_t Yield                    (TH1*        h);
+TLegend* DrawLegend               (Float_t       x1,
+				   Float_t       y1,
+				   TH1*          hist,
+				   TString       label,
+				   TString       option,
+				   Float_t       tsize   = 0.03,
+				   Float_t       xoffset = 0.20,
+				   Float_t       yoffset = _yoffset);
+
+Double_t Yield                    (TH1*          h);
 
 TString  GuessLocalBasePath       ();
 
 void     MakeDirectory            ();
 
-void     DrawRatios               (UInt_t      cut);
+void     DrawRatios               (UInt_t        cut);
 
-void     DrawCrossSections        (UInt_t      cut);
+void     DrawCrossSections        (UInt_t        cut);
 
-void     Inclusive                (UInt_t      cut);
+void     Inclusive                (UInt_t        cut);
 
 void     Systematics              ();
+
+void     SetGraph                 (TGraph* g,
+				   Color_t lcolor,
+				   Style_t lstyle,
+				   Width_t lwidth,
+				   Color_t mcolor,
+				   Size_t  msize,
+				   Style_t mstyle);
 
 
 //------------------------------------------------------------------------------
@@ -212,15 +243,17 @@ void     Systematics              ();
 void XS(UInt_t cut          = MET,
 	UInt_t mode         = PPFmode,
 	UInt_t closure_test = 0,
-	Bool_t batch        = true)
+	Bool_t batch        = false)
 {
   gROOT->SetBatch(batch);
 
   SetParameters(cut, mode, closure_test);
 
+  if (cut >= MET) Scan();
+
   for (UInt_t channel=0; channel<nChannels; channel++) {
 
-    if (ReadInputFiles(channel) < 0) break;
+    if (ReadInputFiles(channel) < 0) return;
 
     PrintLatexTable(channel);
     
@@ -267,6 +300,125 @@ void XS(UInt_t cut          = MET,
   DrawRatios(cut);
 
   DrawCrossSections(cut);
+}
+
+
+//------------------------------------------------------------------------------
+// Scan
+//------------------------------------------------------------------------------
+void Scan()
+{
+  TGraph* gmax [nChannels];
+  TGraph* gscan[nChannels];
+
+  for (UInt_t i=0; i<nChannels; i++) {
+
+    if (ReadInputFiles(i) < 0) return;
+
+    gmax [i] = new TGraph(1);
+    gscan[i] = new TGraph(nScanPoints);
+    
+    Double_t fomMax = 0.;
+
+    if (i == MMM) SetGraph(gscan[i], kBlack,   1, 2, kBlack,   0.75, kFullCircle);
+    if (i == EEE) SetGraph(gscan[i], kRed+1,   1, 2, kRed+1,   0.75, kOpenCircle);
+    if (i == MME) SetGraph(gscan[i], kBlue,    1, 2, kBlue,    0.75, kFullSquare);
+    if (i == EEM) SetGraph(gscan[i], kGreen+1, 1, 2, kGreen+2, 0.75, kOpenSquare);
+
+    if (i == MMM) SetGraph(gmax[i], kBlack,   1, 2, kBlack,   1.25, kFullCircle);
+    if (i == EEE) SetGraph(gmax[i], kRed+1,   1, 2, kRed+1,   1.25, kOpenCircle);
+    if (i == MME) SetGraph(gmax[i], kBlue,    1, 2, kBlue,    1.25, kFullSquare);
+    if (i == EEM) SetGraph(gmax[i], kGreen+1, 1, 2, kGreen+2, 1.25, kOpenSquare);
+
+    for (UInt_t j=0; j<nScanPoints; j++) {
+
+      TString hname = "hCounter_" + sChannel[i] + "_" + sScanPoint[j] + "_LLL";
+ 
+      Double_t nsignal     = 0;
+      Double_t nbackground = 0;
+      
+      for (UInt_t k=0; k<vprocess.size(); k++) {
+	
+	UInt_t m = vprocess.at(k);
+
+	TH1D* dummy = (TH1D*)input[m]->Get(hname);
+
+	if (m == Data) continue;
+	
+	if (m == WZTo3LNu)
+	  nsignal = Yield(dummy);
+	else
+	  nbackground += Yield(dummy);
+      }
+
+      Double_t fom = nsignal / nbackground;
+
+      gscan[i]->SetPoint(j, j, fom);
+
+      if (fom > fomMax) {fomMax = fom; gmax[i]->SetPoint(0, j, fomMax);}
+    }
+  }
+
+
+  // Draw
+  //----------------------------------------------------------------------------
+  TCanvas* canvas = new TCanvas("scan", "scan");
+
+  Double_t ymin =  5.5;
+  Double_t ymax = 15.0;
+
+  TH2F* dummy = new TH2F("dummy_scan", "",
+			 nScanPoints+1, -1, nScanPoints, 100, ymin, ymax);
+
+  dummy->Draw();
+
+  dummy->GetYaxis()->CenterTitle();
+  dummy->GetYaxis()->SetTitle("S / B");
+  dummy->GetYaxis()->SetTitleOffset(1.7);
+
+  for (UInt_t i=0; i<nChannels; i++) {gmax [i]->Draw("p"); gscan[i]->Draw("lp");}
+
+
+  // Change x-axis labels
+  //----------------------------------------------------------------------------
+  TAxis* xaxis = dummy->GetXaxis();
+  
+  for (Int_t j=1; j<xaxis->GetNbins(); j++) xaxis->SetBinLabel(j, "");
+
+  DrawTLatex(         -1.1, 4.85, 0.03, 31, "|m_{#font[12]{ll}} - M_{Z}| <", 0);
+  DrawTLatex(         -1.1, 4.20, 0.03, 31, "E_{T}^{miss} > ",               0);
+  DrawTLatex(nScanPoints-1, 3.55, 0.03, 21, "anti-b",                        0);
+
+  for (UInt_t i=0; i<nScanPoints; i++) {
+
+    if      (i == 2)             DrawTLatex(i, 4.85, 0.03, 21, Form("%d", 20), 0);
+    else if (i == 7)             DrawTLatex(i, 4.85, 0.03, 21, Form("%d", 15), 0);
+    else if (i == 12)            DrawTLatex(i, 4.85, 0.03, 21, Form("%d", 10), 0);
+    else if (i == nScanPoints-1) DrawTLatex(i, 4.85, 0.03, 21, Form("%d", 15), 0);
+
+    if (i < nScanPoints-1) DrawTLatex(i, 4.20, 0.03, 21, Form("%d", 30 + 5*(i%5)), 0);
+    else                   DrawTLatex(i, 4.20, 0.03, 21, Form("%d", 40),           0);
+  }
+
+
+  // Legend
+  //----------------------------------------------------------------------------
+  Double_t x0     = 0.220;
+  Double_t y0     = 0.835;
+  Double_t delta  = _yoffset + 0.001;
+  Double_t ndelta = 0;
+
+  for (UInt_t i=0; i<nChannels; i++)
+    {
+      DrawLegend(x0, y0 - ndelta, (TH1*)gscan[i], " " + sChannelLabel[i], "lp", 0.03, 0.18);
+      
+      ndelta += delta;
+    }
+
+
+  // Save
+  //----------------------------------------------------------------------------
+  canvas->SaveAs("png/scan.png");
 }
 
 
@@ -695,7 +847,7 @@ void DrawHistogram(TString  hname,
 
   // Legend
   //----------------------------------------------------------------------------
-  Double_t x0     = 0.72;
+  Double_t x0     = 0.720;
   Double_t y0     = 0.834;
   Double_t delta  = _yoffset + 0.001;
   Double_t ndelta = 0;
@@ -1047,8 +1199,24 @@ void SetParameters(UInt_t cut,
   sCut[Exactly3Leptons] = "Exactly3Leptons";
   sCut[HasZCandidate]   = "HasZCandidate";
   sCut[MET]             = "MET";
-  sCut[SSLike]          = "SSLike";
   sCut[SSLikeAntiBtag]  = "SSLikeAntiBtag";
+
+  sScanPoint[mll20_MET30] = "mll20_MET30";
+  sScanPoint[mll20_MET35] = "mll20_MET35";
+  sScanPoint[mll20_MET40] = "mll20_MET40";
+  sScanPoint[mll20_MET45] = "mll20_MET45";
+  sScanPoint[mll20_MET50] = "mll20_MET50";
+  sScanPoint[mll15_MET30] = "mll15_MET30";
+  sScanPoint[mll15_MET35] = "mll15_MET35";
+  sScanPoint[mll15_MET40] = "mll15_MET40";
+  sScanPoint[mll15_MET45] = "mll15_MET45";
+  sScanPoint[mll15_MET50] = "mll15_MET50";
+  sScanPoint[mll10_MET30] = "mll10_MET30";
+  sScanPoint[mll10_MET35] = "mll10_MET35";
+  sScanPoint[mll10_MET40] = "mll10_MET40";
+  sScanPoint[mll10_MET45] = "mll10_MET45";
+  sScanPoint[mll10_MET50] = "mll10_MET50";
+  sScanPoint[mll15_MET40_antiBtag] = "SSLikeAntiBtag";
 
   process[DYJets_Madgraph]  = "DYJets_Madgraph";
   process[ZJets_Madgraph]   = "ZJets_Madgraph";
@@ -1238,7 +1406,7 @@ Int_t ReadInputFiles(UInt_t channel)
 
     // Debug
     //--------------------------------------------------------------------------
-    TH1D* dummy = (TH1D*)input[j]->Get("hCounter_MMM_Exactly3Leptons_TTT");
+    TH1D* dummy = (TH1D*)input[j]->Get("hCounter_MMM_mll20_MET30_LLL");
 
     if (!dummy)
       {
@@ -1295,6 +1463,7 @@ void MakeDirectory()
 {
   _directory = "Summer12_53X/WH";
   
+  gSystem->mkdir("pdf");
   gSystem->mkdir("tex");
 
   gSystem->mkdir(_format + "/" + _directory, kTRUE);
@@ -1333,6 +1502,8 @@ void MakeDirectory()
 //------------------------------------------------------------------------------
 void DrawRatios(UInt_t cut)
 {
+  if (cut < MET) return;
+
   TGraphErrors* gStat = new TGraphErrors(nChannels+1);
   TGraphErrors* gSyst = new TGraphErrors(nChannels+1);
   TGraphErrors* gLumi = new TGraphErrors(nChannels+1);
@@ -1467,6 +1638,8 @@ void DrawRatios(UInt_t cut)
 //------------------------------------------------------------------------------
 void DrawCrossSections(UInt_t cut)
 {
+  if (cut < MET) return;
+
   TGraphErrors* gStat = new TGraphErrors(nChannels+1);
   TGraphErrors* gSyst = new TGraphErrors(nChannels+1);
   TGraphErrors* gLumi = new TGraphErrors(nChannels+1);
@@ -1645,4 +1818,24 @@ void Systematics()
 
   systError[DataPPF]  = 36.;
   systError[WZTo3LNu] =  0.;
+}
+
+
+//------------------------------------------------------------------------------
+// SetGraphErrors
+//------------------------------------------------------------------------------
+void SetGraph(TGraph* g,
+	      Color_t lcolor,
+	      Style_t lstyle,
+	      Width_t lwidth,
+	      Color_t mcolor,
+	      Size_t  msize,
+	      Style_t mstyle)
+{
+  g->SetLineColor  (lcolor);
+  g->SetLineStyle  (lstyle);
+  g->SetLineWidth  (lwidth);
+  g->SetMarkerColor(mcolor);
+  g->SetMarkerSize (msize );
+  g->SetMarkerStyle(mstyle);
 }
