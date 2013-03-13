@@ -20,18 +20,6 @@
 const Double_t Z_MASS = 91.1876;  // [GeV]
 
 
-// Input parameters for the WZ cross section
-//------------------------------------------------------------------------------
-const Double_t xsWplusZ    = 13.89;  // pb (MCFM with 71 < mZ < 111 GeV)
-const Double_t xsWminusZ   =  8.06;  // pb (MCFM with 71 < mZ < 111 GeV)
-const Double_t W2e         = 0.1075;
-const Double_t W2m         = 0.1057;
-const Double_t W2tau       = 0.1125;
-const Double_t Z2ll        = 0.033658;
-const Double_t WZ23lnu     = 3 * Z2ll * (W2e + W2m + W2tau);
-const Double_t ngenWZphase = 1449067;  // (71 < mZ < 111 GeV)
-
-
 const UInt_t nChannels = 4;
 
 enum {MMM, EEE, MME, EEM};
@@ -46,28 +34,32 @@ enum {FFF, TFF, TTF, TTT, LLL};
 TString sComposition[] = {"FFF", "TFF", "TTF", "TTT", "LLL"};
 
 
-const UInt_t nCuts = 20;
+const UInt_t nCuts = 25;
 
 enum {
   Exactly3Leptons,
   HasZCandidate,
   HasWCandidate,
+  ATLAS,
   MET,
-  mll20_MET30, mll20_MET35, mll20_MET40, mll20_MET45, mll20_MET50,
-  mll15_MET30, mll15_MET35, mll15_MET40, mll15_MET45, mll15_MET50,
-  mll10_MET30, mll10_MET35, mll10_MET40, mll10_MET45, mll10_MET50,
-  SSLikeAntiBtag
+  SSLike,
+  SSLikeAntiBtag,
+  mll20_MET25, mll20_MET30, mll20_MET35, mll20_MET40, mll20_MET45, mll20_MET50,
+  mll15_MET25, mll15_MET30, mll15_MET35, mll15_MET40, mll15_MET45, mll15_MET50,
+  mll10_MET25, mll10_MET30, mll10_MET35, mll10_MET40, mll10_MET45, mll10_MET50
 };
 
 TString sCut[] = {
   "Exactly3Leptons",
   "HasZCandidate",
   "HasWCandidate",
+  "ATLAS",
   "MET",
-  "mll20_MET30", "mll20_MET35", "mll20_MET40", "mll20_MET45", "mll20_MET50",
-  "mll15_MET30", "mll15_MET35", "mll15_MET40", "mll15_MET45", "mll15_MET50",
-  "mll10_MET30", "mll10_MET35", "mll10_MET40", "mll10_MET45", "mll10_MET50",
-  "SSLikeAntiBtag"
+  "SSLike",
+  "SSLikeAntiBtag",
+  "mll20_MET25", "mll20_MET30", "mll20_MET35", "mll20_MET40", "mll20_MET45", "mll20_MET50",
+  "mll15_MET25", "mll15_MET30", "mll15_MET35", "mll15_MET40", "mll15_MET45", "mll15_MET50",
+  "mll10_MET25", "mll10_MET30", "mll10_MET35", "mll10_MET40", "mll10_MET45", "mll10_MET50"
 };
 
 

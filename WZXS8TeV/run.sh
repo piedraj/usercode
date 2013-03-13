@@ -1,16 +1,13 @@
 
- export RAW=0;
- export PPF=1;
- 
  ./resetproof.sh -a; qdel all; #endproof;
  
- root -l -b -q RunPROOF_WZ.C\(\"DoubleElectron\",RAW\);
- root -l -b -q RunPROOF_WZ.C\(\"DoubleElectron\",PPF\);
+ root -l -b -q RunPROOF_WZ.C\(\"DoubleElectron\",0\);
+ root -l -b -q RunPROOF_WZ.C\(\"DoubleElectron\",1\);
  
  ./resetproof.sh -a; qdel all; #endproof; 
  
- root -l -b -q RunPROOF_WZ.C\(\"DoubleMu\",RAW\);
- root -l -b -q RunPROOF_WZ.C\(\"DoubleMu\",PPF\);
+ root -l -b -q RunPROOF_WZ.C\(\"DoubleMu\",0\);
+ root -l -b -q RunPROOF_WZ.C\(\"DoubleMu\",1\);
  
  ./resetproof.sh -a; qdel all; #endproof;
  

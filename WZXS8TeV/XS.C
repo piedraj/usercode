@@ -39,8 +39,8 @@ const Double_t ngenWZphase = 1449067;  // (71 < mZ < 111 GeV)
 // Data members
 //------------------------------------------------------------------------------
 const UInt_t nChannels   =  4;
-const UInt_t nCuts       =  4;
-const UInt_t nScanPoints = 16;
+const UInt_t nCuts       =  5;
+const UInt_t nScanPoints = 20;
 const UInt_t nProcesses  = 39;
 
 enum {MMM, EEE, MME, EEM};
@@ -49,26 +49,31 @@ enum {
   Exactly3Leptons,
   HasZCandidate,
   MET,
+  SSLike,
   SSLikeAntiBtag
 };
 
 enum {
+  mll20_MET25,
   mll20_MET30,
   mll20_MET35,
   mll20_MET40,
   mll20_MET45,
   mll20_MET50,
+  mll15_MET25,
   mll15_MET30,
   mll15_MET35,
   mll15_MET40,
   mll15_MET45,
   mll15_MET50,
+  mll10_MET25,
   mll10_MET30,
   mll10_MET35,
   mll10_MET40,
   mll10_MET45,
   mll10_MET50,
-  mll15_MET40_antiBtag
+  mll15_MET40_SSLike,
+  mll15_MET40_SSLikeAntiBtag
 };
 
 enum {
@@ -319,7 +324,7 @@ void Scan()
     gscan[i] = new TGraph(nScanPoints);
     
     Double_t fomMax = 0.;
-
+    
     if (i == MMM) SetGraph(gscan[i], kBlack,   1, 2, kBlack,   0.75, kFullCircle);
     if (i == EEE) SetGraph(gscan[i], kRed+1,   1, 2, kRed+1,   0.75, kOpenCircle);
     if (i == MME) SetGraph(gscan[i], kBlue,    1, 2, kBlue,    0.75, kFullSquare);
@@ -344,9 +349,9 @@ void Scan()
 	TH1D* dummy = (TH1D*)input[m]->Get(hname);
 
 	if (m == Data) continue;
-	
+
 	if (m == WZTo3LNu)
-	  nsignal = Yield(dummy);
+      	  nsignal = Yield(dummy);
 	else
 	  nbackground += Yield(dummy);
       }
@@ -354,57 +359,66 @@ void Scan()
       Double_t fom = nsignal / nbackground;
 
       gscan[i]->SetPoint(j, j, fom);
-
+      
       if (fom > fomMax) {fomMax = fom; gmax[i]->SetPoint(0, j, fomMax);}
     }
   }
-
+  
 
   // Draw
   //----------------------------------------------------------------------------
-  TCanvas* canvas = new TCanvas("scan", "scan");
+  TCanvas* canvas = new TCanvas("scan", "scan", 700, 600);
 
-  Double_t ymin =  5.5;
-  Double_t ymax = 15.0;
+  canvas->SetLeftMargin(0.75 * canvas->GetLeftMargin());
 
-  TH2F* dummy = new TH2F("dummy_scan", "",
-			 nScanPoints+1, -1, nScanPoints, 100, ymin, ymax);
+  Double_t ymin =  4.7;
+  Double_t ymax = 14.9;
 
-  dummy->Draw();
+  TH2F* th2scan = new TH2F("th2scan", "",
+			   nScanPoints+1, -1., (Double_t)nScanPoints,
+			   100, ymin, ymax);
 
-  dummy->GetYaxis()->CenterTitle();
-  dummy->GetYaxis()->SetTitle("S / B");
-  dummy->GetYaxis()->SetTitleOffset(1.7);
+  th2scan->Draw();
+  th2scan->GetYaxis()->CenterTitle();
+  th2scan->GetYaxis()->SetTitle("S / B");
+  th2scan->GetYaxis()->SetTitleOffset(1.4);
 
   for (UInt_t i=0; i<nChannels; i++) {gmax [i]->Draw("p"); gscan[i]->Draw("lp");}
 
 
   // Change x-axis labels
   //----------------------------------------------------------------------------
-  TAxis* xaxis = dummy->GetXaxis();
+  Double_t ydelta = 0.7;
+  Double_t ypos   = 4.0;
+  Size_t   tsize  = 0.025;
+
+  TAxis* xaxis = th2scan->GetXaxis();
   
   for (Int_t j=1; j<xaxis->GetNbins(); j++) xaxis->SetBinLabel(j, "");
 
-  DrawTLatex(         -1.1, 4.85, 0.03, 31, "|m_{#font[12]{ll}} - M_{Z}| <", 0);
-  DrawTLatex(         -1.1, 4.20, 0.03, 31, "E_{T}^{miss} > ",               0);
-  DrawTLatex(nScanPoints-1, 3.55, 0.03, 21, "anti-b",                        0);
+  DrawTLatex(-1.1, ypos,        tsize, 31, "|m_{#font[12]{ll}} - M_{Z}| <", 0);
+  DrawTLatex(-1.1, ypos-ydelta, tsize, 31, "E_{T}^{miss} > ",               0);
 
+  DrawTLatex(mll15_MET40_SSLikeAntiBtag, ypos-2.*ydelta, tsize, 21, "#slash{b}", 0);
+  
   for (UInt_t i=0; i<nScanPoints; i++) {
+    
+    if      (i ==  3) DrawTLatex(i, ypos, tsize, 21, Form("%d", 20), 0);
+    else if (i ==  9) DrawTLatex(i, ypos, tsize, 21, Form("%d", 15), 0);
+    else if (i == 15) DrawTLatex(i, ypos, tsize, 21, Form("%d", 10), 0);
+    else if (i == mll15_MET40_SSLike)         DrawTLatex(i, ypos, tsize, 21, Form("%d", 15), 0);
+    else if (i == mll15_MET40_SSLikeAntiBtag) DrawTLatex(i, ypos, tsize, 21, Form("%d", 15), 0);
 
-    if      (i == 2)             DrawTLatex(i, 4.85, 0.03, 21, Form("%d", 20), 0);
-    else if (i == 7)             DrawTLatex(i, 4.85, 0.03, 21, Form("%d", 15), 0);
-    else if (i == 12)            DrawTLatex(i, 4.85, 0.03, 21, Form("%d", 10), 0);
-    else if (i == nScanPoints-1) DrawTLatex(i, 4.85, 0.03, 21, Form("%d", 15), 0);
-
-    if (i < nScanPoints-1) DrawTLatex(i, 4.20, 0.03, 21, Form("%d", 30 + 5*(i%5)), 0);
-    else                   DrawTLatex(i, 4.20, 0.03, 21, Form("%d", 40),           0);
+    if      (i < nScanPoints-2)               DrawTLatex(i, ypos-ydelta, tsize, 21, Form("%d", 25 + 5*(i%6)), 0);
+    else if (i == mll10_MET40_SSLike)         DrawTLatex(i, ypos-ydelta, tsize, 21, Form("%d", 40), 0);
+    else if (i == mll15_MET40_SSLikeAntiBtag) DrawTLatex(i, ypos-ydelta, tsize, 21, Form("%d", 40), 0);
   }
 
 
   // Legend
   //----------------------------------------------------------------------------
-  Double_t x0     = 0.220;
-  Double_t y0     = 0.835;
+  Double_t x0     = 0.165;
+  Double_t y0     = 0.830;
   Double_t delta  = _yoffset + 0.001;
   Double_t ndelta = 0;
 
@@ -1199,24 +1213,32 @@ void SetParameters(UInt_t cut,
   sCut[Exactly3Leptons] = "Exactly3Leptons";
   sCut[HasZCandidate]   = "HasZCandidate";
   sCut[MET]             = "MET";
+  sCut[SSLike]          = "SSLike";
   sCut[SSLikeAntiBtag]  = "SSLikeAntiBtag";
 
+  sScanPoint[mll20_MET25] = "mll20_MET25";
   sScanPoint[mll20_MET30] = "mll20_MET30";
   sScanPoint[mll20_MET35] = "mll20_MET35";
   sScanPoint[mll20_MET40] = "mll20_MET40";
   sScanPoint[mll20_MET45] = "mll20_MET45";
   sScanPoint[mll20_MET50] = "mll20_MET50";
+
+  sScanPoint[mll15_MET25] = "mll15_MET25";
   sScanPoint[mll15_MET30] = "mll15_MET30";
   sScanPoint[mll15_MET35] = "mll15_MET35";
   sScanPoint[mll15_MET40] = "mll15_MET40";
   sScanPoint[mll15_MET45] = "mll15_MET45";
   sScanPoint[mll15_MET50] = "mll15_MET50";
+
+  sScanPoint[mll10_MET25] = "mll10_MET25";
   sScanPoint[mll10_MET30] = "mll10_MET30";
   sScanPoint[mll10_MET35] = "mll10_MET35";
   sScanPoint[mll10_MET40] = "mll10_MET40";
   sScanPoint[mll10_MET45] = "mll10_MET45";
   sScanPoint[mll10_MET50] = "mll10_MET50";
-  sScanPoint[mll15_MET40_antiBtag] = "SSLikeAntiBtag";
+
+  sScanPoint[mll15_MET40_SSLike]         = "SSLike";
+  sScanPoint[mll15_MET40_SSLikeAntiBtag] = "SSLikeAntiBtag";
 
   process[DYJets_Madgraph]  = "DYJets_Madgraph";
   process[ZJets_Madgraph]   = "ZJets_Madgraph";
@@ -1406,7 +1428,7 @@ Int_t ReadInputFiles(UInt_t channel)
 
     // Debug
     //--------------------------------------------------------------------------
-    TH1D* dummy = (TH1D*)input[j]->Get("hCounter_MMM_mll20_MET30_LLL");
+    TH1D* dummy = (TH1D*)input[j]->Get("hCounter_MMM_SSLike_LLL");
 
     if (!dummy)
       {
@@ -1426,9 +1448,16 @@ Int_t ReadInputFiles(UInt_t channel)
 //------------------------------------------------------------------------------
 Double_t Yield(TH1* h)
 {
-  Int_t nbins = h->GetNbinsX();
-
-  return h->Integral(0, nbins+1);
+  if (h)
+    {
+      Int_t nbins = h->GetNbinsX();
+      
+      return h->Integral(0, nbins+1);
+    }
+  else
+    {
+      return 0.;
+    }
 }
 
 
