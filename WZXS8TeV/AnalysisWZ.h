@@ -9,6 +9,7 @@
 #include "TH1F.h"
 #include "TH2F.h"
 #include "TLorentzVector.h"
+#include "TRandom.h"
 #include "TVector3.h"
 
 #include <algorithm>
@@ -20,21 +21,21 @@
 const Double_t Z_MASS = 91.1876;  // [GeV]
 
 
-const UInt_t nChannels = 4;
+const UInt_t nChannel = 4;
 
 enum {MMM, EEE, MME, EEM};
 
 TString sChannel[] = {"MMM", "EEE", "MME", "EEM"};
 
 
-const UInt_t nCompositions = 5;
+const UInt_t nComposition = 5;
 
 enum {FFF, TFF, TTF, TTT, LLL};
 
 TString sComposition[] = {"FFF", "TFF", "TTF", "TTT", "LLL"};
 
 
-const UInt_t nCuts = 25;
+const UInt_t nCut = 25;
 
 enum {
   Exactly3Leptons,
@@ -69,7 +70,7 @@ enum {Tight, Fail};
 
 enum {RAW, PPF, PPP};
 
-const UInt_t nFakeRates = 3;
+const UInt_t nFakeRate = 3;
 
 enum {Jet15, Jet30, Jet50};
 
@@ -80,7 +81,7 @@ struct Lepton
   UInt_t         type;    // Tight, Fail
   Double_t       charge;
   Double_t       sf;
-  Double_t       fr[nFakeRates];
+  Double_t       fr[nFakeRate];
   Double_t       pr;
   TLorentzVector v;
 
@@ -106,115 +107,116 @@ class AnalysisWZ: public CMSAnalysisSelectorMiniTrees
   virtual void Summary();
 
 
-  // My member functions
+  // Member functions
   //----------------------------------------------------------------------------
-  void         GetParameters             ();
+  void           GetParameters             ();
 			    
-  Bool_t       ElectronID                (UInt_t   iElec);
-  Bool_t       ElectronCloseToPV         (UInt_t   iElec);
-  Bool_t       ElectronBDT               (UInt_t   iElec);
-  Bool_t       ElectronIsolation         (UInt_t   iElec);
+  Bool_t         ElectronID                (UInt_t   iElec);
+  Bool_t         ElectronCloseToPV         (UInt_t   iElec);
+  Bool_t         ElectronBDT               (UInt_t   iElec);
+  Bool_t         ElectronIsolation         (UInt_t   iElec);
 			    	      
-  Bool_t       MuonID                    (UInt_t   iMuon);
-  Bool_t       MuonCloseToPV             (UInt_t   iMuon);
-  Bool_t       MuonIsolation             (UInt_t   iMuon);
+  Bool_t         MuonID                    (UInt_t   iMuon);
+  Bool_t         MuonCloseToPV             (UInt_t   iMuon);
+  Bool_t         MuonIsolation             (UInt_t   iMuon);
   
-  void         FillChannelCounters       (UInt_t   iChannel,
-					  UInt_t   iCut,
-					  Double_t dd_weight);
+  void           FillHistograms            (UInt_t   iChannel,
+					    UInt_t   iCut,
+					    Double_t dd_weight);
 
-  void         FillHistograms            (UInt_t   iChannel,
-  					  UInt_t   iCut,
-					  Double_t dd_weight);
+  const Bool_t   WgammaFilter              () const;
 
-  const Bool_t WgammaFilter              () const;
+  Double_t       GetPPFWeight              (UInt_t   jetPt);
+  Double_t       GetPPPWeight              (UInt_t   jetPt);
 
-  Double_t     GetPPFWeight              (UInt_t   jetPt);
-  Double_t     GetPPPWeight              (UInt_t   jetPt);
-  Double_t     GetPPFWeightApprx         (UInt_t   jetPt);
+  TH2F*          LoadHistogram             (TString  filename,
+					    TString  hname,
+					    TString  cname);
 
-  TH2F*        LoadHistogram             (TString  filename,
-					  TString  hname,
-					  TString  cname);
+  void           CounterSummary            (TString  title);
 
-  void         CounterSummary            (TString  title);
+  TLorentzVector GetMET                    ();
 
 
  public:
   
   // Histograms
   //----------------------------------------------------------------------------
-  TH1D*                       hCounterRaw[nChannels][nCuts][nCompositions];
-  TH1D*                       hCounterPU [nChannels][nCuts][nCompositions];
-  TH1D*                       hCounterEff[nChannels][nCuts][nCompositions];
-  TH1D*                       hCounter   [nChannels][nCuts][nCompositions];
+  TH1D*                       hCounterRaw[nChannel][nCut][nComposition];
+  TH1D*                       hCounterPU [nChannel][nCut][nComposition];
+  TH1D*                       hCounterEff[nChannel][nCut][nComposition];
+  TH1D*                       hCounter   [nChannel][nCut][nComposition];
 
-  TH1D*                       hNPV         [nChannels][nCuts];
-  TH1D*                       hMET         [nChannels][nCuts];
-  TH1D*                       hSumCharges  [nChannels][nCuts];
-  TH1D*                       hInvMass2Lep [nChannels][nCuts];
-  TH1D*                       hInvMass3Lep [nChannels][nCuts];
-  TH1D*                       hPtLepton1   [nChannels][nCuts];
-  TH1D*                       hPtLepton2   [nChannels][nCuts];
-  TH1D*                       hPtLepton3   [nChannels][nCuts];
-  TH1D*                       hPtLeadingJet[nChannels][nCuts];
-  TH1D*                       hDPhiZLeptons[nChannels][nCuts];
-  TH1D*                       hPtZLepton1  [nChannels][nCuts];
-  TH1D*                       hPtZLepton2  [nChannels][nCuts];
-  TH1D*                       hPtWLepton   [nChannels][nCuts];
-  TH1D*                       hDRWZLepton1 [nChannels][nCuts];
-  TH1D*                       hDRWZLepton2 [nChannels][nCuts];
-  TH1D*                       hMtW         [nChannels][nCuts];
+  TH1D*                       hNPV         [nChannel][nCut];
+  TH1D*                       hMET         [nChannel][nCut];
+  TH1D*                       hSumCharges  [nChannel][nCut];
+  TH1D*                       hInvMass2Lep [nChannel][nCut];
+  TH1D*                       hInvMass3Lep [nChannel][nCut];
+  TH1D*                       hPtLepton1   [nChannel][nCut];
+  TH1D*                       hPtLepton2   [nChannel][nCut];
+  TH1D*                       hPtLepton3   [nChannel][nCut];
+  TH1D*                       hPtLeadingJet[nChannel][nCut];
+  TH1D*                       hDPhiZLeptons[nChannel][nCut];
+  TH1D*                       hPtZLepton1  [nChannel][nCut];
+  TH1D*                       hPtZLepton2  [nChannel][nCut];
+  TH1D*                       hPtWLepton   [nChannel][nCut];
+  TH1D*                       hDRWZLepton1 [nChannel][nCut];
+  TH1D*                       hDRWZLepton2 [nChannel][nCut];
+  TH1D*                       hMtW         [nChannel][nCut];
 
 
   // Input parameters
   //----------------------------------------------------------------------------
-  Int_t                       mode;
-  Int_t                       closure_test;
   TString                     directory;
   TString                     sample;
-  TString                     fileSuffix;
-  Double_t                    efficiency_weight;
-  Double_t                    pu_weight;
-  Double_t                    xs_weight;
   Double_t                    luminosity;
   Double_t                    pu_luminosity;
-  PUWeight*                   fPUWeight;
+  Double_t                    xs_weight;
+  Int_t                       mode;
+  Int_t                       met_systematic;
+  Int_t                       closure_test;
+  Int_t                       runAtOviedo;
 
 
   // Data members
   //----------------------------------------------------------------------------
   std::vector<Lepton>         AnalysisLeptons;
 
+  TLorentzVector              EventMET;
+  TLorentzVector              WLepton;
   TLorentzVector              ZLepton1;
   TLorentzVector              ZLepton2;
-  TLorentzVector              WLepton;
 
   Bool_t                      isData;
+
+  Double_t                    efficiency_weight;
   Double_t                    invMass2Lep;
   Double_t                    invMass3Lep;
-  Double_t                    transverseMass;
   Double_t                    sumCharges;
+  Double_t                    transverseMass;
   Double_t                    ptLeadingJet;
-  UInt_t                      nbjets;
-  UInt_t                      theChannel;
-  UInt_t                      electronCounter;
-  UInt_t                      tightCounter;
+  Double_t                    pu_weight;
 
-  Double_t                    dataDriven_weight[nFakeRates];
+  UInt_t                      nBJet;
+  UInt_t                      nElectron;
+  UInt_t                      nTight;
+  UInt_t                      theChannel;
 
   ofstream                    outputfile;
 
+  PUWeight*                   fPUWeight;
 
-  // SF, FR and PR
+
+  // Scale factors, fake rates and prompt rates
   //----------------------------------------------------------------------------
+  Double_t                    dataDriven_weight[nFakeRate];
+
+  TH2F*                       MuonFR[nFakeRate];
+  TH2F*                       ElecFR[nFakeRate];
   TH2F*                       MuonSF;
   TH2F*                       ElecSF;
   TH2F*                       MuonPR;
   TH2F*                       ElecPR;
-
-  TH2F*                       MuonFR[nFakeRates];
-  TH2F*                       ElecFR[nFakeRates];
 
 
   ClassDef(AnalysisWZ, 0);

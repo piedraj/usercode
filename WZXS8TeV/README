@@ -45,8 +45,8 @@ cvs co -d PUWeight UserCode/IFCA-UO/Utils/PUWeight
 ################################################################################
 
 cd PAF
-mkdir LeptonScaleFactors
-cd LeptonScaleFactors
+mkdir AuxiliaryFilesWZXS8TeV
+cd AuxiliaryFilesWZXS8TeV
 
 wget www.hep.uniovi.es/piedra/AuxiliaryFilesWZXS8TeV/MuSF_2012.root
 wget www.hep.uniovi.es/piedra/AuxiliaryFilesWZXS8TeV/EleSF_2012.root
@@ -58,6 +58,7 @@ wget www.hep.uniovi.es/piedra/AuxiliaryFilesWZXS8TeV/MuFR_Moriond13_jet50_EWKcor
 wget www.hep.uniovi.es/piedra/AuxiliaryFilesWZXS8TeV/EleFR_Moriond13_jet15_EWKcorr.root
 wget www.hep.uniovi.es/piedra/AuxiliaryFilesWZXS8TeV/EleFR_Moriond13_jet35_EWKcorr.root
 wget www.hep.uniovi.es/piedra/AuxiliaryFilesWZXS8TeV/EleFR_Moriond13_jet50_EWKcorr.root
+wget www.hep.uniovi.es/piedra/AuxiliaryFilesWZXS8TeV/genZmass.root
 
 
 ################################################################################

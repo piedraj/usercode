@@ -1,21 +1,21 @@
 //------------------------------------------------------------------------------
 //
-// scp lxplus.cern.ch:/afs/cern.ch/work/c/calderon/public/LatinoTrees/leptonEffAndFakesHWW/MuFR_Moriond13_jet15_EWKcorr.root             ~/www/LeptonScaleFactors/.
-// scp lxplus.cern.ch:/afs/cern.ch/work/c/calderon/public/LatinoTrees/leptonEffAndFakesHWW/MuFR_Moriond13_jet30_EWKcorr.root             ~/www/LeptonScaleFactors/.
-// scp lxplus.cern.ch:/afs/cern.ch/work/c/calderon/public/LatinoTrees/leptonEffAndFakesHWW/MuFR_Moriond13_jet50_EWKcorr.root             ~/www/LeptonScaleFactors/.
-// scp lxplus.cern.ch:/afs/cern.ch/work/c/calderon/public/LatinoTrees/leptonEffAndFakesHWW/fakerates_trigger_Moriond13_ewksub.root       ~/www/LeptonScaleFactors/.
-// scp lxplus.cern.ch:/afs/cern.ch/work/c/calderon/public/LatinoTrees/leptonEffAndFakesHWW/fakerates_trigger_Moriond13_ewksub_jet15.root ~/www/LeptonScaleFactors/.
-// scp lxplus.cern.ch:/afs/cern.ch/work/c/calderon/public/LatinoTrees/leptonEffAndFakesHWW/fakerates_trigger_Moriond13_ewksub_jet50.root ~/www/LeptonScaleFactors/.
+// scp lxplus.cern.ch:/afs/cern.ch/work/c/calderon/public/LatinoTrees/leptonEffAndFakesHWW/MuFR_Moriond13_jet15_EWKcorr.root             ~/www/AuxiliaryFilesWZXS8TeV/.
+// scp lxplus.cern.ch:/afs/cern.ch/work/c/calderon/public/LatinoTrees/leptonEffAndFakesHWW/MuFR_Moriond13_jet30_EWKcorr.root             ~/www/AuxiliaryFilesWZXS8TeV/.
+// scp lxplus.cern.ch:/afs/cern.ch/work/c/calderon/public/LatinoTrees/leptonEffAndFakesHWW/MuFR_Moriond13_jet50_EWKcorr.root             ~/www/AuxiliaryFilesWZXS8TeV/.
+// scp lxplus.cern.ch:/afs/cern.ch/work/c/calderon/public/LatinoTrees/leptonEffAndFakesHWW/fakerates_trigger_Moriond13_ewksub.root       ~/www/AuxiliaryFilesWZXS8TeV/.
+// scp lxplus.cern.ch:/afs/cern.ch/work/c/calderon/public/LatinoTrees/leptonEffAndFakesHWW/fakerates_trigger_Moriond13_ewksub_jet15.root ~/www/AuxiliaryFilesWZXS8TeV/.
+// scp lxplus.cern.ch:/afs/cern.ch/work/c/calderon/public/LatinoTrees/leptonEffAndFakesHWW/fakerates_trigger_Moriond13_ewksub_jet50.root ~/www/AuxiliaryFilesWZXS8TeV/.
 //
-// scp lxplus.cern.ch:/afs/cern.ch/user/h/hbrun/www/promptRateAll2012/prompt_rateMuons.root     ~/www/LeptonScaleFactors/.
-// scp lxplus.cern.ch:/afs/cern.ch/user/h/hbrun/www/promptRateAll2012/prompt_rateElectrons.root ~/www/LeptonScaleFactors/.
-// scp lxplus.cern.ch:/afs/cern.ch/user/h/hbrun/www/SFbyPeriod/allMuonsSF.root                  ~/www/LeptonScaleFactors/.
-// scp lxplus.cern.ch:/afs/cern.ch/user/h/hbrun/www/SFbyPeriod/allElectronsSF.root              ~/www/LeptonScaleFactors/.
+// scp lxplus.cern.ch:/afs/cern.ch/user/h/hbrun/www/promptRateAll2012/prompt_rateMuons.root     ~/www/AuxiliaryFilesWZXS8TeV/.
+// scp lxplus.cern.ch:/afs/cern.ch/user/h/hbrun/www/promptRateAll2012/prompt_rateElectrons.root ~/www/AuxiliaryFilesWZXS8TeV/.
+// scp lxplus.cern.ch:/afs/cern.ch/user/h/hbrun/www/SFbyPeriod/allMuonsSF.root                  ~/www/AuxiliaryFilesWZXS8TeV/.
+// scp lxplus.cern.ch:/afs/cern.ch/user/h/hbrun/www/SFbyPeriod/allElectronsSF.root              ~/www/AuxiliaryFilesWZXS8TeV/.
 //
 //------------------------------------------------------------------------------
 
 
-const TString path = "/nfs/fanae/user/piedra/www/LeptonScaleFactors/";
+const TString path = "/nfs/fanae/user/piedra/www/AuxiliaryFilesWZXS8TeV/";
 
 
 const Int_t ptBinsSizeElFake = 5;

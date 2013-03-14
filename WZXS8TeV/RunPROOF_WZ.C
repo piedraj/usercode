@@ -1,43 +1,44 @@
-////////////////////////////////////////////////////////////////////////////////
-//
-//    FILE: RunPROOF_WZ.C
-// AUTHORS: I. Gonzalez, A.Y. Rodriguez, J. Piedra
-//    DATE: 2012
-//
-// CONTENT: Main macro to run over MiniTrees using PROOF in PROOF-Lite,
-//          PROOF-Cluster or Sequential mode
-//
-////////////////////////////////////////////////////////////////////////////////
-
 #include "scripts/PAFUtils.C"
+
+
+Double_t luminosity    = 19602.0;  // pb
+Double_t pu_luminosity = 19468.3;  // pb
+Double_t xs_weight     = 1;
+Int_t    runAtOviedo   = 1;
+TProof*  proof         = 0;
+TString  dataPath      = "";
 
 
 enum {RAW, PPF, PPP};
 
 
-Double_t G_Event_Weight = 1;
-Double_t luminosity     = 19602.0;  // pb
-Double_t pu_luminosity  = 19468.3;  // pb
-TProof*  proof          = 0;
-TString  dataPath       = "";
-
-
-void RunPROOF_WZ(TString  sample       = "DoubleMu",
-		 Int_t    mode         = RAW,
-		 Int_t    closure_test = 0,
-		 Long64_t nEvents      = -1,
-		 Bool_t   update       = true)
+void RunPROOF_WZ(TString  sample         = "DoubleMu",
+		 Int_t    mode           = RAW,
+		 Int_t    met_systematic = 0,
+		 Int_t    closure_test   = 0,
+		 Long64_t nEvents        = -1,
+		 Bool_t   update         = true)
 {
   dataPath = GuessLocalBasePath();
 
 
+  // Reset PROOF
+  //----------------------------------------------------------------------------
+  gSystem->Exec("./resetproof.sh -a");
+
+  if (runAtOviedo) gSystem->Exec("qdel all");
+  else             gSystem->Exec("endproof");
+
+
   // PROOF mode
   //----------------------------------------------------------------------------
+  gPAFOptions->NSlots = 30;
+
+  if (runAtOviedo) gPAFOptions->proofMode = kPoD;
+  else             gPAFOptions->proofMode = kCluster;           
+
   //  gPAFOptions->proofMode = kSequential;
   //  gPAFOptions->proofMode = kLite;
-  //  gPAFOptions->proofMode = kCluster;
-  gPAFOptions->proofMode = kPoD;
-  gPAFOptions->NSlots    = 30;
 
 
   // PROOF start
@@ -59,13 +60,9 @@ void RunPROOF_WZ(TString  sample       = "DoubleMu",
   //----------------------------------------------------------------------------
   gROOT->LoadMacro("../DatasetManager/DatasetManager.C+");
 
-  if (sample.Contains("DoubleElectron"))
+  if (sample.Contains("DoubleElectron") || sample.Contains("DoubleMu"))
     {
       gPAFOptions->dataFiles = GetRealDataFiles("MC_Summer12_53X/WH/CalibratedE", sample.Data());
-    }
-  else if (sample.Contains("DoubleMu"))
-    {
-      gPAFOptions->dataFiles = GetRealDataFiles("MC_Summer12_53X/WH", sample.Data());
     }
   else
     {
@@ -77,14 +74,14 @@ void RunPROOF_WZ(TString  sample       = "DoubleMu",
 
       gPAFOptions->dataFiles = dm->GetFiles();
 
-      G_Event_Weight = dm->GetCrossSection() * luminosity / dm->GetEventsInTheSample();
+      xs_weight = dm->GetCrossSection() * luminosity / dm->GetEventsInTheSample();
 
       cout << endl;
-      cout << "      x-section = " << dm->GetCrossSection()      << endl;
-      cout << "     luminosity = " << luminosity                 << endl;
+      cout << "             xs = " << dm->GetCrossSection()      << " pb"   << endl;
+      cout << "     luminosity = " << luminosity                 << " pb-1" << endl;
       cout << "        nevents = " << dm->GetEventsInTheSample() << endl;
       cout << " base file name = " << dm->GetBaseFileName()      << endl;
-      cout << "         weight = " << G_Event_Weight             << endl;
+      cout << "         weight = " << xs_weight                  << endl;
       cout << endl;
     }
 
@@ -93,7 +90,8 @@ void RunPROOF_WZ(TString  sample       = "DoubleMu",
   //----------------------------------------------------------------------------
   TString outputDir = "../WZXS8TeV/results/Summer12_53X/WH";
 
-  if (closure_test) outputDir += "/closure_test";
+  if (met_systematic) outputDir += "/systematics/met";
+  if (closure_test)   outputDir += "/closure_test";
 
   gSystem->mkdir(outputDir, kTRUE);
 
@@ -109,13 +107,15 @@ void RunPROOF_WZ(TString  sample       = "DoubleMu",
   //----------------------------------------------------------------------------
   gPAFOptions->inputParameters = new InputParameters();
 
-  gPAFOptions->inputParameters->SetNamedString("directory",     outputDir.Data());
-  gPAFOptions->inputParameters->SetNamedString("sample",        sample.Data());
-  gPAFOptions->inputParameters->SetNamedDouble("xs_weight",     G_Event_Weight);
-  gPAFOptions->inputParameters->SetNamedDouble("luminosity",    luminosity);
-  gPAFOptions->inputParameters->SetNamedDouble("pu_luminosity", pu_luminosity);
-  gPAFOptions->inputParameters->SetNamedInt   ("mode",          mode);
-  gPAFOptions->inputParameters->SetNamedInt   ("closure_test",  closure_test);
+  gPAFOptions->inputParameters->SetNamedString("directory",      outputDir.Data());
+  gPAFOptions->inputParameters->SetNamedString("sample",         sample.Data());
+  gPAFOptions->inputParameters->SetNamedDouble("luminosity",     luminosity);
+  gPAFOptions->inputParameters->SetNamedDouble("pu_luminosity",  pu_luminosity);
+  gPAFOptions->inputParameters->SetNamedDouble("xs_weight",      xs_weight);
+  gPAFOptions->inputParameters->SetNamedInt   ("mode",           mode);
+  gPAFOptions->inputParameters->SetNamedInt   ("met_systematic", met_systematic);
+  gPAFOptions->inputParameters->SetNamedInt   ("closure_test",   closure_test);
+  gPAFOptions->inputParameters->SetNamedInt   ("runAtOviedo",    runAtOviedo);
 
 
   // Number of events (Long64_t)

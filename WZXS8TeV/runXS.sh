@@ -1,37 +1,33 @@
+#!/bin/bash
 
- rm -rf pdf
- rm -rf png
- rm -rf tex
+rm -rf pdf
+rm -rf png
+rm -rf tex
 
- root -l -b -q XS.C+\(MET,MCmode,1,1\)
- root -l -b -q XS.C+\(MET,PPFmode,1,1\)
+for ((level=0; level<6; level++))
+  do
+  for ((mode=0; mode<2; mode++))
+    do
+    root -l -b -q XS.C+\($level,$mode,0,1\)
+  done
+done
 
- root -l -b -q XS.C+\(Exactly3Leptons,MCmode,0,1\)
- root -l -b -q XS.C+\(Exactly3Leptons,PPFmode,0,1\)
+root -l -b -q XS.C+\(MET,PPFmode,1,1\)
+root -l -b -q XS.C+\(MET,PPFmode,1,1\)
 
- root -l -b -q XS.C+\(HasZCandidate,MCmode,0,1\)
- root -l -b -q XS.C+\(HasZCandidate,PPFmode,0,1\)
+root -l -b -q drawScaleFactors.C+
 
- root -l -b -q XS.C+\(MET,MCmode,0,1\)
- root -l -b -q XS.C+\(MET,PPFmode,0,1\)
+pdflatex mc_samples_wz8tev.tex
+pdflatex mc_samples_wz8tev.tex
 
- root -l -b -q XS.C+\(SSLikeAntiBtag,MCmode,0,1\)
- root -l -b -q XS.C+\(SSLikeAntiBtag,PPFmode,0,1\)
+pdflatex yields.tex
+pdflatex yields.tex
 
- root -l -b -q drawScaleFactors.C+
+mv mc_samples_wz8tev.pdf pdf/.
+mv yields.pdf            pdf/.
 
- pdflatex mc_samples_wz8tev.tex
- pdflatex mc_samples_wz8tev.tex
-
- pdflatex yields.tex
- pdflatex yields.tex
-
- mv mc_samples_wz8tev.pdf pdf/.
- mv yields.pdf            pdf/.
-
- rm -rf *aux
- rm -rf *d
- rm -rf *log
- rm -rf *so
- rm -rf *~
-
+rm -rf *aux
+rm -rf *d
+rm -rf *log
+rm -rf *so
+rm -rf *~

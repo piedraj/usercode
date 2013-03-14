@@ -20,6 +20,22 @@
 #include <vector>
 
 
+//------------------------------------------------------------------------------
+//
+//  MCFM 6.3
+// 
+//  xs = 13.89 +  8.06 = 21.95 pb          // Scale x1 ( 85.79 GeV) with 71 < mZ < 111 GeV
+//  xs = 13.33 +  7.72 = 21.05 pb (-4.1%)  // Scale x2 (171.58 GeV) with 71 < mZ < 111 GeV
+//  xs = 14.63 +  8.49.= 23.12 pb (+5.3%)  // Scale /2 ( 42.90 GeV) with 71 < mZ < 111 GeV
+//
+//  xs = 20.67 + 12.42 = 33.09 pb  // Scale x1 (-1d0) with 12 < mZ       GeV
+//  xs = 13.89 +  8.06 = 21.95 pb  // Scale x1 (-1d0) with 71 < mZ < 111 GeV
+//  xs = 13.67 +  7.93 = 21.60 pb  // Scale x1 (-1d0) with 76 < mZ < 106 GeV
+//  xs = 13.28 +  7.69 = 20.97 pb  // Scale x1 (-1d0) with 81 < mZ < 101 GeV
+//
+//------------------------------------------------------------------------------
+
+
 // Input parameters for the WZ cross section
 //------------------------------------------------------------------------------
 const Double_t xsWplusZ_nlo  = 14.48;  // pb (arXiv:1105.0020v1)
@@ -27,19 +43,20 @@ const Double_t xsWminusZ_nlo =  8.40;  // pb (arXiv:1105.0020v1)
 const Double_t xsWplusZ      = 13.89;  // pb (MCFM with 71 < mZ < 111 GeV)
 const Double_t xsWminusZ     =  8.06;  // pb (MCFM with 71 < mZ < 111 GeV)
 
-const Double_t W2e         = 0.1075;
-const Double_t W2m         = 0.1057;
-const Double_t W2tau       = 0.1125;
-const Double_t Z2ll        = 0.033658;
-const Double_t WZ23lnu     = 3 * Z2ll * (W2e + W2m + W2tau);
-const Double_t ngenWZ      = 2017979;
-const Double_t ngenWZphase = 1449067;  // (71 < mZ < 111 GeV)
+const Double_t W2e     = 0.1075;
+const Double_t W2m     = 0.1057;
+const Double_t W2tau   = 0.1125;
+const Double_t Z2ll    = 0.033658;
+const Double_t WZ23lnu = 3 * Z2ll * (W2e + W2m + W2tau);
+const Double_t ngenWZ  = 2017979;
+
+Double_t ngenWZphase;
 
 
 // Data members
 //------------------------------------------------------------------------------
 const UInt_t nChannels   =  4;
-const UInt_t nCuts       =  5;
+const UInt_t nCuts       =  6;
 const UInt_t nScanPoints = 20;
 const UInt_t nProcesses  = 39;
 
@@ -48,6 +65,7 @@ enum {MMM, EEE, MME, EEM};
 enum {
   Exactly3Leptons,
   HasZCandidate,
+  HasWCandidate,
   MET,
   SSLike,
   SSLikeAntiBtag
@@ -119,7 +137,7 @@ enum {
 };
 
 
-enum {linY = 0, logY};
+enum {linY, logY};
 
 enum {MCmode, PPFmode, PPPmode};
 
@@ -233,28 +251,33 @@ void     Inclusive                (UInt_t        cut);
 
 void     Systematics              ();
 
-void     SetGraph                 (TGraph* g,
-				   Color_t lcolor,
-				   Style_t lstyle,
-				   Width_t lwidth,
-				   Color_t mcolor,
-				   Size_t  msize,
-				   Style_t mstyle);
+void     SetGraph                 (TGraph*       g,
+				   Color_t       lcolor,
+				   Style_t       lstyle,
+				   Width_t       lwidth,
+				   Color_t       mcolor,
+				   Size_t        msize,
+				   Style_t       mstyle);
+
+Double_t GetNGenPhase             (Double_t      loMass,
+				   Double_t      hiMass);
 
 
 //------------------------------------------------------------------------------
 // XS
 //------------------------------------------------------------------------------
-void XS(UInt_t cut          = MET,
+void XS(UInt_t cut          = SSLike,
 	UInt_t mode         = PPFmode,
 	UInt_t closure_test = 0,
 	Bool_t batch        = false)
 {
   gROOT->SetBatch(batch);
 
+  ngenWZphase = GetNGenPhase(71.,111.);
+
   SetParameters(cut, mode, closure_test);
 
-  if (cut >= MET) Scan();
+  if (cut == MET) Scan();
 
   for (UInt_t channel=0; channel<nChannels; channel++) {
 
@@ -410,7 +433,7 @@ void Scan()
     else if (i == mll15_MET40_SSLikeAntiBtag) DrawTLatex(i, ypos, tsize, 21, Form("%d", 15), 0);
 
     if      (i < nScanPoints-2)               DrawTLatex(i, ypos-ydelta, tsize, 21, Form("%d", 25 + 5*(i%6)), 0);
-    else if (i == mll10_MET40_SSLike)         DrawTLatex(i, ypos-ydelta, tsize, 21, Form("%d", 40), 0);
+    else if (i == mll15_MET40_SSLike)         DrawTLatex(i, ypos-ydelta, tsize, 21, Form("%d", 40), 0);
     else if (i == mll15_MET40_SSLikeAntiBtag) DrawTLatex(i, ypos-ydelta, tsize, 21, Form("%d", 40), 0);
   }
 
@@ -1212,6 +1235,7 @@ void SetParameters(UInt_t cut,
 
   sCut[Exactly3Leptons] = "Exactly3Leptons";
   sCut[HasZCandidate]   = "HasZCandidate";
+  sCut[HasWCandidate]   = "HasWCandidate";
   sCut[MET]             = "MET";
   sCut[SSLike]          = "SSLike";
   sCut[SSLikeAntiBtag]  = "SSLikeAntiBtag";
@@ -1845,8 +1869,8 @@ void Systematics()
 {
   for (UInt_t i=0; i<nProcesses; i++) systError[i] = 0.0;
 
-  systError[DataPPF]  = 36.;
-  systError[WZTo3LNu] =  0.;
+  systError[DataPPF]  = 36.0;
+  systError[WZTo3LNu] =  5.3;
 }
 
 
@@ -1867,4 +1891,18 @@ void SetGraph(TGraph* g,
   g->SetMarkerColor(mcolor);
   g->SetMarkerSize (msize );
   g->SetMarkerStyle(mstyle);
+}
+
+
+//------------------------------------------------------------------------------
+// GetNGenPhase
+//------------------------------------------------------------------------------
+Double_t GetNGenPhase(Double_t loMass,
+		      Double_t hiMass)
+{
+  TFile* genfile = TFile::Open("/nfs/fanae/user/piedra/work/PAF/AuxiliaryFilesWZXS8TeV/genZmass.root");
+
+  TH1F* h = (TH1F*)genfile->Get("htemp");
+
+  return h->Integral(h->FindBin(loMass), h->FindBin(hiMass));
 }

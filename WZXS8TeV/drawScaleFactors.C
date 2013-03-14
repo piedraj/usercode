@@ -227,9 +227,9 @@ TH2F* LoadHistogram(TString filename,
 		    TString hname,
 		    TString cname)
 {
-  TFile* inputfile = TFile::Open("/nfs/fanae/user/piedra/work/PAF/LeptonScaleFactors/" + filename + ".root");
+  TFile* inputfile = TFile::Open("/nfs/fanae/user/piedra/work/PAF/AuxiliaryFilesWZXS8TeV/" + filename + ".root");
 
-  //  TFile* inputfile = TFile::Open("/gpfs/csic_users/piedra/work/PAF/LeptonScaleFactors/" + filename + ".root");
+  //  TFile* inputfile = TFile::Open("/gpfs/csic_users/piedra/work/PAF/AuxiliaryFilesWZXS8TeV/" + filename + ".root");
 
   TH2F* hist = (TH2F*)inputfile->Get(hname)->Clone(cname);
 
