@@ -260,7 +260,8 @@ void     SetGraph                 (TGraph*       g,
 				   Style_t       mstyle);
 
 Double_t GetNGenPhase             (Double_t      loMass,
-				   Double_t      hiMass);
+				   Double_t      hiMass,
+				   UInt_t        runAtOviedo);
 
 
 //------------------------------------------------------------------------------
@@ -269,11 +270,12 @@ Double_t GetNGenPhase             (Double_t      loMass,
 void XS(UInt_t cut          = SSLike,
 	UInt_t mode         = PPFmode,
 	UInt_t closure_test = 0,
-	Bool_t batch        = false)
+	UInt_t runAtOviedo  = 1,
+	UInt_t batch        = 1)
 {
   gROOT->SetBatch(batch);
 
-  ngenWZphase = GetNGenPhase(71.,111.);
+  ngenWZphase = GetNGenPhase(71.,111., runAtOviedo);
 
   SetParameters(cut, mode, closure_test);
 
@@ -1898,9 +1900,12 @@ void SetGraph(TGraph* g,
 // GetNGenPhase
 //------------------------------------------------------------------------------
 Double_t GetNGenPhase(Double_t loMass,
-		      Double_t hiMass)
+		      Double_t hiMass,
+		      UInt_t   runAtOviedo)
 {
-  TFile* genfile = TFile::Open("/nfs/fanae/user/piedra/work/PAF/AuxiliaryFilesWZXS8TeV/genZmass.root");
+  TString path = (runAtOviedo) ? "/nfs/fanae/user" : "/gpfs/csic_users";
+
+  TFile* genfile = TFile::Open(path + "/piedra/work/PAF/AuxiliaryFilesWZXS8TeV/genZmass.root");
 
   TH1F* h = (TH1F*)genfile->Get("htemp");
 

@@ -18,6 +18,8 @@
 #include "TSystem.h"
 
 
+// Member functions
+//------------------------------------------------------------------------------
 void DrawIt        (TH2F*       h,
 		    TString     title);
 
@@ -39,6 +41,10 @@ TH2F* LoadHistogram(TString     filename,
 		    TString     cname);
 
 
+// Data members
+//------------------------------------------------------------------------------
+Int_t _runAtOviedo;
+
 TH2F* MuonSF;
 TH2F* ElecSF;
 TH2F* MuonPR;
@@ -51,8 +57,10 @@ TH2F* ElecFR_35;
 TH2F* ElecFR_50;
 
 
-void drawScaleFactors()
+void drawScaleFactors(Int_t runAtOviedo = 1)
 {
+  _runAtOviedo = runAtOviedo;
+
   gInterpreter->ExecuteMacro("./HiggsPaperStyle.C");
 
   gSystem->mkdir("png/ScaleFactors", kTRUE);
@@ -227,9 +235,9 @@ TH2F* LoadHistogram(TString filename,
 		    TString hname,
 		    TString cname)
 {
-  TFile* inputfile = TFile::Open("/nfs/fanae/user/piedra/work/PAF/AuxiliaryFilesWZXS8TeV/" + filename + ".root");
+  TString path = (_runAtOviedo) ? "/nfs/fanae/user" : "/gpfs/csic_users";
 
-  //  TFile* inputfile = TFile::Open("/gpfs/csic_users/piedra/work/PAF/AuxiliaryFilesWZXS8TeV/" + filename + ".root");
+  TFile* inputfile = TFile::Open(path + "/piedra/work/PAF/AuxiliaryFilesWZXS8TeV/" + filename + ".root");
 
   TH2F* hist = (TH2F*)inputfile->Get(hname)->Clone(cname);
 

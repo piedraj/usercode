@@ -1,3 +1,5 @@
+#!/bin/bash
+
 if [ $# -lt 2 ]; then
     echo "  "
     echo "  ./run.sh MET_SYSTEMATIC CLOSURE_TEST"
