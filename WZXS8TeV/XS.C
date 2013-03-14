@@ -55,12 +55,17 @@ Double_t ngenWZphase;
 
 // Data members
 //------------------------------------------------------------------------------
-const UInt_t nChannels   =  4;
-const UInt_t nCuts       =  6;
-const UInt_t nScanPoints = 20;
-const UInt_t nProcesses  = 39;
+const UInt_t nChannel = 4;
 
 enum {MMM, EEE, MME, EEM};
+
+Color_t cChannel[] = {kBlack,      kRed+1, kBlue,     kGreen+1};
+Style_t mChannel[] = {20,          24,     21,        25};
+TString sChannel[] = {"MMM",       "EEE",  "MME",     "EEM"};
+TString lChannel[] = {"#mu#mu#mu", "eee",  "#mu#mue", "ee#mu", "inclusive"};
+
+
+const UInt_t nCut = 6;
 
 enum {
   Exactly3Leptons,
@@ -71,28 +76,36 @@ enum {
   SSLikeAntiBtag
 };
 
+TString sCut[] = {
+  "Exactly3Leptons",
+  "HasZCandidate",
+  "HasWCandidate",
+  "MET",
+  "SSLike",
+  "SSLikeAntiBtag"
+};
+
+
+const UInt_t nScanPoint = 20;
+
 enum {
-  mll20_MET25,
-  mll20_MET30,
-  mll20_MET35,
-  mll20_MET40,
-  mll20_MET45,
-  mll20_MET50,
-  mll15_MET25,
-  mll15_MET30,
-  mll15_MET35,
-  mll15_MET40,
-  mll15_MET45,
-  mll15_MET50,
-  mll10_MET25,
-  mll10_MET30,
-  mll10_MET35,
-  mll10_MET40,
-  mll10_MET45,
-  mll10_MET50,
+  mll20_MET25, mll20_MET30, mll20_MET35, mll20_MET40, mll20_MET45, mll20_MET50,
+  mll15_MET25, mll15_MET30, mll15_MET35, mll15_MET40, mll15_MET45, mll15_MET50,
+  mll10_MET25, mll10_MET30, mll10_MET35, mll10_MET40, mll10_MET45, mll10_MET50,
   mll15_MET40_SSLike,
   mll15_MET40_SSLikeAntiBtag
 };
+
+TString sScanPoint[] = {
+  "mll20_MET25", "mll20_MET30", "mll20_MET35", "mll20_MET40", "mll20_MET45", "mll20_MET50",
+  "mll15_MET25", "mll15_MET30", "mll15_MET35", "mll15_MET40", "mll15_MET45", "mll15_MET50",
+  "mll10_MET25", "mll10_MET30", "mll10_MET35", "mll10_MET40", "mll10_MET45", "mll10_MET50",
+  "SSLike",
+  "SSLikeAntiBtag"
+};
+
+
+const UInt_t nProcess = 39;
 
 enum {
   Data,
@@ -136,6 +149,11 @@ enum {
   TTGJets
 };
 
+Color_t  cProcess [nProcess];
+Double_t systError[nProcess];
+TFile*   input    [nProcess];
+TString  sProcess [nProcess];
+
 
 enum {linY, logY};
 
@@ -144,34 +162,25 @@ enum {MCmode, PPFmode, PPPmode};
 
 // Settings
 //------------------------------------------------------------------------------
-TString         sChannel  [nChannels];
-TString         sCut      [nCuts];
-TString         sScanPoint[nScanPoints];
-TFile*          input     [nProcesses];
-TString         process   [nProcesses];
-Color_t         color     [nProcesses];
-Double_t        systError [nProcesses];
-
-Bool_t         _closure_test;
-Double_t       _luminosity;
-Double_t       _yoffset;
-Int_t          _verbosity;
-TString        _directory;
-TString        _format;
-TString        _output;
-UInt_t         _cut;
-UInt_t         _mode;
+Bool_t          _closure_test;
+Double_t        _luminosity;
+Double_t        _yoffset;
+Int_t           _verbosity;
+TString         _directory;
+TString         _format;
+TString         _output;
+UInt_t          _cut;
+UInt_t          _mode;
 
 vector<UInt_t>  vprocess;
 
 
 // Save the cross section
 //------------------------------------------------------------------------------
-TString         sChannelLabel[nChannels+1];
-Double_t        xsValue      [nChannels+1];
-Double_t        xsErrorStat  [nChannels+1];
-Double_t        xsErrorSyst  [nChannels+1];
-Double_t        xsErrorLumi  [nChannels+1];
+Double_t        xsValue    [nChannel+1];
+Double_t        xsErrorStat[nChannel+1];
+Double_t        xsErrorSyst[nChannel+1];
+Double_t        xsErrorLumi[nChannel+1];
 
 
 // Member functions
@@ -279,9 +288,9 @@ void XS(UInt_t cut          = SSLike,
 
   SetParameters(cut, mode, closure_test);
 
-  if (cut == MET) Scan();
+  Scan();
 
-  for (UInt_t channel=0; channel<nChannels; channel++) {
+  for (UInt_t channel=0; channel<nChannel; channel++) {
 
     if (ReadInputFiles(channel) < 0) return;
 
@@ -338,29 +347,17 @@ void XS(UInt_t cut          = SSLike,
 //------------------------------------------------------------------------------
 void Scan()
 {
-  TGraph* gmax [nChannels];
-  TGraph* gscan[nChannels];
+  TGraph* gscan[nChannel];
 
-  for (UInt_t i=0; i<nChannels; i++) {
+  for (UInt_t i=0; i<nChannel; i++) {
 
     if (ReadInputFiles(i) < 0) return;
 
-    gmax [i] = new TGraph(1);
-    gscan[i] = new TGraph(nScanPoints);
+    gscan[i] = new TGraph(nScanPoint);
     
-    Double_t fomMax = 0.;
-    
-    if (i == MMM) SetGraph(gscan[i], kBlack,   1, 2, kBlack,   0.75, kFullCircle);
-    if (i == EEE) SetGraph(gscan[i], kRed+1,   1, 2, kRed+1,   0.75, kOpenCircle);
-    if (i == MME) SetGraph(gscan[i], kBlue,    1, 2, kBlue,    0.75, kFullSquare);
-    if (i == EEM) SetGraph(gscan[i], kGreen+1, 1, 2, kGreen+2, 0.75, kOpenSquare);
+    SetGraph(gscan[i], cChannel[i], 1, 2, cChannel[i], 0.75, mChannel[i]);
 
-    if (i == MMM) SetGraph(gmax[i], kBlack,   1, 2, kBlack,   1.25, kFullCircle);
-    if (i == EEE) SetGraph(gmax[i], kRed+1,   1, 2, kRed+1,   1.25, kOpenCircle);
-    if (i == MME) SetGraph(gmax[i], kBlue,    1, 2, kBlue,    1.25, kFullSquare);
-    if (i == EEM) SetGraph(gmax[i], kGreen+1, 1, 2, kGreen+2, 1.25, kOpenSquare);
-
-    for (UInt_t j=0; j<nScanPoints; j++) {
+    for (UInt_t j=0; j<nScanPoint; j++) {
 
       TString hname = "hCounter_" + sChannel[i] + "_" + sScanPoint[j] + "_LLL";
  
@@ -380,12 +377,10 @@ void Scan()
 	else
 	  nbackground += Yield(dummy);
       }
-
+      
       Double_t fom = nsignal / nbackground;
 
       gscan[i]->SetPoint(j, j, fom);
-      
-      if (fom > fomMax) {fomMax = fom; gmax[i]->SetPoint(0, j, fomMax);}
     }
   }
   
@@ -396,11 +391,11 @@ void Scan()
 
   canvas->SetLeftMargin(0.75 * canvas->GetLeftMargin());
 
-  Double_t ymin =  4.7;
+  Double_t ymin =  3.2;
   Double_t ymax = 14.9;
 
   TH2F* th2scan = new TH2F("th2scan", "",
-			   nScanPoints+1, -1., (Double_t)nScanPoints,
+			   nScanPoint+1, -1., (Double_t)nScanPoint,
 			   100, ymin, ymax);
 
   th2scan->Draw();
@@ -408,25 +403,25 @@ void Scan()
   th2scan->GetYaxis()->SetTitle("S / B");
   th2scan->GetYaxis()->SetTitleOffset(1.4);
 
-  for (UInt_t i=0; i<nChannels; i++) {gmax [i]->Draw("p"); gscan[i]->Draw("lp");}
+  for (UInt_t i=0; i<nChannel; i++) gscan[i]->Draw("lp");
 
 
   // Change x-axis labels
   //----------------------------------------------------------------------------
   Double_t ydelta = 0.7;
-  Double_t ypos   = 4.0;
+  Double_t ypos   = ymin - ydelta;
   Size_t   tsize  = 0.025;
 
   TAxis* xaxis = th2scan->GetXaxis();
   
   for (Int_t j=1; j<xaxis->GetNbins(); j++) xaxis->SetBinLabel(j, "");
 
-  DrawTLatex(-1.1, ypos,        tsize, 31, "|m_{#font[12]{ll}} - M_{Z}| <", 0);
-  DrawTLatex(-1.1, ypos-ydelta, tsize, 31, "E_{T}^{miss} > ",               0);
+  DrawTLatex(-1., ypos,        tsize, 31, "|m_{#font[12]{ll}} - M_{Z}| <", 0);
+  DrawTLatex(-1., ypos-ydelta, tsize, 31, "E_{T}^{miss} > ",               0);
 
   DrawTLatex(mll15_MET40_SSLikeAntiBtag, ypos-2.*ydelta, tsize, 21, "#slash{b}", 0);
   
-  for (UInt_t i=0; i<nScanPoints; i++) {
+  for (UInt_t i=0; i<nScanPoint; i++) {
     
     if      (i ==  3) DrawTLatex(i, ypos, tsize, 21, Form("%d", 20), 0);
     else if (i ==  9) DrawTLatex(i, ypos, tsize, 21, Form("%d", 15), 0);
@@ -434,7 +429,7 @@ void Scan()
     else if (i == mll15_MET40_SSLike)         DrawTLatex(i, ypos, tsize, 21, Form("%d", 15), 0);
     else if (i == mll15_MET40_SSLikeAntiBtag) DrawTLatex(i, ypos, tsize, 21, Form("%d", 15), 0);
 
-    if      (i < nScanPoints-2)               DrawTLatex(i, ypos-ydelta, tsize, 21, Form("%d", 25 + 5*(i%6)), 0);
+    if      (i < nScanPoint-2)                DrawTLatex(i, ypos-ydelta, tsize, 21, Form("%d", 25 + 5*(i%6)), 0);
     else if (i == mll15_MET40_SSLike)         DrawTLatex(i, ypos-ydelta, tsize, 21, Form("%d", 40), 0);
     else if (i == mll15_MET40_SSLikeAntiBtag) DrawTLatex(i, ypos-ydelta, tsize, 21, Form("%d", 40), 0);
   }
@@ -447,17 +442,17 @@ void Scan()
   Double_t delta  = _yoffset + 0.001;
   Double_t ndelta = 0;
 
-  for (UInt_t i=0; i<nChannels; i++)
+  for (UInt_t i=0; i<nChannel; i++)
     {
-      DrawLegend(x0, y0 - ndelta, (TH1*)gscan[i], " " + sChannelLabel[i], "lp", 0.03, 0.18);
+      DrawLegend(x0, y0 - ndelta, (TH1*)gscan[i], " " + lChannel[i], "lp", 0.03, 0.15);
       
       ndelta += delta;
     }
-
-
+  
+  
   // Save
   //----------------------------------------------------------------------------
-  canvas->SaveAs("png/scan.png");
+  canvas->SaveAs(Form("%s/scan.png", _output.Data()));
 }
 
 
@@ -587,27 +582,27 @@ void PrintLatexTable(UInt_t channel)
 
   outputfile.open(Form("tex/%s_%s.tex", sChannel[channel].Data(), suffix.Data()));
 
-  Double_t nData [nCuts];
-  Double_t nWZ   [nCuts];
-  Double_t nZZ   [nCuts];
-  Double_t nWV   [nCuts];
-  Double_t nVVV  [nCuts];
-  Double_t nTop  [nCuts];
-  Double_t nZJets[nCuts];
-  Double_t nFakes[nCuts];
-  Double_t nBkg  [nCuts];
+  Double_t nData [nCut];
+  Double_t nWZ   [nCut];
+  Double_t nZZ   [nCut];
+  Double_t nWV   [nCut];
+  Double_t nVVV  [nCut];
+  Double_t nTop  [nCut];
+  Double_t nZJets[nCut];
+  Double_t nFakes[nCut];
+  Double_t nBkg  [nCut];
 
-  Double_t eData [nCuts];
-  Double_t eWZ   [nCuts];
-  Double_t eZZ   [nCuts];
-  Double_t eWV   [nCuts];
-  Double_t eVVV  [nCuts];
-  Double_t eTop  [nCuts];
-  Double_t eZJets[nCuts];
-  Double_t eFakes[nCuts];
-  Double_t eBkg  [nCuts];
+  Double_t eData [nCut];
+  Double_t eWZ   [nCut];
+  Double_t eZZ   [nCut];
+  Double_t eWV   [nCut];
+  Double_t eVVV  [nCut];
+  Double_t eTop  [nCut];
+  Double_t eZJets[nCut];
+  Double_t eFakes[nCut];
+  Double_t eBkg  [nCut];
 
-  for (UInt_t i=0; i<nCuts; i++)
+  for (UInt_t i=0; i<nCut; i++)
     {
       nData [i] = 0.;
       nWZ   [i] = 0.;
@@ -629,7 +624,7 @@ void PrintLatexTable(UInt_t channel)
       eFakes[i] = 0.;
       eBkg  [i] = 0.;
   
-      TH1D* hist[nProcesses];
+      TH1D* hist[nProcess];
 
       for (UInt_t j=0; j<vprocess.size(); j++)
 	{
@@ -638,7 +633,7 @@ void PrintLatexTable(UInt_t channel)
 	  TString hname = "hCounter_" + sChannel[channel] + "_" + sCut[i] + "_LLL";
 
 	  hist[k] = (TH1D*)input[k]->Get(hname);
-	  hist[k]->SetName(hname + "_" + process[k]);
+	  hist[k]->SetName(hname + "_" + sProcess[k]);
 	}
 
       nData[i] = Yield(hist[Data]);
@@ -709,21 +704,21 @@ void PrintLatexTable(UInt_t channel)
   
   // Print
   //----------------------------------------------------------------------------
-  if (_mode == MCmode)  {outputfile << Form(" %-20s", "top");         for (UInt_t i=0; i<nCuts; i++) outputfile << Form(" & %3.0f $\\pm$ %2.0f", nTop[i],   eTop[i]);   outputfile << "\\\\\n";}
-  if (_mode == MCmode)  {outputfile << Form(" %-20s", "Z+jets");      for (UInt_t i=0; i<nCuts; i++) outputfile << Form(" & %3.0f $\\pm$ %2.0f", nZJets[i], eZJets[i]); outputfile << "\\\\\n";}
-  if (_mode == PPFmode) {outputfile << Form(" %-20s", "data-driven"); for (UInt_t i=0; i<nCuts; i++) outputfile << Form(" & %3.0f $\\pm$ %2.0f", nFakes[i], eFakes[i]); outputfile << "\\\\\n";}
+  if (_mode == MCmode)  {outputfile << Form(" %-20s", "top");         for (UInt_t i=0; i<nCut; i++) outputfile << Form(" & %3.0f $\\pm$ %2.0f", nTop[i],   eTop[i]);   outputfile << "\\\\\n";}
+  if (_mode == MCmode)  {outputfile << Form(" %-20s", "Z+jets");      for (UInt_t i=0; i<nCut; i++) outputfile << Form(" & %3.0f $\\pm$ %2.0f", nZJets[i], eZJets[i]); outputfile << "\\\\\n";}
+  if (_mode == PPFmode) {outputfile << Form(" %-20s", "data-driven"); for (UInt_t i=0; i<nCut; i++) outputfile << Form(" & %3.0f $\\pm$ %2.0f", nFakes[i], eFakes[i]); outputfile << "\\\\\n";}
 
-  outputfile << Form(" %-20s", "ZZ");          for (UInt_t i=0; i<nCuts; i++) outputfile << Form(" & %3.0f $\\pm$ %2.0f", nZZ[i],  eZZ[i]);  outputfile << "\\\\\n";
-  outputfile << Form(" %-20s", "WV");          for (UInt_t i=0; i<nCuts; i++) outputfile << Form(" & %3.0f $\\pm$ %2.0f", nWV[i],  eWV[i]);  outputfile << "\\\\\n";
-  outputfile << Form(" %-20s", "VVV");         for (UInt_t i=0; i<nCuts; i++) outputfile << Form(" & %3.0f $\\pm$ %2.0f", nVVV[i], eVVV[i]); outputfile << "\\\\\n";
-  outputfile << Form(" %-20s", "backgrounds"); for (UInt_t i=0; i<nCuts; i++) outputfile << Form(" & %3.0f $\\pm$ %2.0f", nBkg[i], eBkg[i]); outputfile << "\\\\\n";
-  outputfile << Form(" %-20s", "WZ");          for (UInt_t i=0; i<nCuts; i++) outputfile << Form(" & %3.0f $\\pm$ %2.0f", nWZ[i],  eWZ[i]);  outputfile << "\\\\\n";
+  outputfile << Form(" %-20s", "ZZ");          for (UInt_t i=0; i<nCut; i++) outputfile << Form(" & %3.0f $\\pm$ %2.0f", nZZ[i],  eZZ[i]);  outputfile << "\\\\\n";
+  outputfile << Form(" %-20s", "WV");          for (UInt_t i=0; i<nCut; i++) outputfile << Form(" & %3.0f $\\pm$ %2.0f", nWV[i],  eWV[i]);  outputfile << "\\\\\n";
+  outputfile << Form(" %-20s", "VVV");         for (UInt_t i=0; i<nCut; i++) outputfile << Form(" & %3.0f $\\pm$ %2.0f", nVVV[i], eVVV[i]); outputfile << "\\\\\n";
+  outputfile << Form(" %-20s", "backgrounds"); for (UInt_t i=0; i<nCut; i++) outputfile << Form(" & %3.0f $\\pm$ %2.0f", nBkg[i], eBkg[i]); outputfile << "\\\\\n";
+  outputfile << Form(" %-20s", "WZ");          for (UInt_t i=0; i<nCut; i++) outputfile << Form(" & %3.0f $\\pm$ %2.0f", nWZ[i],  eWZ[i]);  outputfile << "\\\\\n";
 
   outputfile << " \\hline\n";
 
-  outputfile << Form(" %-20s", "WZ + backgrounds"); for (UInt_t i=0; i<nCuts; i++) outputfile << Form(" & %3.0f $\\pm$ %2.0f", nBkg[i]+nWZ[i], sqrt(nBkg[i]+nWZ[i])); outputfile << "\\\\\n";
-  outputfile << Form(" %-20s", "data");             for (UInt_t i=0; i<nCuts; i++) outputfile << Form(" & %3.0f $\\pm$ %2.0f", nData[i],       eData[i]);             outputfile << "\\\\\n";
-  outputfile << Form(" %-20s", "S/B");              for (UInt_t i=0; i<nCuts; i++) outputfile << Form(" & %.1f",               nWZ[i] / nBkg[i]);                     outputfile << "\\\\\n";
+  outputfile << Form(" %-20s", "WZ + backgrounds"); for (UInt_t i=0; i<nCut; i++) outputfile << Form(" & %3.0f $\\pm$ %2.0f", nBkg[i]+nWZ[i], sqrt(nBkg[i]+nWZ[i])); outputfile << "\\\\\n";
+  outputfile << Form(" %-20s", "data");             for (UInt_t i=0; i<nCut; i++) outputfile << Form(" & %3.0f $\\pm$ %2.0f", nData[i],       eData[i]);             outputfile << "\\\\\n";
+  outputfile << Form(" %-20s", "S/B");              for (UInt_t i=0; i<nCut; i++) outputfile << Form(" & %.1f",               nWZ[i] / nBkg[i]);                     outputfile << "\\\\\n";
 
   outputfile.close();
 }
@@ -771,14 +766,14 @@ void DrawHistogram(TString  hname,
 
   THStack* hstack = new THStack(hname, hname);
 
-  TH1D* hist[nProcesses];
+  TH1D* hist[nProcess];
 
   for (UInt_t i=0; i<vprocess.size(); i++) {
 
     UInt_t j = vprocess.at(i);
 
     hist[j] = (TH1D*)input[j]->Get(hname);
-    hist[j]->SetName(hname + "_" + process[j]);
+    hist[j]->SetName(hname + "_" + sProcess[j]);
 
     if (moveOverflow) MoveOverflowBins  (hist[j], xmin, xmax);
     else              ZeroOutOfRangeBins(hist[j], xmin, xmax);
@@ -794,9 +789,9 @@ void DrawHistogram(TString  hname,
       }
     else
       {
-	hist[j]->SetFillColor(color[j]);
+	hist[j]->SetFillColor(cProcess[j]);
 	hist[j]->SetFillStyle(1001);
-	hist[j]->SetLineColor(color[j]);
+	hist[j]->SetLineColor(cProcess[j]);
 
 	hstack->Add(hist[j]);
       }
@@ -968,7 +963,7 @@ void DrawHistogram(TString  hname,
 
   // CMS titles
   //----------------------------------------------------------------------------
-  DrawTLatex(0.185, 0.975, 0.05, 13, sChannelLabel[channel]);
+  DrawTLatex(0.185, 0.975, 0.05, 13, lChannel[channel]);
   DrawTLatex(0.940, 0.983, 0.05, 33, Form("#sqrt{s} = 8 TeV, L = %.1f fb^{-1}", _luminosity/1e3));
 
 
@@ -1224,124 +1219,82 @@ void SetParameters(UInt_t cut,
 		   UInt_t mode,
 		   UInt_t closure_test)
 {
-  sChannelLabel[MMM]       = "#mu#mu#mu";
-  sChannelLabel[EEE]       = "eee";
-  sChannelLabel[MME]       = "#mu#mue";
-  sChannelLabel[EEM]       = "ee#mu";
-  sChannelLabel[nChannels] = "inclusive";
+  sProcess[DYJets_Madgraph]  = "DYJets_Madgraph";
+  sProcess[ZJets_Madgraph]   = "ZJets_Madgraph";
+  sProcess[ZbbToLL]          = "ZbbToLL";
+  sProcess[WbbToLNu]         = "WbbToLNu";
+  sProcess[WJets_Madgraph]   = "WJets_Madgraph";
+  sProcess[WGstarToElNuMad]  = "WGstarToElNuMad";
+  sProcess[WGstarToMuNuMad]  = "WGstarToMuNuMad";
+  sProcess[WGstarToTauNuMad] = "WGstarToTauNuMad";
+  sProcess[WgammaToLNuG]     = "WgammaToLNuG";
+  sProcess[ZgammaToLLG]      = "ZgammaToLLG";
+  sProcess[TTbar_Madgraph]   = "TTbar_Madgraph";
+  sProcess[TW]               = "TW";
+  sProcess[TbarW]            = "TbarW";
+  sProcess[WW]               = "WW";
+  sProcess[WZTo3LNu]         = "WZTo3LNu";
+  sProcess[WZTo2L2QMad]      = "WZTo2L2QMad";
+  sProcess[WZTo2QLNuMad]     = "WZTo2QLNuMad";
+  sProcess[ZZTo2L2QMad]      = "ZZTo2L2QMad";
+  sProcess[ggZZ2L2L]         = "ggZZ2L2L";
+  sProcess[ggZZ4L]           = "ggZZ4L";
+  sProcess[ZZ2Mu2Tau]        = "ZZ2Mu2Tau";
+  sProcess[ZZ4E]             = "ZZ4E";
+  sProcess[ZZ2E2Tau]         = "ZZ2E2Tau";
+  sProcess[ZZ4Mu]            = "ZZ4Mu";
+  sProcess[ZZ2E2Mu]          = "ZZ2E2Mu";
+  sProcess[ZZ4Tau]           = "ZZ4Tau";
+  sProcess[HZZ4L]            = "HZZ4L";
+  sProcess[WWGJets]          = "WWGJets";
+  sProcess[WZZJets]          = "WZZJets";
+  sProcess[ZZZJets]          = "ZZZJets";
+  sProcess[WWZJets]          = "WWZJets";
+  sProcess[WWWJets]          = "WWWJets";
+  sProcess[TTWJets]          = "TTWJets";
+  sProcess[TTZJets]          = "TTZJets";
+  sProcess[TTWWJets]         = "TTWWJets";
+  sProcess[TTGJets]          = "TTGJets";
 
-  sChannel[MMM] = "MMM";
-  sChannel[EEE] = "EEE";
-  sChannel[MME] = "MME";
-  sChannel[EEM] = "EEM";
-
-  sCut[Exactly3Leptons] = "Exactly3Leptons";
-  sCut[HasZCandidate]   = "HasZCandidate";
-  sCut[HasWCandidate]   = "HasWCandidate";
-  sCut[MET]             = "MET";
-  sCut[SSLike]          = "SSLike";
-  sCut[SSLikeAntiBtag]  = "SSLikeAntiBtag";
-
-  sScanPoint[mll20_MET25] = "mll20_MET25";
-  sScanPoint[mll20_MET30] = "mll20_MET30";
-  sScanPoint[mll20_MET35] = "mll20_MET35";
-  sScanPoint[mll20_MET40] = "mll20_MET40";
-  sScanPoint[mll20_MET45] = "mll20_MET45";
-  sScanPoint[mll20_MET50] = "mll20_MET50";
-
-  sScanPoint[mll15_MET25] = "mll15_MET25";
-  sScanPoint[mll15_MET30] = "mll15_MET30";
-  sScanPoint[mll15_MET35] = "mll15_MET35";
-  sScanPoint[mll15_MET40] = "mll15_MET40";
-  sScanPoint[mll15_MET45] = "mll15_MET45";
-  sScanPoint[mll15_MET50] = "mll15_MET50";
-
-  sScanPoint[mll10_MET25] = "mll10_MET25";
-  sScanPoint[mll10_MET30] = "mll10_MET30";
-  sScanPoint[mll10_MET35] = "mll10_MET35";
-  sScanPoint[mll10_MET40] = "mll10_MET40";
-  sScanPoint[mll10_MET45] = "mll10_MET45";
-  sScanPoint[mll10_MET50] = "mll10_MET50";
-
-  sScanPoint[mll15_MET40_SSLike]         = "SSLike";
-  sScanPoint[mll15_MET40_SSLikeAntiBtag] = "SSLikeAntiBtag";
-
-  process[DYJets_Madgraph]  = "DYJets_Madgraph";
-  process[ZJets_Madgraph]   = "ZJets_Madgraph";
-  process[ZbbToLL]          = "ZbbToLL";
-  process[WbbToLNu]         = "WbbToLNu";
-  process[WJets_Madgraph]   = "WJets_Madgraph";
-  process[WGstarToElNuMad]  = "WGstarToElNuMad";
-  process[WGstarToMuNuMad]  = "WGstarToMuNuMad";
-  process[WGstarToTauNuMad] = "WGstarToTauNuMad";
-  process[WgammaToLNuG]     = "WgammaToLNuG";
-  process[ZgammaToLLG]      = "ZgammaToLLG";
-  process[TTbar_Madgraph]   = "TTbar_Madgraph";
-  process[TW]               = "TW";
-  process[TbarW]            = "TbarW";
-  process[WW]               = "WW";
-  process[WZTo3LNu]         = "WZTo3LNu";
-  process[WZTo2L2QMad]      = "WZTo2L2QMad";
-  process[WZTo2QLNuMad]     = "WZTo2QLNuMad";
-  process[ZZTo2L2QMad]      = "ZZTo2L2QMad";
-  process[ggZZ2L2L]         = "ggZZ2L2L";
-  process[ggZZ4L]           = "ggZZ4L";
-  process[ZZ2Mu2Tau]        = "ZZ2Mu2Tau";
-  process[ZZ4E]             = "ZZ4E";
-  process[ZZ2E2Tau]         = "ZZ2E2Tau";
-  process[ZZ4Mu]            = "ZZ4Mu";
-  process[ZZ2E2Mu]          = "ZZ2E2Mu";
-  process[ZZ4Tau]           = "ZZ4Tau";
-  process[HZZ4L]            = "HZZ4L";
-  process[WWGJets]          = "WWGJets";
-  process[WZZJets]          = "WZZJets";
-  process[ZZZJets]          = "ZZZJets";
-  process[WWZJets]          = "WWZJets";
-  process[WWWJets]          = "WWWJets";
-  process[TTWJets]          = "TTWJets";
-  process[TTZJets]          = "TTZJets";
-  process[TTWWJets]         = "TTWWJets";
-  process[TTGJets]          = "TTGJets";
-
-  color[Data]             = kBlack;
-  color[DataPPF]          = kGray+1;
-  color[DataPPP]          = kOrange-2;
-  color[DYJets_Madgraph]  = kGreen+2;   // Z+jets
-  color[ZJets_Madgraph]   = kGreen+2;   // Z+jets
-  color[ZbbToLL]          = kGreen+2;   // Z+jets
-  color[WbbToLNu]         = kAzure;     // WV
-  color[WJets_Madgraph]   = kAzure;     // WV
-  color[WGstarToElNuMad]  = kAzure;     // WV
-  color[WGstarToMuNuMad]  = kAzure;     // WV
-  color[WGstarToTauNuMad] = kAzure;     // WV
-  color[WgammaToLNuG]     = kAzure;     // WV
-  color[WW]               = kAzure;     // WV
-  color[WZTo2L2QMad]      = kAzure;     // WV
-  color[WZTo2QLNuMad]     = kAzure;     // WV
-  color[TTbar_Madgraph]   = kAzure-9;   // top
-  color[TW]               = kAzure-9;   // top
-  color[TbarW]            = kAzure-9;   // top
-  color[WZTo3LNu]         = kOrange-2;  // WZ
-  color[ZZTo2L2QMad]      = kRed+1;     // ZZ
-  color[ZgammaToLLG]      = kRed+1;     // ZZ
-  color[ggZZ2L2L]         = kRed+1;     // ZZ
-  color[ggZZ4L]           = kRed+1;     // ZZ
-  color[ZZ2Mu2Tau]        = kRed+1;     // ZZ
-  color[ZZ4E]             = kRed+1;     // ZZ
-  color[ZZ2E2Tau]         = kRed+1;     // ZZ
-  color[ZZ4Mu]            = kRed+1;     // ZZ
-  color[ZZ2E2Mu]          = kRed+1;     // ZZ
-  color[ZZ4Tau]           = kRed+1;     // ZZ
-  color[HZZ4L]            = kRed+1;     // ZZ
-  color[WWGJets]          = kBlack;     // VVV
-  color[WZZJets]          = kBlack;     // VVV
-  color[ZZZJets]          = kBlack;     // VVV
-  color[WWZJets]          = kBlack;     // VVV
-  color[WWWJets]          = kBlack;     // VVV
-  color[TTWJets]          = kBlack;     // VVV
-  color[TTZJets]          = kBlack;     // VVV
-  color[TTWWJets]         = kBlack;     // VVV
-  color[TTGJets]          = kBlack;     // VVV
+  cProcess[Data]             = kBlack;
+  cProcess[DataPPF]          = kGray+1;
+  cProcess[DataPPP]          = kOrange-2;
+  cProcess[DYJets_Madgraph]  = kGreen+2;   // Z+jets
+  cProcess[ZJets_Madgraph]   = kGreen+2;   // Z+jets
+  cProcess[ZbbToLL]          = kGreen+2;   // Z+jets
+  cProcess[WbbToLNu]         = kAzure;     // WV
+  cProcess[WJets_Madgraph]   = kAzure;     // WV
+  cProcess[WGstarToElNuMad]  = kAzure;     // WV
+  cProcess[WGstarToMuNuMad]  = kAzure;     // WV
+  cProcess[WGstarToTauNuMad] = kAzure;     // WV
+  cProcess[WgammaToLNuG]     = kAzure;     // WV
+  cProcess[WW]               = kAzure;     // WV
+  cProcess[WZTo2L2QMad]      = kAzure;     // WV
+  cProcess[WZTo2QLNuMad]     = kAzure;     // WV
+  cProcess[TTbar_Madgraph]   = kAzure-9;   // top
+  cProcess[TW]               = kAzure-9;   // top
+  cProcess[TbarW]            = kAzure-9;   // top
+  cProcess[WZTo3LNu]         = kOrange-2;  // WZ
+  cProcess[ZZTo2L2QMad]      = kRed+1;     // ZZ
+  cProcess[ZgammaToLLG]      = kRed+1;     // ZZ
+  cProcess[ggZZ2L2L]         = kRed+1;     // ZZ
+  cProcess[ggZZ4L]           = kRed+1;     // ZZ
+  cProcess[ZZ2Mu2Tau]        = kRed+1;     // ZZ
+  cProcess[ZZ4E]             = kRed+1;     // ZZ
+  cProcess[ZZ2E2Tau]         = kRed+1;     // ZZ
+  cProcess[ZZ4Mu]            = kRed+1;     // ZZ
+  cProcess[ZZ2E2Mu]          = kRed+1;     // ZZ
+  cProcess[ZZ4Tau]           = kRed+1;     // ZZ
+  cProcess[HZZ4L]            = kRed+1;     // ZZ
+  cProcess[WWGJets]          = kBlack;     // VVV
+  cProcess[WZZJets]          = kBlack;     // VVV
+  cProcess[ZZZJets]          = kBlack;     // VVV
+  cProcess[WWZJets]          = kBlack;     // VVV
+  cProcess[WWWJets]          = kBlack;     // VVV
+  cProcess[TTWJets]          = kBlack;     // VVV
+  cProcess[TTZJets]          = kBlack;     // VVV
+  cProcess[TTWWJets]         = kBlack;     // VVV
+  cProcess[TTGJets]          = kBlack;     // VVV
 
   Systematics();
 
@@ -1430,15 +1383,15 @@ Int_t ReadInputFiles(UInt_t channel)
 {
   if (channel == EEE || channel == EEM)
     {
-      process[Data]    = "DoubleElectron";
-      process[DataPPF] = "DoubleElectron_PPF";
-      process[DataPPP] = "DoubleElectron_PPP";
+      sProcess[Data]    = "DoubleElectron";
+      sProcess[DataPPF] = "DoubleElectron_PPF";
+      sProcess[DataPPP] = "DoubleElectron_PPP";
     }
   else if (channel == MMM || channel == MME)
     {
-      process[Data]    = "DoubleMu";
-      process[DataPPF] = "DoubleMu_PPF";
-      process[DataPPP] = "DoubleMu_PPP";
+      sProcess[Data]    = "DoubleMu";
+      sProcess[DataPPF] = "DoubleMu_PPF";
+      sProcess[DataPPP] = "DoubleMu_PPP";
     }
 
   TString path = Form("%s/piedra/work/WZXS8TeV/results/%s/",
@@ -1449,7 +1402,7 @@ Int_t ReadInputFiles(UInt_t channel)
 
     UInt_t j = vprocess.at(i);
 
-    input[j] = new TFile(path + process[j] + ".root");
+    input[j] = new TFile(path + sProcess[j] + ".root");
 
 
     // Debug
@@ -1459,7 +1412,7 @@ Int_t ReadInputFiles(UInt_t channel)
     if (!dummy)
       {
 	printf(" [ReadInputFiles] The %s file is broken or it does not exist.\n",
-	       process[j].Data());
+	       sProcess[j].Data());
 
 	return -1;
       }
@@ -1559,11 +1512,11 @@ void DrawRatios(UInt_t cut)
 {
   if (cut < MET) return;
 
-  TGraphErrors* gStat = new TGraphErrors(nChannels+1);
-  TGraphErrors* gSyst = new TGraphErrors(nChannels+1);
-  TGraphErrors* gLumi = new TGraphErrors(nChannels+1);
+  TGraphErrors* gStat = new TGraphErrors(nChannel+1);
+  TGraphErrors* gSyst = new TGraphErrors(nChannel+1);
+  TGraphErrors* gLumi = new TGraphErrors(nChannel+1);
 
-  for (UInt_t i=0; i<nChannels+1; i++) {
+  for (UInt_t i=0; i<nChannel+1; i++) {
 
     Double_t f = xsValue[i] / (xsWplusZ + xsWminusZ);
 
@@ -1612,7 +1565,7 @@ void DrawRatios(UInt_t cut)
   Double_t xmin = 0.6;
   Double_t xmax = 2.2;
   Double_t ymin = 0.50;
-  Double_t ymax = nChannels+1 + ymin;
+  Double_t ymax = nChannel+1 + ymin;
   
   TH2F* dummy = new TH2F("dummy_ratios", "",
 			 100, xmin, xmax,
@@ -1641,12 +1594,12 @@ void DrawRatios(UInt_t cut)
 
   // Labels
   //----------------------------------------------------------------------------
-  for (UInt_t i=0; i<nChannels+1; i++) {
+  for (UInt_t i=0; i<nChannel+1; i++) {
 
     Double_t x = gStat->GetX()[i];
     Double_t y = gStat->GetY()[i];
 
-    DrawTLatex(xmin+0.05, y, 0.035, 12, Form("%s", sChannelLabel[i].Data()), 0);
+    DrawTLatex(xmin+0.05, y, 0.035, 12, Form("%s", lChannel[i].Data()), 0);
 
     Double_t gStatError  = gStat->GetErrorX(i);
     Double_t gSystError  = gSyst->GetErrorX(i);
@@ -1695,11 +1648,11 @@ void DrawCrossSections(UInt_t cut)
 {
   if (cut < MET) return;
 
-  TGraphErrors* gStat = new TGraphErrors(nChannels+1);
-  TGraphErrors* gSyst = new TGraphErrors(nChannels+1);
-  TGraphErrors* gLumi = new TGraphErrors(nChannels+1);
+  TGraphErrors* gStat = new TGraphErrors(nChannel+1);
+  TGraphErrors* gSyst = new TGraphErrors(nChannel+1);
+  TGraphErrors* gLumi = new TGraphErrors(nChannel+1);
 
-  for (UInt_t i=0; i<nChannels+1; i++) {
+  for (UInt_t i=0; i<nChannel+1; i++) {
 
     Double_t errorSquared = (xsErrorStat[i] * xsErrorStat[i]);
 
@@ -1746,7 +1699,7 @@ void DrawCrossSections(UInt_t cut)
   Double_t xmin = (xsWplusZ + xsWminusZ) -  8.;
   Double_t xmax = (xsWplusZ + xsWminusZ) + 25.;
   Double_t ymin = 0.50;
-  Double_t ymax = nChannels+1 + ymin;
+  Double_t ymax = nChannel+1 + ymin;
   
   TH2F* dummy = new TH2F("dummy_xs", "",
 			 100, xmin, xmax,
@@ -1776,12 +1729,12 @@ void DrawCrossSections(UInt_t cut)
 
   // Labels
   //----------------------------------------------------------------------------
-  for (UInt_t i=0; i<nChannels+1; i++) {
+  for (UInt_t i=0; i<nChannel+1; i++) {
 
     Double_t x = gStat->GetX()[i];
     Double_t y = gStat->GetY()[i];
 
-    DrawTLatex(xmin+1., y, 0.035, 12, Form("%s", sChannelLabel[i].Data()), 0);
+    DrawTLatex(xmin+1., y, 0.035, 12, Form("%s", lChannel[i].Data()), 0);
 
     Double_t gStatError  = gStat->GetErrorX(i);
     Double_t gSystError  = gSyst->GetErrorX(i);
@@ -1838,7 +1791,7 @@ void Inclusive(UInt_t cut)
   Double_t lumi  = 0;
   Double_t total = 0;
 
-  for (UInt_t i=0; i<nChannels; i++) {
+  for (UInt_t i=0; i<nChannel; i++) {
 
     Double_t xsErrorTotal = 0;
 
@@ -1856,11 +1809,11 @@ void Inclusive(UInt_t cut)
     total += (1. / xsErrorTotal    / xsErrorTotal);
   }
 
-  xsValue[nChannels] = x / total;
+  xsValue[nChannel] = x / total;
 
-  xsErrorStat[nChannels] = 1. / sqrt(stat);
-  xsErrorSyst[nChannels] = 1. / sqrt(syst);
-  xsErrorLumi[nChannels] = 1. / sqrt(lumi);
+  xsErrorStat[nChannel] = 1. / sqrt(stat);
+  xsErrorSyst[nChannel] = 1. / sqrt(syst);
+  xsErrorLumi[nChannel] = 1. / sqrt(lumi);
 }
 
 
@@ -1869,7 +1822,7 @@ void Inclusive(UInt_t cut)
 //------------------------------------------------------------------------------
 void Systematics()
 {
-  for (UInt_t i=0; i<nProcesses; i++) systError[i] = 0.0;
+  for (UInt_t i=0; i<nProcess; i++) systError[i] = 0.0;
 
   systError[DataPPF]  = 36.0;
   systError[WZTo3LNu] =  5.3;

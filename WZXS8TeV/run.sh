@@ -2,7 +2,7 @@
 
 if [ $# -lt 2 ]; then
     echo "  "
-    echo "  ./run.sh MET_SYSTEMATIC CLOSURE_TEST"
+    echo "  ./run.sh MET_SYS CLOSURE"
     echo "  "
     exit -1
 fi
