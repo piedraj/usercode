@@ -35,32 +35,26 @@ enum {FFF, TFF, TTF, TTT, LLL};
 TString sComposition[] = {"FFF", "TFF", "TTF", "TTT", "LLL"};
 
 
-const UInt_t nCut = 25;
+const UInt_t nCut = 7;
 
 enum {
   Exactly3Leptons,
   HasZCandidate,
   HasWCandidate,
-  ATLAS,
-  MET,
-  SSLike,
-  SSLikeAntiBtag,
-  mll20_MET25, mll20_MET30, mll20_MET35, mll20_MET40, mll20_MET45, mll20_MET50,
-  mll15_MET25, mll15_MET30, mll15_MET35, mll15_MET40, mll15_MET45, mll15_MET50,
-  mll10_MET25, mll10_MET30, mll10_MET35, mll10_MET40, mll10_MET45, mll10_MET50
+  MET30,
+  MET40,
+  MET40AntiBtag,
+  ATLAS
 };
 
 TString sCut[] = {
   "Exactly3Leptons",
   "HasZCandidate",
   "HasWCandidate",
-  "ATLAS",
-  "MET",
-  "SSLike",
-  "SSLikeAntiBtag",
-  "mll20_MET25", "mll20_MET30", "mll20_MET35", "mll20_MET40", "mll20_MET45", "mll20_MET50",
-  "mll15_MET25", "mll15_MET30", "mll15_MET35", "mll15_MET40", "mll15_MET45", "mll15_MET50",
-  "mll10_MET25", "mll10_MET30", "mll10_MET35", "mll10_MET40", "mll10_MET45", "mll10_MET50"
+  "MET30",
+  "MET40",
+  "MET40AntiBtag",
+  "ATLAS"
 };
 
 
@@ -92,6 +86,14 @@ struct Lepton
 };
 
 
+enum {noSyst, metSyst};
+
+
+//------------------------------------------------------------------------------
+//
+// AnalysisWZ
+//
+//------------------------------------------------------------------------------
 class AnalysisWZ: public CMSAnalysisSelectorMiniTrees
 {
  public:
@@ -173,7 +175,7 @@ class AnalysisWZ: public CMSAnalysisSelectorMiniTrees
   Double_t                    pu_luminosity;
   Double_t                    xs_weight;
   Int_t                       mode;
-  Int_t                       met_systematic;
+  Int_t                       systematic;
   Int_t                       closure_test;
   Int_t                       runAtOviedo;
 

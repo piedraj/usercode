@@ -20,46 +20,48 @@
 
 // Member functions
 //------------------------------------------------------------------------------
-void DrawIt        (TH2F*       h,
-		    TString     title);
+void    DrawIt            (TH2F*       h,
+			   TString     title);
 
-void AxisFonts     (TAxis*      axis,
-		    TString     title);
+void    AxisFonts         (TAxis*      axis,
+			   TString     title);
 
-void TH2FAxisFonts (TH2F*       h,
-		    TString     coordinate,
-		    TString     title);
+void    TH2FAxisFonts     (TH2F*       h,
+			   TString     coordinate,
+			   TString     title);
 
-void DrawTLatex    (Double_t    x,
-		    Double_t    y,
-		    Double_t    tsize,
-		    Short_t     align,
-		    const char* text);
+void    DrawTLatex        (Double_t    x,
+			   Double_t    y,
+			   Double_t    tsize,
+			   Short_t     align,
+			   const char* text);
 
-TH2F* LoadHistogram(TString     filename,
-		    TString     hname,
-		    TString     cname);
+TH2F*   LoadHistogram     (TString     filename,
+			   TString     hname,
+			   TString     cname);
+
+TString GuessLocalBasePath();
 
 
 // Data members
 //------------------------------------------------------------------------------
-Int_t _runAtOviedo;
+TString localpath;
 
-TH2F* MuonSF;
-TH2F* ElecSF;
-TH2F* MuonPR;
-TH2F* ElecPR;
-TH2F* MuonFR_15;
-TH2F* MuonFR_30;
-TH2F* MuonFR_50;
-TH2F* ElecFR_15;
-TH2F* ElecFR_35;
-TH2F* ElecFR_50;
+TH2F*   MuonSF;
+TH2F*   ElecSF;
+TH2F*   MuonPR;
+TH2F*   ElecPR;
+TH2F*   MuonFR_15;
+TH2F*   MuonFR_30;
+TH2F*   MuonFR_50;
+TH2F*   ElecFR_15;
+TH2F*   ElecFR_35;
+TH2F*   ElecFR_50;
 
 
-void drawScaleFactors(Int_t runAtOviedo = 1)
+void drawScaleFactors()
 {
-  _runAtOviedo = runAtOviedo;
+  localpath = GuessLocalBasePath();
 
   gInterpreter->ExecuteMacro("./HiggsPaperStyle.C");
 
@@ -235,9 +237,7 @@ TH2F* LoadHistogram(TString filename,
 		    TString hname,
 		    TString cname)
 {
-  TString path = (_runAtOviedo) ? "/nfs/fanae/user" : "/gpfs/csic_users";
-
-  TFile* inputfile = TFile::Open(path + "/piedra/work/PAF/AuxiliaryFilesWZXS8TeV/" + filename + ".root");
+  TFile* inputfile = TFile::Open(localpath + "/piedra/work/PAF/AuxiliaryFilesWZXS8TeV/" + filename + ".root");
 
   TH2F* hist = (TH2F*)inputfile->Get(hname)->Clone(cname);
 
@@ -246,4 +246,28 @@ TH2F* LoadHistogram(TString filename,
   inputfile->Close();
 
   return hist;
+}
+
+
+//------------------------------------------------------------------------------
+// GuessLocalBasePath
+//------------------------------------------------------------------------------
+TString GuessLocalBasePath()
+{
+  TString host = gSystem->HostName();
+
+  if (host.Contains("uniovi.es"))
+    {
+      return TString("/nfs/fanae/user");
+    }
+  else if (host.Contains("ifca.es"))
+    {
+      return TString("/gpfs/csic_users");
+    }
+  else
+    {
+      printf(" ERROR: Could not guess base path from host name %s.", host.Data());
+
+      return TString("");
+    }
 }

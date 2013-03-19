@@ -2,12 +2,15 @@
 
 if [ $# -lt 2 ]; then
     echo "  "
-    echo "  ./run.sh MET_SYS CLOSURE"
+    echo "  ./run.sh SYST CLOSURE"
+    echo "  "
+    echo "  nominal analysis with SYST = 0"
+    echo "  met systematic   with SYST = 1"
     echo "  "
     exit -1
 fi
 
-MET_SYS=$1
+SYST=$1
 CLOSURE=$2
 
 
@@ -58,15 +61,18 @@ TTGJets          \
 "
 
 
-for SAMPLE in ${DATA_SAMPLES}; do
+if [ $SYST == 0 ]; then
 
-    root -l -b -q "RunPROOF_WZ.C(\"${SAMPLE}\",0,${MET_SYS},${CLOSURE})";
-    root -l -b -q "RunPROOF_WZ.C(\"${SAMPLE}\",1,${MET_SYS},${CLOSURE})";
+    for SAMPLE in ${DATA_SAMPLES}; do
+	
+	root -l -b -q "RunPROOF_WZ.C(\"${SAMPLE}\",0,$SYST,$CLOSURE)";
+	root -l -b -q "RunPROOF_WZ.C(\"${SAMPLE}\",1,$SYST,$CLOSURE)";
 
-done
+    done
+fi
 
 for SAMPLE in ${MC_SAMPLES}; do
-
-    root -l -b -q "RunPROOF_WZ.C(\"${SAMPLE}\",0,${MET_SYS},${CLOSURE})";
+    
+    root -l -b -q "RunPROOF_WZ.C(\"${SAMPLE}\",0,$SYST,$CLOSURE)";
     
 done

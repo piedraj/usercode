@@ -38,31 +38,45 @@
 
 // Input parameters for the WZ cross section
 //------------------------------------------------------------------------------
-const Double_t xsWplusZ_nlo  = 14.48;  // pb (arXiv:1105.0020v1)
-const Double_t xsWminusZ_nlo =  8.40;  // pb (arXiv:1105.0020v1)
-const Double_t xsWplusZ      = 13.89;  // pb (MCFM with 71 < mZ < 111 GeV)
-const Double_t xsWminusZ     =  8.06;  // pb (MCFM with 71 < mZ < 111 GeV)
+const Double_t xsWplusZ  = 13.89;  // pb (MCFM with 71 < mZ < 111 GeV)
+const Double_t xsWminusZ =  8.06;  // pb (MCFM with 71 < mZ < 111 GeV)
 
-const Double_t W2e     = 0.1075;
-const Double_t W2m     = 0.1057;
-const Double_t W2tau   = 0.1125;
-const Double_t Z2ll    = 0.033658;
-const Double_t WZ23lnu = 3 * Z2ll * (W2e + W2m + W2tau);
-const Double_t ngenWZ  = 2017979;
-
-Double_t ngenWZphase;
+const Double_t W2e         = 0.1075;
+const Double_t W2m         = 0.1057;
+const Double_t W2tau       = 0.1125;
+const Double_t Z2ll        = 0.033658;
+const Double_t WZ23lnu     = 3 * Z2ll * (W2e + W2m + W2tau);
+const Double_t ngenWZ      = 2017979;
+const Double_t ngenWZphase = 1449067;  // (71 < mZ < 111 GeV)
 
 
 // Data members
 //------------------------------------------------------------------------------
 const UInt_t nChannel = 4;
 
-enum {MMM, EEE, MME, EEM};
+enum {
+  MMM,
+  EEE,
+  MME,
+  EEM,
+  LLL
+};
 
-Color_t cChannel[] = {kBlack,      kRed+1, kBlue,     kGreen+1};
-Style_t mChannel[] = {20,          24,     21,        25};
-TString sChannel[] = {"MMM",       "EEE",  "MME",     "EEM"};
-TString lChannel[] = {"#mu#mu#mu", "eee",  "#mu#mue", "ee#mu", "inclusive"};
+TString sChannel[nChannel+1] = {
+  "MMM",
+  "EEE",
+  "MME",
+  "EEM",
+  "LLL"
+};
+
+TString lChannel[nChannel+1] = {
+  "#mu#mu#mu",
+  "eee",
+  "#mu#mue",
+  "ee#mu",
+  "inclusive"
+};
 
 
 const UInt_t nCut = 6;
@@ -71,46 +85,26 @@ enum {
   Exactly3Leptons,
   HasZCandidate,
   HasWCandidate,
-  MET,
-  SSLike,
-  SSLikeAntiBtag
+  MET30,
+  MET40,
+  MET40AntiBtag
 };
 
-TString sCut[] = {
+TString sCut[nCut] = {
   "Exactly3Leptons",
   "HasZCandidate",
   "HasWCandidate",
-  "MET",
-  "SSLike",
-  "SSLikeAntiBtag"
+  "MET30",
+  "MET40",
+  "MET40AntiBtag"
 };
 
 
-const UInt_t nScanPoint = 20;
-
-enum {
-  mll20_MET25, mll20_MET30, mll20_MET35, mll20_MET40, mll20_MET45, mll20_MET50,
-  mll15_MET25, mll15_MET30, mll15_MET35, mll15_MET40, mll15_MET45, mll15_MET50,
-  mll10_MET25, mll10_MET30, mll10_MET35, mll10_MET40, mll10_MET45, mll10_MET50,
-  mll15_MET40_SSLike,
-  mll15_MET40_SSLikeAntiBtag
-};
-
-TString sScanPoint[] = {
-  "mll20_MET25", "mll20_MET30", "mll20_MET35", "mll20_MET40", "mll20_MET45", "mll20_MET50",
-  "mll15_MET25", "mll15_MET30", "mll15_MET35", "mll15_MET40", "mll15_MET45", "mll15_MET50",
-  "mll10_MET25", "mll10_MET30", "mll10_MET35", "mll10_MET40", "mll10_MET45", "mll10_MET50",
-  "SSLike",
-  "SSLikeAntiBtag"
-};
-
-
-const UInt_t nProcess = 39;
+const UInt_t nProcess = 38;
 
 enum {
   Data,
   DataPPF,
-  DataPPP,
   DYJets_Madgraph,
   ZJets_Madgraph,
   ZbbToLL,
@@ -149,10 +143,22 @@ enum {
   TTGJets
 };
 
-Color_t  cProcess [nProcess];
-Double_t systError[nProcess];
-TFile*   input    [nProcess];
-TString  sProcess [nProcess];
+Color_t cProcess[nProcess];
+TFile*  input   [nProcess];
+TString sProcess[nProcess];
+
+
+// Systematics
+//------------------------------------------------------------------------------
+const UInt_t nSystematic = 3;
+
+enum {fakesSyst, mcfmSyst, metSyst};
+
+TString sSystematic[nSystematic] = {"fakes", "mcfm", "met"};
+
+Double_t processSyst[nProcess];
+
+Double_t systematicError[nProcess][nSystematic];
 
 
 enum {linY, logY};
@@ -168,6 +174,8 @@ Double_t        _yoffset;
 Int_t           _verbosity;
 TString         _directory;
 TString         _format;
+TString         _localpath;
+TString         _datapath;
 TString         _output;
 UInt_t          _cut;
 UInt_t          _mode;
@@ -196,8 +204,6 @@ void     MeasureTheCrossSection   (UInt_t        channel,
 
 void     PrintLatexTable          (UInt_t        channel);
 
-void     Scan                     ();
-
 void     DrawHistogram            (TString       hname,
 				   UInt_t        channel,
 				   UInt_t        cut,
@@ -217,10 +223,6 @@ Double_t GetMaximumIncludingErrors(TH1*          h,
 				   Double_t      xmax = -999);
 
 void     MoveOverflowBins         (TH1*          h,
-				   Double_t      xmin = -999,
-				   Double_t      xmax = -999);
-
-void     ZeroOutOfRangeBins       (TH1*          h,
 				   Double_t      xmin = -999,
 				   Double_t      xmax = -999);
 
@@ -252,51 +254,30 @@ TString  GuessLocalBasePath       ();
 
 void     MakeDirectory            ();
 
-void     DrawRatios               (UInt_t        cut);
-
 void     DrawCrossSections        (UInt_t        cut);
 
 void     Inclusive                (UInt_t        cut);
 
-void     Systematics              ();
-
-void     SetGraph                 (TGraph*       g,
-				   Color_t       lcolor,
-				   Style_t       lstyle,
-				   Width_t       lwidth,
-				   Color_t       mcolor,
-				   Size_t        msize,
-				   Style_t       mstyle);
-
-Double_t GetNGenPhase             (Double_t      loMass,
-				   Double_t      hiMass,
-				   UInt_t        runAtOviedo);
+void     RelativeSystematics      (UInt_t        cut);
 
 
 //------------------------------------------------------------------------------
 // XS
 //------------------------------------------------------------------------------
-void XS(UInt_t cut          = SSLike,
+void XS(UInt_t cut          = MET40,
 	UInt_t mode         = PPFmode,
 	UInt_t closure_test = 0,
-	UInt_t runAtOviedo  = 1,
 	UInt_t batch        = 1)
 {
   gROOT->SetBatch(batch);
 
-  ngenWZphase = GetNGenPhase(71.,111., runAtOviedo);
-
   SetParameters(cut, mode, closure_test);
 
-  Scan();
+  RelativeSystematics(cut);
 
   for (UInt_t channel=0; channel<nChannel; channel++) {
 
     if (ReadInputFiles(channel) < 0) return;
-
-    PrintLatexTable(channel);
-    
-    MeasureTheCrossSection(channel, cut);
 
     DrawHistogram("hSumCharges", channel, cut, "q_{1} + q_{2} + q_{3}");
 
@@ -314,6 +295,10 @@ void XS(UInt_t cut          = SSLike,
       }
     else
       {
+	PrintLatexTable(channel);
+	
+	MeasureTheCrossSection(channel, cut);
+
 	DrawHistogram("hMET",          channel, cut, "E_{T}^{miss}",          5, 0, "GeV", linY);
 	DrawHistogram("hInvMass3Lep",  channel, cut, "m_{#font[12]{3l}}",     5, 0, "GeV", linY, 60, 350);
 	DrawHistogram("hPtLepton1",    channel, cut, "p_{T}^{first lepton}",  5, 0, "GeV", linY);
@@ -334,125 +319,11 @@ void XS(UInt_t cut          = SSLike,
       }
   }
 
+  if (closure_test) return;
+
   Inclusive(cut);
   
-  DrawRatios(cut);
-
   DrawCrossSections(cut);
-}
-
-
-//------------------------------------------------------------------------------
-// Scan
-//------------------------------------------------------------------------------
-void Scan()
-{
-  TGraph* gscan[nChannel];
-
-  for (UInt_t i=0; i<nChannel; i++) {
-
-    if (ReadInputFiles(i) < 0) return;
-
-    gscan[i] = new TGraph(nScanPoint);
-    
-    SetGraph(gscan[i], cChannel[i], 1, 2, cChannel[i], 0.75, mChannel[i]);
-
-    for (UInt_t j=0; j<nScanPoint; j++) {
-
-      TString hname = "hCounter_" + sChannel[i] + "_" + sScanPoint[j] + "_LLL";
- 
-      Double_t nsignal     = 0;
-      Double_t nbackground = 0;
-      
-      for (UInt_t k=0; k<vprocess.size(); k++) {
-	
-	UInt_t m = vprocess.at(k);
-
-	TH1D* dummy = (TH1D*)input[m]->Get(hname);
-
-	if (m == Data) continue;
-
-	if (m == WZTo3LNu)
-      	  nsignal = Yield(dummy);
-	else
-	  nbackground += Yield(dummy);
-      }
-      
-      Double_t fom = nsignal / nbackground;
-
-      gscan[i]->SetPoint(j, j, fom);
-    }
-  }
-  
-
-  // Draw
-  //----------------------------------------------------------------------------
-  TCanvas* canvas = new TCanvas("scan", "scan", 700, 600);
-
-  canvas->SetLeftMargin(0.75 * canvas->GetLeftMargin());
-
-  Double_t ymin =  3.2;
-  Double_t ymax = 14.9;
-
-  TH2F* th2scan = new TH2F("th2scan", "",
-			   nScanPoint+1, -1., (Double_t)nScanPoint,
-			   100, ymin, ymax);
-
-  th2scan->Draw();
-  th2scan->GetYaxis()->CenterTitle();
-  th2scan->GetYaxis()->SetTitle("S / B");
-  th2scan->GetYaxis()->SetTitleOffset(1.4);
-
-  for (UInt_t i=0; i<nChannel; i++) gscan[i]->Draw("lp");
-
-
-  // Change x-axis labels
-  //----------------------------------------------------------------------------
-  Double_t ydelta = 0.7;
-  Double_t ypos   = ymin - ydelta;
-  Size_t   tsize  = 0.025;
-
-  TAxis* xaxis = th2scan->GetXaxis();
-  
-  for (Int_t j=1; j<xaxis->GetNbins(); j++) xaxis->SetBinLabel(j, "");
-
-  DrawTLatex(-1., ypos,        tsize, 31, "|m_{#font[12]{ll}} - M_{Z}| <", 0);
-  DrawTLatex(-1., ypos-ydelta, tsize, 31, "E_{T}^{miss} > ",               0);
-
-  DrawTLatex(mll15_MET40_SSLikeAntiBtag, ypos-2.*ydelta, tsize, 21, "#slash{b}", 0);
-  
-  for (UInt_t i=0; i<nScanPoint; i++) {
-    
-    if      (i ==  3) DrawTLatex(i, ypos, tsize, 21, Form("%d", 20), 0);
-    else if (i ==  9) DrawTLatex(i, ypos, tsize, 21, Form("%d", 15), 0);
-    else if (i == 15) DrawTLatex(i, ypos, tsize, 21, Form("%d", 10), 0);
-    else if (i == mll15_MET40_SSLike)         DrawTLatex(i, ypos, tsize, 21, Form("%d", 15), 0);
-    else if (i == mll15_MET40_SSLikeAntiBtag) DrawTLatex(i, ypos, tsize, 21, Form("%d", 15), 0);
-
-    if      (i < nScanPoint-2)                DrawTLatex(i, ypos-ydelta, tsize, 21, Form("%d", 25 + 5*(i%6)), 0);
-    else if (i == mll15_MET40_SSLike)         DrawTLatex(i, ypos-ydelta, tsize, 21, Form("%d", 40), 0);
-    else if (i == mll15_MET40_SSLikeAntiBtag) DrawTLatex(i, ypos-ydelta, tsize, 21, Form("%d", 40), 0);
-  }
-
-
-  // Legend
-  //----------------------------------------------------------------------------
-  Double_t x0     = 0.165;
-  Double_t y0     = 0.830;
-  Double_t delta  = _yoffset + 0.001;
-  Double_t ndelta = 0;
-
-  for (UInt_t i=0; i<nChannel; i++)
-    {
-      DrawLegend(x0, y0 - ndelta, (TH1*)gscan[i], " " + lChannel[i], "lp", 0.03, 0.15);
-      
-      ndelta += delta;
-    }
-  
-  
-  // Save
-  //----------------------------------------------------------------------------
-  canvas->SaveAs(Form("%s/scan.png", _output.Data()));
 }
 
 
@@ -461,14 +332,14 @@ void Scan()
 //------------------------------------------------------------------------------
 void MeasureTheCrossSection(UInt_t channel, UInt_t cut)
 {
-  if (cut < MET) return;
+  if (cut < MET30) return;
 
   if (_closure_test) return;
 
-  Double_t ndata       = 0;
-  Double_t nsignal     = 0;
-  Double_t nbackground = 0;
-  Double_t ebackground = 0;
+  Double_t ndata   = 0;
+  Double_t nsignal = 0;
+  Double_t nbkg    = 0;
+  Double_t ebkg    = 0;
 
   TString suffix = "_" + sChannel[channel] + "_" + sCut[cut] + "_LLL";
 
@@ -478,96 +349,77 @@ void MeasureTheCrossSection(UInt_t channel, UInt_t cut)
 
     UInt_t j = vprocess.at(i);
 
-    TH1D* dummy = (TH1D*)input[j]->Get("hCounter" + suffix);
+    Double_t process_yield = Yield((TH1D*)input[j]->Get("hCounter" + suffix));
 
     if (j == Data)
       {
-	ndata = Yield(dummy);
+	ndata = process_yield;
       }
     else if (j == WZTo3LNu)
       {
-	nsignal = Yield(dummy);
+	nsignal = process_yield;
       }
     else
       {
-	nbackground += Yield(dummy);
+	nbkg += process_yield;
 
-	ebackground += Yield(dummy);
+	Double_t ebkgStat = sqrt(process_yield);
+	Double_t ebkgSyst = processSyst[j] * process_yield / 1e2;
 
-	ebackground += ((Yield(dummy)*systError[j]/1e2) * (Yield(dummy)*systError[j]/1e2));
+	ebkg += (ebkgStat * ebkgStat);
+	ebkg += (ebkgSyst * ebkgSyst);
       }
   }
 
-  ebackground = sqrt(ebackground);
+  ebkg = sqrt(ebkg);
 
 
   // Estimate the cross section
   //----------------------------------------------------------------------------
   Double_t efficiency = nWZ / ngenWZphase;
 
-  xsValue[channel] = (ndata - nbackground) / (_luminosity * efficiency * WZ23lnu);
+  xsValue[channel] = (ndata - nbkg) / (_luminosity * efficiency * WZ23lnu);
 
 
   // Relative errors
   //----------------------------------------------------------------------------
-  Double_t xsRelativeErrorBackground = ebackground;
-  Double_t xsRelativeErrorEfficiency = systError[WZTo3LNu];
+  Double_t xsRelativeErrorLumi       = 4.4;
+  Double_t xsRelativeErrorStat       = 1e2 * sqrt(ndata) / (ndata - nbkg);
+  Double_t xsRelativeErrorBackground = 1e2 * ebkg        / (ndata - nbkg);
+  Double_t xsRelativeErrorEfficiency = processSyst[WZTo3LNu];
+  Double_t xsRelativeErrorSyst       = 0;
 
-  Double_t xsRelativeErrorSyst = 0;
   xsRelativeErrorSyst += (xsRelativeErrorBackground * xsRelativeErrorBackground);
   xsRelativeErrorSyst += (xsRelativeErrorEfficiency * xsRelativeErrorEfficiency);
   xsRelativeErrorSyst = sqrt(xsRelativeErrorSyst);
 
-  Double_t xsRelativeErrorStat = 1e2 * sqrt(ndata) / (ndata - nbackground);
-  Double_t xsRelativeErrorLumi = 4.4;
-
 
   // Absolute errors
   //----------------------------------------------------------------------------
-  xsErrorStat[channel] = xsValue[channel] * xsRelativeErrorStat / 1e2;  // pb
-  xsErrorSyst[channel] = xsValue[channel] * xsRelativeErrorSyst / 1e2;  // pb
-  xsErrorLumi[channel] = xsValue[channel] * xsRelativeErrorLumi / 1e2;  // pb
+  xsErrorStat[channel] = xsRelativeErrorStat * xsValue[channel] / 1e2;  // pb
+  xsErrorSyst[channel] = xsRelativeErrorSyst * xsValue[channel] / 1e2;  // pb
+  xsErrorLumi[channel] = xsRelativeErrorLumi * xsValue[channel] / 1e2;  // pb
 
 
   // Print the results
   //----------------------------------------------------------------------------
-  if (_verbosity > 0) {
-    printf("\n");
-    printf("                          ---------- %s ---------- ", sChannel[channel].Data());
-  }
-
-  if (_verbosity > 2) {
-    printf("\n");
-    printf("                    BR(W  -> e   nu) = %5.2f %s\n", 1e2 * W2e,     "%");
-    printf("                    BR(W  -> mu  nu) = %5.2f %s\n", 1e2 * W2m,     "%");
-    printf("                    BR(W  -> tau nu) = %5.2f %s\n", 1e2 * W2tau,   "%");
-    printf("                    BR(Z  -> ll)     = %7.4f %s\n", 1e2 * Z2ll,    "%");
-    printf("                    BR(WZ -> 3l nu)  = %5.2f %s\n", 1e2 * WZ23lnu, "%");
-    printf("                          luminosity = %.1f pb\n", _luminosity);
-    printf("                        generated WZ = %.0f\n", ngenWZ);
-    printf(" generated WZ with 71 < mZ < 111 GeV = %.0f (%.0f %s)\n", ngenWZphase, 1e2 * ngenWZphase / ngenWZ, "%");
-  }
-
-  if (_verbosity > 1) {
-    printf("\n");
-    printf("               number of selected WZ = %.0f\n", nWZ);
-    printf("                       WZ efficiency = %.2f %s\n", 1e2 * efficiency, "%");
-    printf("                         nbackground = %5.1f +- %4.1f\n", nbackground,       sqrt(nbackground));
-    printf("                               ndata = %5.1f +- %4.1f\n", ndata,             sqrt(ndata));
-    printf("                 ndata - nbackground = %5.1f +- %4.1f\n", ndata-nbackground, sqrt(ndata+nbackground));
-    printf("                             nsignal = %5.1f +- %4.1f\n", nsignal,           sqrt(nsignal));
-  }
-
-  if (_verbosity > 0) {
-    printf("\n");
-    printf("                         measured xs = %.2f +- %.2f (stat) +- %.2f (syst) +- %.2f (lumi) pb\n",
-	   xsValue    [channel],
-	   xsErrorStat[channel],
-	   xsErrorSyst[channel],
-	   xsErrorLumi[channel]);
-    printf("                              NLO xs = %.2f pb (MCFM with 71 < mZ < 111 GeV)\n", xsWplusZ + xsWminusZ);
-    printf("\n");
-  }
+  if (_verbosity > 0)
+    {
+      printf("\n");
+      printf(" WZ efficiency = %.2f%s\n", 1e2 * efficiency, "%");
+      printf("          nbkg = %5.1f +- %4.1f\n", nbkg,       sqrt(nbkg));
+      printf("         ndata = %5.1f +- %4.1f\n", ndata,      sqrt(ndata));
+      printf("  ndata - nbkg = %5.1f +- %4.1f\n", ndata-nbkg, sqrt(ndata+nbkg));
+      printf("       nsignal = %5.1f +- %4.1f\n", nsignal,    sqrt(nsignal));
+      printf("\n       xs(%s) = %.2f +- %.2f (stat) +- %.2f (syst) +- %.2f (lumi) pb\n",
+	     sChannel   [channel].Data(),
+	     xsValue    [channel],
+	     xsErrorStat[channel],
+	     xsErrorSyst[channel],
+	     xsErrorLumi[channel]);
+      printf("       xs(NLO) = %.2f pb\n", xsWplusZ + xsWminusZ);
+      printf("\n");
+    }
 }
 
 
@@ -633,6 +485,7 @@ void PrintLatexTable(UInt_t channel)
 	  TString hname = "hCounter_" + sChannel[channel] + "_" + sCut[i] + "_LLL";
 
 	  hist[k] = (TH1D*)input[k]->Get(hname);
+
 	  hist[k]->SetName(hname + "_" + sProcess[k]);
 	}
 
@@ -716,9 +569,9 @@ void PrintLatexTable(UInt_t channel)
 
   outputfile << " \\hline\n";
 
-  outputfile << Form(" %-20s", "WZ + backgrounds"); for (UInt_t i=0; i<nCut; i++) outputfile << Form(" & %3.0f $\\pm$ %2.0f", nBkg[i]+nWZ[i], sqrt(nBkg[i]+nWZ[i])); outputfile << "\\\\\n";
-  outputfile << Form(" %-20s", "data");             for (UInt_t i=0; i<nCut; i++) outputfile << Form(" & %3.0f $\\pm$ %2.0f", nData[i],       eData[i]);             outputfile << "\\\\\n";
-  outputfile << Form(" %-20s", "S/B");              for (UInt_t i=0; i<nCut; i++) outputfile << Form(" & %.1f",               nWZ[i] / nBkg[i]);                     outputfile << "\\\\\n";
+  outputfile << Form(" %-20s", "WZ + backgrounds");    for (UInt_t i=0; i<nCut; i++) outputfile << Form(" & %3.0f $\\pm$ %2.0f", nBkg[i]+nWZ[i], sqrt(nBkg[i]+nWZ[i])); outputfile << "\\\\\n";
+  outputfile << Form(" %-20s", "data");                for (UInt_t i=0; i<nCut; i++) outputfile << Form(" & %3.0f $\\pm$ %2.0f", nData[i],       eData[i]);             outputfile << "\\\\\n";
+  outputfile << Form(" %-20s", "S/$\\sqrt{\\rm{B}}$"); for (UInt_t i=0; i<nCut; i++) outputfile << Form(" & %.1f",               nWZ[i] / sqrt(nBkg[i]));               outputfile << "\\\\\n";
 
   outputfile.close();
 }
@@ -773,10 +626,10 @@ void DrawHistogram(TString  hname,
     UInt_t j = vprocess.at(i);
 
     hist[j] = (TH1D*)input[j]->Get(hname);
+
     hist[j]->SetName(hname + "_" + sProcess[j]);
 
-    if (moveOverflow) MoveOverflowBins  (hist[j], xmin, xmax);
-    else              ZeroOutOfRangeBins(hist[j], xmin, xmax);
+    if (moveOverflow) MoveOverflowBins(hist[j], xmin, xmax);
     
     if (ngroup > 0) hist[j]->Rebin(ngroup);
 
@@ -819,11 +672,13 @@ void DrawHistogram(TString  hname,
 
       if (j == Data) continue;
 
-      Double_t binContent = hist[j]->GetBinContent(ibin);
-      
+      Double_t binContent   = hist[j]->GetBinContent(ibin);
+      Double_t binStatError = hist[j]->GetBinError(ibin);
+      Double_t binSystError = processSyst[j] * binContent / 1e2;
+
       binValue += binContent;
-      binError += (hist[j]->GetBinError(ibin) * hist[j]->GetBinError(ibin));
-      binError += (systError[j]*binContent/1e2 * systError[j]*binContent/1e2);
+      binError += (binStatError * binStatError);
+      binError += (binSystError * binSystError);
     }
     
     binError = sqrt(binError);
@@ -890,75 +745,67 @@ void DrawHistogram(TString  hname,
   DrawLegend(x0 - 0.49, y0 - ndelta, allmc,          Form(" all (%.0f)",  Yield(allmc)),          "f");  ndelta += delta;
   DrawLegend(x0 - 0.49, y0 - ndelta, hist[WZTo3LNu], Form(" WZ (%.0f)",   Yield(hist[WZTo3LNu])), "f");  ndelta += delta;
 
-  if (_mode == PPPmode)
+  if (_mode == MCmode)
     {
-      DrawLegend(x0 - 0.49, y0 - ndelta, hist[DataPPP], Form(" PPP (%.0f)", Yield(hist[DataPPP])), "f"); ndelta += delta;
-      DrawLegend(x0 - 0.49, y0 - ndelta, hist[DataPPF], Form(" PPF (%.0f)", Yield(hist[DataPPF])), "f"); ndelta += delta;
-    }
-  else
-    {
-      if (_mode == MCmode)
-	{
-	  Double_t TopYield   = 0.0;
-	  Double_t ZJetsYield = 0.0;
+      Double_t TopYield   = 0.0;
+      Double_t ZJetsYield = 0.0;
 	  
-	  TopYield += Yield(hist[TTbar_Madgraph]);
-	  TopYield += Yield(hist[TW]);
-	  TopYield += Yield(hist[TbarW]);
+      TopYield += Yield(hist[TTbar_Madgraph]);
+      TopYield += Yield(hist[TW]);
+      TopYield += Yield(hist[TbarW]);
 
-	  ZJetsYield += Yield(hist[DYJets_Madgraph]);
-	  ZJetsYield += Yield(hist[ZJets_Madgraph]);
-	  ZJetsYield += Yield(hist[ZbbToLL]);
+      ZJetsYield += Yield(hist[DYJets_Madgraph]);
+      ZJetsYield += Yield(hist[ZJets_Madgraph]);
+      ZJetsYield += Yield(hist[ZbbToLL]);
 
-	  DrawLegend(x0 - 0.49, y0 - ndelta, hist[TTbar_Madgraph], Form(" top (%.0f)",    TopYield),   "f"); ndelta += delta;
-	  DrawLegend(x0 - 0.49, y0 - ndelta, hist[ZJets_Madgraph], Form(" Z+jets (%.0f)", ZJetsYield), "f"); ndelta += delta;
-	}
-      else if (_mode == PPFmode)
-	{
-	  DrawLegend(x0 - 0.49, y0 - ndelta, hist[DataPPF], Form(" data-driven (%.0f)", Yield(hist[DataPPF])), "f"); ndelta += delta;
-	}
-
-      Double_t ZZYield  = 0.0;
-      Double_t WVYield  = 0.0;
-      Double_t VVVYield = 0.0;
-
-      ZZYield += Yield(hist[ZgammaToLLG]);
-      ZZYield += Yield(hist[ggZZ2L2L]);
-      ZZYield += Yield(hist[ggZZ4L]);
-      ZZYield += Yield(hist[ZZ2Mu2Tau]);
-      ZZYield += Yield(hist[ZZ4E]);
-      ZZYield += Yield(hist[ZZ2E2Tau]);
-      ZZYield += Yield(hist[ZZ4Mu]);
-      ZZYield += Yield(hist[ZZ2E2Mu]);
-      ZZYield += Yield(hist[ZZ4Tau]);
-      ZZYield += Yield(hist[HZZ4L]);
-
-      WVYield += Yield(hist[WW]);
-      WVYield += Yield(hist[WZTo2L2QMad]);
-      WVYield += Yield(hist[WZTo2QLNuMad]);
-      WVYield += Yield(hist[WbbToLNu]);
-      WVYield += Yield(hist[WJets_Madgraph]);
-      WVYield += Yield(hist[WGstarToElNuMad]);
-      WVYield += Yield(hist[WGstarToMuNuMad]);
-      WVYield += Yield(hist[WGstarToTauNuMad]);
-      WVYield += Yield(hist[WgammaToLNuG]);
-
-      VVVYield += Yield(hist[WWGJets]);
-      VVVYield += Yield(hist[WZZJets]);
-      VVVYield += Yield(hist[ZZZJets]);
-      VVVYield += Yield(hist[WWZJets]);
-      VVVYield += Yield(hist[WWWJets]);
-      VVVYield += Yield(hist[TTWJets]);
-      VVVYield += Yield(hist[TTZJets]);
-      VVVYield += Yield(hist[TTWWJets]);
-      VVVYield += Yield(hist[TTGJets]);
-      
-      ndelta = 0;
-
-      DrawLegend(x0 - 0.23, y0 - ndelta, hist[ggZZ2L2L], Form(" ZZ (%.0f)",  ZZYield),  "f"); ndelta += delta;
-      DrawLegend(x0 - 0.23, y0 - ndelta, hist[WW],       Form(" WV (%.0f)",  WVYield),  "f"); ndelta += delta;
-      DrawLegend(x0 - 0.23, y0 - ndelta, hist[WWGJets],  Form(" VVV (%.0f)", VVVYield), "f"); ndelta += delta;
+      DrawLegend(x0 - 0.49, y0 - ndelta, hist[TTbar_Madgraph], Form(" top (%.0f)",    TopYield),   "f"); ndelta += delta;
+      DrawLegend(x0 - 0.49, y0 - ndelta, hist[ZJets_Madgraph], Form(" Z+jets (%.0f)", ZJetsYield), "f"); ndelta += delta;
     }
+  else if (_mode == PPFmode)
+    {
+      DrawLegend(x0 - 0.49, y0 - ndelta, hist[DataPPF], Form(" data-driven (%.0f)", Yield(hist[DataPPF])), "f"); ndelta += delta;
+    }
+
+  Double_t ZZYield  = 0.0;
+  Double_t WVYield  = 0.0;
+  Double_t VVVYield = 0.0;
+
+  ZZYield += Yield(hist[ZgammaToLLG]);
+  ZZYield += Yield(hist[ggZZ2L2L]);
+  ZZYield += Yield(hist[ggZZ4L]);
+  ZZYield += Yield(hist[ZZ2Mu2Tau]);
+  ZZYield += Yield(hist[ZZ4E]);
+  ZZYield += Yield(hist[ZZ2E2Tau]);
+  ZZYield += Yield(hist[ZZ4Mu]);
+  ZZYield += Yield(hist[ZZ2E2Mu]);
+  ZZYield += Yield(hist[ZZ4Tau]);
+  ZZYield += Yield(hist[HZZ4L]);
+  
+  WVYield += Yield(hist[WW]);
+  WVYield += Yield(hist[WZTo2L2QMad]);
+  WVYield += Yield(hist[WZTo2QLNuMad]);
+  WVYield += Yield(hist[WbbToLNu]);
+  WVYield += Yield(hist[WJets_Madgraph]);
+  WVYield += Yield(hist[WGstarToElNuMad]);
+  WVYield += Yield(hist[WGstarToMuNuMad]);
+  WVYield += Yield(hist[WGstarToTauNuMad]);
+  WVYield += Yield(hist[WgammaToLNuG]);
+
+  VVVYield += Yield(hist[WWGJets]);
+  VVVYield += Yield(hist[WZZJets]);
+  VVVYield += Yield(hist[ZZZJets]);
+  VVVYield += Yield(hist[WWZJets]);
+  VVVYield += Yield(hist[WWWJets]);
+  VVVYield += Yield(hist[TTWJets]);
+  VVVYield += Yield(hist[TTZJets]);
+  VVVYield += Yield(hist[TTWWJets]);
+  VVVYield += Yield(hist[TTGJets]);
+      
+  ndelta = 0;
+  
+  DrawLegend(x0 - 0.23, y0 - ndelta, hist[ggZZ2L2L], Form(" ZZ (%.0f)",  ZZYield),  "f"); ndelta += delta;
+  DrawLegend(x0 - 0.23, y0 - ndelta, hist[WW],       Form(" WV (%.0f)",  WVYield),  "f"); ndelta += delta;
+  DrawLegend(x0 - 0.23, y0 - ndelta, hist[WWGJets],  Form(" VVV (%.0f)", VVVYield), "f"); ndelta += delta;
 
 
   // CMS titles
@@ -1094,30 +941,6 @@ void MoveOverflowBins(TH1*     h,
 
   h->SetBinContent(lastBin, lastVal);
   h->SetBinError  (lastBin, lastErr);
-}
-
-
-//------------------------------------------------------------------------------
-// ZeroOutOfRangeBins
-//------------------------------------------------------------------------------
-void ZeroOutOfRangeBins(TH1*     h,
-			Double_t xmin,
-			Double_t xmax)
-{
-  UInt_t nbins = h->GetNbinsX();
-
-  TAxis* axis = (TAxis*)h->GetXaxis();
-  
-  UInt_t firstBin = (xmin != -999) ? axis->FindBin(xmin) : 1;
-  UInt_t lastBin  = (xmax != -999) ? axis->FindBin(xmax) : nbins;
-
-  for (UInt_t i=0; i<=nbins+1; i++) {
-
-    if (i < firstBin || i > lastBin) {
-      h->SetBinContent(i, 0);
-      h->SetBinError  (i, 0);
-    }
-  }
 }
 
 
@@ -1258,7 +1081,6 @@ void SetParameters(UInt_t cut,
 
   cProcess[Data]             = kBlack;
   cProcess[DataPPF]          = kGray+1;
-  cProcess[DataPPP]          = kOrange-2;
   cProcess[DYJets_Madgraph]  = kGreen+2;   // Z+jets
   cProcess[ZJets_Madgraph]   = kGreen+2;   // Z+jets
   cProcess[ZbbToLL]          = kGreen+2;   // Z+jets
@@ -1296,15 +1118,19 @@ void SetParameters(UInt_t cut,
   cProcess[TTWWJets]         = kBlack;     // VVV
   cProcess[TTGJets]          = kBlack;     // VVV
 
-  Systematics();
 
   _luminosity   = 19602.0;  // pb
   _yoffset      = 0.048;
-  _verbosity    = 0;
+  _verbosity    = 2;
   _format       = "png";
   _cut          = cut;
   _mode         = mode;
   _closure_test = closure_test;
+  _localpath    = GuessLocalBasePath();
+  _directory    = "Summer12_53X/WH";
+  _datapath     = Form("%s/piedra/work/WZXS8TeV/results/%s/",
+		       _localpath.Data(),
+		       _directory.Data());
 
   MakeDirectory();
 
@@ -1316,63 +1142,55 @@ void SetParameters(UInt_t cut,
   
   TH1::SetDefaultSumw2();
 
+
   vprocess.clear();
 
   vprocess.push_back(Data);
+  vprocess.push_back(WbbToLNu);
+  vprocess.push_back(WJets_Madgraph);
+  vprocess.push_back(WGstarToElNuMad);
+  vprocess.push_back(WGstarToMuNuMad);
+  vprocess.push_back(WGstarToTauNuMad);
+  vprocess.push_back(WgammaToLNuG);
+  vprocess.push_back(WW);
+  vprocess.push_back(WZTo2L2QMad);
+  vprocess.push_back(WZTo2QLNuMad);
 
-  if (mode == PPPmode)
+  if (mode == MCmode)
+    {
+      vprocess.push_back(TTbar_Madgraph);
+      vprocess.push_back(TW);
+      vprocess.push_back(TbarW);
+      vprocess.push_back(ZZTo2L2QMad);
+      vprocess.push_back(DYJets_Madgraph);
+      vprocess.push_back(ZJets_Madgraph);
+      vprocess.push_back(ZbbToLL);
+    }
+  else if (mode == PPFmode)
     {
       vprocess.push_back(DataPPF);
-      vprocess.push_back(DataPPP);
     }
-  else
-    {
-      vprocess.push_back(WbbToLNu);
-      vprocess.push_back(WJets_Madgraph);
-      vprocess.push_back(WGstarToElNuMad);
-      vprocess.push_back(WGstarToMuNuMad);
-      vprocess.push_back(WGstarToTauNuMad);
-      vprocess.push_back(WgammaToLNuG);
-      vprocess.push_back(WW);
-      vprocess.push_back(WZTo2L2QMad);
-      vprocess.push_back(WZTo2QLNuMad);
-
-      if (mode == MCmode)
-	{
-	  vprocess.push_back(TTbar_Madgraph);
-	  vprocess.push_back(TW);
-	  vprocess.push_back(TbarW);
-	  vprocess.push_back(ZZTo2L2QMad);
-	  vprocess.push_back(DYJets_Madgraph);
-	  vprocess.push_back(ZJets_Madgraph);
-	  vprocess.push_back(ZbbToLL);
-	}
-      else if (mode == PPFmode)
-	{
-	  vprocess.push_back(DataPPF);
-	}
       
-      vprocess.push_back(ZgammaToLLG);
-      vprocess.push_back(ggZZ2L2L);
-      vprocess.push_back(ggZZ4L);
-      vprocess.push_back(ZZ2Mu2Tau);
-      vprocess.push_back(ZZ4E);
-      vprocess.push_back(ZZ2E2Tau);
-      vprocess.push_back(ZZ4Mu);
-      vprocess.push_back(ZZ2E2Mu);
-      vprocess.push_back(ZZ4Tau);
-      vprocess.push_back(HZZ4L);
-      vprocess.push_back(WWGJets);
-      vprocess.push_back(WZZJets);
-      vprocess.push_back(ZZZJets);
-      vprocess.push_back(WWZJets);
-      vprocess.push_back(WWWJets);
-      vprocess.push_back(TTWJets);
-      vprocess.push_back(TTZJets);
-      vprocess.push_back(TTWWJets);
-      vprocess.push_back(TTGJets);
-      vprocess.push_back(WZTo3LNu);
-    }
+  vprocess.push_back(ZgammaToLLG);
+  vprocess.push_back(ggZZ2L2L);
+  vprocess.push_back(ggZZ4L);
+  vprocess.push_back(ZZ2Mu2Tau);
+  vprocess.push_back(ZZ4E);
+  vprocess.push_back(ZZ2E2Tau);
+  vprocess.push_back(ZZ4Mu);
+  vprocess.push_back(ZZ2E2Mu);
+  vprocess.push_back(ZZ4Tau);
+  vprocess.push_back(HZZ4L);
+  vprocess.push_back(WWGJets);
+  vprocess.push_back(WZZJets);
+  vprocess.push_back(ZZZJets);
+  vprocess.push_back(WWZJets);
+  vprocess.push_back(WWWJets);
+  vprocess.push_back(TTWJets);
+  vprocess.push_back(TTZJets);
+  vprocess.push_back(TTWWJets);
+  vprocess.push_back(TTGJets);
+  vprocess.push_back(WZTo3LNu);
 }
 
 
@@ -1381,33 +1199,21 @@ void SetParameters(UInt_t cut,
 //------------------------------------------------------------------------------
 Int_t ReadInputFiles(UInt_t channel)
 {
-  if (channel == EEE || channel == EEM)
-    {
-      sProcess[Data]    = "DoubleElectron";
-      sProcess[DataPPF] = "DoubleElectron_PPF";
-      sProcess[DataPPP] = "DoubleElectron_PPP";
-    }
-  else if (channel == MMM || channel == MME)
-    {
-      sProcess[Data]    = "DoubleMu";
-      sProcess[DataPPF] = "DoubleMu_PPF";
-      sProcess[DataPPP] = "DoubleMu_PPP";
-    }
+  if      (channel == EEE || channel == EEM) sProcess[Data] = "DoubleElectron";
+  else if (channel == MMM || channel == MME) sProcess[Data] = "DoubleMu";
 
-  TString path = Form("%s/piedra/work/WZXS8TeV/results/%s/",
-		      GuessLocalBasePath().Data(),
-		      _directory.Data());
+  sProcess[DataPPF] = sProcess[Data] + "_PPF";
 
   for (UInt_t i=0; i<vprocess.size(); i++) {
 
     UInt_t j = vprocess.at(i);
 
-    input[j] = new TFile(path + sProcess[j] + ".root");
+    input[j] = new TFile(_datapath + sProcess[j] + ".root");
 
 
-    // Debug
+    // Check
     //--------------------------------------------------------------------------
-    TH1D* dummy = (TH1D*)input[j]->Get("hCounter_MMM_SSLike_LLL");
+    TH1D* dummy = (TH1D*)input[j]->Get("hCounter_" + sChannel[channel] + "_MET30_LLL");
 
     if (!dummy)
       {
@@ -1469,8 +1275,6 @@ TString GuessLocalBasePath()
 //------------------------------------------------------------------------------
 void MakeDirectory()
 {
-  _directory = "Summer12_53X/WH";
-  
   gSystem->mkdir("pdf");
   gSystem->mkdir("tex");
 
@@ -1506,147 +1310,11 @@ void MakeDirectory()
 
 
 //------------------------------------------------------------------------------
-// DrawRatios
-//------------------------------------------------------------------------------
-void DrawRatios(UInt_t cut)
-{
-  if (cut < MET) return;
-
-  TGraphErrors* gStat = new TGraphErrors(nChannel+1);
-  TGraphErrors* gSyst = new TGraphErrors(nChannel+1);
-  TGraphErrors* gLumi = new TGraphErrors(nChannel+1);
-
-  for (UInt_t i=0; i<nChannel+1; i++) {
-
-    Double_t f = xsValue[i] / (xsWplusZ + xsWminusZ);
-
-    Double_t errorSquared = (xsErrorStat[i] * xsErrorStat[i]);
-
-    gStat->SetPointError(i, f * sqrt(errorSquared) / xsValue[i], 0.0);
-
-    errorSquared += (xsErrorSyst[i] * xsErrorSyst[i]);
-
-    gSyst->SetPointError(i, f * sqrt(errorSquared) / xsValue[i], 0.0);
-
-    errorSquared += (xsErrorLumi[i] * xsErrorLumi[i]);
-
-    gLumi->SetPointError(i, f * sqrt(errorSquared) / xsValue[i], 0.0);
-
-    gStat->SetPoint(i, f, i+1);
-    gSyst->SetPoint(i, f, i+1);
-    gLumi->SetPoint(i, f, i+1);
-  }
-
-
-  // Cosmetics
-  //----------------------------------------------------------------------------
-  gStat->SetLineWidth  (2);
-  gStat->SetMarkerSize (1.3);
-  gStat->SetMarkerStyle(kFullCircle);
-
-  gSyst->SetLineColor  (kRed);
-  gSyst->SetLineWidth  (2);
-  gSyst->SetMarkerSize (1.3);
-  gSyst->SetMarkerStyle(kFullCircle);
-
-  gLumi->SetLineColor  (kBlue);
-  gLumi->SetLineWidth  (2);
-  gLumi->SetMarkerSize (1.3);
-  gLumi->SetMarkerStyle(kFullCircle);
-
-
-  // Draw
-  //----------------------------------------------------------------------------
-  TCanvas* canvas = new TCanvas("ratios_" + sCut[cut],
-				"ratios_" + sCut[cut]);
-
-  canvas->SetLeftMargin(canvas->GetRightMargin());
-
-  Double_t xmin = 0.6;
-  Double_t xmax = 2.2;
-  Double_t ymin = 0.50;
-  Double_t ymax = nChannel+1 + ymin;
-  
-  TH2F* dummy = new TH2F("dummy_ratios", "",
-			 100, xmin, xmax,
-			 100, ymin, ymax);
-
-  dummy->Draw();
-  
-  
-  // Vertical line at 1
-  //----------------------------------------------------------------------------
-  TLine* line = new TLine(1.0, ymin, 1.0, ymax);
-
-  line->SetLineColor(kGray+2);
-  line->SetLineStyle(3);
-  line->SetLineWidth(3);
-
-  line->Draw("same");
-
-
-  // Ratios
-  //----------------------------------------------------------------------------
-  gLumi->Draw("p,same");
-  gSyst->Draw("p,same");
-  gStat->Draw("p,same");
-
-
-  // Labels
-  //----------------------------------------------------------------------------
-  for (UInt_t i=0; i<nChannel+1; i++) {
-
-    Double_t x = gStat->GetX()[i];
-    Double_t y = gStat->GetY()[i];
-
-    DrawTLatex(xmin+0.05, y, 0.035, 12, Form("%s", lChannel[i].Data()), 0);
-
-    Double_t gStatError  = gStat->GetErrorX(i);
-    Double_t gSystError  = gSyst->GetErrorX(i);
-    Double_t gLumiError  = gLumi->GetErrorX(i);
-
-    gLumiError = sqrt(gLumiError*gLumiError - gSystError*gSystError);
-    gSystError = sqrt(gSystError*gSystError - gStatError*gStatError);
-
-    DrawTLatex(xmax-0.05, y, 0.035, 32, Form("%.2f #pm %.2f #pm %.2f #pm %.2f",
-					     x, gStatError, gSystError, gLumiError), 0);
-  }
-
-  DrawTLatex(0.940, 0.983, 0.05, 33,
-	     Form("#sqrt{s} = 8 TeV, L = %.1f fb^{-1}", _luminosity/1e3));
-
-  dummy->GetXaxis()->CenterTitle();
-  dummy->GetXaxis()->SetTitleOffset(1.4);
-  dummy->GetXaxis()->SetTitle("#sigma_{WZ}^{exp} / #sigma_{WZ}^{theo}");
-  dummy->GetYaxis()->SetTitle("");
-
-
-  // Remove y-axis labels
-  //----------------------------------------------------------------------------
-  TAxis* yaxis = dummy->GetYaxis();
-  
-  for (Int_t j=1; j<yaxis->GetNbins(); j++) yaxis->SetBinLabel(j, "");
-
-
-  // Save
-  //----------------------------------------------------------------------------
-  canvas->Update();
-  canvas->GetFrame()->DrawClone();
-  canvas->RedrawAxis();
-
-  canvas->SaveAs(Form("%s/ratios_%s.%s",
-		      _output.Data(),
-		      sCut[cut].Data(),
-		      _format.Data()));
-}
-
-
-//------------------------------------------------------------------------------
 // DrawCrossSections
 //------------------------------------------------------------------------------
 void DrawCrossSections(UInt_t cut)
 {
-  if (cut < MET) return;
+  if (cut < MET30) return;
 
   TGraphErrors* gStat = new TGraphErrors(nChannel+1);
   TGraphErrors* gSyst = new TGraphErrors(nChannel+1);
@@ -1781,7 +1449,7 @@ void DrawCrossSections(UInt_t cut)
 //------------------------------------------------------------------------------
 void Inclusive(UInt_t cut)
 {
-  if (cut < MET) return;
+  if (cut < MET30) return;
 
   if (_closure_test) return;
 
@@ -1818,49 +1486,125 @@ void Inclusive(UInt_t cut)
 
 
 //------------------------------------------------------------------------------
-// Systematics
+// RelativeSystematics
 //------------------------------------------------------------------------------
-void Systematics()
+void RelativeSystematics(UInt_t cut)
 {
-  for (UInt_t i=0; i<nProcess; i++) systError[i] = 0.0;
+  if (cut < MET30) return;
+  
+  if (_closure_test) return;
 
-  systError[DataPPF]  = 36.0;
-  systError[WZTo3LNu] =  5.3;
-}
+  for (UInt_t i=0; i<nSystematic; i++) {
+
+    Double_t maxSyst = 0.0;
+
+    for (UInt_t k=0; k<nProcess; k++) systematicError[k][i] = 0.0;
+
+    if (i == fakesSyst) {systematicError[DataPPF] [i] = 36.0; continue;}
+    if (i == mcfmSyst)  {systematicError[WZTo3LNu][i] =  5.3; continue;}
+
+    for (UInt_t j=0; j<nChannel; j++) {
+
+      if      (i == EEE || i == EEM) sProcess[Data] = "DoubleElectron";
+      else if (i == MMM || i == MME) sProcess[Data] = "DoubleMu";
+      
+      sProcess[DataPPF] = sProcess[Data] + "_PPF";
+      
+      TString hname = "hCounter_" + sChannel[j] + "_" + sCut[cut] + "_LLL";
+
+      for(UInt_t k=0; k<nProcess; k++) {
+	
+	if (k == Data)    continue;
+	if (k == DataPPF) continue;
+	
+	TFile* f0 = new TFile(_datapath + sProcess[k] + ".root");
+	TFile* f1 = new TFile(_datapath + "systematics/" + sSystematic[i] + "/" + sProcess[k] + ".root");
+
+	Double_t y0 = Yield((TH1D*)f0->Get(hname));
+	Double_t y1 = Yield((TH1D*)f1->Get(hname));
+
+	Double_t syst = (y0 > 1) ? 1e2 * fabs(y1 - y0) / y0 : 0.0;
+
+	if (syst > systematicError[k][i]) systematicError[k][i] = syst;
+
+	if (systematicError[k][i] > maxSyst) maxSyst = systematicError[k][i];
+      }
+    }
+
+    for (UInt_t k=0; k<nProcess; k++) {
+
+      if (k == Data || k == DataPPF) continue;
+      
+      systematicError[k][i] = maxSyst;
+    }
+  }
 
 
-//------------------------------------------------------------------------------
-// SetGraphErrors
-//------------------------------------------------------------------------------
-void SetGraph(TGraph* g,
-	      Color_t lcolor,
-	      Style_t lstyle,
-	      Width_t lwidth,
-	      Color_t mcolor,
-	      Size_t  msize,
-	      Style_t mstyle)
-{
-  g->SetLineColor  (lcolor);
-  g->SetLineStyle  (lstyle);
-  g->SetLineWidth  (lwidth);
-  g->SetMarkerColor(mcolor);
-  g->SetMarkerSize (msize );
-  g->SetMarkerStyle(mstyle);
-}
+  processSyst[DataPPF] = systematicError[DataPPF][fakesSyst];
+  
+
+  for (UInt_t i=0; i<nProcess; i++) {
+
+    if (i == Data || i == DataPPF) continue;
+
+    for (UInt_t j=0; j<nSystematic; j++) {
+
+      if (j == fakesSyst) continue;
+      
+      Double_t syst2 = systematicError[i][j] * systematicError[i][j];
+
+      if (j == mcfmSyst)
+	{
+	  if (i == WZTo3LNu) processSyst[i] += syst2;
+
+	  continue;
+	}
+
+      processSyst[i] += syst2;
+    }
+
+    processSyst[i] = sqrt(processSyst[i]);
+  }
 
 
-//------------------------------------------------------------------------------
-// GetNGenPhase
-//------------------------------------------------------------------------------
-Double_t GetNGenPhase(Double_t loMass,
-		      Double_t hiMass,
-		      UInt_t   runAtOviedo)
-{
-  TString path = (runAtOviedo) ? "/nfs/fanae/user" : "/gpfs/csic_users";
+  // Print
+  //----------------------------------------------------------------------------
+  if (_verbosity > 1)
+    {
+      printf("\n%10s ", "source");
 
-  TFile* genfile = TFile::Open(path + "/piedra/work/PAF/AuxiliaryFilesWZXS8TeV/genZmass.root");
+      for (UInt_t i=0; i<nProcess; i++)
+	{
+	  if (i != DataPPF && i != WZTo3LNu && i != ZJets_Madgraph && i != TW) continue;
+	  
+	  printf(" %14s ", sProcess[i].Data());
+	}
 
-  TH1F* h = (TH1F*)genfile->Get("htemp");
+      printf("\n");
 
-  return h->Integral(h->FindBin(loMass), h->FindBin(hiMass));
+      for (UInt_t j=0; j<nSystematic; j++) {
+
+	printf("%10s ", sSystematic[j].Data());
+	
+	for (UInt_t i=0; i<nProcess; i++)
+	  {
+	    if (i != DataPPF && i != WZTo3LNu && i != ZJets_Madgraph && i != TW) continue;
+	    
+	    printf(" %14.1f ", systematicError[i][j]);
+	  }
+
+	printf("\n");
+      }
+
+      printf("%10s ", "total");
+      
+      for (UInt_t i=0; i<nProcess; i++)
+	{
+	  if (i != DataPPF && i != WZTo3LNu && i != ZJets_Madgraph && i != TW) continue;
+	  
+	  printf(" %14.1f ", processSyst[i]);
+	}
+      
+      printf("\n\n");
+    }
 }

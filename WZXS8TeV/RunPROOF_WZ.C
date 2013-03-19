@@ -4,22 +4,25 @@
 Double_t luminosity    = 19602.0;  // pb
 Double_t pu_luminosity = 19468.3;  // pb
 Double_t xs_weight     = 1;
-Int_t    runAtOviedo   = 1;
 TProof*  proof         = 0;
 TString  dataPath      = "";
 
 
-enum {RAW, PPF, PPP};
+enum {RAW, PPF};
+
+enum {noSyst, metSyst};
 
 
-void RunPROOF_WZ(TString  sample         = "DoubleMu",
-		 Int_t    mode           = RAW,
-		 Int_t    met_systematic = 0,
-		 Int_t    closure_test   = 0,
-		 Long64_t nEvents        = -1,
-		 Bool_t   update         = true)
+void RunPROOF_WZ(TString  sample       = "WZTo3LNu",
+		 Int_t    mode         = RAW,
+		 Int_t    systematic   = noSyst,
+		 Int_t    closure_test = 0,
+		 Long64_t nEvents      = -1,
+		 Bool_t   update       = true)
 {
-  dataPath = GuessLocalBasePath();
+  GuessDataPath();
+
+  Int_t runAtOviedo = (dataPath.Contains("ifca")) ? 0 : 1;
 
 
   // Reset PROOF
@@ -90,13 +93,13 @@ void RunPROOF_WZ(TString  sample         = "DoubleMu",
   //----------------------------------------------------------------------------
   TString outputDir = "../WZXS8TeV/results/Summer12_53X/WH";
 
-  if (met_systematic) outputDir += "/systematics/met";
-  if (closure_test)   outputDir += "/closure_test";
+  if (systematic == metSyst) outputDir += "/systematics/met";
+
+  if (closure_test) outputDir += "/closure_test";
 
   gSystem->mkdir(outputDir, kTRUE);
 
   if (mode == PPF) sample += "_PPF";
-  if (mode == PPP) sample += "_PPP";
 
   TString outputFile = outputDir + "/" + sample + ".root";
   
@@ -107,15 +110,15 @@ void RunPROOF_WZ(TString  sample         = "DoubleMu",
   //----------------------------------------------------------------------------
   gPAFOptions->inputParameters = new InputParameters();
 
-  gPAFOptions->inputParameters->SetNamedString("directory",      outputDir.Data());
-  gPAFOptions->inputParameters->SetNamedString("sample",         sample.Data());
-  gPAFOptions->inputParameters->SetNamedDouble("luminosity",     luminosity);
-  gPAFOptions->inputParameters->SetNamedDouble("pu_luminosity",  pu_luminosity);
-  gPAFOptions->inputParameters->SetNamedDouble("xs_weight",      xs_weight);
-  gPAFOptions->inputParameters->SetNamedInt   ("mode",           mode);
-  gPAFOptions->inputParameters->SetNamedInt   ("met_systematic", met_systematic);
-  gPAFOptions->inputParameters->SetNamedInt   ("closure_test",   closure_test);
-  gPAFOptions->inputParameters->SetNamedInt   ("runAtOviedo",    runAtOviedo);
+  gPAFOptions->inputParameters->SetNamedString("directory",     outputDir.Data());
+  gPAFOptions->inputParameters->SetNamedString("sample",        sample.Data());
+  gPAFOptions->inputParameters->SetNamedDouble("luminosity",    luminosity);
+  gPAFOptions->inputParameters->SetNamedDouble("pu_luminosity", pu_luminosity);
+  gPAFOptions->inputParameters->SetNamedDouble("xs_weight",     xs_weight);
+  gPAFOptions->inputParameters->SetNamedInt   ("mode",          mode);
+  gPAFOptions->inputParameters->SetNamedInt   ("systematic",    systematic);
+  gPAFOptions->inputParameters->SetNamedInt   ("closure_test",  closure_test);
+  gPAFOptions->inputParameters->SetNamedInt   ("runAtOviedo",   runAtOviedo);
 
 
   // Number of events (Long64_t)
@@ -152,9 +155,6 @@ void RunPROOF_WZ(TString  sample         = "DoubleMu",
 
   // Control output and checks
   //----------------------------------------------------------------------------
-  // If true (default) the output file is reopened so the objects in the file
-  // can be interactively accessed. The objects are also listed.
-
   gPAFOptions->reopenOutputFile = false;
 
 
@@ -237,18 +237,16 @@ vector<TString> GetRealDataFiles(const char* relativepath,
 
 
 //------------------------------------------------------------------------------
-// GuessLocalBasePath
+// GuessDataPath
 //------------------------------------------------------------------------------
-TString GuessLocalBasePath()
+void GuessDataPath()
 {
   TString host = gSystem->HostName();
 
-  TString localBasePath = "/pool/ciencias";
+  dataPath = "/pool/ciencias";
 
   if (host.Contains("ifca"))
     {
-      localBasePath = TString("/gpfs/csic_projects/tier3data");
+      dataPath = TString("/gpfs/csic_projects/tier3data");
     }
-
-  return localBasePath;
 }

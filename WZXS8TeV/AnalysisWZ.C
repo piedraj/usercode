@@ -341,9 +341,6 @@ void AnalysisWZ::InsideLoop()
 
   if (closure_test && fabs(invMass2Lep - Z_MASS) > 15.) return;
 
-
-  // Compute the W transverse mass
-  //----------------------------------------------------------------------------
   const Double_t met  = EventMET.Et();
   const Double_t lWEt = WLepton.Et();
 
@@ -358,37 +355,11 @@ void AnalysisWZ::InsideLoop()
   //----------------------------------------------------------------------------
   if (!closure_test)
     {
-      if (WLepton.Pt() <= 20) return;
-
       if (WLepton.DeltaR(ZLepton1) < 0.1) return;
       if (WLepton.DeltaR(ZLepton2) < 0.1) return;
     }
 
   FillHistograms(theChannel, HasWCandidate, dataDriven_weight[Jet30]);
-
-
-  // Scan
-  //----------------------------------------------------------------------------
-  if (fabs(invMass2Lep - Z_MASS) < 20. && EventMET.Et() > 25.) FillHistograms(theChannel, mll20_MET25, dataDriven_weight[Jet50]);
-  if (fabs(invMass2Lep - Z_MASS) < 20. && EventMET.Et() > 30.) FillHistograms(theChannel, mll20_MET30, dataDriven_weight[Jet50]);
-  if (fabs(invMass2Lep - Z_MASS) < 20. && EventMET.Et() > 35.) FillHistograms(theChannel, mll20_MET35, dataDriven_weight[Jet50]);
-  if (fabs(invMass2Lep - Z_MASS) < 20. && EventMET.Et() > 40.) FillHistograms(theChannel, mll20_MET40, dataDriven_weight[Jet50]);
-  if (fabs(invMass2Lep - Z_MASS) < 20. && EventMET.Et() > 45.) FillHistograms(theChannel, mll20_MET45, dataDriven_weight[Jet50]);
-  if (fabs(invMass2Lep - Z_MASS) < 20. && EventMET.Et() > 50.) FillHistograms(theChannel, mll20_MET50, dataDriven_weight[Jet50]);
-
-  if (fabs(invMass2Lep - Z_MASS) < 15. && EventMET.Et() > 25.) FillHistograms(theChannel, mll15_MET25, dataDriven_weight[Jet50]);
-  if (fabs(invMass2Lep - Z_MASS) < 15. && EventMET.Et() > 30.) FillHistograms(theChannel, mll15_MET30, dataDriven_weight[Jet50]);
-  if (fabs(invMass2Lep - Z_MASS) < 15. && EventMET.Et() > 35.) FillHistograms(theChannel, mll15_MET35, dataDriven_weight[Jet50]);
-  if (fabs(invMass2Lep - Z_MASS) < 15. && EventMET.Et() > 40.) FillHistograms(theChannel, mll15_MET40, dataDriven_weight[Jet50]);
-  if (fabs(invMass2Lep - Z_MASS) < 15. && EventMET.Et() > 45.) FillHistograms(theChannel, mll15_MET45, dataDriven_weight[Jet50]);
-  if (fabs(invMass2Lep - Z_MASS) < 15. && EventMET.Et() > 50.) FillHistograms(theChannel, mll15_MET50, dataDriven_weight[Jet50]);
-
-  if (fabs(invMass2Lep - Z_MASS) < 10. && EventMET.Et() > 25.) FillHistograms(theChannel, mll10_MET25, dataDriven_weight[Jet50]);
-  if (fabs(invMass2Lep - Z_MASS) < 10. && EventMET.Et() > 30.) FillHistograms(theChannel, mll10_MET30, dataDriven_weight[Jet50]);
-  if (fabs(invMass2Lep - Z_MASS) < 10. && EventMET.Et() > 35.) FillHistograms(theChannel, mll10_MET35, dataDriven_weight[Jet50]);
-  if (fabs(invMass2Lep - Z_MASS) < 10. && EventMET.Et() > 40.) FillHistograms(theChannel, mll10_MET40, dataDriven_weight[Jet50]);
-  if (fabs(invMass2Lep - Z_MASS) < 10. && EventMET.Et() > 45.) FillHistograms(theChannel, mll10_MET45, dataDriven_weight[Jet50]);
-  if (fabs(invMass2Lep - Z_MASS) < 10. && EventMET.Et() > 50.) FillHistograms(theChannel, mll10_MET50, dataDriven_weight[Jet50]);
 
 
   // ATLAS
@@ -403,7 +374,7 @@ void AnalysisWZ::InsideLoop()
     }
 
 
-  // MET
+  // MET30
   //----------------------------------------------------------------------------
   Bool_t metPass = (EventMET.Et() > 30.);
 
@@ -411,24 +382,22 @@ void AnalysisWZ::InsideLoop()
 
   if (!metPass) return;
 
-  if (closure_test) FillHistograms(theChannel, MET, dataDriven_weight[Jet30]);
-  else              FillHistograms(theChannel, MET, dataDriven_weight[Jet50]);
+  if (closure_test) FillHistograms(theChannel, MET30, dataDriven_weight[Jet30]);
+  else              FillHistograms(theChannel, MET30, dataDriven_weight[Jet50]);
 
 
-  // SSLike
+  // MET40
   //----------------------------------------------------------------------------
-  if (fabs(invMass2Lep - Z_MASS) > 15.) return;
-
   if (EventMET.Et() < 40.) return;
 
-  FillHistograms(theChannel, SSLike, dataDriven_weight[Jet50]);
+  FillHistograms(theChannel, MET40, dataDriven_weight[Jet50]);
 
 
-  // SSLikeAntiBtag
+  // MET40AntiBtag
   //----------------------------------------------------------------------------
   if (nBJet > 0) return;
 
-  FillHistograms(theChannel, SSLikeAntiBtag, dataDriven_weight[Jet50]);
+  FillHistograms(theChannel, MET40AntiBtag, dataDriven_weight[Jet50]);
 }
 
 
@@ -525,7 +494,7 @@ void AnalysisWZ::GetParameters()
   GetInputParameters()->TheNamedDouble("pu_luminosity",  pu_luminosity);
   GetInputParameters()->TheNamedDouble("xs_weight",      xs_weight);
   GetInputParameters()->TheNamedInt   ("mode",           mode);
-  GetInputParameters()->TheNamedInt   ("met_systematic", met_systematic);
+  GetInputParameters()->TheNamedInt   ("systematic",     systematic);
   GetInputParameters()->TheNamedInt   ("closure_test",   closure_test);
   GetInputParameters()->TheNamedInt   ("runAtOviedo",    runAtOviedo);
 }
@@ -755,12 +724,12 @@ void AnalysisWZ::FillHistograms(UInt_t   iChannel,
   //----------------------------------------------------------------------------  
   hCounterRaw[iChannel][iCut][nTight]->Fill(1);
   hCounterPU [iChannel][iCut][nTight]->Fill(1, pu_weight);
-  hCounterEff[iChannel][iCut][nTight]->Fill(1, efficiency_weight);
+  hCounterEff[iChannel][iCut][nTight]->Fill(1, efficiency_weight * dd_weight);
   hCounter   [iChannel][iCut][nTight]->Fill(1, hweight);
 
   hCounterRaw[iChannel][iCut][LLL]->Fill(1);
   hCounterPU [iChannel][iCut][LLL]->Fill(1, pu_weight);
-  hCounterEff[iChannel][iCut][LLL]->Fill(1, efficiency_weight);
+  hCounterEff[iChannel][iCut][LLL]->Fill(1, efficiency_weight * dd_weight);
   hCounter   [iChannel][iCut][LLL]->Fill(1, hweight);
 
 
@@ -987,7 +956,7 @@ TLorentzVector AnalysisWZ::GetMET()
   Double_t px = T_METPFTypeI_ET * cos(T_METPFTypeI_Phi);
   Double_t py = T_METPFTypeI_ET * sin(T_METPFTypeI_Phi);
 
-  if (met_systematic)
+  if (systematic == metSyst)
     {
       TRandom* random = new TRandom();
       

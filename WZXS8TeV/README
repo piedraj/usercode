@@ -69,7 +69,9 @@ wget www.hep.uniovi.es/piedra/AuxiliaryFilesWZXS8TeV/genZmass.root
 
 cd PAF
 
-./run.sh MET_SYS CLOSURE
+./run.sh 0 0
+./run.sh 1 0
+./run.sh 0 1
 
 
 ################################################################################
@@ -80,5 +82,5 @@ cd PAF
 
 cd WZXS8TeV
 
-./runXS.sh RUN_AT_OVIEDO
+./runXS.sh
 
