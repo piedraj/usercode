@@ -250,52 +250,49 @@ void LatinosTreeScript(Float_t luminosity,
     tree->Add(filesPath + "Data_TightTight/2L/latino_RunD_7274pbinv.root");
   }
   else if (theSample == "WJetsFakes_Total") {
-    tree->Add(filesPath + "/Data_LooseLoose_fakeW/4L/latino_RunA_892pbinv_LooseLoose.root");
-    tree->Add(filesPath + "/Data_LooseLoose_fakeW/4L/latino_RunB_4404pbinv_LooseLoose.root");
-    tree->Add(filesPath + "/Data_LooseLoose_fakeW/4L/latino_RunC_7032pbinv_LooseLoose.root");
-    tree->Add(filesPath + "/Data_LooseLoose_fakeW/4L/latino_RunD_7274pbinv_LooseLoose.root");
+    tree->Add(filesPath + "Moriond13/latino_LooseLoose_19.5fb.root");
   }
   else if (theSample == "ggWWto2L") {
-    tree->Add(filesPath + "MC_TightTight/2L/latino_001_GluGluToWWTo4L.root");
+    tree->Add(filesPath + "MoriondeffW/MC_TightTight_DABCABC/latino_001_GluGluToWWTo4L.root");
   }
   else if (theSample == "WWTo2L2Nu") {
-    tree->Add(filesPath + "MC_TightTight/2L/latino_000_WWJets2LMad.root");
+    tree->Add(filesPath + "MoriondeffW/MC_TightTight_DABCABC/latino_000_WWJets2LMad.root");
   }
   else if (theSample == "WZ") {
-    tree->Add(filesPath + "MC_TightTight/2L/latino_074_WZJetsMad.root");
-    tree->Add(filesPath + "MC_TightTight/2L/latino_078_WZTo2L2QMad.root");
+    tree->Add(filesPath + "MoriondeffW/MC_TightTight_DABCABC/latino_074_WZJetsMad.root");
+    tree->Add(filesPath + "MoriondeffW/MC_TightTight_DABCABC/latino_078_WZTo2L2QMad.root");
   }
   else if (theSample == "ZZ") {
-    tree->Add(filesPath + "MC_TightTight/2L/latino_075_ZZJetsMad.root");
-    tree->Add(filesPath + "MC_TightTight/2L/latino_079_ZZTo2L2QMad.root"); 
+    tree->Add(filesPath + "MoriondeffW/MC_TightTight_DABCABC/latino_075_ZZJetsMad.root");
+    tree->Add(filesPath + "MoriondeffW/MC_TightTight_DABCABC/latino_079_ZZTo2L2QMad.root"); 
   }
   else if (theSample == "TTbar") {
-    tree->Add(filesPath + "MC_TightTight/2L/latino_019_TTTo2L2Nu2B.root");
+    tree->Add(filesPath + "MoriondeffW/MC_TightTight_DABCABC/latino_019_TTTo2L2Nu2B.root");
   }
   else if (theSample == "TW") {
-    tree->Add(filesPath + "MC_TightTight/2L/latino_011_TtWFullDR.root");
-    tree->Add(filesPath + "MC_TightTight/2L/latino_012_TbartWFullDR.root");
+    tree->Add(filesPath + "MoriondeffW/MC_TightTight_DABCABC/latino_011_TtWFullDR.root");
+    tree->Add(filesPath + "MoriondeffW/MC_TightTight_DABCABC/latino_012_TbartWFullDR.root");
   }
   else if (theSample == "DY") {
-    tree->Add(filesPath + "MC_TightTight/2L/latino_036_DY10toLLMad.root");
-    tree->Add(filesPath + "MC_TightTight/2L/latino_037_DY50toLLMad.root");
+    tree->Add(filesPath + "MoriondeffW/MC_TightTight_DABCABC/latino_036_DY10toLLMad.root");
+    tree->Add(filesPath + "MoriondeffW/MC_TightTight_DABCABC/latino_037_DY50toLLMad.root");
   }
   else if (theSample == "DYtautau") {
-    tree->Add(filesPath +"MC_TightTight/4L/latino_DYtt_12.1fb.root");
-    tree->Add(filesPath +"MC_TightTight/2L/latino_086_ZgammaToLLuG.root");
+    tree->Add(filesPath +"MoriondeffW/TauTau/latino_DYtt_19.5fb.root");
+    tree->Add(filesPath +"MoriondeffW/MC_TightTight_DABCABC/latino_086_ZgammaToLLuG.root");
   }
   else if (theSample == "WgammaNoStar") {
-    tree->Add(filesPath + "MC_TightTight/2L/latino_085_WgammaToLNuG.root");
-    tree->Add(filesPath + "MC_TightTight/2L/latino_008_GamGamWW.root");
+    tree->Add(filesPath + "MoriondeffW/MC_TightTight_DABCABC/latino_085_WgammaToLNuG.root");
+    tree->Add(filesPath + "MoriondeffW/MC_TightTight_DABCABC/latino_008_GamGamWW.root");
   }
   else if (theSample == "WgammaStar") {
-    tree->Add(filesPath + "MC_TightTight/2L/latino_082_WGstarToElNuMad.root");
-    tree->Add(filesPath + "MC_TightTight/2L/latino_083_WGstarToMuNuMad.root");
-    tree->Add(filesPath + "MC_TightTight/2L/latino_084_WGstarToTauNuMad.root");
+    tree->Add(filesPath + "MoriondeffW/MC_TightTight_DABCABC/latino_082_WGstarToElNuMad.root");
+    tree->Add(filesPath + "MoriondeffW/MC_TightTight_DABCABC/latino_083_WGstarToMuNuMad.root");
+    tree->Add(filesPath + "MoriondeffW/MC_TightTight_DABCABC/latino_084_WGstarToTauNuMad.root");
   }
   else if (theSample == "HWW125") { 
-    tree->Add(filesPath + "MC_TightTight/2L/latino_1125_ggToH125toWWTo2LAndTau2Nu.root");
-    tree->Add(filesPath + "MC_TightTight/2L/latino_2125_vbfToH125toWWTo2LAndTau2Nu.root");
+    tree->Add(filesPath + "MoriondeffW/MC_TightTight_DABCABC/latino_1125_ggToH125toWWTo2LAndTau2Nu.root");
+    tree->Add(filesPath + "MoriondeffW/MC_TightTight_DABCABC/latino_2125_vbfToH125toWWTo2LAndTau2Nu.root");
   }
   else {
     return;

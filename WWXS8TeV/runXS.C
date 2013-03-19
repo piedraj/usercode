@@ -38,7 +38,7 @@ void runXS(Int_t    njet          = 0,
 	   Double_t luminosity    = 19468,
 	   TString  cutLevel      = "TopTagging",
 	   Bool_t   useNM1        = false,
-	   Int_t    printLevel    = SILENT,
+	   Int_t    printLevel    = NOTE,
 	   Bool_t   useDataDriven = true,  // false => DY and Top from MC
 	   Bool_t   drawTheXS     = false,
 	   Double_t yMin          = -999,
