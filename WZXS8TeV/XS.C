@@ -47,42 +47,6 @@
 //  xs = 13.28 +  7.69 = 20.97 pb  // Scale x1 (-1d0) with 81 < mZ < 101 GeV
 //
 //------------------------------------------------------------------------------
-//
-// work in progress @lxplus
-//
-//------------------------------------------------------------------------------
-/*
-
-  cd work/CMSSW_projects/CMSSW_5_3_2_patch4/bin
-  cmsenv
-  scram setup lhapdffull
-
-  set LHAPDFLIB=/afs/cern.ch/cms/slc5_amd64_gcc462/external/lhapdf/5.8.5-cms/full/lib
-  set LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${LHAPDFLIB}
-
-  cd work/mcfm/MCFM/Bin
-  rm PDFsets
-  ln -s /afs/cern.ch/cms/slc5_amd64_gcc462/external/lhapdf/5.8.5-cms/share/lhapdf/PDFsets
-
-  cd work/mcfm/MCFM
-  emacs -nw makefile
-
-      LHAPDFLIB   = /afs/cern.ch/cms/slc5_amd64_gcc462/external/lhapdf/5.8.5-cms/full/lib
-      PDFROUTINES = LHAPDF
-
-  cd work/mcfm/MCFM/Bin
-  emacs -nw myInputs/inputWPlusZ_lhapdf.DAT
-
-      NNPDF20_100.LHgrid [LHAPDF group]
-      0                  [LHAPDF set]
-
-  make
-      ...
-      error
-      error
-
-*/
-//------------------------------------------------------------------------------
 
 
 // Input parameters for the WZ cross section
@@ -222,7 +186,6 @@ Double_t        _luminosity;
 Double_t        _yoffset;
 Int_t           _verbosity;
 TString         _directory;
-TString         _format;
 TString         _localpath;
 TString         _datapath;
 TString         _output;
@@ -301,7 +264,7 @@ Double_t Yield                    (TH1*          h);
 
 TString  GuessLocalBasePath       ();
 
-void     MakeDirectory            ();
+void     MakeOutputDirectory      (TString       format);
 
 void     DrawCrossSections        (UInt_t        cut);
 
@@ -315,10 +278,9 @@ void     RelativeSystematics      (UInt_t        cut);
 //------------------------------------------------------------------------------
 void XS(UInt_t cut          = MET30,
 	UInt_t mode         = PPFmode,
-	UInt_t closure_test = 0,
-	UInt_t batch        = 1)
+	UInt_t closure_test = 0)
 {
-  gROOT->SetBatch(batch);
+  gROOT->SetBatch();
 
   SetParameters(cut, mode, closure_test);
 
@@ -477,6 +439,8 @@ void MeasureTheCrossSection(UInt_t channel, UInt_t cut)
 //------------------------------------------------------------------------------
 void PrintLatexTable(UInt_t channel)
 {
+  gSystem->mkdir("tex", kTRUE);
+
   ofstream outputfile;
 
   TString suffix = (_mode == MCmode) ? "mc" : "ppf";
@@ -910,13 +874,12 @@ void DrawHistogram(TString  hname,
 
   canvas->cd();
 
-  TString suffixLogy = (setLogy) ? "_log" : "";
+  TString cname = _output + "/" + hname;
 
-  canvas->SaveAs(Form("%s/%s%s.%s",
-		      _output.Data(),
-		      hname.Data(),
-		      suffixLogy.Data(),
-		      _format.Data()));
+  if (setLogy) cname += "_log";
+
+  canvas->SaveAs(Form("pdf/%s.pdf", cname.Data()));
+  canvas->SaveAs(Form("png/%s.png", cname.Data()));
 }
 
 
@@ -1171,23 +1134,22 @@ void SetParameters(UInt_t cut,
   cProcess[TTGJets]          = kBlack;     // VVV
 
 
-  _luminosity   = 19602.0;  // pb
+  _luminosity   = 19602.0;
   _yoffset      = 0.048;
   _verbosity    = 1;
-  _format       = "png";
   _cut          = cut;
   _mode         = mode;
   _closure_test = closure_test;
   _localpath    = GuessLocalBasePath();
-  _directory    = "Summer12_53X/WH";
 
-  if (_closure_test) _directory += "/closure_test";
+  _directory = (_closure_test) ? "closure_test" : "";
   
-  _datapath = Form("%s/piedra/work/WZXS8TeV/results/%s/",
+  _datapath = Form("%s/piedra/work/WZXS8TeV/results/Summer12_53X/WH/%s",
 		   _localpath.Data(),
 		   _directory.Data());
 
-  MakeDirectory();
+  MakeOutputDirectory("pdf");
+  MakeOutputDirectory("png");
 
   gInterpreter->ExecuteMacro("HiggsPaperStyle.C");
 
@@ -1263,7 +1225,7 @@ Int_t ReadInputFiles(UInt_t channel)
 
     UInt_t j = vprocess.at(i);
 
-    input[j] = new TFile(_datapath + sProcess[j] + ".root");
+    input[j] = new TFile(_datapath + "/" + sProcess[j] + ".root");
 
 
     // Check
@@ -1326,39 +1288,32 @@ TString GuessLocalBasePath()
 
 
 //------------------------------------------------------------------------------
-// MakeDirectory
+// MakeOutputDirectory
 //------------------------------------------------------------------------------
-void MakeDirectory()
+void MakeOutputDirectory(TString format)
 {
-  gSystem->mkdir("pdf");
-  gSystem->mkdir("tex");
+  gSystem->mkdir(format, kTRUE);
 
-  gSystem->mkdir(_format + "/" + _directory, kTRUE);
+  gSystem->Exec(Form("cp index.php %s/.", format.Data()));
 
-  gSystem->Exec(Form("cp index.php %s/.", _format.Data()));
+  _output = (_closure_test) ? "closure_test" : "analysis";
 
-  gSystem->Exec(Form("cp index.php %s/Summer12_53X/.", _format.Data()));
+  gSystem->mkdir(format + "/" + _output, kTRUE);
 
-  gSystem->Exec(Form("cp index.php %s/%s/.", _format.Data(), _directory.Data()));
-
-  _output = _format + "/" + _directory;
-
-  gSystem->mkdir(_output, kTRUE);
-
-  gSystem->Exec(Form("cp index.php %s/.", _output.Data()));
+  gSystem->Exec(Form("cp index.php %s/%s/.", format.Data(), _output.Data()));
 
   if (_mode == MCmode)  _output += "/MC";
   if (_mode == PPFmode) _output += "/PPF";
 
-  gSystem->mkdir(_output, kTRUE);
+  gSystem->mkdir(format + "/" + _output, kTRUE);
 
-  gSystem->Exec(Form("cp index.php %s/.", _output.Data()));
+  gSystem->Exec(Form("cp index.php %s/%s/.", format.Data(), _output.Data()));
 
   _output += "/" + sCut[_cut];
 
-  gSystem->mkdir(_output, kTRUE);
+  gSystem->mkdir(format + "/" + _output, kTRUE);
 
-  gSystem->Exec(Form("cp index.php %s/.", _output.Data()));
+  gSystem->Exec(Form("cp index.php %s/%s/.", format.Data(), _output.Data()));
 }
 
 
@@ -1490,10 +1445,8 @@ void DrawCrossSections(UInt_t cut)
   canvas->GetFrame()->DrawClone();
   canvas->RedrawAxis();
 
-  canvas->SaveAs(Form("%s/xs_%s.%s",
-		      _output.Data(),
-		      sCut[cut].Data(),
-		      _format.Data()));
+  canvas->SaveAs(Form("pdf/%s/xs_%s.pdf", _output.Data(), sCut[cut].Data()));
+  canvas->SaveAs(Form("png/%s/xs_%s.png", _output.Data(), sCut[cut].Data()));
 }
 
 
@@ -1571,8 +1524,8 @@ void RelativeSystematics(UInt_t cut)
 	if (k == Data)    continue;
 	if (k == DataPPF) continue;
 	
-	TFile* f0 = new TFile(_datapath + sProcess[k] + ".root");
-	TFile* f1 = new TFile(_datapath + "systematics/" + sSystematic[i] + "/" + sProcess[k] + ".root");
+	TFile* f0 = new TFile(_datapath + "/" + sProcess[k] + ".root");
+	TFile* f1 = new TFile(_datapath + "/systematics/" + sSystematic[i] + "/" + sProcess[k] + ".root");
 
 	Double_t y0 = Yield((TH1D*)f0->Get(hname));
 	Double_t y1 = Yield((TH1D*)f1->Get(hname));

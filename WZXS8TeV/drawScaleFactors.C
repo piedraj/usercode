@@ -65,11 +65,14 @@ void drawScaleFactors()
 
   gInterpreter->ExecuteMacro("./HiggsPaperStyle.C");
 
-  gSystem->mkdir("png/ScaleFactors", kTRUE);
+  gSystem->mkdir("pdf/scale_factors", kTRUE);
+  gSystem->mkdir("png/scale_factors", kTRUE);
 
+  gSystem->Exec("cp index.php pdf/.");
   gSystem->Exec("cp index.php png/.");
 
-  gSystem->Exec("cp index.php png/ScaleFactors/.");
+  gSystem->Exec("cp index.php pdf/scale_factors/.");
+  gSystem->Exec("cp index.php png/scale_factors/.");
 
   gStyle->SetOptStat(0);
 
@@ -172,7 +175,8 @@ void DrawIt(TH2F* h, TString title)
 
   canvas->GetFrame()->DrawClone();
 
-  canvas->SaveAs("png/ScaleFactors/" + name + ".png");
+  canvas->SaveAs("pdf/scale_factors/" + name + ".pdf");
+  canvas->SaveAs("png/scale_factors/" + name + ".png");
 }
 
 

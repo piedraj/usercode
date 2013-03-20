@@ -17,17 +17,28 @@ root -l -b -q XS.C+\(MET30,MCmode,1\)
 
 root -l -b -q drawScaleFactors.C+
 
+
+# PDF tables
+#-------------------------------------------------------------------------------
 pdflatex mc_samples_wz8tev.tex
 pdflatex mc_samples_wz8tev.tex
 
 pdflatex yields.tex
 pdflatex yields.tex
 
-mv mc_samples_wz8tev.pdf pdf/.
-mv yields.pdf            pdf/.
+mkdir -p pdf/tables
 
+cp index.php pdf/tables/.
+
+mv mc_samples_wz8tev.pdf pdf/tables/.
+mv yields.pdf            pdf/tables/.
+
+
+# Cleanup
+#-------------------------------------------------------------------------------
 rm -rf *aux
 rm -rf *d
 rm -rf *log
 rm -rf *so
 rm -rf *~
+
