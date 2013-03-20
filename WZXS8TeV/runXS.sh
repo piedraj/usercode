@@ -12,8 +12,8 @@ for ((level=0; level<6; level++))
   done
 done
 
-root -l -b -q XS.C+\(MET,PPFmode,1\)
-root -l -b -q XS.C+\(MET,MCmode,1\)
+root -l -b -q XS.C+\(MET30,PPFmode,1\)
+root -l -b -q XS.C+\(MET30,MCmode,1\)
 
 root -l -b -q drawScaleFactors.C+
 

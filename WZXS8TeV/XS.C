@@ -23,16 +23,65 @@
 //------------------------------------------------------------------------------
 //
 //  MCFM 6.3
+//
+//------------------------------------------------------------------------------
+//
+// scale systematic
+//
+//  xs = 13.89 + 8.06 = 21.95 pb          // Scale x1 ( 85.79 GeV) with 71 < mZ < 111 GeV
+//  xs = 13.33 + 7.72 = 21.05 pb (-4.1%)  // Scale x2 (171.58 GeV) with 71 < mZ < 111 GeV
+//  xs = 14.63 + 8.49.= 23.12 pb (+5.3%)  // Scale /2 ( 42.90 GeV) with 71 < mZ < 111 GeV
+//
+//
+// pdf systematic
 // 
-//  xs = 13.89 +  8.06 = 21.95 pb          // Scale x1 ( 85.79 GeV) with 71 < mZ < 111 GeV
-//  xs = 13.33 +  7.72 = 21.05 pb (-4.1%)  // Scale x2 (171.58 GeV) with 71 < mZ < 111 GeV
-//  xs = 14.63 +  8.49.= 23.12 pb (+5.3%)  // Scale /2 ( 42.90 GeV) with 71 < mZ < 111 GeV
+//  xs = 13.89 + 8.06 = 21.95 pb        // 'mstw8nlo' [pdlabel]
+//  xs = 13.68 + 7.61 = 21.29 pb (-3%)  // 'cteq66m'  [pdlabel]
+//
+//
+// test different mZ windows
 //
 //  xs = 20.67 + 12.42 = 33.09 pb  // Scale x1 (-1d0) with 12 < mZ       GeV
 //  xs = 13.89 +  8.06 = 21.95 pb  // Scale x1 (-1d0) with 71 < mZ < 111 GeV
 //  xs = 13.67 +  7.93 = 21.60 pb  // Scale x1 (-1d0) with 76 < mZ < 106 GeV
 //  xs = 13.28 +  7.69 = 20.97 pb  // Scale x1 (-1d0) with 81 < mZ < 101 GeV
 //
+//------------------------------------------------------------------------------
+//
+// work in progress @lxplus
+//
+//------------------------------------------------------------------------------
+/*
+
+  cd work/CMSSW_projects/CMSSW_5_3_2_patch4/bin
+  cmsenv
+  scram setup lhapdffull
+
+  set LHAPDFLIB=/afs/cern.ch/cms/slc5_amd64_gcc462/external/lhapdf/5.8.5-cms/full/lib
+  set LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${LHAPDFLIB}
+
+  cd work/mcfm/MCFM/Bin
+  rm PDFsets
+  ln -s /afs/cern.ch/cms/slc5_amd64_gcc462/external/lhapdf/5.8.5-cms/share/lhapdf/PDFsets
+
+  cd work/mcfm/MCFM
+  emacs -nw makefile
+
+      LHAPDFLIB   = /afs/cern.ch/cms/slc5_amd64_gcc462/external/lhapdf/5.8.5-cms/full/lib
+      PDFROUTINES = LHAPDF
+
+  cd work/mcfm/MCFM/Bin
+  emacs -nw myInputs/inputWPlusZ_lhapdf.DAT
+
+      NNPDF20_100.LHgrid [LHAPDF group]
+      0                  [LHAPDF set]
+
+  make
+      ...
+      error
+      error
+
+*/
 //------------------------------------------------------------------------------
 
 
@@ -150,11 +199,11 @@ TString sProcess[nProcess];
 
 // Systematics
 //------------------------------------------------------------------------------
-const UInt_t nSystematic = 3;
+const UInt_t nSystematic = 4;
 
-enum {fakesSyst, mcfmSyst, metSyst};
+enum {fakesSyst, scaleSyst, pdfSyst, metSyst};
 
-TString sSystematic[nSystematic] = {"fakes", "mcfm", "met"};
+TString sSystematic[nSystematic] = {"fakes", "scale", "pdf", "met"};
 
 Double_t processSyst[nProcess];
 
@@ -264,7 +313,7 @@ void     RelativeSystematics      (UInt_t        cut);
 //------------------------------------------------------------------------------
 // XS
 //------------------------------------------------------------------------------
-void XS(UInt_t cut          = MET40,
+void XS(UInt_t cut          = MET30,
 	UInt_t mode         = PPFmode,
 	UInt_t closure_test = 0,
 	UInt_t batch        = 1)
@@ -295,10 +344,10 @@ void XS(UInt_t cut          = MET40,
       }
     else
       {
-	PrintLatexTable(channel);
-	
 	MeasureTheCrossSection(channel, cut);
 
+	PrintLatexTable(channel);
+	
 	DrawHistogram("hMET",          channel, cut, "E_{T}^{miss}",          5, 0, "GeV", linY);
 	DrawHistogram("hInvMass3Lep",  channel, cut, "m_{#font[12]{3l}}",     5, 0, "GeV", linY, 60, 350);
 	DrawHistogram("hPtLepton1",    channel, cut, "p_{T}^{first lepton}",  5, 0, "GeV", linY);
@@ -569,9 +618,12 @@ void PrintLatexTable(UInt_t channel)
 
   outputfile << " \\hline\n";
 
-  outputfile << Form(" %-20s", "WZ + backgrounds");    for (UInt_t i=0; i<nCut; i++) outputfile << Form(" & %3.0f $\\pm$ %2.0f", nBkg[i]+nWZ[i], sqrt(nBkg[i]+nWZ[i])); outputfile << "\\\\\n";
-  outputfile << Form(" %-20s", "data");                for (UInt_t i=0; i<nCut; i++) outputfile << Form(" & %3.0f $\\pm$ %2.0f", nData[i],       eData[i]);             outputfile << "\\\\\n";
-  outputfile << Form(" %-20s", "S/$\\sqrt{\\rm{B}}$"); for (UInt_t i=0; i<nCut; i++) outputfile << Form(" & %.1f",               nWZ[i] / sqrt(nBkg[i]));               outputfile << "\\\\\n";
+  outputfile << Form(" %-20s", "WZ + backgrounds"); for (UInt_t i=0; i<nCut; i++) outputfile << Form(" & %3.0f $\\pm$ %2.0f", nBkg[i]+nWZ[i], sqrt(nBkg[i]+nWZ[i])); outputfile << "\\\\\n";
+  outputfile << Form(" %-20s", "data");             for (UInt_t i=0; i<nCut; i++) outputfile << Form(" & %3.0f $\\pm$ %2.0f", nData[i],       eData[i]);             outputfile << "\\\\\n";
+
+  //  outputfile << Form(" %-20s", "S/$\\sqrt{{\\rm S} + {\\rm B}}$");
+
+  //  for (UInt_t i=0; i<nCut; i++) outputfile << Form(" & %.1f", nWZ[i] / (sqrt(nWZ[i] + nBkg[i]))); outputfile << "\\\\\n";
 
   outputfile.close();
 }
@@ -1121,16 +1173,19 @@ void SetParameters(UInt_t cut,
 
   _luminosity   = 19602.0;  // pb
   _yoffset      = 0.048;
-  _verbosity    = 2;
+  _verbosity    = 1;
   _format       = "png";
   _cut          = cut;
   _mode         = mode;
   _closure_test = closure_test;
   _localpath    = GuessLocalBasePath();
   _directory    = "Summer12_53X/WH";
-  _datapath     = Form("%s/piedra/work/WZXS8TeV/results/%s/",
-		       _localpath.Data(),
-		       _directory.Data());
+
+  if (_closure_test) _directory += "/closure_test";
+  
+  _datapath = Form("%s/piedra/work/WZXS8TeV/results/%s/",
+		   _localpath.Data(),
+		   _directory.Data());
 
   MakeDirectory();
 
@@ -1285,8 +1340,6 @@ void MakeDirectory()
   gSystem->Exec(Form("cp index.php %s/Summer12_53X/.", _format.Data()));
 
   gSystem->Exec(Form("cp index.php %s/%s/.", _format.Data(), _directory.Data()));
-
-  if (_closure_test) _directory += "/closure_test";
 
   _output = _format + "/" + _directory;
 
@@ -1490,9 +1543,9 @@ void Inclusive(UInt_t cut)
 //------------------------------------------------------------------------------
 void RelativeSystematics(UInt_t cut)
 {
-  if (cut < MET30) return;
-  
   if (_closure_test) return;
+
+  for (UInt_t k=0; k<nProcess; k++) processSyst[k] = 0.0;
 
   for (UInt_t i=0; i<nSystematic; i++) {
 
@@ -1501,7 +1554,8 @@ void RelativeSystematics(UInt_t cut)
     for (UInt_t k=0; k<nProcess; k++) systematicError[k][i] = 0.0;
 
     if (i == fakesSyst) {systematicError[DataPPF] [i] = 36.0; continue;}
-    if (i == mcfmSyst)  {systematicError[WZTo3LNu][i] =  5.3; continue;}
+    if (i == scaleSyst) {systematicError[WZTo3LNu][i] =  5.3; continue;}
+    if (i == pdfSyst)   {systematicError[WZTo3LNu][i] =  3.0; continue;}
 
     for (UInt_t j=0; j<nChannel; j++) {
 
@@ -1522,6 +1576,9 @@ void RelativeSystematics(UInt_t cut)
 
 	Double_t y0 = Yield((TH1D*)f0->Get(hname));
 	Double_t y1 = Yield((TH1D*)f1->Get(hname));
+
+	f0->Close();
+	f1->Close();
 
 	Double_t syst = (y0 > 1) ? 1e2 * fabs(y1 - y0) / y0 : 0.0;
 
@@ -1553,12 +1610,8 @@ void RelativeSystematics(UInt_t cut)
       
       Double_t syst2 = systematicError[i][j] * systematicError[i][j];
 
-      if (j == mcfmSyst)
-	{
-	  if (i == WZTo3LNu) processSyst[i] += syst2;
-
-	  continue;
-	}
+      if (j == scaleSyst) {if (i == WZTo3LNu) processSyst[i] += syst2; continue;}
+      if (j == pdfSyst)   {if (i == WZTo3LNu) processSyst[i] += syst2; continue;}
 
       processSyst[i] += syst2;
     }
@@ -1569,42 +1622,41 @@ void RelativeSystematics(UInt_t cut)
 
   // Print
   //----------------------------------------------------------------------------
-  if (_verbosity > 1)
+  if (_verbosity < 2) return;
+
+  printf("\n%10s ", " ");
+
+  for (UInt_t i=0; i<nProcess; i++)
     {
-      printf("\n%10s ", "source");
-
-      for (UInt_t i=0; i<nProcess; i++)
-	{
-	  if (i != DataPPF && i != WZTo3LNu && i != ZJets_Madgraph && i != TW) continue;
-	  
-	  printf(" %14s ", sProcess[i].Data());
-	}
-
-      printf("\n");
-
-      for (UInt_t j=0; j<nSystematic; j++) {
-
-	printf("%10s ", sSystematic[j].Data());
-	
-	for (UInt_t i=0; i<nProcess; i++)
-	  {
-	    if (i != DataPPF && i != WZTo3LNu && i != ZJets_Madgraph && i != TW) continue;
-	    
-	    printf(" %14.1f ", systematicError[i][j]);
-	  }
-
-	printf("\n");
-      }
-
-      printf("%10s ", "total");
+      if (i != DataPPF && i != WZTo3LNu && i != ZJets_Madgraph && i != TW) continue;
       
-      for (UInt_t i=0; i<nProcess; i++)
-	{
-	  if (i != DataPPF && i != WZTo3LNu && i != ZJets_Madgraph && i != TW) continue;
-	  
-	  printf(" %14.1f ", processSyst[i]);
-	}
-      
-      printf("\n\n");
+      (i == DataPPF) ? printf(" %15s ", "PPF") : printf(" %15s ", sProcess[i].Data());
     }
+  
+  printf("\n");
+  
+  for (UInt_t j=0; j<nSystematic; j++) {
+    
+    printf("%10s ", sSystematic[j].Data());
+    
+    for (UInt_t i=0; i<nProcess; i++)
+      {
+	if (i != DataPPF && i != WZTo3LNu && i != ZJets_Madgraph && i != TW) continue;
+	
+	printf(" %15.1f ", systematicError[i][j]);
+      }
+    
+    printf("\n");
+  }
+
+  printf("%10s ", "total");
+  
+  for (UInt_t i=0; i<nProcess; i++)
+    {
+      if (i != DataPPF && i != WZTo3LNu && i != ZJets_Madgraph && i != TW) continue;
+      
+      printf(" %15.1f ", processSyst[i]);
+    }
+      
+  printf("\n\n");
 }
