@@ -77,6 +77,8 @@ struct Lepton
   Double_t       sf;
   Double_t       fr[nFakeRate];
   Double_t       pr;
+  Double_t       lead;
+  Double_t       trail;
   TLorentzVector v;
 
   Bool_t operator<(const Lepton& a) const
@@ -139,11 +141,16 @@ class AnalysisWZ: public CMSAnalysisSelectorMiniTrees
 
   TLorentzVector GetMET                    ();
 
+  Double_t       GetTriggerWeight          ();
+
 
  public:
   
   // Histograms
   //----------------------------------------------------------------------------
+  TH1D*                       hScaleFactor[nChannel];
+  TH1D*                       hTriggerEff [nChannel];
+
   TH1D*                       hCounterRaw[nChannel][nCut][nComposition];
   TH1D*                       hCounterPU [nChannel][nCut][nComposition];
   TH1D*                       hCounterEff[nChannel][nCut][nComposition];
@@ -209,7 +216,7 @@ class AnalysisWZ: public CMSAnalysisSelectorMiniTrees
   PUWeight*                   fPUWeight;
 
 
-  // Scale factors, fake rates and prompt rates
+  // SF, FR, PR and trigger efficiencies
   //----------------------------------------------------------------------------
   Double_t                    dataDriven_weight[nFakeRate];
 
@@ -219,6 +226,10 @@ class AnalysisWZ: public CMSAnalysisSelectorMiniTrees
   TH2F*                       ElecSF;
   TH2F*                       MuonPR;
   TH2F*                       ElecPR;
+  TH2F*                       DoubleElLead;
+  TH2F*                       DoubleMuLead;
+  TH2F*                       DoubleElTrail;
+  TH2F*                       DoubleMuTrail;
 
 
   ClassDef(AnalysisWZ, 0);

@@ -57,6 +57,10 @@ TH2F*   MuonFR_50;
 TH2F*   ElecFR_15;
 TH2F*   ElecFR_35;
 TH2F*   ElecFR_50;
+TH2F*   DoubleElLead;
+TH2F*   DoubleMuLead;
+TH2F*   DoubleElTrail;
+TH2F*   DoubleMuTrail;
 
 
 void drawScaleFactors()
@@ -94,16 +98,25 @@ void drawScaleFactors()
   ElecFR_35 = LoadHistogram("EleFR_Moriond13_jet35_EWKcorr", "fakeElH2", "ElecFR_35");
   ElecFR_50 = LoadHistogram("EleFR_Moriond13_jet50_EWKcorr", "fakeElH2", "ElecFR_50");
 
-  DrawIt(MuonSF,    "2012 muon SF");
-  DrawIt(ElecSF,    "2012 electron SF");
-  DrawIt(MuonPR,    "2012 muon PR");
-  DrawIt(ElecPR,    "2012 electron PR");
-  DrawIt(MuonFR_15, "2012 muon FR jet15");
-  DrawIt(MuonFR_30, "2012 muon FR jet30");
-  DrawIt(MuonFR_50, "2012 muon FR jet50");
-  DrawIt(ElecFR_15, "2012 electron FR jet15");
-  DrawIt(ElecFR_35, "2012 electron FR jet35");
-  DrawIt(ElecFR_50, "2012 electron FR jet50");
+  DoubleElLead  = LoadHistogram("triggerEfficiencies", "DoubleElLead",  "DoubleElLead");
+  DoubleMuLead  = LoadHistogram("triggerEfficiencies", "DoubleMuLead",  "DoubleMuLead");
+  DoubleElTrail = LoadHistogram("triggerEfficiencies", "DoubleElTrail", "DoubleElTrail");
+  DoubleMuTrail = LoadHistogram("triggerEfficiencies", "DoubleMuTrail", "DoubleMuTrail");
+
+  DrawIt(MuonSF,        "2012 muon SF");
+  DrawIt(ElecSF,        "2012 electron SF");
+  DrawIt(MuonPR,        "2012 muon PR");
+  DrawIt(ElecPR,        "2012 electron PR");
+  DrawIt(MuonFR_15,     "2012 muon FR jet15");
+  DrawIt(MuonFR_30,     "2012 muon FR jet30");
+  DrawIt(MuonFR_50,     "2012 muon FR jet50");
+  DrawIt(ElecFR_15,     "2012 electron FR jet15");
+  DrawIt(ElecFR_35,     "2012 electron FR jet35");
+  DrawIt(ElecFR_50,     "2012 electron FR jet50");
+  DrawIt(DoubleElLead,  "2012 leading electron trigger efficiency");
+  DrawIt(DoubleMuLead,  "2012 leading muon trigger efficiency");
+  DrawIt(DoubleElTrail, "2012 trailing electron trigger efficiency");
+  DrawIt(DoubleMuTrail, "2012 trailing muon trigger efficiency");
 }
 
 
@@ -131,6 +144,8 @@ void DrawIt(TH2F* h, TString title)
   h->SetTitle("");
 
   DrawTLatex(0.940, 0.976, 0.05, 33, title);
+
+  if (title.Contains("trigger")) continue;
   
   Double_t hmin = h->GetMinimum();
   Double_t hmax = h->GetMaximum();

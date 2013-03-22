@@ -24,6 +24,10 @@ void AnalysisWZ::Initialise()
   TH1::SetDefaultSumw2();
 
   for (UInt_t i=0; i<nChannel; i++) {
+
+    hScaleFactor[i] = CreateH1D("hScaleFactor_" + sChannel[i], "", 480, -0.1, 1.1);
+    hTriggerEff [i] = CreateH1D("hTriggerEff_"  + sChannel[i], "", 480, -0.1, 1.1);
+
     for (UInt_t j=0; j<nCut; j++) {
 
       TString suffix = "_" + sChannel[i] + "_" + sCut[j];
@@ -59,7 +63,7 @@ void AnalysisWZ::Initialise()
   }
 
 
-  // SF, FR and PR histograms
+  // SF, FR, PR and trigger efficiencies histograms
   //----------------------------------------------------------------------------
   MuonSF = LoadHistogram("MuSF_2012",  "h2inverted", "MuonSF");
   ElecSF = LoadHistogram("EleSF_2012", "h2inverted", "ElecSF");
@@ -73,6 +77,11 @@ void AnalysisWZ::Initialise()
   ElecFR[Jet15] = LoadHistogram("EleFR_Moriond13_jet15_EWKcorr", "fakeElH2", "ElecFR_Jet15");
   ElecFR[Jet30] = LoadHistogram("EleFR_Moriond13_jet35_EWKcorr", "fakeElH2", "ElecFR_Jet30");
   ElecFR[Jet50] = LoadHistogram("EleFR_Moriond13_jet50_EWKcorr", "fakeElH2", "ElecFR_Jet50");
+
+  DoubleElLead  = LoadHistogram("triggerEfficiencies", "DoubleElLead",  "DoubleElLead");
+  DoubleMuLead  = LoadHistogram("triggerEfficiencies", "DoubleMuLead",  "DoubleMuLead");
+  DoubleElTrail = LoadHistogram("triggerEfficiencies", "DoubleElTrail", "DoubleElTrail");
+  DoubleMuTrail = LoadHistogram("triggerEfficiencies", "DoubleMuTrail", "DoubleMuTrail");
 }
 
 
@@ -153,6 +162,7 @@ void AnalysisWZ::InsideLoop()
 
     const Double_t sfMax = MuonSF->GetXaxis()->GetBinCenter(MuonSF->GetNbinsX());
     const Double_t prMax = MuonPR->GetXaxis()->GetBinCenter(MuonPR->GetNbinsX());
+    const Double_t trMax = DoubleMuLead->GetXaxis()->GetBinCenter(DoubleMuLead->GetNbinsX());
 
     Lepton AnalysisMuon;
 
@@ -163,6 +173,8 @@ void AnalysisWZ::InsideLoop()
     AnalysisMuon.v      = MuonVector;
     AnalysisMuon.sf     = MuonSF->GetBinContent(MuonSF->FindBin(min(pt,sfMax),eta));
     AnalysisMuon.pr     = MuonPR->GetBinContent(MuonPR->FindBin(min(pt,prMax),eta));
+    AnalysisMuon.lead   = DoubleMuLead ->GetBinContent(DoubleMuLead ->FindBin(min(pt,trMax),eta));
+    AnalysisMuon.trail  = DoubleMuTrail->GetBinContent(DoubleMuTrail->FindBin(min(pt,trMax),eta));
 
     for (UInt_t j=0; j<nFakeRate; j++)
       AnalysisMuon.fr[j] = MuonFR[j]->GetBinContent(MuonFR[j]->FindBin(min(pt,35.),eta));
@@ -196,6 +208,7 @@ void AnalysisWZ::InsideLoop()
 
     const Double_t sfMax = ElecSF->GetXaxis()->GetBinCenter(ElecSF->GetNbinsX());
     const Double_t prMax = ElecPR->GetXaxis()->GetBinCenter(ElecPR->GetNbinsX());
+    const Double_t trMax = DoubleElLead->GetXaxis()->GetBinCenter(DoubleElLead->GetNbinsX());
 
     Lepton AnalysisElectron;
     
@@ -206,6 +219,8 @@ void AnalysisWZ::InsideLoop()
     AnalysisElectron.v      = ElectronVector;
     AnalysisElectron.sf     = ElecSF->GetBinContent(ElecSF->FindBin(min(pt,sfMax),eta));
     AnalysisElectron.pr     = ElecPR->GetBinContent(ElecPR->FindBin(min(pt,prMax),eta));
+    AnalysisElectron.lead   = DoubleElLead ->GetBinContent(DoubleElLead ->FindBin(min(pt,trMax),eta));
+    AnalysisElectron.trail  = DoubleElTrail->GetBinContent(DoubleElTrail->FindBin(min(pt,trMax),eta));
 
     for (UInt_t j=0; j<nFakeRate; j++)
       AnalysisElectron.fr[j] = ElecFR[j]->GetBinContent(ElecFR[j]->FindBin(min(pt,35.),eta));
@@ -252,10 +267,23 @@ void AnalysisWZ::InsideLoop()
   if (sample.Contains("DoubleElectron") && nElectron < 2) return;
 
 
-  // Apply lepton SF
+  // Apply lepton SF and trigger efficiencies
   //----------------------------------------------------------------------------
+  Double_t lepton_scale_factor = 1.0;
+  Double_t trigger_efficiency  = 1.0;
+
   if (!isData)
-    for (UInt_t i=0; i<3; i++) efficiency_weight *= AnalysisLeptons[i].sf;
+    {
+      for (UInt_t i=0; i<3; i++) lepton_scale_factor *= AnalysisLeptons[i].sf;
+
+      trigger_efficiency = GetTriggerWeight();
+    }
+
+  efficiency_weight *= lepton_scale_factor;
+  efficiency_weight *= trigger_efficiency;
+
+  hScaleFactor[theChannel]->Fill(lepton_scale_factor);
+  hTriggerEff [theChannel]->Fill(trigger_efficiency);
 
 
   // Data-driven estimates
@@ -969,4 +997,34 @@ TLorentzVector AnalysisWZ::GetMET()
   TLorentzVector metv(px, py, 0.0, met);
 
   return metv;
+}
+
+
+//------------------------------------------------------------------------------
+// GetTriggerWeight
+//------------------------------------------------------------------------------
+Double_t AnalysisWZ::GetTriggerWeight()
+{
+  Double_t eL[3];
+  Double_t eT[3];
+
+  for (UInt_t i=0; i<3; i++) {
+
+    Lepton lep = AnalysisLeptons[i];
+
+    eL[i] = lep.lead;
+    eT[i] = lep.trail;
+
+    if (theChannel == MME && lep.flavor != Muon)     {eL[i] = 0.0; eT[i] = 0.0;}
+    if (theChannel == EEM && lep.flavor != Electron) {eL[i] = 0.0; eT[i] = 0.0;}
+  }
+
+  Double_t r1 = (1. - eL[0]) * (1. - eL[1]) * (1. - eL[2]);
+  Double_t r2 =       eL[0]  * (1. - eT[1]) * (1. - eT[2]);
+  Double_t r3 =       eL[1]  * (1. - eT[0]) * (1. - eT[2]);
+  Double_t r4 =       eL[2]  * (1. - eT[0]) * (1. - eT[1]); 
+
+  Double_t triggerWeight = 1. - (r1 + r2 + r3 + r4);
+  
+  return triggerWeight;
 }
