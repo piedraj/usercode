@@ -113,47 +113,17 @@ TString sCut[nCut] = {
 };
 
 
-const UInt_t nProcess = 38;
+const UInt_t nProcess = 8;
 
 enum {
   Data,
-  DataPPF,
-  DYJets_Madgraph,
-  ZJets_Madgraph,
-  ZbbToLL,
-  WbbToLNu,
-  WJets_Madgraph,
-  WGstarToElNuMad,
-  WGstarToMuNuMad,
-  WGstarToTauNuMad,
-  WgammaToLNuG,
-  ZgammaToLLG,
-  TTbar_Madgraph,
-  TW,
-  TbarW,
-  WW,
-  WZTo3LNu,
-  WZTo2L2QMad,
-  WZTo2QLNuMad,
-  ZZTo2L2QMad,
-  ggZZ2L2L,
-  ggZZ4L,
-  ZZ2Mu2Tau,
-  ZZ4E,
-  ZZ2E2Tau,
-  ZZ4Mu,
-  ZZ2E2Mu,
-  ZZ4Tau,
-  HZZ4L,
-  WWGJets,
-  WZZJets,
-  ZZZJets,
-  WWZJets,
-  WWWJets,
-  TTWJets,
-  TTZJets,
-  TTWWJets,
-  TTGJets
+  Fakes,
+  WZ,
+  ZZ,
+  Top,
+  ZJets,
+  VVV,
+  WV
 };
 
 Color_t cProcess[nProcess];
@@ -354,7 +324,7 @@ void MeasureTheCrossSection(UInt_t channel, UInt_t cut)
 
   TString suffix = "_" + sChannel[channel] + "_" + sCut[cut] + "_LLL";
 
-  Double_t nWZ = Yield((TH1D*)input[WZTo3LNu]->Get("hCounterEff" + suffix));
+  Double_t nWZ = Yield((TH1D*)input[WZ]->Get("hCounterEff" + suffix));
 
   for (UInt_t i=0; i<vprocess.size(); i++) {
 
@@ -366,7 +336,7 @@ void MeasureTheCrossSection(UInt_t channel, UInt_t cut)
       {
 	ndata = process_yield;
       }
-    else if (j == WZTo3LNu)
+    else if (j == WZ)
       {
 	nsignal = process_yield;
       }
@@ -397,7 +367,7 @@ void MeasureTheCrossSection(UInt_t channel, UInt_t cut)
   Double_t xsRelativeErrorLumi       = 4.4;
   Double_t xsRelativeErrorStat       = 1e2 * sqrt(ndata) / (ndata - nbkg);
   Double_t xsRelativeErrorBackground = 1e2 * ebkg        / (ndata - nbkg);
-  Double_t xsRelativeErrorEfficiency = processSyst[WZTo3LNu];
+  Double_t xsRelativeErrorEfficiency = processSyst[WZ];
   Double_t xsRelativeErrorSyst       = 0;
 
   xsRelativeErrorSyst += (xsRelativeErrorBackground * xsRelativeErrorBackground);
@@ -448,46 +418,26 @@ void PrintLatexTable(UInt_t channel)
   outputfile.open(Form("tex/%s_%s.tex", sChannel[channel].Data(), suffix.Data()));
 
   Double_t nData [nCut];
+  Double_t nFakes[nCut];
   Double_t nWZ   [nCut];
   Double_t nZZ   [nCut];
-  Double_t nWV   [nCut];
-  Double_t nVVV  [nCut];
   Double_t nTop  [nCut];
   Double_t nZJets[nCut];
-  Double_t nFakes[nCut];
+  Double_t nVVV  [nCut];
+  Double_t nWV   [nCut];
   Double_t nBkg  [nCut];
-
-  Double_t eData [nCut];
-  Double_t eWZ   [nCut];
-  Double_t eZZ   [nCut];
-  Double_t eWV   [nCut];
-  Double_t eVVV  [nCut];
-  Double_t eTop  [nCut];
-  Double_t eZJets[nCut];
-  Double_t eFakes[nCut];
-  Double_t eBkg  [nCut];
-
+  
   for (UInt_t i=0; i<nCut; i++)
     {
       nData [i] = 0.;
+      nFakes[i] = 0.;
       nWZ   [i] = 0.;
       nZZ   [i] = 0.;
-      nWV   [i] = 0.;
-      nVVV  [i] = 0.;
       nTop  [i] = 0.;
       nZJets[i] = 0.;
-      nFakes[i] = 0.;
+      nVVV  [i] = 0.;
+      nWV   [i] = 0.;
       nBkg  [i] = 0.;
-
-      eData [i] = 0.;
-      eWZ   [i] = 0.;
-      eZZ   [i] = 0.;
-      eWV   [i] = 0.;
-      eVVV  [i] = 0.;
-      eTop  [i] = 0.;
-      eZJets[i] = 0.;
-      eFakes[i] = 0.;
-      eBkg  [i] = 0.;
   
       TH1D* hist[nProcess];
 
@@ -503,92 +453,45 @@ void PrintLatexTable(UInt_t channel)
 	}
 
       nData[i] = Yield(hist[Data]);
-      eData[i] = sqrt(nData[i]);
+      nWZ  [i] = Yield(hist[WZ]);
+      nZZ  [i] = Yield(hist[ZZ]);
+      nVVV [i] = Yield(hist[VVV]);
+      nWV  [i] = Yield(hist[WV]);
 
-      nWZ[i] = Yield(hist[WZTo3LNu]);
-      eWZ[i] = sqrt(nWZ[i]);
-
-      nZZ[i] += Yield(hist[ZgammaToLLG]);
-      nZZ[i] += Yield(hist[ZZTo2L2QMad]);
-      nZZ[i] += Yield(hist[ggZZ2L2L]);
-      nZZ[i] += Yield(hist[ggZZ4L]);
-      nZZ[i] += Yield(hist[ZZ2Mu2Tau]);
-      nZZ[i] += Yield(hist[ZZ4E]);
-      nZZ[i] += Yield(hist[ZZ2E2Tau]);
-      nZZ[i] += Yield(hist[ZZ4Mu]);
-      nZZ[i] += Yield(hist[ZZ2E2Mu]);
-      nZZ[i] += Yield(hist[ZZ4Tau]);
-      nZZ[i] += Yield(hist[HZZ4L]);
-      eZZ[i]  = sqrt(nZZ[i]);
-    
-      nWV[i] += Yield(hist[WW]);
-      nWV[i] += Yield(hist[WZTo2L2QMad]);
-      nWV[i] += Yield(hist[WZTo2QLNuMad]);
-      nWV[i] += Yield(hist[WbbToLNu]);
-      nWV[i] += Yield(hist[WJets_Madgraph]);
-      nWV[i] += Yield(hist[WGstarToElNuMad]);
-      nWV[i] += Yield(hist[WGstarToMuNuMad]);
-      nWV[i] += Yield(hist[WGstarToTauNuMad]);
-      nWV[i] += Yield(hist[WgammaToLNuG]);
-      eWV[i]  = sqrt(nWV[i]);
-    
-      nVVV[i] += Yield(hist[WWGJets]);
-      nVVV[i] += Yield(hist[WZZJets]);
-      nVVV[i] += Yield(hist[ZZZJets]);
-      nVVV[i] += Yield(hist[WWZJets]);
-      nVVV[i] += Yield(hist[WWWJets]);
-      nVVV[i] += Yield(hist[TTWJets]);
-      nVVV[i] += Yield(hist[TTZJets]);
-      nVVV[i] += Yield(hist[TTWWJets]);
-      nVVV[i] += Yield(hist[TTGJets]);
-      eVVV[i]  = sqrt(nVVV[i]);
+      nBkg[i] = nZZ[i] + nVVV[i] + nWV[i];
 
       if (_mode == MCmode)
 	{
-	  nTop[i] += Yield(hist[TTbar_Madgraph]);
-	  nTop[i] += Yield(hist[TW]);
-	  nTop[i] += Yield(hist[TbarW]);
-	  eTop[i]  = sqrt(nTop[i]);
+	  nTop  [i] = Yield(hist[Top]);
+	  nZJets[i] = Yield(hist[ZJets]);
 
-	  nZJets[i] += Yield(hist[DYJets_Madgraph]);
-	  nZJets[i] += Yield(hist[ZJets_Madgraph]);
-	  nZJets[i] += Yield(hist[ZbbToLL]);
-	  eZJets[i]  = sqrt(nZJets[i]);
-
-	  nBkg[i] = nZZ[i] + nWV[i] + nVVV[i] + nTop[i] + nZJets[i];
-	  eBkg[i] = sqrt(nBkg[i]);
+	  nBkg[i] += nTop[i] + nZJets[i];
 	}
       else if (_mode == PPFmode)
 	{
-	  nFakes[i] = Yield(hist[DataPPF]);
-	  eFakes[i] = sqrt(nFakes[i]);
+	  nFakes[i] = Yield(hist[Fakes]);
 
-	  nBkg[i] = nZZ[i] + nWV[i] + nVVV[i] + nFakes[i];
-	  eBkg[i] = sqrt(nBkg[i]);
+	  nBkg[i] += nFakes[i];
 	}
     }
 
   
   // Print
   //----------------------------------------------------------------------------
-  if (_mode == MCmode)  {outputfile << Form(" %-20s", "top");         for (UInt_t i=0; i<nCut; i++) outputfile << Form(" & %3.0f $\\pm$ %2.0f", nTop[i],   eTop[i]);   outputfile << "\\\\\n";}
-  if (_mode == MCmode)  {outputfile << Form(" %-20s", "Z+jets");      for (UInt_t i=0; i<nCut; i++) outputfile << Form(" & %3.0f $\\pm$ %2.0f", nZJets[i], eZJets[i]); outputfile << "\\\\\n";}
-  if (_mode == PPFmode) {outputfile << Form(" %-20s", "data-driven"); for (UInt_t i=0; i<nCut; i++) outputfile << Form(" & %3.0f $\\pm$ %2.0f", nFakes[i], eFakes[i]); outputfile << "\\\\\n";}
+  if (_mode == MCmode)  {outputfile << Form(" %-20s", "top");         for (UInt_t i=0; i<nCut; i++) outputfile << Form(" & %3.0f $\\pm$ %2.0f", nTop[i],   sqrt(nTop[i]));   outputfile << "\\\\\n";}
+  if (_mode == MCmode)  {outputfile << Form(" %-20s", "Z+jets");      for (UInt_t i=0; i<nCut; i++) outputfile << Form(" & %3.0f $\\pm$ %2.0f", nZJets[i], sqrt(nZJets[i])); outputfile << "\\\\\n";}
+  if (_mode == PPFmode) {outputfile << Form(" %-20s", "data-driven"); for (UInt_t i=0; i<nCut; i++) outputfile << Form(" & %3.0f $\\pm$ %2.0f", nFakes[i], sqrt(nFakes[i])); outputfile << "\\\\\n";}
 
-  outputfile << Form(" %-20s", "ZZ");          for (UInt_t i=0; i<nCut; i++) outputfile << Form(" & %3.0f $\\pm$ %2.0f", nZZ[i],  eZZ[i]);  outputfile << "\\\\\n";
-  outputfile << Form(" %-20s", "WV");          for (UInt_t i=0; i<nCut; i++) outputfile << Form(" & %3.0f $\\pm$ %2.0f", nWV[i],  eWV[i]);  outputfile << "\\\\\n";
-  outputfile << Form(" %-20s", "VVV");         for (UInt_t i=0; i<nCut; i++) outputfile << Form(" & %3.0f $\\pm$ %2.0f", nVVV[i], eVVV[i]); outputfile << "\\\\\n";
-  outputfile << Form(" %-20s", "backgrounds"); for (UInt_t i=0; i<nCut; i++) outputfile << Form(" & %3.0f $\\pm$ %2.0f", nBkg[i], eBkg[i]); outputfile << "\\\\\n";
-  outputfile << Form(" %-20s", "WZ");          for (UInt_t i=0; i<nCut; i++) outputfile << Form(" & %3.0f $\\pm$ %2.0f", nWZ[i],  eWZ[i]);  outputfile << "\\\\\n";
+  outputfile << Form(" %-20s", "ZZ");          for (UInt_t i=0; i<nCut; i++) outputfile << Form(" & %3.0f $\\pm$ %2.0f", nZZ[i],  sqrt(nZZ[i]));  outputfile << "\\\\\n";
+  outputfile << Form(" %-20s", "WV");          for (UInt_t i=0; i<nCut; i++) outputfile << Form(" & %3.0f $\\pm$ %2.0f", nWV[i],  sqrt(nWV[i]));  outputfile << "\\\\\n";
+  outputfile << Form(" %-20s", "VVV");         for (UInt_t i=0; i<nCut; i++) outputfile << Form(" & %3.0f $\\pm$ %2.0f", nVVV[i], sqrt(nVVV[i])); outputfile << "\\\\\n";
+  outputfile << Form(" %-20s", "backgrounds"); for (UInt_t i=0; i<nCut; i++) outputfile << Form(" & %3.0f $\\pm$ %2.0f", nBkg[i], sqrt(nBkg[i])); outputfile << "\\\\\n";
+  outputfile << Form(" %-20s", "WZ");          for (UInt_t i=0; i<nCut; i++) outputfile << Form(" & %3.0f $\\pm$ %2.0f", nWZ[i],  sqrt(nWZ[i]));  outputfile << "\\\\\n";
 
   outputfile << " \\hline\n";
 
   outputfile << Form(" %-20s", "WZ + backgrounds"); for (UInt_t i=0; i<nCut; i++) outputfile << Form(" & %3.0f $\\pm$ %2.0f", nBkg[i]+nWZ[i], sqrt(nBkg[i]+nWZ[i])); outputfile << "\\\\\n";
-  outputfile << Form(" %-20s", "data");             for (UInt_t i=0; i<nCut; i++) outputfile << Form(" & %3.0f $\\pm$ %2.0f", nData[i],       eData[i]);             outputfile << "\\\\\n";
-
-  //  outputfile << Form(" %-20s", "S/$\\sqrt{{\\rm S} + {\\rm B}}$");
-
-  //  for (UInt_t i=0; i<nCut; i++) outputfile << Form(" & %.1f", nWZ[i] / (sqrt(nWZ[i] + nBkg[i]))); outputfile << "\\\\\n";
+  outputfile << Form(" %-20s", "data");             for (UInt_t i=0; i<nCut; i++) outputfile << Form(" & %3.0f $\\pm$ %2.0f", nData[i],       sqrt(nData[i]));       outputfile << "\\\\\n";
 
   outputfile.close();
 }
@@ -758,72 +661,25 @@ void DrawHistogram(TString  hname,
   Double_t delta  = _yoffset + 0.001;
   Double_t ndelta = 0;
   
-  DrawLegend(x0 - 0.49, y0 - ndelta, hist[Data],     Form(" data (%.0f)", Yield(hist[Data])),     "lp"); ndelta += delta;
-  DrawLegend(x0 - 0.49, y0 - ndelta, allmc,          Form(" all (%.0f)",  Yield(allmc)),          "f");  ndelta += delta;
-  DrawLegend(x0 - 0.49, y0 - ndelta, hist[WZTo3LNu], Form(" WZ (%.0f)",   Yield(hist[WZTo3LNu])), "f");  ndelta += delta;
+  DrawLegend(x0 - 0.49, y0 - ndelta, hist[Data], Form(" data (%.0f)", Yield(hist[Data])), "lp"); ndelta += delta;
+  DrawLegend(x0 - 0.49, y0 - ndelta, allmc,      Form(" all (%.0f)",  Yield(allmc)),      "f");  ndelta += delta;
+  DrawLegend(x0 - 0.49, y0 - ndelta, hist[WZ],   Form(" WZ (%.0f)",   Yield(hist[WZ])),   "f");  ndelta += delta;
 
   if (_mode == MCmode)
     {
-      Double_t TopYield   = 0.0;
-      Double_t ZJetsYield = 0.0;
-	  
-      TopYield += Yield(hist[TTbar_Madgraph]);
-      TopYield += Yield(hist[TW]);
-      TopYield += Yield(hist[TbarW]);
-
-      ZJetsYield += Yield(hist[DYJets_Madgraph]);
-      ZJetsYield += Yield(hist[ZJets_Madgraph]);
-      ZJetsYield += Yield(hist[ZbbToLL]);
-
-      DrawLegend(x0 - 0.49, y0 - ndelta, hist[TTbar_Madgraph], Form(" top (%.0f)",    TopYield),   "f"); ndelta += delta;
-      DrawLegend(x0 - 0.49, y0 - ndelta, hist[ZJets_Madgraph], Form(" Z+jets (%.0f)", ZJetsYield), "f"); ndelta += delta;
+      DrawLegend(x0 - 0.49, y0 - ndelta, hist[Top],   Form(" top (%.0f)",    Yield(hist[Top])),   "f"); ndelta += delta;
+      DrawLegend(x0 - 0.49, y0 - ndelta, hist[ZJets], Form(" Z+jets (%.0f)", Yield(hist[ZJets])), "f"); ndelta += delta;
     }
   else if (_mode == PPFmode)
     {
-      DrawLegend(x0 - 0.49, y0 - ndelta, hist[DataPPF], Form(" data-driven (%.0f)", Yield(hist[DataPPF])), "f"); ndelta += delta;
+      DrawLegend(x0 - 0.49, y0 - ndelta, hist[Fakes], Form(" data-driven (%.0f)", Yield(hist[Fakes])), "f"); ndelta += delta;
     }
 
-  Double_t ZZYield  = 0.0;
-  Double_t WVYield  = 0.0;
-  Double_t VVVYield = 0.0;
-
-  ZZYield += Yield(hist[ZgammaToLLG]);
-  ZZYield += Yield(hist[ZZTo2L2QMad]);
-  ZZYield += Yield(hist[ggZZ2L2L]);
-  ZZYield += Yield(hist[ggZZ4L]);
-  ZZYield += Yield(hist[ZZ2Mu2Tau]);
-  ZZYield += Yield(hist[ZZ4E]);
-  ZZYield += Yield(hist[ZZ2E2Tau]);
-  ZZYield += Yield(hist[ZZ4Mu]);
-  ZZYield += Yield(hist[ZZ2E2Mu]);
-  ZZYield += Yield(hist[ZZ4Tau]);
-  ZZYield += Yield(hist[HZZ4L]);
-  
-  WVYield += Yield(hist[WW]);
-  WVYield += Yield(hist[WZTo2L2QMad]);
-  WVYield += Yield(hist[WZTo2QLNuMad]);
-  WVYield += Yield(hist[WbbToLNu]);
-  WVYield += Yield(hist[WJets_Madgraph]);
-  WVYield += Yield(hist[WGstarToElNuMad]);
-  WVYield += Yield(hist[WGstarToMuNuMad]);
-  WVYield += Yield(hist[WGstarToTauNuMad]);
-  WVYield += Yield(hist[WgammaToLNuG]);
-
-  VVVYield += Yield(hist[WWGJets]);
-  VVVYield += Yield(hist[WZZJets]);
-  VVVYield += Yield(hist[ZZZJets]);
-  VVVYield += Yield(hist[WWZJets]);
-  VVVYield += Yield(hist[WWWJets]);
-  VVVYield += Yield(hist[TTWJets]);
-  VVVYield += Yield(hist[TTZJets]);
-  VVVYield += Yield(hist[TTWWJets]);
-  VVVYield += Yield(hist[TTGJets]);
-      
   ndelta = 0;
   
-  DrawLegend(x0 - 0.23, y0 - ndelta, hist[ggZZ2L2L], Form(" ZZ (%.0f)",  ZZYield),  "f"); ndelta += delta;
-  DrawLegend(x0 - 0.23, y0 - ndelta, hist[WW],       Form(" WV (%.0f)",  WVYield),  "f"); ndelta += delta;
-  DrawLegend(x0 - 0.23, y0 - ndelta, hist[WWGJets],  Form(" VVV (%.0f)", VVVYield), "f"); ndelta += delta;
+  DrawLegend(x0 - 0.23, y0 - ndelta, hist[ZZ],  Form(" ZZ (%.0f)",  Yield(hist[ZZ])),  "f"); ndelta += delta;
+  DrawLegend(x0 - 0.23, y0 - ndelta, hist[VVV], Form(" VVV (%.0f)", Yield(hist[VVV])), "f"); ndelta += delta;
+  DrawLegend(x0 - 0.23, y0 - ndelta, hist[WV],  Form(" WV (%.0f)",  Yield(hist[WV])),  "f"); ndelta += delta;
 
 
   // CMS titles
@@ -1059,84 +915,23 @@ void SetParameters(UInt_t cut,
 		   UInt_t mode,
 		   UInt_t closure_test)
 {
-  sProcess[Data]             = "Data";
-  sProcess[DataPPF]          = "Data_PPF";
-  sProcess[DYJets_Madgraph]  = "DYJets_Madgraph";
-  sProcess[ZJets_Madgraph]   = "ZJets_Madgraph";
-  sProcess[ZbbToLL]          = "ZbbToLL";
-  sProcess[WbbToLNu]         = "WbbToLNu";
-  sProcess[WJets_Madgraph]   = "WJets_Madgraph";
-  sProcess[WGstarToElNuMad]  = "WGstarToElNuMad";
-  sProcess[WGstarToMuNuMad]  = "WGstarToMuNuMad";
-  sProcess[WGstarToTauNuMad] = "WGstarToTauNuMad";
-  sProcess[WgammaToLNuG]     = "WgammaToLNuG";
-  sProcess[ZgammaToLLG]      = "ZgammaToLLG";
-  sProcess[TTbar_Madgraph]   = "TTbar_Madgraph";
-  sProcess[TW]               = "TW";
-  sProcess[TbarW]            = "TbarW";
-  sProcess[WW]               = "WW";
-  sProcess[WZTo3LNu]         = "WZTo3LNu";
-  sProcess[WZTo2L2QMad]      = "WZTo2L2QMad";
-  sProcess[WZTo2QLNuMad]     = "WZTo2QLNuMad";
-  sProcess[ZZTo2L2QMad]      = "ZZTo2L2QMad";
-  sProcess[ggZZ2L2L]         = "ggZZ2L2L";
-  sProcess[ggZZ4L]           = "ggZZ4L";
-  sProcess[ZZ2Mu2Tau]        = "ZZ2Mu2Tau";
-  sProcess[ZZ4E]             = "ZZ4E";
-  sProcess[ZZ2E2Tau]         = "ZZ2E2Tau";
-  sProcess[ZZ4Mu]            = "ZZ4Mu";
-  sProcess[ZZ2E2Mu]          = "ZZ2E2Mu";
-  sProcess[ZZ4Tau]           = "ZZ4Tau";
-  sProcess[HZZ4L]            = "HZZ4L";
-  sProcess[WWGJets]          = "WWGJets";
-  sProcess[WZZJets]          = "WZZJets";
-  sProcess[ZZZJets]          = "ZZZJets";
-  sProcess[WWZJets]          = "WWZJets";
-  sProcess[WWWJets]          = "WWWJets";
-  sProcess[TTWJets]          = "TTWJets";
-  sProcess[TTZJets]          = "TTZJets";
-  sProcess[TTWWJets]         = "TTWWJets";
-  sProcess[TTGJets]          = "TTGJets";
+  sProcess[Data]  = "Data";
+  sProcess[Fakes] = "Data_PPF";
+  sProcess[WZ]    = "WZTo3LNu";
+  sProcess[ZZ]    = "ZZ";
+  sProcess[Top]   = "Top";
+  sProcess[ZJets] = "ZJets";
+  sProcess[VVV]   = "VVV";
+  sProcess[WV]    = "WV";
 
-  cProcess[Data]             = kBlack;
-  cProcess[DataPPF]          = kGray+1;
-  cProcess[DYJets_Madgraph]  = kGreen+2;   // Z+jets
-  cProcess[ZJets_Madgraph]   = kGreen+2;   // Z+jets
-  cProcess[ZbbToLL]          = kGreen+2;   // Z+jets
-  cProcess[WbbToLNu]         = kAzure;     // WV
-  cProcess[WJets_Madgraph]   = kAzure;     // WV
-  cProcess[WGstarToElNuMad]  = kAzure;     // WV
-  cProcess[WGstarToMuNuMad]  = kAzure;     // WV
-  cProcess[WGstarToTauNuMad] = kAzure;     // WV
-  cProcess[WgammaToLNuG]     = kAzure;     // WV
-  cProcess[WW]               = kAzure;     // WV
-  cProcess[WZTo2L2QMad]      = kAzure;     // WV
-  cProcess[WZTo2QLNuMad]     = kAzure;     // WV
-  cProcess[TTbar_Madgraph]   = kAzure-9;   // top
-  cProcess[TW]               = kAzure-9;   // top
-  cProcess[TbarW]            = kAzure-9;   // top
-  cProcess[WZTo3LNu]         = kOrange-2;  // WZ
-  cProcess[ZgammaToLLG]      = kRed+1;     // ZZ
-  cProcess[ZZTo2L2QMad]      = kRed+1;     // ZZ
-  cProcess[ggZZ2L2L]         = kRed+1;     // ZZ
-  cProcess[ggZZ4L]           = kRed+1;     // ZZ
-  cProcess[ZZ2Mu2Tau]        = kRed+1;     // ZZ
-  cProcess[ZZ4E]             = kRed+1;     // ZZ
-  cProcess[ZZ2E2Tau]         = kRed+1;     // ZZ
-  cProcess[ZZ4Mu]            = kRed+1;     // ZZ
-  cProcess[ZZ2E2Mu]          = kRed+1;     // ZZ
-  cProcess[ZZ4Tau]           = kRed+1;     // ZZ
-  cProcess[HZZ4L]            = kRed+1;     // ZZ
-  cProcess[WWGJets]          = kBlack;     // VVV
-  cProcess[WZZJets]          = kBlack;     // VVV
-  cProcess[ZZZJets]          = kBlack;     // VVV
-  cProcess[WWZJets]          = kBlack;     // VVV
-  cProcess[WWWJets]          = kBlack;     // VVV
-  cProcess[TTWJets]          = kBlack;     // VVV
-  cProcess[TTZJets]          = kBlack;     // VVV
-  cProcess[TTWWJets]         = kBlack;     // VVV
-  cProcess[TTGJets]          = kBlack;     // VVV
-
+  cProcess[Data]  = kBlack;
+  cProcess[Fakes] = kGray+1;
+  cProcess[WZ]    = kOrange-2;
+  cProcess[ZZ]    = kRed+1;
+  cProcess[Top]   = kAzure-9;
+  cProcess[ZJets] = kGreen+2;
+  cProcess[VVV]   = kBlack;
+  cProcess[WV]    = kAzure;
 
   _luminosity   = 19602.0;
   _yoffset      = 0.048;
@@ -1166,51 +961,21 @@ void SetParameters(UInt_t cut,
   vprocess.clear();
 
   vprocess.push_back(Data);
-  vprocess.push_back(WbbToLNu);
-  vprocess.push_back(WJets_Madgraph);
-  vprocess.push_back(WGstarToElNuMad);
-  vprocess.push_back(WGstarToMuNuMad);
-  vprocess.push_back(WGstarToTauNuMad);
-  vprocess.push_back(WgammaToLNuG);
-  vprocess.push_back(WW);
-  vprocess.push_back(WZTo2L2QMad);
-  vprocess.push_back(WZTo2QLNuMad);
+  vprocess.push_back(WV);
+  vprocess.push_back(VVV);
 
   if (mode == MCmode)
     {
-      vprocess.push_back(TTbar_Madgraph);
-      vprocess.push_back(TW);
-      vprocess.push_back(TbarW);
-      vprocess.push_back(DYJets_Madgraph);
-      vprocess.push_back(ZJets_Madgraph);
-      vprocess.push_back(ZbbToLL);
+      vprocess.push_back(ZJets);
+      vprocess.push_back(Top);
     }
   else if (mode == PPFmode)
     {
-      vprocess.push_back(DataPPF);
+      vprocess.push_back(Fakes);
     }
       
-  vprocess.push_back(ZgammaToLLG);
-  vprocess.push_back(ZZTo2L2QMad);
-  vprocess.push_back(ggZZ2L2L);
-  vprocess.push_back(ggZZ4L);
-  vprocess.push_back(ZZ2Mu2Tau);
-  vprocess.push_back(ZZ4E);
-  vprocess.push_back(ZZ2E2Tau);
-  vprocess.push_back(ZZ4Mu);
-  vprocess.push_back(ZZ2E2Mu);
-  vprocess.push_back(ZZ4Tau);
-  vprocess.push_back(HZZ4L);
-  vprocess.push_back(WWGJets);
-  vprocess.push_back(WZZJets);
-  vprocess.push_back(ZZZJets);
-  vprocess.push_back(WWZJets);
-  vprocess.push_back(WWWJets);
-  vprocess.push_back(TTWJets);
-  vprocess.push_back(TTZJets);
-  vprocess.push_back(TTWWJets);
-  vprocess.push_back(TTGJets);
-  vprocess.push_back(WZTo3LNu);
+  vprocess.push_back(ZZ);
+  vprocess.push_back(WZ);
 }
 
 
@@ -1497,22 +1262,20 @@ void RelativeSystematics(UInt_t cut)
 
   for (UInt_t i=0; i<nSystematic; i++) {
 
-    Double_t maxSyst = 0.0;
-
     for (UInt_t k=0; k<nProcess; k++) systematicError[k][i] = 0.0;
 
-    if (i == fakesSyst) {systematicError[DataPPF] [i] = 36.0; continue;}
-    if (i == scaleSyst) {systematicError[WZTo3LNu][i] =  5.3; continue;}
-    if (i == pdfSyst)   {systematicError[WZTo3LNu][i] =  3.0; continue;}
+    if (i == fakesSyst) {systematicError[Fakes][i] = 36.0; continue;}
+    if (i == scaleSyst) {systematicError[WZ][i]    =  5.3; continue;}
+    if (i == pdfSyst)   {systematicError[WZ][i]    =  3.0; continue;}
 
-    for (UInt_t j=0; j<nChannel; j++) {
+    for(UInt_t k=0; k<nProcess; k++) {
 
-      TString hname = "hCounter_" + sChannel[j] + "_" + sCut[cut] + "_TTT";
+      for (UInt_t j=0; j<nChannel; j++) {
 
-      for(UInt_t k=0; k<nProcess; k++) {
+	TString hname = "hCounter_" + sChannel[j] + "_" + sCut[cut] + "_TTT";
 	
-	if (k == Data)    continue;
-	if (k == DataPPF) continue;
+	if (k == Data)  continue;
+	if (k == Fakes) continue;
 	
 	TFile* f0 = new TFile(_datapath + "/" + _directory + "/" + sProcess[k] + ".root");
 	TFile* f1 = new TFile(_datapath + "/systematics/" + sSystematic[i] + "/" + sProcess[k] + ".root");
@@ -1523,29 +1286,20 @@ void RelativeSystematics(UInt_t cut)
 	f0->Close();
 	f1->Close();
 
-	Double_t syst = (y0 > 1) ? 1e2 * fabs(y1 - y0) / y0 : 0.0;
+	Double_t syst = (y0 > 0) ? 1e2 * fabs(y1 - y0) / y0 : 0.0;
 
 	if (syst > systematicError[k][i]) systematicError[k][i] = syst;
-
-	if (systematicError[k][i] > maxSyst) maxSyst = systematicError[k][i];
       }
-    }
-
-    for (UInt_t k=0; k<nProcess; k++) {
-
-      if (k == Data || k == DataPPF) continue;
-      
-      systematicError[k][i] = maxSyst;
     }
   }
 
 
-  processSyst[DataPPF] = systematicError[DataPPF][fakesSyst];
+  processSyst[Fakes] = systematicError[Fakes][fakesSyst];
   
 
   for (UInt_t i=0; i<nProcess; i++) {
 
-    if (i == Data || i == DataPPF) continue;
+    if (i == Data || i == Fakes) continue;
 
     for (UInt_t j=0; j<nSystematic; j++) {
 
@@ -1553,8 +1307,8 @@ void RelativeSystematics(UInt_t cut)
       
       Double_t syst2 = systematicError[i][j] * systematicError[i][j];
 
-      if (j == scaleSyst) {if (i == WZTo3LNu) processSyst[i] += syst2; continue;}
-      if (j == pdfSyst)   {if (i == WZTo3LNu) processSyst[i] += syst2; continue;}
+      if (j == scaleSyst) {if (i == WZ) processSyst[i] += syst2; continue;}
+      if (j == pdfSyst)   {if (i == WZ) processSyst[i] += syst2; continue;}
 
       processSyst[i] += syst2;
     }
@@ -1571,9 +1325,7 @@ void RelativeSystematics(UInt_t cut)
 
   for (UInt_t i=0; i<nProcess; i++)
     {
-      if (i != DataPPF && i != WZTo3LNu && i != ZJets_Madgraph && i != TW) continue;
-      
-      (i == DataPPF) ? printf(" %15s ", "PPF") : printf(" %15s ", sProcess[i].Data());
+      (i == Fakes) ? printf(" %15s ", "Fakes") : printf(" %15s ", sProcess[i].Data());
     }
   
   printf("\n");
@@ -1584,8 +1336,6 @@ void RelativeSystematics(UInt_t cut)
     
     for (UInt_t i=0; i<nProcess; i++)
       {
-	if (i != DataPPF && i != WZTo3LNu && i != ZJets_Madgraph && i != TW) continue;
-	
 	printf(" %15.1f ", systematicError[i][j]);
       }
     
@@ -1596,8 +1346,6 @@ void RelativeSystematics(UInt_t cut)
   
   for (UInt_t i=0; i<nProcess; i++)
     {
-      if (i != DataPPF && i != WZTo3LNu && i != ZJets_Madgraph && i != TW) continue;
-      
       printf(" %15.1f ", processSyst[i]);
     }
       
