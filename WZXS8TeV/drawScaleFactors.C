@@ -20,27 +20,29 @@
 
 // Member functions
 //------------------------------------------------------------------------------
-void    DrawIt            (TH2F*       h,
-			   TString     title);
+void    DrawIt             (TH2F*       h,
+			    TString     title);
 
-void    AxisFonts         (TAxis*      axis,
-			   TString     title);
+void    AxisFonts          (TAxis*      axis,
+			    TString     title);
 
-void    TH2FAxisFonts     (TH2F*       h,
-			   TString     coordinate,
-			   TString     title);
+void    TH2FAxisFonts      (TH2F*       h,
+			    TString     coordinate,
+			    TString     title);
 
-void    DrawTLatex        (Double_t    x,
-			   Double_t    y,
-			   Double_t    tsize,
-			   Short_t     align,
-			   const char* text);
+void    DrawTLatex         (Double_t    x,
+			    Double_t    y,
+			    Double_t    tsize,
+			    Short_t     align,
+			    const char* text);
 
-TH2F*   LoadHistogram     (TString     filename,
-			   TString     hname,
-			   TString     cname);
+TH2F*   LoadHistogram      (TString     filename,
+			    TString     hname,
+			    TString     cname);
 
-TString GuessLocalBasePath();
+TString GuessLocalBasePath ();
+
+void    MakeOutputDirectory(TString     format);
 
 
 // Data members
@@ -65,18 +67,12 @@ TH2F*   DoubleMuTrail;
 
 void drawScaleFactors()
 {
+  MakeOutputDirectory("pdf");
+  MakeOutputDirectory("png");
+
   localpath = GuessLocalBasePath();
 
   gInterpreter->ExecuteMacro("./HiggsPaperStyle.C");
-
-  gSystem->mkdir("pdf/scale_factors", kTRUE);
-  gSystem->mkdir("png/scale_factors", kTRUE);
-
-  gSystem->Exec("cp index.php pdf/.");
-  gSystem->Exec("cp index.php png/.");
-
-  gSystem->Exec("cp index.php pdf/scale_factors/.");
-  gSystem->Exec("cp index.php png/scale_factors/.");
 
   gStyle->SetOptStat(0);
 
@@ -145,30 +141,31 @@ void DrawIt(TH2F* h, TString title)
 
   DrawTLatex(0.940, 0.976, 0.05, 33, title);
 
-  if (title.Contains("trigger")) continue;
-  
-  Double_t hmin = h->GetMinimum();
-  Double_t hmax = h->GetMaximum();
+  if (!title.Contains("trigger")) {
 
-  for (Int_t i=1; i<=h->GetNbinsX(); i++) {
-    for (Int_t j=1; j<=h->GetNbinsY(); j++) {
+    Double_t hmin = h->GetMinimum();
+    Double_t hmax = h->GetMaximum();
 
-      Double_t value = h->GetBinContent(i,j);
+    for (Int_t i=1; i<=h->GetNbinsX(); i++) {
+      for (Int_t j=1; j<=h->GetNbinsY(); j++) {
 
-      Double_t ypos = h->GetYaxis()->GetBinCenter(j);
-      Double_t xpos = h->GetXaxis()->GetBinCenter(i);
+	Double_t value = h->GetBinContent(i,j);
+
+	Double_t ypos = h->GetYaxis()->GetBinCenter(j);
+	Double_t xpos = h->GetXaxis()->GetBinCenter(i);
       
-      if (gPad->GetLogx()) xpos = h->GetXaxis()->GetBinCenterLog(i);
+	if (gPad->GetLogx()) xpos = h->GetXaxis()->GetBinCenterLog(i);
 
-      TLatex* latex = new TLatex(xpos, ypos, Form("%.2f", value));
+	TLatex* latex = new TLatex(xpos, ypos, Form("%.2f", value));
 
-      latex->SetTextAlign(   22);
-      latex->SetTextFont (   42);
-      latex->SetTextSize (0.027);
+	latex->SetTextAlign(   22);
+	latex->SetTextFont (   42);
+	latex->SetTextSize (0.027);
 
-      if (value < hmin + 0.3*(hmax - hmin)) latex->SetTextColor(kWhite);
-      
-      latex->Draw();
+	if (value < hmin + 0.3*(hmax - hmin)) latex->SetTextColor(kWhite);
+	
+	latex->Draw();
+      }
     }
   }
 
@@ -289,4 +286,17 @@ TString GuessLocalBasePath()
 
       return TString("");
     }
+}
+
+
+//------------------------------------------------------------------------------
+// MakeOutputDirectory
+//------------------------------------------------------------------------------
+void MakeOutputDirectory(TString format)
+{
+  gSystem->mkdir(Form("%s/scale_factors", format.Data()), kTRUE);
+
+  gSystem->Exec(Form("cp index.php %s/.", format.Data()));
+
+  gSystem->Exec(Form("cp index.php %s/scale_factors/.", format.Data()));
 }

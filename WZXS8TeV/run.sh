@@ -17,6 +17,7 @@ CLOSURE=$2
 DATA_SAMPLES=" \
 DoubleElectron \
 DoubleMu       \
+MuEG
 "
 
 
@@ -39,7 +40,6 @@ WZTo3LNu         \
 WZTo2L2QMad      \
 WZTo2QLNuMad     \
 ZZTo2L2QMad      \
-ZZ               \
 ggZZ2L2L         \
 ggZZ4L           \
 ZZ2Mu2Tau        \

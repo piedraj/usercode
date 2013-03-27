@@ -143,18 +143,21 @@ class AnalysisWZ: public CMSAnalysisSelectorMiniTrees
 
   Double_t       GetTriggerWeight          ();
 
+  Bool_t         PassTrigger               ();
+
 
  public:
   
   // Histograms
   //----------------------------------------------------------------------------
-  TH1D*                       hScaleFactor[nChannel];
-  TH1D*                       hTriggerEff [nChannel];
-
   TH1D*                       hCounterRaw[nChannel][nCut][nComposition];
   TH1D*                       hCounterPU [nChannel][nCut][nComposition];
   TH1D*                       hCounterEff[nChannel][nCut][nComposition];
   TH1D*                       hCounter   [nChannel][nCut][nComposition];
+
+  TH1D*                       hLeptonWeight [nChannel][nCut];
+  TH1D*                       hTriggerWeight[nChannel][nCut];
+  TH1D*                       hTotalWeight  [nChannel][nCut];
 
   TH1D*                       hNPV         [nChannel][nCut];
   TH1D*                       hMET         [nChannel][nCut];
@@ -198,18 +201,22 @@ class AnalysisWZ: public CMSAnalysisSelectorMiniTrees
 
   Bool_t                      isData;
 
-  Double_t                    efficiency_weight;
   Double_t                    invMass2Lep;
   Double_t                    invMass3Lep;
   Double_t                    sumCharges;
   Double_t                    transverseMass;
   Double_t                    ptLeadingJet;
+  Double_t                    efficiency_weight;
   Double_t                    pu_weight;
+  Double_t                    mc_lepton_weight;
+  Double_t                    mc_trigger_weight;
+  Double_t                    mc_total_weight;
 
   UInt_t                      nBJet;
   UInt_t                      nElectron;
   UInt_t                      nTight;
   UInt_t                      theChannel;
+  UInt_t                      theTrigger;
 
   ofstream                    outputfile;
 

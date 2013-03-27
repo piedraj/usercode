@@ -25,9 +25,6 @@ void AnalysisWZ::Initialise()
 
   for (UInt_t i=0; i<nChannel; i++) {
 
-    hScaleFactor[i] = CreateH1D("hScaleFactor_" + sChannel[i], "", 480, -0.1, 1.1);
-    hTriggerEff [i] = CreateH1D("hTriggerEff_"  + sChannel[i], "", 480, -0.1, 1.1);
-
     for (UInt_t j=0; j<nCut; j++) {
 
       TString suffix = "_" + sChannel[i] + "_" + sCut[j];
@@ -39,6 +36,10 @@ void AnalysisWZ::Initialise()
 	hCounterEff[i][j][k] = CreateH1D("hCounterEff" + suffix + "_" + sComposition[k], "", 3, 0, 3);
 	hCounter   [i][j][k] = CreateH1D("hCounter"    + suffix + "_" + sComposition[k], "", 3, 0, 3);
       }
+
+      hLeptonWeight [i][j] = CreateH1D("hLeptonWeight"  + suffix, "", 90, 0.75, 1.05);
+      hTriggerWeight[i][j] = CreateH1D("hTriggerWeight" + suffix, "", 90, 0.75, 1.05);
+      hTotalWeight  [i][j] = CreateH1D("hTotalWeight"   + suffix, "", 90, 0.75, 1.05);
 
       hNPV         [i][j] = CreateH1D("hNPV"          + suffix, "",  50,  0,  50);
       hMET         [i][j] = CreateH1D("hMET"          + suffix, "", 200,  0, 200);
@@ -90,11 +91,23 @@ void AnalysisWZ::Initialise()
 //------------------------------------------------------------------------------
 void AnalysisWZ::InsideLoop()
 {
-  isData = (sample.Contains("DoubleElectron") || sample.Contains("DoubleMu")) ? 1 : 0;
+  if (sample.Contains("DoubleElectron") ||
+      sample.Contains("DoubleMu") ||
+      sample.Contains("MuEG"))
+    {
+      isData = true;
+    }
+  else
+    {
+      isData = false;
+    }
 
   pu_weight = (isData) ? 1. : fPUWeight->GetWeight((Int_t)T_Event_nTruePU);
 
   efficiency_weight = pu_weight;
+  mc_lepton_weight  = 1.;
+  mc_trigger_weight = 1.;
+  mc_total_weight   = 1.;
 
   AnalysisLeptons.clear();
 
@@ -119,12 +132,6 @@ void AnalysisWZ::InsideLoop()
   if (sample.Contains("ZJets_Madgraph") && T_Gen_bSt3_Px->size() > 0) return;
 
   if (sample.Contains("WJets_Madgraph") && T_Gen_bSt3_Px->size() > 0) return;
-
-
-  // HLT
-  //----------------------------------------------------------------------------
-  if (sample.Contains("DoubleMu")       && !T_passTriggerDoubleMu) return;
-  if (sample.Contains("DoubleElectron") && !T_passTriggerDoubleEl) return;
 
 
   // Loop over muons
@@ -237,11 +244,11 @@ void AnalysisWZ::InsideLoop()
 
   std::reverse(AnalysisLeptons.begin(), AnalysisLeptons.end());
 
-  //  Bool_t pt3pass = (AnalysisLeptons[2].v.Pt() > 20.);
-  //
-  //  if (closure_test) pt3pass = !pt3pass;
-  //
-  //  if (!pt3pass) return;
+  Bool_t pt3pass = (AnalysisLeptons[2].v.Pt() > 20.);
+  
+  if (closure_test) pt3pass = !pt3pass;
+  
+  if (!pt3pass) return;
 
 
   // Classify the channels
@@ -266,24 +273,24 @@ void AnalysisWZ::InsideLoop()
   if (sample.Contains("DoubleMu")       && nElectron > 1) return;
   if (sample.Contains("DoubleElectron") && nElectron < 2) return;
 
+  
+  // HLT
+  //----------------------------------------------------------------------------
+  if (!PassTrigger()) return;
+
 
   // Apply lepton SF and trigger efficiencies
   //----------------------------------------------------------------------------
-  Double_t lepton_scale_factor = 1.0;
-  Double_t trigger_efficiency  = 1.0;
-
   if (!isData)
     {
-      for (UInt_t i=0; i<3; i++) lepton_scale_factor *= AnalysisLeptons[i].sf;
+      for (UInt_t i=0; i<3; i++) mc_lepton_weight *= AnalysisLeptons[i].sf;
 
-      trigger_efficiency = GetTriggerWeight();
+      mc_trigger_weight = GetTriggerWeight();
+
+      mc_total_weight = mc_lepton_weight * mc_trigger_weight;
+
+      efficiency_weight *= mc_total_weight;
     }
-
-  efficiency_weight *= lepton_scale_factor;
-  efficiency_weight *= trigger_efficiency;
-
-  hScaleFactor[theChannel]->Fill(lepton_scale_factor);
-  hTriggerEff [theChannel]->Fill(trigger_efficiency);
 
 
   // Data-driven estimates
@@ -739,12 +746,6 @@ void AnalysisWZ::FillHistograms(UInt_t   iChannel,
 				UInt_t   iCut,
 				Double_t dd_weight)
 {
-  Bool_t pt3pass = (AnalysisLeptons[2].v.Pt() > 20.);
-
-  if (closure_test) pt3pass = !pt3pass;
-
-  if (iChannel != ATLAS && !pt3pass) return;
-
   Double_t hweight = efficiency_weight * xs_weight * dd_weight;
 
 
@@ -761,7 +762,14 @@ void AnalysisWZ::FillHistograms(UInt_t   iChannel,
   hCounter   [iChannel][iCut][LLL]->Fill(1, hweight);
 
 
-  // Histograms
+  // MC weight histograms
+  //----------------------------------------------------------------------------
+  hLeptonWeight [theChannel][iCut]->Fill(mc_lepton_weight,  pu_weight);
+  hTriggerWeight[theChannel][iCut]->Fill(mc_trigger_weight, pu_weight);
+  hTotalWeight  [theChannel][iCut]->Fill(mc_total_weight,   pu_weight);
+
+
+  // Analysis histograms
   //----------------------------------------------------------------------------  
   hNPV         [iChannel][iCut]->Fill(T_Vertex_z->size(),        hweight);
   hMET         [iChannel][iCut]->Fill(EventMET.Et(),             hweight);
@@ -1014,9 +1022,6 @@ Double_t AnalysisWZ::GetTriggerWeight()
 
     eL[i] = lep.lead;
     eT[i] = lep.trail;
-
-    if (theChannel == MME && lep.flavor != Muon)     {eL[i] = 0.0; eT[i] = 0.0;}
-    if (theChannel == EEM && lep.flavor != Electron) {eL[i] = 0.0; eT[i] = 0.0;}
   }
 
   Double_t r1 = (1. - eL[0]) * (1. - eL[1]) * (1. - eL[2]);
@@ -1027,4 +1032,39 @@ Double_t AnalysisWZ::GetTriggerWeight()
   Double_t triggerWeight = 1. - (r1 + r2 + r3 + r4);
   
   return triggerWeight;
+}
+
+
+//------------------------------------------------------------------------------
+// PassTrigger
+//------------------------------------------------------------------------------
+Bool_t AnalysisWZ::PassTrigger()
+{
+  if (!isData) return true;
+  
+  Bool_t pass = false;
+
+  if (sample.Contains("DoubleMu"))
+    {
+      pass = T_passTriggerDoubleMu;
+    }
+  else if (sample.Contains("DoubleElectron"))
+    {
+      pass = T_passTriggerDoubleEl;
+    }
+  else if (sample.Contains("MuEG"))
+    {
+      pass = T_passTriggerElMu;
+
+      if (nElectron > 1)
+	{
+	  pass &= (!T_passTriggerDoubleEl);
+	}
+      else
+	{
+	  pass &= (!T_passTriggerDoubleMu);
+	}
+    }
+
+  return pass;
 }

@@ -209,7 +209,7 @@ void     SetParameters            (UInt_t        cut,
 				   UInt_t        mode,
 				   UInt_t        closure_test);
 
-Int_t    ReadInputFiles           (UInt_t        channel);
+Int_t    ReadInputFiles           ();
 
 void     MeasureTheCrossSection   (UInt_t        channel,
 				   UInt_t        cut);
@@ -284,11 +284,11 @@ void XS(UInt_t cut          = MET30,
 
   SetParameters(cut, mode, closure_test);
 
+  if (ReadInputFiles() < 0) return;
+
   RelativeSystematics(cut);
 
   for (UInt_t channel=0; channel<nChannel; channel++) {
-
-    if (ReadInputFiles(channel) < 0) return;
 
     DrawHistogram("hSumCharges", channel, cut, "q_{1} + q_{2} + q_{3}");
 
@@ -509,6 +509,7 @@ void PrintLatexTable(UInt_t channel)
       eWZ[i] = sqrt(nWZ[i]);
 
       nZZ[i] += Yield(hist[ZgammaToLLG]);
+      nZZ[i] += Yield(hist[ZZTo2L2QMad]);
       nZZ[i] += Yield(hist[ggZZ2L2L]);
       nZZ[i] += Yield(hist[ggZZ4L]);
       nZZ[i] += Yield(hist[ZZ2Mu2Tau]);
@@ -787,6 +788,7 @@ void DrawHistogram(TString  hname,
   Double_t VVVYield = 0.0;
 
   ZZYield += Yield(hist[ZgammaToLLG]);
+  ZZYield += Yield(hist[ZZTo2L2QMad]);
   ZZYield += Yield(hist[ggZZ2L2L]);
   ZZYield += Yield(hist[ggZZ4L]);
   ZZYield += Yield(hist[ZZ2Mu2Tau]);
@@ -1057,6 +1059,8 @@ void SetParameters(UInt_t cut,
 		   UInt_t mode,
 		   UInt_t closure_test)
 {
+  sProcess[Data]             = "Data";
+  sProcess[DataPPF]          = "Data_PPF";
   sProcess[DYJets_Madgraph]  = "DYJets_Madgraph";
   sProcess[ZJets_Madgraph]   = "ZJets_Madgraph";
   sProcess[ZbbToLL]          = "ZbbToLL";
@@ -1112,8 +1116,8 @@ void SetParameters(UInt_t cut,
   cProcess[TW]               = kAzure-9;   // top
   cProcess[TbarW]            = kAzure-9;   // top
   cProcess[WZTo3LNu]         = kOrange-2;  // WZ
-  cProcess[ZZTo2L2QMad]      = kRed+1;     // ZZ
   cProcess[ZgammaToLLG]      = kRed+1;     // ZZ
+  cProcess[ZZTo2L2QMad]      = kRed+1;     // ZZ
   cProcess[ggZZ2L2L]         = kRed+1;     // ZZ
   cProcess[ggZZ4L]           = kRed+1;     // ZZ
   cProcess[ZZ2Mu2Tau]        = kRed+1;     // ZZ
@@ -1136,17 +1140,16 @@ void SetParameters(UInt_t cut,
 
   _luminosity   = 19602.0;
   _yoffset      = 0.048;
-  _verbosity    = 1;
+  _verbosity    = 2;
   _cut          = cut;
   _mode         = mode;
   _closure_test = closure_test;
   _localpath    = GuessLocalBasePath();
 
-  _directory = (_closure_test) ? "closure_test" : "";
+  _directory = (_closure_test) ? "closure_test" : "analysis";
   
-  _datapath = Form("%s/piedra/work/WZXS8TeV/results/Summer12_53X/WH/%s",
-		   _localpath.Data(),
-		   _directory.Data());
+  _datapath = Form("%s/piedra/work/WZXS8TeV/results/Summer12_53X/WH/",
+		   _localpath.Data());
 
   MakeOutputDirectory("pdf");
   MakeOutputDirectory("png");
@@ -1178,7 +1181,6 @@ void SetParameters(UInt_t cut,
       vprocess.push_back(TTbar_Madgraph);
       vprocess.push_back(TW);
       vprocess.push_back(TbarW);
-      vprocess.push_back(ZZTo2L2QMad);
       vprocess.push_back(DYJets_Madgraph);
       vprocess.push_back(ZJets_Madgraph);
       vprocess.push_back(ZbbToLL);
@@ -1189,6 +1191,7 @@ void SetParameters(UInt_t cut,
     }
       
   vprocess.push_back(ZgammaToLLG);
+  vprocess.push_back(ZZTo2L2QMad);
   vprocess.push_back(ggZZ2L2L);
   vprocess.push_back(ggZZ4L);
   vprocess.push_back(ZZ2Mu2Tau);
@@ -1214,29 +1217,21 @@ void SetParameters(UInt_t cut,
 //------------------------------------------------------------------------------
 // ReadInputFiles
 //------------------------------------------------------------------------------
-Int_t ReadInputFiles(UInt_t channel)
+Int_t ReadInputFiles()
 {
-  if      (channel == EEE || channel == EEM) sProcess[Data] = "DoubleElectron";
-  else if (channel == MMM || channel == MME) sProcess[Data] = "DoubleMu";
-
-  sProcess[DataPPF] = sProcess[Data] + "_PPF";
-
   for (UInt_t i=0; i<vprocess.size(); i++) {
 
     UInt_t j = vprocess.at(i);
 
-    input[j] = new TFile(_datapath + "/" + sProcess[j] + ".root");
+    input[j] = new TFile(_datapath + "/" + _directory + "/" + sProcess[j] + ".root");
 
-
-    // Check
-    //--------------------------------------------------------------------------
-    TH1D* dummy = (TH1D*)input[j]->Get("hCounter_" + sChannel[channel] + "_MET30_LLL");
+    TH1D* dummy = (TH1D*)input[j]->Get("hCounter_MME_MET30_TTT");
 
     if (!dummy)
       {
 	printf(" [ReadInputFiles] The %s file is broken or it does not exist.\n",
 	       sProcess[j].Data());
-
+	
 	return -1;
       }
   }
@@ -1296,7 +1291,7 @@ void MakeOutputDirectory(TString format)
 
   gSystem->Exec(Form("cp index.php %s/.", format.Data()));
 
-  _output = (_closure_test) ? "closure_test" : "analysis";
+  _output = _directory;
 
   gSystem->mkdir(format + "/" + _output, kTRUE);
 
@@ -1512,19 +1507,14 @@ void RelativeSystematics(UInt_t cut)
 
     for (UInt_t j=0; j<nChannel; j++) {
 
-      if      (i == EEE || i == EEM) sProcess[Data] = "DoubleElectron";
-      else if (i == MMM || i == MME) sProcess[Data] = "DoubleMu";
-      
-      sProcess[DataPPF] = sProcess[Data] + "_PPF";
-      
-      TString hname = "hCounter_" + sChannel[j] + "_" + sCut[cut] + "_LLL";
+      TString hname = "hCounter_" + sChannel[j] + "_" + sCut[cut] + "_TTT";
 
       for(UInt_t k=0; k<nProcess; k++) {
 	
 	if (k == Data)    continue;
 	if (k == DataPPF) continue;
 	
-	TFile* f0 = new TFile(_datapath + "/" + sProcess[k] + ".root");
+	TFile* f0 = new TFile(_datapath + "/" + _directory + "/" + sProcess[k] + ".root");
 	TFile* f1 = new TFile(_datapath + "/systematics/" + sSystematic[i] + "/" + sProcess[k] + ".root");
 
 	Double_t y0 = Yield((TH1D*)f0->Get(hname));

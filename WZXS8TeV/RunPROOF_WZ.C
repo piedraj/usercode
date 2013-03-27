@@ -63,7 +63,9 @@ void RunPROOF_WZ(TString  sample       = "WZTo3LNu",
   //----------------------------------------------------------------------------
   gROOT->LoadMacro("../DatasetManager/DatasetManager.C+");
 
-  if (sample.Contains("DoubleElectron") || sample.Contains("DoubleMu"))
+  if (sample.Contains("DoubleElectron") ||
+      sample.Contains("DoubleMu") ||
+      sample.Contains("MuEG"))
     {
       gPAFOptions->dataFiles = GetRealDataFiles("MC_Summer12_53X/WH/CalibratedE", sample.Data());
     }
@@ -93,9 +95,21 @@ void RunPROOF_WZ(TString  sample       = "WZTo3LNu",
   //----------------------------------------------------------------------------
   TString outputDir = "../WZXS8TeV/results/Summer12_53X/WH";
 
-  if (systematic == metSyst) outputDir += "/systematics/met";
-
-  if (closure_test) outputDir += "/closure_test";
+  if (systematic == noSyst)
+    {
+      if (closure_test)
+	{
+	  outputDir += "/closure_test";
+	}
+      else
+	{
+	  outputDir += "/analysis";
+	}
+    }
+  else if (systematic == metSyst)
+    {
+      outputDir += "/systematics/met";
+    }
 
   gSystem->mkdir(outputDir, kTRUE);
 
