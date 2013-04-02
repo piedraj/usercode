@@ -246,8 +246,8 @@ void     RelativeSystematics      (UInt_t        cut);
 //------------------------------------------------------------------------------
 // XS
 //------------------------------------------------------------------------------
-void XS(UInt_t cut          = MET30,
-	UInt_t mode         = PPFmode,
+void XS(UInt_t cut          = HasZCandidate,
+	UInt_t mode         = MCmode,
 	UInt_t closure_test = 0)
 {
   gROOT->SetBatch();
@@ -297,6 +297,9 @@ void XS(UInt_t cut          = MET30,
 	DrawHistogram("hDRWZLepton1",  channel, cut, "#DeltaR(W lepton, Z leading lepton)",   5, 1, "NULL", linY);
 	DrawHistogram("hDRWZLepton2",  channel, cut, "#DeltaR(W lepton, Z trailing lepton)",  5, 1, "NULL", linY);
 	DrawHistogram("hMtW",          channel, cut, "m_{T}^{W}",                             5, 0, "GeV",  linY);
+
+	DrawHistogram("hDRWZLepton1Zoom", channel, cut, "#DeltaR(W lepton, Z leading lepton)",   5, 3, "NULL", linY);
+	DrawHistogram("hDRWZLepton2Zoom", channel, cut, "#DeltaR(W lepton, Z trailing lepton)",  5, 3, "NULL", linY);
       }
   }
 
@@ -549,7 +552,7 @@ void DrawHistogram(TString  hname,
 
     hist[j]->SetName(hname + "_" + sProcess[j]);
 
-    if (moveOverflow) MoveOverflowBins(hist[j], xmin, xmax);
+    //    if (moveOverflow) MoveOverflowBins(hist[j], xmin, xmax);
     
     if (ngroup > 0) hist[j]->Rebin(ngroup);
 

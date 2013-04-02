@@ -176,6 +176,9 @@ class AnalysisWZ: public CMSAnalysisSelectorMiniTrees
   TH1D*                       hDRWZLepton2 [nChannel][nCut];
   TH1D*                       hMtW         [nChannel][nCut];
 
+  TH1D*                       hDRWZLepton1Zoom[nChannel][nCut];
+  TH1D*                       hDRWZLepton2Zoom[nChannel][nCut];
+
 
   // Input parameters
   //----------------------------------------------------------------------------

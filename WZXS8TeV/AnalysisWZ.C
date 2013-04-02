@@ -60,6 +60,9 @@ void AnalysisWZ::Initialise()
       hDRWZLepton1 [i][j] = CreateH1D("hDRWZLepton1"  + suffix, "", 200,  0,   6);    
       hDRWZLepton2 [i][j] = CreateH1D("hDRWZLepton2"  + suffix, "", 200,  0,   6);    
       hMtW         [i][j] = CreateH1D("hMtW"          + suffix, "", 200,  0, 200);    
+
+      hDRWZLepton1Zoom[i][j] = CreateH1D("hDRWZLepton1Zoom" + suffix, "", 500, 0, 0.5);    
+      hDRWZLepton2Zoom[i][j] = CreateH1D("hDRWZLepton2Zoom" + suffix, "", 500, 0, 0.5);    
     }
   }
 
@@ -274,6 +277,23 @@ void AnalysisWZ::InsideLoop()
   if (sample.Contains("DoubleElectron") && nElectron < 2) return;
 
   
+
+  // Apply DeltaR cut
+  //----------------------------------------------------------------------------
+  Double_t smallestDeltaR = 999.;
+
+  for (UInt_t i=0; i<3; i++) {
+    for (UInt_t j=i+1; j<3; j++) {
+
+      Double_t tmpDeltaR = AnalysisLeptons[i].v.DeltaR(AnalysisLeptons[j].v);
+
+      if (tmpDeltaR < smallestDeltaR) smallestDeltaR = tmpDeltaR;
+    }
+  }
+
+  if (smallestDeltaR < 0.001) return;
+
+
   // HLT
   //----------------------------------------------------------------------------
   if (!PassTrigger()) return;
@@ -794,6 +814,9 @@ void AnalysisWZ::FillHistograms(UInt_t   iChannel,
   hDRWZLepton1 [iChannel][iCut]->Fill(deltaR1,        hweight);
   hDRWZLepton2 [iChannel][iCut]->Fill(deltaR2,        hweight);
   hMtW         [iChannel][iCut]->Fill(transverseMass, hweight);
+
+  hDRWZLepton1Zoom[iChannel][iCut]->Fill(deltaR1, hweight);
+  hDRWZLepton2Zoom[iChannel][iCut]->Fill(deltaR2, hweight);
 }
 
 
