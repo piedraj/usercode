@@ -113,13 +113,14 @@ TString sCut[nCut] = {
 };
 
 
-const UInt_t nProcess = 8;
+const UInt_t nProcess = 9;
 
 enum {
   Data,
   Fakes,
   WZ,
   ZZ,
+  ZG,
   Top,
   ZJets,
   VVV,
@@ -246,8 +247,8 @@ void     RelativeSystematics      (UInt_t        cut);
 //------------------------------------------------------------------------------
 // XS
 //------------------------------------------------------------------------------
-void XS(UInt_t cut          = HasZCandidate,
-	UInt_t mode         = MCmode,
+void XS(UInt_t cut          = Exactly3Leptons,
+	UInt_t mode         = PPFmode,
 	UInt_t closure_test = 0)
 {
   gROOT->SetBatch();
@@ -277,7 +278,7 @@ void XS(UInt_t cut          = HasZCandidate,
     else
       {
 	MeasureTheCrossSection(channel, cut);
-
+	
 	PrintLatexTable(channel);
 	
 	DrawHistogram("hMET",          channel, cut, "E_{T}^{miss}",          5, 0, "GeV", linY);
@@ -297,9 +298,9 @@ void XS(UInt_t cut          = HasZCandidate,
 	DrawHistogram("hDRWZLepton1",  channel, cut, "#DeltaR(W lepton, Z leading lepton)",   5, 1, "NULL", linY);
 	DrawHistogram("hDRWZLepton2",  channel, cut, "#DeltaR(W lepton, Z trailing lepton)",  5, 1, "NULL", linY);
 	DrawHistogram("hMtW",          channel, cut, "m_{T}^{W}",                             5, 0, "GeV",  linY);
-
-	DrawHistogram("hDRWZLepton1Zoom", channel, cut, "#DeltaR(W lepton, Z leading lepton)",   5, 3, "NULL", linY);
-	DrawHistogram("hDRWZLepton2Zoom", channel, cut, "#DeltaR(W lepton, Z trailing lepton)",  5, 3, "NULL", linY);
+	
+	//	DrawHistogram("hDRWZLepton1Zoom", channel, cut, "#DeltaR(W lepton, Z leading lepton)",   5, 3, "NULL", linY);
+	//	DrawHistogram("hDRWZLepton2Zoom", channel, cut, "#DeltaR(W lepton, Z trailing lepton)",  5, 3, "NULL", linY);
       }
   }
 
@@ -424,6 +425,7 @@ void PrintLatexTable(UInt_t channel)
   Double_t nFakes[nCut];
   Double_t nWZ   [nCut];
   Double_t nZZ   [nCut];
+  Double_t nZG   [nCut];
   Double_t nTop  [nCut];
   Double_t nZJets[nCut];
   Double_t nVVV  [nCut];
@@ -436,6 +438,7 @@ void PrintLatexTable(UInt_t channel)
       nFakes[i] = 0.;
       nWZ   [i] = 0.;
       nZZ   [i] = 0.;
+      nZG   [i] = 0.;
       nTop  [i] = 0.;
       nZJets[i] = 0.;
       nVVV  [i] = 0.;
@@ -458,10 +461,11 @@ void PrintLatexTable(UInt_t channel)
       nData[i] = Yield(hist[Data]);
       nWZ  [i] = Yield(hist[WZ]);
       nZZ  [i] = Yield(hist[ZZ]);
+      nZG  [i] = Yield(hist[ZG]);
       nVVV [i] = Yield(hist[VVV]);
       nWV  [i] = Yield(hist[WV]);
 
-      nBkg[i] = nZZ[i] + nVVV[i] + nWV[i];
+      nBkg[i] = nZZ[i] + nZG[i] + nVVV[i] + nWV[i];
 
       if (_mode == MCmode)
 	{
@@ -486,6 +490,7 @@ void PrintLatexTable(UInt_t channel)
   if (_mode == PPFmode) {outputfile << Form(" %-20s", "data-driven"); for (UInt_t i=0; i<nCut; i++) outputfile << Form(" & %3.0f $\\pm$ %2.0f", nFakes[i], sqrt(nFakes[i])); outputfile << "\\\\\n";}
 
   outputfile << Form(" %-20s", "ZZ");          for (UInt_t i=0; i<nCut; i++) outputfile << Form(" & %3.0f $\\pm$ %2.0f", nZZ[i],  sqrt(nZZ[i]));  outputfile << "\\\\\n";
+  outputfile << Form(" %-20s", "ZG");          for (UInt_t i=0; i<nCut; i++) outputfile << Form(" & %3.0f $\\pm$ %2.0f", nZG[i],  sqrt(nZG[i]));  outputfile << "\\\\\n";
   outputfile << Form(" %-20s", "WV");          for (UInt_t i=0; i<nCut; i++) outputfile << Form(" & %3.0f $\\pm$ %2.0f", nWV[i],  sqrt(nWV[i]));  outputfile << "\\\\\n";
   outputfile << Form(" %-20s", "VVV");         for (UInt_t i=0; i<nCut; i++) outputfile << Form(" & %3.0f $\\pm$ %2.0f", nVVV[i], sqrt(nVVV[i])); outputfile << "\\\\\n";
   outputfile << Form(" %-20s", "backgrounds"); for (UInt_t i=0; i<nCut; i++) outputfile << Form(" & %3.0f $\\pm$ %2.0f", nBkg[i], sqrt(nBkg[i])); outputfile << "\\\\\n";
@@ -552,7 +557,7 @@ void DrawHistogram(TString  hname,
 
     hist[j]->SetName(hname + "_" + sProcess[j]);
 
-    //    if (moveOverflow) MoveOverflowBins(hist[j], xmin, xmax);
+    if (moveOverflow) MoveOverflowBins(hist[j], xmin, xmax);
     
     if (ngroup > 0) hist[j]->Rebin(ngroup);
 
@@ -680,9 +685,10 @@ void DrawHistogram(TString  hname,
 
   ndelta = 0;
   
-  DrawLegend(x0 - 0.23, y0 - ndelta, hist[ZZ],  Form(" ZZ (%.0f)",  Yield(hist[ZZ])),  "f"); ndelta += delta;
-  DrawLegend(x0 - 0.23, y0 - ndelta, hist[VVV], Form(" VVV (%.0f)", Yield(hist[VVV])), "f"); ndelta += delta;
-  DrawLegend(x0 - 0.23, y0 - ndelta, hist[WV],  Form(" WV (%.0f)",  Yield(hist[WV])),  "f"); ndelta += delta;
+  DrawLegend(x0 - 0.22, y0 - ndelta, hist[ZZ],  Form(" ZZ (%.0f)",                          Yield(hist[ZZ])),  "f"); ndelta += delta;
+  DrawLegend(x0 - 0.22, y0 - ndelta, hist[ZG],  Form(" Z #rightarrow 4#font[12]{l} (%.0f)", Yield(hist[ZG])),  "f"); ndelta += delta;
+  DrawLegend(x0 - 0.22, y0 - ndelta, hist[VVV], Form(" VVV (%.0f)",                         Yield(hist[VVV])), "f"); ndelta += delta;
+  DrawLegend(x0 - 0.22, y0 - ndelta, hist[WV],  Form(" WV (%.0f)",                          Yield(hist[WV])),  "f"); ndelta += delta;
 
 
   // CMS titles
@@ -922,6 +928,7 @@ void SetParameters(UInt_t cut,
   sProcess[Fakes] = "Data_PPF";
   sProcess[WZ]    = "WZTo3LNu";
   sProcess[ZZ]    = "ZZ";
+  sProcess[ZG]    = "ZgammaToLLG";
   sProcess[Top]   = "Top";
   sProcess[ZJets] = "ZJets";
   sProcess[VVV]   = "VVV";
@@ -931,6 +938,7 @@ void SetParameters(UInt_t cut,
   cProcess[Fakes] = kGray+1;
   cProcess[WZ]    = kOrange-2;
   cProcess[ZZ]    = kRed+1;
+  cProcess[ZG]    = kRed+2;
   cProcess[Top]   = kAzure-9;
   cProcess[ZJets] = kGreen+2;
   cProcess[VVV]   = kBlack;
@@ -978,6 +986,7 @@ void SetParameters(UInt_t cut,
     }
       
   vprocess.push_back(ZZ);
+  vprocess.push_back(ZG);
   vprocess.push_back(WZ);
 }
 

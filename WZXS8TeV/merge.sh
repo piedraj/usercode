@@ -27,7 +27,6 @@ for FOLDER in $FOLDERS; do
     fi
 
     hadd -f -k ZZ.root   \
-	ZgammaToLLG.root \
 	ggZZ2L2L.root    \
 	ggZZ4L.root      \
 	ZZTo2L2QMad.root \

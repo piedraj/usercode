@@ -815,8 +815,8 @@ void AnalysisWZ::FillHistograms(UInt_t   iChannel,
   hDRWZLepton2 [iChannel][iCut]->Fill(deltaR2,        hweight);
   hMtW         [iChannel][iCut]->Fill(transverseMass, hweight);
 
-  hDRWZLepton1Zoom[iChannel][iCut]->Fill(deltaR1, hweight);
-  hDRWZLepton2Zoom[iChannel][iCut]->Fill(deltaR2, hweight);
+  if (deltaR1 <= 0.5) hDRWZLepton1Zoom[iChannel][iCut]->Fill(deltaR1, hweight);
+  if (deltaR2 <= 0.5) hDRWZLepton2Zoom[iChannel][iCut]->Fill(deltaR2, hweight);
 }
 
 
