@@ -299,8 +299,8 @@ void XS(UInt_t cut          = Exactly3Leptons,
 	DrawHistogram("hDRWZLepton2",  channel, cut, "#DeltaR(W lepton, Z trailing lepton)",  5, 1, "NULL", linY);
 	DrawHistogram("hMtW",          channel, cut, "m_{T}^{W}",                             5, 0, "GeV",  linY);
 	
-	//	DrawHistogram("hDRWZLepton1Zoom", channel, cut, "#DeltaR(W lepton, Z leading lepton)",   5, 3, "NULL", linY);
-	//	DrawHistogram("hDRWZLepton2Zoom", channel, cut, "#DeltaR(W lepton, Z trailing lepton)",  5, 3, "NULL", linY);
+	DrawHistogram("hDRWZLepton1Zoom", channel, cut, "#DeltaR(W lepton, Z leading lepton)",   5, 3, "NULL", linY);
+	DrawHistogram("hDRWZLepton2Zoom", channel, cut, "#DeltaR(W lepton, Z trailing lepton)",  5, 3, "NULL", linY);
       }
   }
 
@@ -489,12 +489,12 @@ void PrintLatexTable(UInt_t channel)
   if (_mode == MCmode)  {outputfile << Form(" %-20s", "Z+jets");      for (UInt_t i=0; i<nCut; i++) outputfile << Form(" & %3.0f $\\pm$ %2.0f", nZJets[i], sqrt(nZJets[i])); outputfile << "\\\\\n";}
   if (_mode == PPFmode) {outputfile << Form(" %-20s", "data-driven"); for (UInt_t i=0; i<nCut; i++) outputfile << Form(" & %3.0f $\\pm$ %2.0f", nFakes[i], sqrt(nFakes[i])); outputfile << "\\\\\n";}
 
-  outputfile << Form(" %-20s", "ZZ");          for (UInt_t i=0; i<nCut; i++) outputfile << Form(" & %3.0f $\\pm$ %2.0f", nZZ[i],  sqrt(nZZ[i]));  outputfile << "\\\\\n";
-  outputfile << Form(" %-20s", "ZG");          for (UInt_t i=0; i<nCut; i++) outputfile << Form(" & %3.0f $\\pm$ %2.0f", nZG[i],  sqrt(nZG[i]));  outputfile << "\\\\\n";
-  outputfile << Form(" %-20s", "WV");          for (UInt_t i=0; i<nCut; i++) outputfile << Form(" & %3.0f $\\pm$ %2.0f", nWV[i],  sqrt(nWV[i]));  outputfile << "\\\\\n";
-  outputfile << Form(" %-20s", "VVV");         for (UInt_t i=0; i<nCut; i++) outputfile << Form(" & %3.0f $\\pm$ %2.0f", nVVV[i], sqrt(nVVV[i])); outputfile << "\\\\\n";
-  outputfile << Form(" %-20s", "backgrounds"); for (UInt_t i=0; i<nCut; i++) outputfile << Form(" & %3.0f $\\pm$ %2.0f", nBkg[i], sqrt(nBkg[i])); outputfile << "\\\\\n";
-  outputfile << Form(" %-20s", "WZ");          for (UInt_t i=0; i<nCut; i++) outputfile << Form(" & %3.0f $\\pm$ %2.0f", nWZ[i],  sqrt(nWZ[i]));  outputfile << "\\\\\n";
+  outputfile << Form(" %-20s", "ZZ");              for (UInt_t i=0; i<nCut; i++) outputfile << Form(" & %3.0f $\\pm$ %2.0f", nZZ[i],  sqrt(nZZ[i]));  outputfile << "\\\\\n";
+  outputfile << Form(" %-20s", "Z $\\to 4\\ell$"); for (UInt_t i=0; i<nCut; i++) outputfile << Form(" & %3.0f $\\pm$ %2.0f", nZG[i],  sqrt(nZG[i]));  outputfile << "\\\\\n";
+  outputfile << Form(" %-20s", "WV");              for (UInt_t i=0; i<nCut; i++) outputfile << Form(" & %3.0f $\\pm$ %2.0f", nWV[i],  sqrt(nWV[i]));  outputfile << "\\\\\n";
+  outputfile << Form(" %-20s", "VVV");             for (UInt_t i=0; i<nCut; i++) outputfile << Form(" & %3.0f $\\pm$ %2.0f", nVVV[i], sqrt(nVVV[i])); outputfile << "\\\\\n";
+  outputfile << Form(" %-20s", "backgrounds");     for (UInt_t i=0; i<nCut; i++) outputfile << Form(" & %3.0f $\\pm$ %2.0f", nBkg[i], sqrt(nBkg[i])); outputfile << "\\\\\n";
+  outputfile << Form(" %-20s", "WZ");              for (UInt_t i=0; i<nCut; i++) outputfile << Form(" & %3.0f $\\pm$ %2.0f", nWZ[i],  sqrt(nWZ[i]));  outputfile << "\\\\\n";
 
   outputfile << " \\hline\n";
 

@@ -154,12 +154,6 @@ void AnalysisWZ::InsideLoop()
 
     if (eta >= 2.4) continue;
 
-    Bool_t isnotglobal = ( T_Muon_IsAllStandAloneMuons->at(i)
-			   && !T_Muon_IsGlobalMuon->at(i)
-			   && !T_Muon_IsAllTrackerMuons->at(i) );
-
-    if (isnotglobal) continue;
-
     if (fabs(T_Muon_IP2DBiasedPV->at(i)) > 0.2) continue;
 
     if (fabs(T_Muon_dzPVBiasedPV->at(i)) > 0.1) continue;
