@@ -26,6 +26,7 @@ WJetsFakes\_Total  \
 DataRun2012\_Total \
 DYtautau           \
 HWW125             \
+Zgamma             \
 "
 
 
@@ -80,6 +81,7 @@ DYtautau           \
 HWW125             \
 WW                 \
 Wgamma             \
+Zgamma             \
 "
 
 for SAMPLE in $ALLSAMPLES; do 

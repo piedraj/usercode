@@ -278,8 +278,7 @@ void LatinosTreeScript(Float_t luminosity,
     tree->Add(filesPath + "MoriondeffW/MC_TightTight_DABCABC/latino_037_DY50toLLMad.root");
   }
   else if (theSample == "DYtautau") {
-    tree->Add(filesPath +"MoriondeffW/TauTau/latino_DYtt_19.5fb.root");
-    tree->Add(filesPath +"MoriondeffW/MC_TightTight_DABCABC/latino_086_ZgammaToLLuG.root");
+    tree->Add(filesPath + "MoriondeffW/TauTau/latino_DYtt_19.5fb.root");
   }
   else if (theSample == "WgammaNoStar") {
     tree->Add(filesPath + "MoriondeffW/MC_TightTight_DABCABC/latino_085_WgammaToLNuG.root");
@@ -293,6 +292,9 @@ void LatinosTreeScript(Float_t luminosity,
   else if (theSample == "HWW125") { 
     tree->Add(filesPath + "MoriondeffW/MC_TightTight_DABCABC/latino_1125_ggToH125toWWTo2LAndTau2Nu.root");
     tree->Add(filesPath + "MoriondeffW/MC_TightTight_DABCABC/latino_2125_vbfToH125toWWTo2LAndTau2Nu.root");
+  }
+  else if (theSample == "Zgamma") { 
+    tree->Add(filesPath +"MoriondeffW/MC_TightTight_DABCABC/latino_086_ZgammaToLLuG.root");
   }
   else {
     return;
