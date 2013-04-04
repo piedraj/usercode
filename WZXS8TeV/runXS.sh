@@ -5,7 +5,8 @@ rm -rf png
 rm -rf tex
 rm -rf *.log
 
-### ./merge.sh >& merge.log
+./merge.sh >& merge.log
+grep Error merge.log
 
 for ((level=0; level<5; level++))
   do
