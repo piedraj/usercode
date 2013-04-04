@@ -7,7 +7,7 @@ rm -rf *.log
 
 ### ./merge.sh >& merge.log
 
-for ((level=0; level<6; level++))
+for ((level=0; level<5; level++))
   do
   for ((mode=0; mode<2; mode++))
     do

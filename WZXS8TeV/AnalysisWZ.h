@@ -35,12 +35,11 @@ enum {FFF, TFF, TTF, TTT, LLL};
 TString sComposition[] = {"FFF", "TFF", "TTF", "TTT", "LLL"};
 
 
-const UInt_t nCut = 7;
+const UInt_t nCut = 6;
 
 enum {
   Exactly3Leptons,
   HasZCandidate,
-  HasWCandidate,
   MET30,
   MET40,
   MET40AntiBtag,
@@ -50,7 +49,6 @@ enum {
 TString sCut[] = {
   "Exactly3Leptons",
   "HasZCandidate",
-  "HasWCandidate",
   "MET30",
   "MET40",
   "MET40AntiBtag",

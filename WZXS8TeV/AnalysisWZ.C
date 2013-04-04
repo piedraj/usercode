@@ -351,12 +351,8 @@ void AnalysisWZ::InsideLoop()
   //----------------------------------------------------------------------------
   for (UInt_t i=0; i<3; i++) {
 
-    if (closure_test && i != 0) continue;
-
     for (UInt_t j=i+1; j<3; j++) {
       
-      if (closure_test && j != 1) continue;
-
       if (AnalysisLeptons[i].flavor != AnalysisLeptons[j].flavor) continue;
 
       if (AnalysisLeptons[i].charge * AnalysisLeptons[j].charge > 0) continue;
@@ -388,8 +384,6 @@ void AnalysisWZ::InsideLoop()
   //----------------------------------------------------------------------------
   if (fabs(invMass2Lep - Z_MASS) > 20.) return;
 
-  if (closure_test && fabs(invMass2Lep - Z_MASS) > 15.) return;
-
   const Double_t met  = EventMET.Et();
   const Double_t lWEt = WLepton.Et();
 
@@ -398,17 +392,6 @@ void AnalysisWZ::InsideLoop()
   transverseMass = sqrt(transverseMass);
 
   FillHistograms(theChannel, HasZCandidate, dataDriven_weight[Jet30]);
-
-
-  // HasWCandidate
-  //----------------------------------------------------------------------------
-  if (!closure_test)
-    {
-      if (WLepton.DeltaR(ZLepton1) < 0.1) return;
-      if (WLepton.DeltaR(ZLepton2) < 0.1) return;
-    }
-
-  FillHistograms(theChannel, HasWCandidate, dataDriven_weight[Jet30]);
 
 
   // ATLAS

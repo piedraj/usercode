@@ -92,12 +92,11 @@ TString lChannel[nChannel+1] = {
 };
 
 
-const UInt_t nCut = 6;
+const UInt_t nCut = 5;
 
 enum {
   Exactly3Leptons,
   HasZCandidate,
-  HasWCandidate,
   MET30,
   MET40,
   MET40AntiBtag
@@ -106,7 +105,6 @@ enum {
 TString sCut[nCut] = {
   "Exactly3Leptons",
   "HasZCandidate",
-  "HasWCandidate",
   "MET30",
   "MET40",
   "MET40AntiBtag"
@@ -247,7 +245,7 @@ void     RelativeSystematics      (UInt_t        cut);
 //------------------------------------------------------------------------------
 // XS
 //------------------------------------------------------------------------------
-void XS(UInt_t cut          = Exactly3Leptons,
+void XS(UInt_t cut          = MET30,
 	UInt_t mode         = PPFmode,
 	UInt_t closure_test = 0)
 {
@@ -261,11 +259,11 @@ void XS(UInt_t cut          = Exactly3Leptons,
 
   for (UInt_t channel=0; channel<nChannel; channel++) {
 
-    DrawHistogram("hSumCharges", channel, cut, "q_{1} + q_{2} + q_{3}");
+    DrawHistogram("hSumCharges",  channel, cut, "q_{1} + q_{2} + q_{3}");
 
     if (closure_test)
       {
-	DrawHistogram("hInvMass2Lep",  channel, cut, "m_{#font[12]{ll}}",                    -1, 0, "GeV",  linY, 76, 106);
+	DrawHistogram("hInvMass2Lep",  channel, cut, "m_{#font[12]{ll}}",                    -1, 0, "GeV",  linY, 71, 111);
 	DrawHistogram("hInvMass3Lep",  channel, cut, "m_{#font[12]{3l}}",                     2, 0, "GeV",  linY, 60, 200);
 	DrawHistogram("hPtLeadingJet", channel, cut, "p_{T}^{leading jet}",                   2, 0, "GeV",  linY,  0, 125);
 	DrawHistogram("hPtZLepton1",   channel, cut, "p_{T}^{Z leading lepton}",              2, 0, "GeV",  linY,  0, 125);
