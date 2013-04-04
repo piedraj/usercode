@@ -192,7 +192,7 @@ void drawDistributions(Int_t    njet       = 0,
 
   // N-1 distributions
   //----------------------------------------------------------------------------
-  if (1) {
+  if (0) {
     DrawNM1("hDeltaPhiLeptons", "#Delta#phi_{#font[12]{ll}}", -1, 1, "rad");
     DrawNM1("hMinv",            "m_{#font[12]{ll}}",           4, 0, "GeV");
     DrawNM1("hPtDiLepton",      "p_{T}^{#font[12]{ll}}",       4, 0, "GeV", 0, 120);
