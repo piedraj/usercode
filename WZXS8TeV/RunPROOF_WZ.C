@@ -13,12 +13,11 @@ enum {RAW, PPF};
 enum {noSyst, metSyst};
 
 
-void RunPROOF_WZ(TString  sample       = "WZTo3LNu",
-		 Int_t    mode         = RAW,
-		 Int_t    systematic   = noSyst,
-		 Int_t    closure_test = 0,
-		 Long64_t nEvents      = -1,
-		 Bool_t   update       = true)
+void RunPROOF_WZ(TString  sample     = "WZTo3LNu",
+		 Int_t    mode       = RAW,
+		 Int_t    systematic = noSyst,
+		 Long64_t nEvents    = -1,
+		 Bool_t   update     = true)
 {
   GuessDataPath();
 
@@ -97,14 +96,7 @@ void RunPROOF_WZ(TString  sample       = "WZTo3LNu",
 
   if (systematic == noSyst)
     {
-      if (closure_test)
-	{
-	  outputDir += "/closure_test";
-	}
-      else
-	{
-	  outputDir += "/analysis";
-	}
+      outputDir += "/analysis";
     }
   else if (systematic == metSyst)
     {
@@ -131,7 +123,6 @@ void RunPROOF_WZ(TString  sample       = "WZTo3LNu",
   gPAFOptions->inputParameters->SetNamedDouble("xs_weight",     xs_weight);
   gPAFOptions->inputParameters->SetNamedInt   ("mode",          mode);
   gPAFOptions->inputParameters->SetNamedInt   ("systematic",    systematic);
-  gPAFOptions->inputParameters->SetNamedInt   ("closure_test",  closure_test);
   gPAFOptions->inputParameters->SetNamedInt   ("runAtOviedo",   runAtOviedo);
 
 

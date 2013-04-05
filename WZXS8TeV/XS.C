@@ -92,14 +92,15 @@ TString lChannel[nChannel+1] = {
 };
 
 
-const UInt_t nCut = 5;
+const UInt_t nCut = 6;
 
 enum {
   Exactly3Leptons,
   HasZCandidate,
   MET30,
   MET40,
-  MET40AntiBtag
+  MET40AntiBtag,
+  ClosureTest
 };
 
 TString sCut[nCut] = {
@@ -107,7 +108,8 @@ TString sCut[nCut] = {
   "HasZCandidate",
   "MET30",
   "MET40",
-  "MET40AntiBtag"
+  "MET40AntiBtag",
+  "ClosureTest"
 };
 
 
@@ -150,7 +152,6 @@ enum {MCmode, PPFmode, PPPmode};
 
 // Settings
 //------------------------------------------------------------------------------
-Bool_t          _closure_test;
 Double_t        _luminosity;
 Double_t        _yoffset;
 Int_t           _verbosity;
@@ -175,8 +176,7 @@ Double_t        xsErrorLumi[nChannel+1];
 // Member functions
 //------------------------------------------------------------------------------
 void     SetParameters            (UInt_t        cut,
-				   UInt_t        mode,
-				   UInt_t        closure_test);
+				   UInt_t        mode);
 
 Int_t    ReadInputFiles           ();
 
@@ -245,13 +245,12 @@ void     RelativeSystematics      (UInt_t        cut);
 //------------------------------------------------------------------------------
 // XS
 //------------------------------------------------------------------------------
-void XS(UInt_t cut          = MET30,
-	UInt_t mode         = PPFmode,
-	UInt_t closure_test = 0)
+void XS(UInt_t cut  = MET30,
+	UInt_t mode = PPFmode)
 {
   gROOT->SetBatch();
 
-  SetParameters(cut, mode, closure_test);
+  SetParameters(cut, mode);
 
   if (ReadInputFiles() < 0) return;
 
@@ -259,9 +258,9 @@ void XS(UInt_t cut          = MET30,
 
   for (UInt_t channel=0; channel<nChannel; channel++) {
 
-    DrawHistogram("hSumCharges",  channel, cut, "q_{1} + q_{2} + q_{3}");
+    DrawHistogram("hSumCharges", channel, cut, "q_{1} + q_{2} + q_{3}");
 
-    if (closure_test)
+    if (cut == ClosureTest)
       {
 	DrawHistogram("hInvMass2Lep",  channel, cut, "m_{#font[12]{ll}}",                    -1, 0, "GeV",  linY, 71, 111);
 	DrawHistogram("hInvMass3Lep",  channel, cut, "m_{#font[12]{3l}}",                     2, 0, "GeV",  linY, 60, 200);
@@ -279,16 +278,13 @@ void XS(UInt_t cut          = MET30,
 	
 	PrintLatexTable(channel);
 	
-	DrawHistogram("hMET",          channel, cut, "E_{T}^{miss}",          5, 0, "GeV", linY);
-	DrawHistogram("hInvMass3Lep",  channel, cut, "m_{#font[12]{3l}}",     5, 0, "GeV", linY, 60, 350);
-	DrawHistogram("hPtLepton1",    channel, cut, "p_{T}^{first lepton}",  5, 0, "GeV", linY);
-	DrawHistogram("hPtLepton2",    channel, cut, "p_{T}^{second lepton}", 5, 0, "GeV", linY);
-	DrawHistogram("hPtLepton3",    channel, cut, "p_{T}^{third lepton}",  5, 0, "GeV", linY);
-	DrawHistogram("hPtLeadingJet", channel, cut, "p_{T}^{leading jet}",   5, 0, "GeV", linY);
-	
-	if (cut < HasZCandidate) continue;
-	
+	DrawHistogram("hMET",          channel, cut, "E_{T}^{miss}",                          5, 0, "GeV",  linY);
 	DrawHistogram("hInvMass2Lep",  channel, cut, "m_{#font[12]{ll}}",                    -1, 0, "GeV",  linY, 71, 111);
+	DrawHistogram("hInvMass3Lep",  channel, cut, "m_{#font[12]{3l}}",                     5, 0, "GeV",  linY, 60, 350);
+	DrawHistogram("hPtLepton1",    channel, cut, "p_{T}^{first lepton}",                  5, 0, "GeV",  linY);
+	DrawHistogram("hPtLepton2",    channel, cut, "p_{T}^{second lepton}",                 5, 0, "GeV",  linY);
+	DrawHistogram("hPtLepton3",    channel, cut, "p_{T}^{third lepton}",                  5, 0, "GeV",  linY);
+	DrawHistogram("hPtLeadingJet", channel, cut, "p_{T}^{leading jet}",                   5, 0, "GeV",  linY);
 	DrawHistogram("hDPhiZLeptons", channel, cut, "#Delta#phi_{#font[12]{ll}}",           10, 1, "^{o}", linY);
 	DrawHistogram("hPtZLepton1",   channel, cut, "p_{T}^{Z leading lepton}",              5, 0, "GeV",  linY);
 	DrawHistogram("hPtZLepton2",   channel, cut, "p_{T}^{Z trailing lepton}",             5, 0, "GeV",  linY);
@@ -296,13 +292,8 @@ void XS(UInt_t cut          = MET30,
 	DrawHistogram("hDRWZLepton1",  channel, cut, "#DeltaR(W lepton, Z leading lepton)",   5, 1, "NULL", linY);
 	DrawHistogram("hDRWZLepton2",  channel, cut, "#DeltaR(W lepton, Z trailing lepton)",  5, 1, "NULL", linY);
 	DrawHistogram("hMtW",          channel, cut, "m_{T}^{W}",                             5, 0, "GeV",  linY);
-	
-	DrawHistogram("hDRWZLepton1Zoom", channel, cut, "#DeltaR(W lepton, Z leading lepton)",   5, 3, "NULL", linY);
-	DrawHistogram("hDRWZLepton2Zoom", channel, cut, "#DeltaR(W lepton, Z trailing lepton)",  5, 3, "NULL", linY);
       }
   }
-
-  if (closure_test) return;
 
   Inclusive(cut);
   
@@ -315,9 +306,7 @@ void XS(UInt_t cut          = MET30,
 //------------------------------------------------------------------------------
 void MeasureTheCrossSection(UInt_t channel, UInt_t cut)
 {
-  if (cut < MET30) return;
-
-  if (_closure_test) return;
+  if (cut == ClosureTest) return;
 
   Double_t ndata   = 0;
   Double_t nsignal = 0;
@@ -919,8 +908,7 @@ TLegend* DrawLegend(Float_t x1,
 // SetParameters
 //------------------------------------------------------------------------------
 void SetParameters(UInt_t cut,
-		   UInt_t mode,
-		   UInt_t closure_test)
+		   UInt_t mode)
 {
   sProcess[Data]  = "Data";
   sProcess[Fakes] = "Data_PPF";
@@ -942,15 +930,13 @@ void SetParameters(UInt_t cut,
   cProcess[VVV]   = kBlack;
   cProcess[WV]    = kAzure;
 
-  _luminosity   = 19602.0;
-  _yoffset      = 0.048;
-  _verbosity    = 2;
-  _cut          = cut;
-  _mode         = mode;
-  _closure_test = closure_test;
-  _localpath    = GuessLocalBasePath();
-
-  _directory = (_closure_test) ? "closure_test" : "analysis";
+  _luminosity = 19602.0;
+  _yoffset    = 0.048;
+  _verbosity  = 2;
+  _cut        = cut;
+  _mode       = mode;
+  _localpath  = GuessLocalBasePath();
+  _directory  = "analysis";
   
   _datapath = Form("%s/piedra/work/WZXS8TeV/results/Summer12_53X/WH/",
 		   _localpath.Data());
@@ -1225,9 +1211,7 @@ void DrawCrossSections(UInt_t cut)
 //------------------------------------------------------------------------------
 void Inclusive(UInt_t cut)
 {
-  if (cut < MET30) return;
-
-  if (_closure_test) return;
+  if (cut == ClosureTest) return;
 
   Double_t x     = 0;
   Double_t stat  = 0;
@@ -1266,7 +1250,7 @@ void Inclusive(UInt_t cut)
 //------------------------------------------------------------------------------
 void RelativeSystematics(UInt_t cut)
 {
-  if (_closure_test) return;
+  if (cut == ClosureTest) return;
 
   for (UInt_t k=0; k<nProcess; k++) processSyst[k] = 0.0;
 

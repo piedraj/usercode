@@ -43,7 +43,7 @@ enum {
   MET30,
   MET40,
   MET40AntiBtag,
-  ATLAS
+  ClosureTest
 };
 
 TString sCut[] = {
@@ -52,7 +52,7 @@ TString sCut[] = {
   "MET30",
   "MET40",
   "MET40AntiBtag",
-  "ATLAS"
+  "ClosureTest"
 };
 
 
@@ -174,9 +174,6 @@ class AnalysisWZ: public CMSAnalysisSelectorMiniTrees
   TH1D*                       hDRWZLepton2 [nChannel][nCut];
   TH1D*                       hMtW         [nChannel][nCut];
 
-  TH1D*                       hDRWZLepton1Zoom[nChannel][nCut];
-  TH1D*                       hDRWZLepton2Zoom[nChannel][nCut];
-
 
   // Input parameters
   //----------------------------------------------------------------------------
@@ -187,7 +184,6 @@ class AnalysisWZ: public CMSAnalysisSelectorMiniTrees
   Double_t                    xs_weight;
   Int_t                       mode;
   Int_t                       systematic;
-  Int_t                       closure_test;
   Int_t                       runAtOviedo;
 
 

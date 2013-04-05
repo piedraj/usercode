@@ -44,15 +44,12 @@ void AnalysisWZ::Initialise()
       hNPV         [i][j] = CreateH1D("hNPV"          + suffix, "",  50,  0,  50);
       hMET         [i][j] = CreateH1D("hMET"          + suffix, "", 200,  0, 200);
       hSumCharges  [i][j] = CreateH1D("hSumCharges"   + suffix, "",   9, -4,   5);
+      hInvMass2Lep [i][j] = CreateH1D("hInvMass2Lep"  + suffix, "", 200,  0, 200);
       hInvMass3Lep [i][j] = CreateH1D("hInvMass3Lep"  + suffix, "", 400,  0, 400);
       hPtLepton1   [i][j] = CreateH1D("hPtLepton1"    + suffix, "", 200,  0, 200);
       hPtLepton2   [i][j] = CreateH1D("hPtLepton2"    + suffix, "", 200,  0, 200);
       hPtLepton3   [i][j] = CreateH1D("hPtLepton3"    + suffix, "", 200,  0, 200);    
       hPtLeadingJet[i][j] = CreateH1D("hPtLeadingJet" + suffix, "", 200,  0, 200);    
-      
-      if (j < HasZCandidate) continue;
-      
-      hInvMass2Lep [i][j] = CreateH1D("hInvMass2Lep"  + suffix, "", 200,  0, 200);
       hDPhiZLeptons[i][j] = CreateH1D("hDPhiZLeptons" + suffix, "", 320,  0, 3.2);    
       hPtZLepton1  [i][j] = CreateH1D("hPtZLepton1"   + suffix, "", 200,  0, 200);
       hPtZLepton2  [i][j] = CreateH1D("hPtZLepton2"   + suffix, "", 200,  0, 200);
@@ -60,9 +57,6 @@ void AnalysisWZ::Initialise()
       hDRWZLepton1 [i][j] = CreateH1D("hDRWZLepton1"  + suffix, "", 200,  0,   6);    
       hDRWZLepton2 [i][j] = CreateH1D("hDRWZLepton2"  + suffix, "", 200,  0,   6);    
       hMtW         [i][j] = CreateH1D("hMtW"          + suffix, "", 200,  0, 200);    
-
-      hDRWZLepton1Zoom[i][j] = CreateH1D("hDRWZLepton1Zoom" + suffix, "", 500, 0, 0.5);    
-      hDRWZLepton2Zoom[i][j] = CreateH1D("hDRWZLepton2Zoom" + suffix, "", 500, 0, 0.5);    
     }
   }
 
@@ -241,12 +235,6 @@ void AnalysisWZ::InsideLoop()
 
   std::reverse(AnalysisLeptons.begin(), AnalysisLeptons.end());
 
-  Bool_t pt3pass = (AnalysisLeptons[2].v.Pt() > 20.);
-  
-  if (closure_test) pt3pass = !pt3pass;
-  
-  if (!pt3pass) return;
-
 
   // Classify the channels
   //----------------------------------------------------------------------------
@@ -286,6 +274,37 @@ void AnalysisWZ::InsideLoop()
   }
 
   if (smallestDeltaR < 0.001) return;
+
+
+  // Make Z and W candidates
+  //----------------------------------------------------------------------------
+  for (UInt_t i=0; i<3; i++) {
+
+    for (UInt_t j=i+1; j<3; j++) {
+      
+      if (AnalysisLeptons[i].flavor != AnalysisLeptons[j].flavor) continue;
+
+      if (AnalysisLeptons[i].charge * AnalysisLeptons[j].charge > 0) continue;
+
+      Double_t inv_mass = (AnalysisLeptons[i].v + AnalysisLeptons[j].v).M();
+
+      if (fabs(inv_mass - Z_MASS) < fabs(invMass2Lep - Z_MASS)) {
+
+	invMass2Lep = inv_mass;
+
+	ZLepton1 = AnalysisLeptons[i].v;
+	ZLepton2 = AnalysisLeptons[j].v;
+
+	for (UInt_t k=0; k<3; k++) {
+	
+	  if (k == i) continue;
+	  if (k == j) continue;
+
+	  WLepton = AnalysisLeptons[k].v;
+	}
+      }
+    }
+  }
 
 
   // HLT
@@ -342,42 +361,9 @@ void AnalysisWZ::InsideLoop()
   }
 
 
-  // Fill histograms with exactly 3 leptons
+  // Exactly3Leptons
   //----------------------------------------------------------------------------
   FillHistograms(theChannel, Exactly3Leptons, dataDriven_weight[Jet30]);
-
-
-  // Make Z and W candidates
-  //----------------------------------------------------------------------------
-  for (UInt_t i=0; i<3; i++) {
-
-    for (UInt_t j=i+1; j<3; j++) {
-      
-      if (AnalysisLeptons[i].flavor != AnalysisLeptons[j].flavor) continue;
-
-      if (AnalysisLeptons[i].charge * AnalysisLeptons[j].charge > 0) continue;
-
-      Double_t inv_mass = (AnalysisLeptons[i].v + AnalysisLeptons[j].v).M();
-
-      if (fabs(inv_mass - Z_MASS) < fabs(invMass2Lep - Z_MASS)) {
-
-	invMass2Lep = inv_mass;
-
-	ZLepton1 = AnalysisLeptons[i].v;
-	ZLepton2 = AnalysisLeptons[j].v;
-
-	for (UInt_t k=0; k<3; k++) {
-	
-	  if (k == i) continue;
-	  if (k == j) continue;
-
-	  WLepton = AnalysisLeptons[k].v;
-	}
-      }
-    }
-  }
-
-  if (invMass2Lep < 12.) return;
 
 
   // HasZCandidate
@@ -394,33 +380,23 @@ void AnalysisWZ::InsideLoop()
   FillHistograms(theChannel, HasZCandidate, dataDriven_weight[Jet30]);
 
 
-  // ATLAS
-  //----------------------------------------------------------------------------
-  if (AnalysisLeptons[0].v.Pt() > 25  &&
-      AnalysisLeptons[2].v.Pt() > 15  &&
-      fabs(invMass2Lep - Z_MASS) < 10 &&
-      EventMET.Et() > 25              &&
-      transverseMass > 20)
-    {
-      FillHistograms(theChannel, ATLAS, dataDriven_weight[Jet50]);
-    }
-
-
   // MET30
   //----------------------------------------------------------------------------
-  Bool_t metPass = (EventMET.Et() > 30.);
+  if (EventMET.Et() > 30.)
+    {
+      FillHistograms(theChannel, MET30, dataDriven_weight[Jet50]);
+    }
+  else
+    {
+      FillHistograms(theChannel, ClosureTest, dataDriven_weight[Jet30]);
 
-  if (closure_test) metPass = !metPass;
-
-  if (!metPass) return;
-
-  if (closure_test) FillHistograms(theChannel, MET30, dataDriven_weight[Jet30]);
-  else              FillHistograms(theChannel, MET30, dataDriven_weight[Jet50]);
+      return;
+    }
 
 
   // MET40
   //----------------------------------------------------------------------------
-  if (EventMET.Et() < 40.) return;
+  if (EventMET.Et() <= 40.) return;
 
   FillHistograms(theChannel, MET40, dataDriven_weight[Jet50]);
 
@@ -522,13 +498,12 @@ void AnalysisWZ::GetParameters()
   directory = GetInputParameters()->TheNamedString("directory");
   sample    = GetInputParameters()->TheNamedString("sample");
 
-  GetInputParameters()->TheNamedDouble("luminosity",     luminosity);
-  GetInputParameters()->TheNamedDouble("pu_luminosity",  pu_luminosity);
-  GetInputParameters()->TheNamedDouble("xs_weight",      xs_weight);
-  GetInputParameters()->TheNamedInt   ("mode",           mode);
-  GetInputParameters()->TheNamedInt   ("systematic",     systematic);
-  GetInputParameters()->TheNamedInt   ("closure_test",   closure_test);
-  GetInputParameters()->TheNamedInt   ("runAtOviedo",    runAtOviedo);
+  GetInputParameters()->TheNamedDouble("luminosity",    luminosity);
+  GetInputParameters()->TheNamedDouble("pu_luminosity", pu_luminosity);
+  GetInputParameters()->TheNamedDouble("xs_weight",     xs_weight);
+  GetInputParameters()->TheNamedInt   ("mode",          mode);
+  GetInputParameters()->TheNamedInt   ("systematic",    systematic);
+  GetInputParameters()->TheNamedInt   ("runAtOviedo",   runAtOviedo);
 }
 
 
@@ -743,6 +718,13 @@ void AnalysisWZ::FillHistograms(UInt_t   iChannel,
 				UInt_t   iCut,
 				Double_t dd_weight)
 {
+  Bool_t pt3cut = (AnalysisLeptons[2].v.Pt() > 20);
+
+  if (iCut == ClosureTest) pt3cut = !pt3cut;
+
+  if (!pt3cut) return;
+
+
   Double_t hweight = efficiency_weight * xs_weight * dd_weight;
 
 
@@ -768,32 +750,26 @@ void AnalysisWZ::FillHistograms(UInt_t   iChannel,
 
   // Analysis histograms
   //----------------------------------------------------------------------------  
+  Double_t deltaPhi = ZLepton1.DeltaPhi(ZLepton2);
+  Double_t deltaR1  = WLepton.DeltaR(ZLepton1);
+  Double_t deltaR2  = WLepton.DeltaR(ZLepton2);
+
   hNPV         [iChannel][iCut]->Fill(T_Vertex_z->size(),        hweight);
   hMET         [iChannel][iCut]->Fill(EventMET.Et(),             hweight);
   hSumCharges  [iChannel][iCut]->Fill(sumCharges,                hweight);
+  hInvMass2Lep [iChannel][iCut]->Fill(invMass2Lep,               hweight);
   hInvMass3Lep [iChannel][iCut]->Fill(invMass3Lep,               hweight);
   hPtLepton1   [iChannel][iCut]->Fill(AnalysisLeptons[0].v.Pt(), hweight);
   hPtLepton2   [iChannel][iCut]->Fill(AnalysisLeptons[1].v.Pt(), hweight);
   hPtLepton3   [iChannel][iCut]->Fill(AnalysisLeptons[2].v.Pt(), hweight);
   hPtLeadingJet[iChannel][iCut]->Fill(ptLeadingJet,              hweight);
-
-  if (iCut < HasZCandidate) return;
-
-  Double_t deltaPhi = ZLepton1.DeltaPhi(ZLepton2);
-  Double_t deltaR1  = WLepton.DeltaR(ZLepton1);
-  Double_t deltaR2  = WLepton.DeltaR(ZLepton2);
-
-  hInvMass2Lep [iChannel][iCut]->Fill(invMass2Lep,    hweight);
-  hDPhiZLeptons[iChannel][iCut]->Fill(fabs(deltaPhi), hweight);
-  hPtZLepton1  [iChannel][iCut]->Fill(ZLepton1.Pt(),  hweight);
-  hPtZLepton2  [iChannel][iCut]->Fill(ZLepton2.Pt(),  hweight);
-  hPtWLepton   [iChannel][iCut]->Fill(WLepton.Pt(),   hweight);
-  hDRWZLepton1 [iChannel][iCut]->Fill(deltaR1,        hweight);
-  hDRWZLepton2 [iChannel][iCut]->Fill(deltaR2,        hweight);
-  hMtW         [iChannel][iCut]->Fill(transverseMass, hweight);
-
-  if (deltaR1 <= 0.5) hDRWZLepton1Zoom[iChannel][iCut]->Fill(deltaR1, hweight);
-  if (deltaR2 <= 0.5) hDRWZLepton2Zoom[iChannel][iCut]->Fill(deltaR2, hweight);
+  hDPhiZLeptons[iChannel][iCut]->Fill(fabs(deltaPhi),            hweight);
+  hPtZLepton1  [iChannel][iCut]->Fill(ZLepton1.Pt(),             hweight);
+  hPtZLepton2  [iChannel][iCut]->Fill(ZLepton2.Pt(),             hweight);
+  hPtWLepton   [iChannel][iCut]->Fill(WLepton.Pt(),              hweight);
+  hDRWZLepton1 [iChannel][iCut]->Fill(deltaR1,                   hweight);
+  hDRWZLepton2 [iChannel][iCut]->Fill(deltaR2,                   hweight);
+  hMtW         [iChannel][iCut]->Fill(transverseMass,            hweight);
 }
 
 

@@ -1,17 +1,16 @@
 #!/bin/bash
 
-if [ $# -lt 2 ]; then
+if [ $# -lt 1 ]; then
     echo "  "
-    echo "  ./run.sh SYST CLOSURE"
+    echo "  ./run.sh SYSTEMATIC"
     echo "  "
-    echo "  nominal analysis with SYST = 0"
-    echo "  met systematic   with SYST = 1"
+    echo "  nominal analysis with SYSTEMATIC = 0"
+    echo "  met systematic   with SYSTEMATIC = 1"
     echo "  "
     exit -1
 fi
 
-SYST=$1
-CLOSURE=$2
+SYSTEMATIC=$1
 
 
 DATA_SAMPLES=" \
@@ -61,18 +60,19 @@ TTGJets          \
 "
 
 
-if [ $SYST == 0 ]; then
+if [ ${SYSTEMATIC} == 0 ]; then
 
     for SAMPLE in ${DATA_SAMPLES}; do
 	
-	root -l -b -q "RunPROOF_WZ.C(\"${SAMPLE}\",0,$SYST,$CLOSURE)";
-	root -l -b -q "RunPROOF_WZ.C(\"${SAMPLE}\",1,$SYST,$CLOSURE)";
+	root -l -b -q "RunPROOF_WZ.C(\"${SAMPLE}\",0,${SYSTEMATIC})";
+	root -l -b -q "RunPROOF_WZ.C(\"${SAMPLE}\",1,${SYSTEMATIC})";
 
     done
 fi
 
 for SAMPLE in ${MC_SAMPLES}; do
     
-    root -l -b -q "RunPROOF_WZ.C(\"${SAMPLE}\",0,$SYST,$CLOSURE)";
+    root -l -b -q "RunPROOF_WZ.C(\"${SAMPLE}\",0,${SYSTEMATIC})";
     
 done
+
