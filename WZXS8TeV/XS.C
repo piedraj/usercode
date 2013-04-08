@@ -235,11 +235,11 @@ TString  GuessLocalBasePath       ();
 
 void     MakeOutputDirectory      (TString       format);
 
-void     DrawCrossSections        (UInt_t        cut);
-
-void     Inclusive                (UInt_t        cut);
+void     Inclusive                ();
 
 void     RelativeSystematics      (UInt_t        cut);
+
+void     DrawCrossSections        (UInt_t        cut);
 
 
 //------------------------------------------------------------------------------
@@ -258,6 +258,10 @@ void XS(UInt_t cut  = MET30,
 
   for (UInt_t channel=0; channel<nChannel; channel++) {
 
+    MeasureTheCrossSection(channel, cut);
+
+    PrintLatexTable(channel);
+
     DrawHistogram("hSumCharges", channel, cut, "q_{1} + q_{2} + q_{3}");
 
     if (cut == ClosureTest)
@@ -274,10 +278,6 @@ void XS(UInt_t cut  = MET30,
       }
     else
       {
-	MeasureTheCrossSection(channel, cut);
-	
-	PrintLatexTable(channel);
-	
 	DrawHistogram("hMET",          channel, cut, "E_{T}^{miss}",                          5, 0, "GeV",  linY);
 	DrawHistogram("hInvMass2Lep",  channel, cut, "m_{#font[12]{ll}}",                    -1, 0, "GeV",  linY, 71, 111);
 	DrawHistogram("hInvMass3Lep",  channel, cut, "m_{#font[12]{3l}}",                     5, 0, "GeV",  linY, 60, 350);
@@ -295,7 +295,7 @@ void XS(UInt_t cut  = MET30,
       }
   }
 
-  Inclusive(cut);
+  Inclusive();
   
   DrawCrossSections(cut);
 }
@@ -306,8 +306,6 @@ void XS(UInt_t cut  = MET30,
 //------------------------------------------------------------------------------
 void MeasureTheCrossSection(UInt_t channel, UInt_t cut)
 {
-  if (cut == ClosureTest) return;
-
   Double_t ndata   = 0;
   Double_t nsignal = 0;
   Double_t nbkg    = 0;
@@ -1078,7 +1076,7 @@ void MakeOutputDirectory(TString format)
 //------------------------------------------------------------------------------
 void DrawCrossSections(UInt_t cut)
 {
-  if (cut < MET30) return;
+  if (cut == ClosureTest) return;
 
   TGraphErrors* gStat = new TGraphErrors(nChannel+1);
   TGraphErrors* gSyst = new TGraphErrors(nChannel+1);
@@ -1209,10 +1207,8 @@ void DrawCrossSections(UInt_t cut)
 //------------------------------------------------------------------------------
 // Inclusive
 //------------------------------------------------------------------------------
-void Inclusive(UInt_t cut)
+void Inclusive()
 {
-  if (cut == ClosureTest) return;
-
   Double_t x     = 0;
   Double_t stat  = 0;
   Double_t syst  = 0;
@@ -1250,8 +1246,6 @@ void Inclusive(UInt_t cut)
 //------------------------------------------------------------------------------
 void RelativeSystematics(UInt_t cut)
 {
-  if (cut == ClosureTest) return;
-
   for (UInt_t k=0; k<nProcess; k++) processSyst[k] = 0.0;
 
   for (UInt_t i=0; i<nSystematic; i++) {
