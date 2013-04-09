@@ -268,21 +268,17 @@ void LatinosTreeScript(Float_t luminosity,
   }
   else if (theSample == "TTbar") {
     tree->Add(filesPath + "MoriondeffW/MC_TightTight_DABCABC/latino_019_TTTo2L2Nu2B.root");
-    //    tree->Add(filesPath + "MoriondeffW/MC_TightTight_DABCABC/latino_010_TTJetsMad.root");  // Javier Cuevas
   }
   else if (theSample == "TW") {
     tree->Add(filesPath + "MoriondeffW/MC_TightTight_DABCABC/latino_011_TtWFullDR.root");
     tree->Add(filesPath + "MoriondeffW/MC_TightTight_DABCABC/latino_012_TbartWFullDR.root");
   }
-  else if (theSample == "DYJets_Madgraph") {  // Javier Cuevas
+  else if (theSample == "DY") {
     tree->Add(filesPath + "MoriondeffW/MC_TightTight_DABCABC/latino_036_DY10toLLMad.root");
-  }
-  else if (theSample == "ZJets_Madgraph") {  // Javier Cuevas
     tree->Add(filesPath + "MoriondeffW/MC_TightTight_DABCABC/latino_037_DY50toLLMad.root");
   }
   else if (theSample == "DYtautau") {
-    tree->Add(filesPath +"MoriondeffW/TauTau/latino_DYtt_19.5fb.root");
-    //    tree->Add(filesPath +"MoriondeffW/MC_TightTight_DABCABC/latino_086_ZgammaToLLuG.root");
+    tree->Add(filesPath + "MoriondeffW/TauTau/latino_DYtt_19.5fb.root");
   }
   else if (theSample == "WgammaNoStar") {
     tree->Add(filesPath + "MoriondeffW/MC_TightTight_DABCABC/latino_085_WgammaToLNuG.root");
@@ -296,6 +292,9 @@ void LatinosTreeScript(Float_t luminosity,
   else if (theSample == "HWW125") { 
     tree->Add(filesPath + "MoriondeffW/MC_TightTight_DABCABC/latino_1125_ggToH125toWWTo2LAndTau2Nu.root");
     tree->Add(filesPath + "MoriondeffW/MC_TightTight_DABCABC/latino_2125_vbfToH125toWWTo2LAndTau2Nu.root");
+  }
+  else if (theSample == "Zgamma") { 
+    tree->Add(filesPath +"MoriondeffW/MC_TightTight_DABCABC/latino_086_ZgammaToLLuG.root");
   }
   else {
     return;
@@ -413,7 +412,7 @@ void LatinosTreeScript(Float_t luminosity,
     //--------------------------------------------------------------------------
     Bool_t accept_WGstar = (chmet < (0.75*pt1+100) && chmet < (0.75*jetpt1+100));
 
-    //    if ((dataset == 36 || dataset == 37) && mctruth == 2)                    continue;
+    if ((dataset == 36 || dataset == 37) && mctruth == 2)                    continue;
     if (dataset == 82 && !accept_WGstar)                                     continue;
     if (dataset == 86 && (flavorChannel == "MuMu" || flavorChannel == "EE")) continue;
     if ((SelectedChannel != -1) && (channel != SelectedChannel))             continue;
@@ -507,10 +506,6 @@ void LatinosTreeScript(Float_t luminosity,
     // Main analysis
     //
     //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    if (mll       < 20) continue;  // Javier Cuevas
-    if (njet      <  2) continue;  // Javier Cuevas
-    if (nbjettche <  1) continue;  // Javier Cuevas
-
     for (UInt_t ilevel=0; ilevel<nLevels; ilevel++) {
 
       FillHistograms(TriggerLevel, ilevel);
