@@ -6,6 +6,7 @@
 #include "packages/TProofVector/TProofVector.h"
 
 #include "TFile.h"
+#include "TGraphErrors.h"
 #include "TH1F.h"
 #include "TH2F.h"
 #include "TLorentzVector.h"
@@ -18,7 +19,9 @@
 #include <vector>
 
 
-const Double_t Z_MASS = 91.1876;  // [GeV]
+const Double_t Z_MASS        = 91.1876;  // [GeV]
+const Double_t MUON_MASS     =  0.1057;  // [GeV]
+const Double_t ELECTRON_MASS =  0.0005;  // [GeV]
 
 
 const UInt_t nChannel = 4;
@@ -86,7 +89,14 @@ struct Lepton
 };
 
 
-enum {noSyst, metSyst};
+enum {
+  noSyst,
+  metSyst,
+  muonUpSyst,
+  muonDownSyst,
+  electronUpSyst,
+  electronDownSyst
+};
 
 
 //------------------------------------------------------------------------------
@@ -142,6 +152,13 @@ class AnalysisWZ: public CMSAnalysisSelectorMiniTrees
   Double_t       GetTriggerWeight          ();
 
   Bool_t         PassTrigger               ();
+
+  Double_t       ScaleLepton               (UInt_t   flavor,
+					    Double_t pt,
+					    Double_t eta = -999);
+
+  TH1F*          GetHistogramFromGraph     (TString  hname,
+					    TString  gname);
 
 
  public:
@@ -234,6 +251,13 @@ class AnalysisWZ: public CMSAnalysisSelectorMiniTrees
   TH2F*                       DoubleMuLead;
   TH2F*                       DoubleElTrail;
   TH2F*                       DoubleMuTrail;
+
+
+  // Electron energy scale systematics
+  //----------------------------------------------------------------------------
+  TH1F*                       hScaleInEB;
+  TH1F*                       hScaleOutEB;
+  TH1F*                       hScaleEE;
 
 
   ClassDef(AnalysisWZ, 0);

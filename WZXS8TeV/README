@@ -59,6 +59,7 @@ wget www.hep.uniovi.es/piedra/AuxiliaryFilesWZXS8TeV/EleFR_Moriond13_jet15_EWKco
 wget www.hep.uniovi.es/piedra/AuxiliaryFilesWZXS8TeV/EleFR_Moriond13_jet35_EWKcorr.root
 wget www.hep.uniovi.es/piedra/AuxiliaryFilesWZXS8TeV/EleFR_Moriond13_jet50_EWKcorr.root
 wget www.hep.uniovi.es/piedra/AuxiliaryFilesWZXS8TeV/triggerEfficiencies.root
+wget www.hep.uniovi.es/piedra/AuxiliaryFilesWZXS8TeV/gScaleSyst-8TeV.root
 
 
 ################################################################################
@@ -69,9 +70,7 @@ wget www.hep.uniovi.es/piedra/AuxiliaryFilesWZXS8TeV/triggerEfficiencies.root
 
 cd PAF
 
-./run.sh 0 0
-./run.sh 1 0
-./run.sh 0 1
+./run.sh 0
 
 
 ################################################################################

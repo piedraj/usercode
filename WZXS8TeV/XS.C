@@ -134,15 +134,31 @@ TString sProcess[nProcess];
 
 // Systematics
 //------------------------------------------------------------------------------
-const UInt_t nSystematic = 4;
+const UInt_t nSystematic = 7;
 
-enum {fakesSyst, scaleSyst, pdfSyst, metSyst};
+enum {
+  fakesSyst,
+  qcdSyst,
+  pdfSyst,
+  metSyst,
+  triggerSyst,
+  muonSyst,
+  electronSyst
+};
 
-TString sSystematic[nSystematic] = {"fakes", "scale", "pdf", "met"};
+TString sSystematic[nSystematic] = {
+  "fakes",
+  "qcd",
+  "pdf",
+  "met",
+  "trigger",
+  "muon",
+  "electron"
+};
 
-Double_t processSyst[nProcess];
+Double_t totalSyst[nChannel][nProcess];
 
-Double_t systematicError[nProcess][nSystematic];
+Double_t systematicError[nChannel][nProcess][nSystematic];
 
 
 enum {linY, logY};
@@ -155,7 +171,6 @@ enum {MCmode, PPFmode, PPPmode};
 Double_t        _luminosity;
 Double_t        _yoffset;
 Int_t           _verbosity;
-TString         _directory;
 TString         _localpath;
 TString         _datapath;
 TString         _output;
@@ -237,9 +252,13 @@ void     MakeOutputDirectory      (TString       format);
 
 void     Inclusive                ();
 
-void     RelativeSystematics      (UInt_t        cut);
+void     RelativeSystematics      (UInt_t        channel,
+				   UInt_t        cut);
 
 void     DrawCrossSections        (UInt_t        cut);
+
+Double_t RelativeDifference       (Double_t      x0,
+				   Double_t      x1);
 
 
 //------------------------------------------------------------------------------
@@ -254,9 +273,9 @@ void XS(UInt_t cut  = MET30,
 
   if (ReadInputFiles() < 0) return;
 
-  RelativeSystematics(cut);
-
   for (UInt_t channel=0; channel<nChannel; channel++) {
+
+    RelativeSystematics(channel, cut);
 
     MeasureTheCrossSection(channel, cut);
 
@@ -334,7 +353,7 @@ void MeasureTheCrossSection(UInt_t channel, UInt_t cut)
 	nbkg += process_yield;
 
 	Double_t ebkgStat = sqrt(process_yield);
-	Double_t ebkgSyst = processSyst[j] * process_yield / 1e2;
+	Double_t ebkgSyst = totalSyst[channel][j] * process_yield / 1e2;
 
 	ebkg += (ebkgStat * ebkgStat);
 	ebkg += (ebkgSyst * ebkgSyst);
@@ -356,7 +375,7 @@ void MeasureTheCrossSection(UInt_t channel, UInt_t cut)
   Double_t xsRelativeErrorLumi       = 4.4;
   Double_t xsRelativeErrorStat       = 1e2 * sqrt(ndata) / (ndata - nbkg);
   Double_t xsRelativeErrorBackground = 1e2 * ebkg        / (ndata - nbkg);
-  Double_t xsRelativeErrorEfficiency = processSyst[WZ];
+  Double_t xsRelativeErrorEfficiency = totalSyst[channel][WZ];
   Double_t xsRelativeErrorSyst       = 0;
 
   xsRelativeErrorSyst += (xsRelativeErrorBackground * xsRelativeErrorBackground);
@@ -587,7 +606,7 @@ void DrawHistogram(TString  hname,
 
       Double_t binContent   = hist[j]->GetBinContent(ibin);
       Double_t binStatError = hist[j]->GetBinError(ibin);
-      Double_t binSystError = processSyst[j] * binContent / 1e2;
+      Double_t binSystError = totalSyst[channel][j] * binContent / 1e2;
 
       binValue += binContent;
       binError += (binStatError * binStatError);
@@ -934,7 +953,6 @@ void SetParameters(UInt_t cut,
   _cut        = cut;
   _mode       = mode;
   _localpath  = GuessLocalBasePath();
-  _directory  = "analysis";
   
   _datapath = Form("%s/piedra/work/WZXS8TeV/results/Summer12_53X/WH/",
 		   _localpath.Data());
@@ -982,7 +1000,7 @@ Int_t ReadInputFiles()
 
     UInt_t j = vprocess.at(i);
 
-    input[j] = new TFile(_datapath + "/" + _directory + "/" + sProcess[j] + ".root");
+    input[j] = new TFile(_datapath + "/analysis/" + sProcess[j] + ".root");
 
     TH1D* dummy = (TH1D*)input[j]->Get("hCounter_MME_MET30_TTT");
 
@@ -1050,7 +1068,7 @@ void MakeOutputDirectory(TString format)
 
   gSystem->Exec(Form("cp index.php %s/.", format.Data()));
 
-  _output = _directory;
+  _output = "analysis";
 
   gSystem->mkdir(format + "/" + _output, kTRUE);
 
@@ -1244,65 +1262,113 @@ void Inclusive()
 //------------------------------------------------------------------------------
 // RelativeSystematics
 //------------------------------------------------------------------------------
-void RelativeSystematics(UInt_t cut)
+void RelativeSystematics(UInt_t channel, UInt_t cut)
 {
-  for (UInt_t k=0; k<nProcess; k++) processSyst[k] = 0.0;
+  for (UInt_t i=0; i<vprocess.size(); i++)
+    {
+      UInt_t process = vprocess.at(i);
 
-  for (UInt_t i=0; i<nSystematic; i++) {
-
-    for (UInt_t k=0; k<nProcess; k++) systematicError[k][i] = 0.0;
-
-    if (i == fakesSyst) {systematicError[Fakes][i] = 36.0; continue;}
-    if (i == scaleSyst) {systematicError[WZ][i]    =  5.3; continue;}
-    if (i == pdfSyst)   {systematicError[WZ][i]    =  3.0; continue;}
-
-    for(UInt_t k=0; k<nProcess; k++) {
-
-      for (UInt_t j=0; j<nChannel; j++) {
-
-	TString hname = "hCounter_" + sChannel[j] + "_" + sCut[cut] + "_TTT";
-	
-	if (k == Data)  continue;
-	if (k == Fakes) continue;
-	
-	TFile* f0 = new TFile(_datapath + "/" + _directory + "/" + sProcess[k] + ".root");
-	TFile* f1 = new TFile(_datapath + "/systematics/" + sSystematic[i] + "/" + sProcess[k] + ".root");
-
-	Double_t y0 = Yield((TH1D*)f0->Get(hname));
-	Double_t y1 = Yield((TH1D*)f1->Get(hname));
-
-	f0->Close();
-	f1->Close();
-
-	Double_t syst = (y0 > 0) ? 1e2 * fabs(y1 - y0) / y0 : 0.0;
-
-	if (syst > systematicError[k][i]) systematicError[k][i] = syst;
-      }
+      totalSyst[channel][process] = 0.0;
     }
-  }
+
+  for (UInt_t syst=0; syst<nSystematic; syst++)
+    {
+      for (UInt_t i=0; i<vprocess.size(); i++)
+	{
+	  UInt_t process = vprocess.at(i);
+	  
+	  systematicError[channel][process][syst] = 0.0;
+	}
+
+      if (syst == fakesSyst) {systematicError[channel][Fakes][syst] = 36.0; continue;}
+      if (syst == qcdSyst)   {systematicError[channel][WZ]   [syst] =  5.3; continue;}
+      if (syst == pdfSyst)   {systematicError[channel][WZ]   [syst] =  3.0; continue;}
+      
+      if (syst == triggerSyst)
+	{
+	  Double_t tmpSyst = 0.0;
+	  
+	  if (channel == MMM) tmpSyst = sqrt(3.*3. + 3.*3. + 3.*3.);
+	  if (channel == MME) tmpSyst = sqrt(3.*3. + 3.*3. + 4.*4.);
+	  if (channel == EEM) tmpSyst = sqrt(4.*4. + 4.*4. + 3.*3.);
+	  if (channel == EEE) tmpSyst = sqrt(4.*4. + 4.*4. + 4.*4.);
+
+	  systematicError[channel][WZ][syst] = tmpSyst;
+	      
+	  continue;
+	}
+
+      for (UInt_t i=0; i<vprocess.size(); i++)
+	{
+	  UInt_t process = vprocess.at(i);
+
+	  TString hname = "hCounter_" + sChannel[channel] + "_" + sCut[cut] + "_TTT";
+	
+	  if (process == Data)  continue;
+	  if (process == Fakes) continue;
+	
+	  TString suffix = "/" + sProcess[process] + ".root";
+
+	  TFile* f0 = new TFile(_datapath + "/analysis" + suffix);
+
+	  Double_t y0 = Yield((TH1D*)f0->Get(hname));
+
+	  f0->Close();
+
+	  Double_t y1;
+
+	  if (syst == muonSyst || syst == electronSyst)
+	    {
+	      TFile* fUp   = new TFile(_datapath + "/systematics/" + sSystematic[syst] + "Up"   + suffix);
+	      TFile* fDown = new TFile(_datapath + "/systematics/" + sSystematic[syst] + "Down" + suffix);
+	      
+	      Double_t yUp   = Yield((TH1D*)fUp  ->Get(hname));
+	      Double_t yDown = Yield((TH1D*)fDown->Get(hname));
+	      
+	      Double_t systUp   = RelativeDifference(y0, yUp);
+	      Double_t systDown = RelativeDifference(y0, yDown);
+
+	      y1 = (systUp > systDown) ? yUp : yDown;
+
+	      fUp  ->Close();
+	      fDown->Close();
+	    }
+	  else
+	    {
+	      TFile* f1 = new TFile(_datapath + "/systematics/" + sSystematic[syst] + suffix);
+
+	      y1 = Yield((TH1D*)f1->Get(hname));
+
+	      f1->Close();
+	    }
+
+	  systematicError[channel][process][syst] = RelativeDifference(y0, y1);
+	}
+    }
 
 
-  processSyst[Fakes] = systematicError[Fakes][fakesSyst];
+  totalSyst[channel][Fakes] = systematicError[channel][Fakes][fakesSyst];
   
 
-  for (UInt_t i=0; i<nProcess; i++) {
+  for (UInt_t process=0; process<nProcess; process++)
+    {
+      if (process == Data)  continue;
+      if (process == Fakes) continue;
 
-    if (i == Data || i == Fakes) continue;
-
-    for (UInt_t j=0; j<nSystematic; j++) {
-
-      if (j == fakesSyst) continue;
+      for (UInt_t syst=0; syst<nSystematic; syst++)
+	{
+	  if (syst == fakesSyst) continue;
       
-      Double_t syst2 = systematicError[i][j] * systematicError[i][j];
+	  Double_t syst2 = systematicError[channel][process][syst] * systematicError[channel][process][syst];
 
-      if (j == scaleSyst) {if (i == WZ) processSyst[i] += syst2; continue;}
-      if (j == pdfSyst)   {if (i == WZ) processSyst[i] += syst2; continue;}
+	  if (syst == qcdSyst) {if (process == WZ) totalSyst[channel][process] += syst2; continue;}
+	  if (syst == pdfSyst) {if (process == WZ) totalSyst[channel][process] += syst2; continue;}
 
-      processSyst[i] += syst2;
+	  totalSyst[channel][process] += syst2;
+	}
+      
+      totalSyst[channel][process] = sqrt(totalSyst[channel][process]);
     }
-
-    processSyst[i] = sqrt(processSyst[i]);
-  }
 
 
   // Print
@@ -1311,20 +1377,28 @@ void RelativeSystematics(UInt_t cut)
 
   printf("\n%10s ", " ");
 
-  for (UInt_t i=0; i<nProcess; i++)
+  for (UInt_t i=0; i<vprocess.size(); i++)
     {
-      (i == Fakes) ? printf(" %15s ", "Fakes") : printf(" %15s ", sProcess[i].Data());
+      UInt_t process = vprocess.at(i);
+
+      if (process == Data) continue;
+
+      printf(" %15s ", sProcess[process].Data());
     }
   
   printf("\n");
   
-  for (UInt_t j=0; j<nSystematic; j++) {
+  for (UInt_t syst=0; syst<nSystematic; syst++) {
     
-    printf("%10s ", sSystematic[j].Data());
+    printf("%10s ", sSystematic[syst].Data());
     
-    for (UInt_t i=0; i<nProcess; i++)
+    for (UInt_t i=0; i<vprocess.size(); i++)
       {
-	printf(" %15.1f ", systematicError[i][j]);
+	UInt_t process = vprocess.at(i);
+
+	if (process == Data) continue;
+
+	printf(" %15.1f ", systematicError[channel][process][syst]);
       }
     
     printf("\n");
@@ -1332,10 +1406,26 @@ void RelativeSystematics(UInt_t cut)
 
   printf("%10s ", "total");
   
-  for (UInt_t i=0; i<nProcess; i++)
+  for (UInt_t i=0; i<vprocess.size(); i++)
     {
-      printf(" %15.1f ", processSyst[i]);
+      UInt_t process = vprocess.at(i);
+
+      if (process == Data) continue;
+
+      printf(" %15.1f ", totalSyst[channel][process]);
     }
       
   printf("\n\n");
+}
+
+
+//------------------------------------------------------------------------------
+// RelativeDifference
+//------------------------------------------------------------------------------
+Double_t RelativeDifference(Double_t x0, Double_t x1)
+{
+  if (x0 < 1) return 0;
+  if (x1 < 1) return 0;
+
+  return 1e2 * fabs(x1 - x0) / x0;
 }

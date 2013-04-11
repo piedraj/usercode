@@ -1,10 +1,13 @@
 #!/bin/bash
 
 
-FOLDERS="       \
-analysis        \
-closure_test    \
-systematics/met \
+FOLDERS="                \
+analysis                 \
+systematics/met          \
+systematics/muonUp       \
+systematics/muonDown     \
+systematics/electronUp   \
+systematics/electronDown \
 "
 
 
@@ -12,7 +15,7 @@ for FOLDER in $FOLDERS; do
 
     pushd results/Summer12_53X/WH/$FOLDER
 
-    if [ "$FOLDER" = "analysis" -o $FOLDER = "closure_test" ]; then
+    if [ "$FOLDER" = "analysis" ]; then
 
 	hadd -f -k Data.root    \
 	    DoubleElectron.root \

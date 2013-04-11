@@ -10,7 +10,14 @@ TString  dataPath      = "";
 
 enum {RAW, PPF};
 
-enum {noSyst, metSyst};
+enum {
+  noSyst,
+  metSyst,
+  muonUpSyst,
+  muonDownSyst,
+  electronUpSyst,
+  electronDownSyst
+};
 
 
 void RunPROOF_WZ(TString  sample     = "WZTo3LNu",
@@ -27,6 +34,8 @@ void RunPROOF_WZ(TString  sample     = "WZTo3LNu",
   // Reset PROOF
   //----------------------------------------------------------------------------
   gSystem->Exec("./resetproof.sh -a");
+  gSystem->Exec("rm -f *.d");
+  gSystem->Exec("rm -f *.so");
 
   if (runAtOviedo) gSystem->Exec("qdel all");
   else             gSystem->Exec("endproof");
@@ -94,14 +103,12 @@ void RunPROOF_WZ(TString  sample     = "WZTo3LNu",
   //----------------------------------------------------------------------------
   TString outputDir = "../WZXS8TeV/results/Summer12_53X/WH";
 
-  if (systematic == noSyst)
-    {
-      outputDir += "/analysis";
-    }
-  else if (systematic == metSyst)
-    {
-      outputDir += "/systematics/met";
-    }
+  if      (systematic == noSyst)           outputDir += "/analysis";
+  else if (systematic == metSyst)          outputDir += "/systematics/met";
+  else if (systematic == muonUpSyst)       outputDir += "/systematics/muonUp";
+  else if (systematic == muonDownSyst)     outputDir += "/systematics/muonDown";
+  else if (systematic == electronUpSyst)   outputDir += "/systematics/electronUp";
+  else if (systematic == electronDownSyst) outputDir += "/systematics/electronDown";
 
   gSystem->mkdir(outputDir, kTRUE);
 

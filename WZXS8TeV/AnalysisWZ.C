@@ -80,6 +80,13 @@ void AnalysisWZ::Initialise()
   DoubleMuLead  = LoadHistogram("triggerEfficiencies", "DoubleMuLead",  "DoubleMuLead");
   DoubleElTrail = LoadHistogram("triggerEfficiencies", "DoubleElTrail", "DoubleElTrail");
   DoubleMuTrail = LoadHistogram("triggerEfficiencies", "DoubleMuTrail", "DoubleMuTrail");
+
+
+  // Electron energy scale systematics
+  //----------------------------------------------------------------------------
+  hScaleInEB  = GetHistogramFromGraph("hScaleInEB",  "gScaleInEB");
+  hScaleOutEB = GetHistogramFromGraph("hScaleOutEB", "gScaleOutEB");
+  hScaleEE    = GetHistogramFromGraph("hScaleEE",    "gScaleEE");
 }
 
 
@@ -140,9 +147,11 @@ void AnalysisWZ::InsideLoop()
 			      T_Muon_Pz->at(i),
 			      T_Muon_Energy->at(i));
     
-    Double_t pt = MuonVector.Pt();
-
     Double_t eta = fabs(MuonVector.Eta());
+
+    Double_t pt = ScaleLepton(Muon, MuonVector.Pt());
+
+    MuonVector.SetPtEtaPhiM(pt, MuonVector.Eta(), MuonVector.Phi(), MUON_MASS);
 
     if (pt <= 10.) continue;
 
@@ -190,9 +199,11 @@ void AnalysisWZ::InsideLoop()
 				  T_Elec_Pz->at(i),
 				  T_Elec_Energy->at(i));
 
-    Double_t pt = ElectronVector.Pt();
-
     Double_t eta = fabs(ElectronVector.Eta());
+
+    Double_t pt = ScaleLepton(Electron, ElectronVector.Pt(), eta);
+
+    ElectronVector.SetPtEtaPhiM(pt, ElectronVector.Eta(), ElectronVector.Phi(), ELECTRON_MASS);
 
     if (pt <= 10.) continue;
 
@@ -209,7 +220,7 @@ void AnalysisWZ::InsideLoop()
     const Double_t trMax = DoubleElLead->GetXaxis()->GetBinCenter(DoubleElLead->GetNbinsX());
 
     Lepton AnalysisElectron;
-    
+
     AnalysisElectron.index  = i;
     AnalysisElectron.flavor = Electron;
     AnalysisElectron.type   = electron_type;
@@ -513,10 +524,12 @@ void AnalysisWZ::GetParameters()
 Bool_t AnalysisWZ::ElectronBDT(UInt_t iElec)
 {
   Double_t eta = fabs(T_Elec_SC_Eta->at(iElec));
+
+  Double_t pt = ScaleLepton(Electron, T_Elec_Pt->at(iElec), eta);
 	
   Double_t mvaCut = 999;
 
-  if (T_Elec_Pt->at(iElec) < 20)
+  if (pt < 20)
     {
       if      (eta <= 0.8)                {mvaCut = 0.00;}
       else if (eta > 0.8 && eta <= 1.479) {mvaCut = 0.10;}
@@ -540,19 +553,21 @@ Bool_t AnalysisWZ::ElectronBDT(UInt_t iElec)
 //------------------------------------------------------------------------------
 Bool_t AnalysisWZ::ElectronID(UInt_t iElec)
 {
+  Double_t eta           = T_Elec_SC_Eta       ->at(iElec);
   Double_t sigmaietaieta = T_Elec_sigmaIetaIeta->at(iElec);
   Double_t deltaPhiIn    = T_Elec_deltaPhiIn   ->at(iElec);
   Double_t deltaEtaIn    = T_Elec_deltaEtaIn   ->at(iElec);
   Double_t HtoE          = T_Elec_HtoE         ->at(iElec);
-  Double_t pt            = T_Elec_Pt           ->at(iElec);
   Double_t trkIso03      = T_Elec_dr03TkSumPt  ->at(iElec);
   Double_t hadIso03      = T_Elec_dr03HcalSumEt->at(iElec);
   Double_t emIso03       = T_Elec_dr03EcalSumEt->at(iElec);
   Double_t max_emIso03   = std::max(emIso03-1., 0.);
 
+  Double_t pt = ScaleLepton(Electron, T_Elec_Pt->at(iElec), eta);
+
   Bool_t pass = false;
 	
-  if (fabs(T_Elec_SC_Eta->at(iElec)) < 1.479)
+  if (fabs(eta) < 1.479)
     {
       pass = sigmaietaieta   < 0.01
 	&& fabs(deltaPhiIn)  < 0.15
@@ -642,8 +657,9 @@ Bool_t AnalysisWZ::ElectronIsolation(UInt_t iElec)
   Double_t neutral = T_Elec_neutralHadronIso->at(iElec);
   Double_t photon  = T_Elec_photonIso->at(iElec);
   Double_t rho     = T_Event_RhoIso;
+  Double_t pt      = ScaleLepton(Electron, Elec.Pt(), Elec.Eta());
 
-  Double_t relIso = (charged + max(0., neutral + photon - rho*AEff04)) / Elec.Pt();
+  Double_t relIso = (charged + max(0., neutral + photon - rho*AEff04)) / pt;
 
   Bool_t pass = (relIso < 0.15);
 
@@ -656,7 +672,9 @@ Bool_t AnalysisWZ::ElectronIsolation(UInt_t iElec)
 //------------------------------------------------------------------------------
 Bool_t AnalysisWZ::MuonID(UInt_t iMuon)
 {
-  Double_t ptResolution = T_Muon_deltaPt->at(iMuon) / T_Muon_Pt->at(iMuon);
+  Double_t pt = ScaleLepton(Muon, T_Muon_Pt->at(iMuon));
+
+  Double_t ptResolution = T_Muon_deltaPt->at(iMuon) / pt;
 
   Bool_t passcutsforGlb = T_Muon_IsGlobalMuon->at(iMuon);
 
@@ -684,7 +702,9 @@ Bool_t AnalysisWZ::MuonID(UInt_t iMuon)
 //------------------------------------------------------------------------------
 Bool_t AnalysisWZ::MuonCloseToPV(UInt_t iMuon)
 {
-  Double_t MaxMuIP = (T_Muon_Pt->at(iMuon) < 20) ? 0.01 : 0.02;
+  Double_t pt = ScaleLepton(Muon, T_Muon_Pt->at(iMuon));
+
+  Double_t MaxMuIP = (pt < 20) ? 0.01 : 0.02;
 
   Bool_t pass = (fabs(T_Muon_IP2DBiasedPV->at(iMuon)) <= MaxMuIP);
 
@@ -698,7 +718,8 @@ Bool_t AnalysisWZ::MuonCloseToPV(UInt_t iMuon)
 Bool_t AnalysisWZ::MuonIsolation(UInt_t iMuon) 
 {
   Double_t eta = T_Muon_Eta->at(iMuon);
-  Double_t pt  = T_Muon_Pt ->at(iMuon);
+
+  Double_t pt = ScaleLepton(Muon, T_Muon_Pt->at(iMuon));
 
   Double_t isoCut = -1;
 
@@ -968,6 +989,9 @@ TLorentzVector AnalysisWZ::GetMET()
   Double_t px = T_METPFTypeI_ET * cos(T_METPFTypeI_Phi);
   Double_t py = T_METPFTypeI_ET * sin(T_METPFTypeI_Phi);
 
+  
+  // metSyst
+  //----------------------------------------------------------------------------
   if (systematic == metSyst)
     {
       TRandom* random = new TRandom();
@@ -979,6 +1003,59 @@ TLorentzVector AnalysisWZ::GetMET()
   Double_t met = sqrt(px*px + py*py);
 
   TLorentzVector metv(px, py, 0.0, met);
+
+
+  // muonUpSyst, muonDownSyst
+  //----------------------------------------------------------------------------
+  if (systematic == muonUpSyst || systematic == muonDownSyst)
+    {
+      TLorentzVector oleps, leps;
+
+      for (UInt_t i=0; i<T_Muon_Px->size(); i++) {
+
+	TLorentzVector tmp(T_Muon_Px->at(i),
+			   T_Muon_Py->at(i),
+			   T_Muon_Pz->at(i),
+			   T_Muon_Energy->at(i));
+    
+	oleps += tmp;
+      
+	Double_t pt = ScaleLepton(Muon, tmp.Pt());
+
+	tmp.SetPtEtaPhiM(pt, tmp.Eta(), tmp.Phi(), MUON_MASS);
+
+	leps += tmp;
+      }
+
+      metv += (oleps - leps);
+    }
+
+
+  // electronUpSyst, electronDownSyst
+  //----------------------------------------------------------------------------
+  if (systematic == electronUpSyst || systematic == electronDownSyst)
+    {
+      TLorentzVector oleps, leps;
+
+      for (UInt_t i=0; i<T_Elec_Px->size(); i++) {
+
+	TLorentzVector tmp(T_Elec_Px->at(i),
+			   T_Elec_Py->at(i),
+			   T_Elec_Pz->at(i),
+			   T_Elec_Energy->at(i));
+    
+	oleps += tmp;
+      
+	Double_t pt = ScaleLepton(Electron, tmp.Pt(), tmp.Eta());
+
+	tmp.SetPtEtaPhiM(pt, tmp.Eta(), tmp.Phi(), ELECTRON_MASS);
+
+	leps += tmp;
+      }
+
+      metv += (oleps - leps);
+    }
+
 
   return metv;
 }
@@ -1043,4 +1120,99 @@ Bool_t AnalysisWZ::PassTrigger()
     }
 
   return pass;
+}
+
+
+//------------------------------------------------------------------------------
+// ScaleLeptons
+//------------------------------------------------------------------------------
+Double_t AnalysisWZ::ScaleLepton(UInt_t flavor, Double_t pt, Double_t eta)
+{
+  if (systematic != muonUpSyst     &&
+      systematic != muonDownSyst   &&
+      systematic != electronUpSyst &&
+      systematic != electronDownSyst) return pt;
+
+  Double_t scale = 0.0;
+
+  if (flavor == Muon &&
+      (systematic == muonUpSyst || systematic == muonDownSyst))
+    {
+      scale = 0.01;
+    }
+  else if (flavor == Electron &&
+	   (systematic == electronUpSyst || systematic == electronDownSyst))
+    {
+      const Double_t InEBMax  = hScaleInEB ->GetXaxis()->GetBinCenter(hScaleInEB ->GetNbinsX());
+      const Double_t OutEBMax = hScaleOutEB->GetXaxis()->GetBinCenter(hScaleOutEB->GetNbinsX());
+      const Double_t EEMax    = hScaleEE   ->GetXaxis()->GetBinCenter(hScaleEE   ->GetNbinsX());
+
+      const Double_t scaleInEB  = hScaleInEB ->GetBinContent(hScaleInEB ->FindBin(min(pt,InEBMax)));
+      const Double_t scaleOutEB = hScaleOutEB->GetBinContent(hScaleOutEB->FindBin(min(pt,OutEBMax)));
+      const Double_t scaleEE    = hScaleEE   ->GetBinContent(hScaleEE   ->FindBin(min(pt,EEMax)));
+
+      if (fabs(eta) < 0.8)
+	{
+	  scale = scaleInEB;
+	}
+      else if (fabs(eta) >= 0.8 && fabs(eta) < 1.479)
+	{
+	  scale = scaleOutEB;
+	}
+      else
+	{
+	  scale = scaleEE;
+	}
+    }
+     
+  if (systematic == muonDownSyst || systematic == electronDownSyst)
+    {
+      scale = -scale;
+    }
+
+
+  return (1. + scale) * pt;
+}
+
+
+//------------------------------------------------------------------------------
+// GetHistogramFromGraph
+//------------------------------------------------------------------------------
+TH1F* AnalysisWZ::GetHistogramFromGraph(TString hname, TString gname)
+{
+  TString path = (runAtOviedo) ? "/nfs/fanae/user" : "/gpfs/csic_users";
+
+  TFile* inputfile = TFile::Open(path + "/piedra/work/PAF/AuxiliaryFilesWZXS8TeV/gScaleSyst-8TeV.root");
+
+  TGraphErrors* graph = (TGraphErrors*)inputfile->Get(gname);
+
+  UInt_t nbins = graph->GetN();
+
+  Double_t* xx = graph->GetX();
+  Double_t* yy = graph->GetY();
+
+  Double_t* range = new Double_t[nbins+1];
+
+  for (UInt_t i=0; i<nbins; i++)
+    {
+      range[i+1] = (xx[i] + xx[i+1]) / 2.;
+    }
+
+  range[0]     = xx[0]       - (xx[1]       - xx[0]      ) / 2.;
+  range[nbins] = xx[nbins-1] + (xx[nbins-1] - xx[nbins-2]) / 2.;
+
+  TH1F* hist = new TH1F(hname, hname, nbins, range);
+  
+  hist->SetDirectory(0);
+
+  for (UInt_t i=1; i<=nbins; i++)
+    {
+      hist->SetBinContent(i, fabs(yy[i-1]));
+    }
+
+  inputfile->Close();
+
+  delete [] range;
+
+  return hist;
 }

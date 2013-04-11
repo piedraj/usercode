@@ -4,8 +4,12 @@ if [ $# -lt 1 ]; then
     echo "  "
     echo "  ./run.sh SYSTEMATIC"
     echo "  "
-    echo "  nominal analysis with SYSTEMATIC = 0"
-    echo "  met systematic   with SYSTEMATIC = 1"
+    echo "  0 = noSyst"
+    echo "  1 = metSyst"
+    echo "  2 = muonUpSyst"
+    echo "  3 = muonDownSyst"
+    echo "  4 = electronUpSyst"
+    echo "  5 = electronDownSyst"
     echo "  "
     exit -1
 fi
