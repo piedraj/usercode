@@ -3,6 +3,9 @@
 INPUT_DIR=/nfs/fanae/user/piedra/work/WZXS8TeV
 OUTPUT_DIR=/nfs/fanae/user/piedra/svn/notes/AN-13-093/trunk
 
+
+# Figures
+#-------------------------------------------------------------------------------
 cp $INPUT_DIR/pdf/scale_factors/ElecSF.pdf                                           $OUTPUT_DIR/figures/scale_factors/.
 cp $INPUT_DIR/pdf/scale_factors/MuonSF.pdf                                           $OUTPUT_DIR/figures/scale_factors/.
 cp $INPUT_DIR/pdf/scale_factors/DoubleElLead.pdf                                     $OUTPUT_DIR/figures/scale_factors/.
@@ -40,7 +43,30 @@ cp $INPUT_DIR/pdf/analysis/PPF/MET30/hInvMass2Lep_EEM_MET30.pdf                 
 cp $INPUT_DIR/pdf/analysis/PPF/MET30/hInvMass2Lep_MME_MET30.pdf                      $OUTPUT_DIR/figures/analysis/PPF/MET30/.
 cp $INPUT_DIR/pdf/analysis/PPF/MET30/hInvMass2Lep_MMM_MET30.pdf                      $OUTPUT_DIR/figures/analysis/PPF/MET30/.
 
+
+# Yields
+#-------------------------------------------------------------------------------
+cp $INPUT_DIR/tex/EEE_mc.tex  $OUTPUT_DIR/tables/.
+cp $INPUT_DIR/tex/EEM_mc.tex  $OUTPUT_DIR/tables/.
+cp $INPUT_DIR/tex/MME_mc.tex  $OUTPUT_DIR/tables/.
+cp $INPUT_DIR/tex/MMM_mc.tex  $OUTPUT_DIR/tables/.
+
 cp $INPUT_DIR/tex/EEE_ppf.tex  $OUTPUT_DIR/tables/.
 cp $INPUT_DIR/tex/EEM_ppf.tex  $OUTPUT_DIR/tables/.
 cp $INPUT_DIR/tex/MME_ppf.tex  $OUTPUT_DIR/tables/.
 cp $INPUT_DIR/tex/MMM_ppf.tex  $OUTPUT_DIR/tables/.
+
+
+# Systematics
+#-------------------------------------------------------------------------------
+cp $INPUT_DIR/tex/systematics_MET30_EEE.tex  $OUTPUT_DIR/tables/.
+cp $INPUT_DIR/tex/systematics_MET30_EEM.tex  $OUTPUT_DIR/tables/.
+cp $INPUT_DIR/tex/systematics_MET30_MME.tex  $OUTPUT_DIR/tables/.
+cp $INPUT_DIR/tex/systematics_MET30_MMM.tex  $OUTPUT_DIR/tables/.
+
+
+# Final results
+#-------------------------------------------------------------------------------
+cp $INPUT_DIR/pdf/analysis/PPF/MET30/xs_MET30.pdf  $OUTPUT_DIR/figures/analysis/PPF/MET30/.
+cp $INPUT_DIR/tex/xs_MET30_ppf.tex                 $OUTPUT_DIR/tables/.
+

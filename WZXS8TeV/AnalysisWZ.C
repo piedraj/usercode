@@ -108,7 +108,7 @@ void AnalysisWZ::InsideLoop()
 
   pu_weight = (isData) ? 1. : fPUWeight->GetWeight((Int_t)T_Event_nTruePU);
 
-  efficiency_weight = pu_weight;
+  efficiency_weight = 1.;
   mc_lepton_weight  = 1.;
   mc_trigger_weight = 1.;
   mc_total_weight   = 1.;
@@ -746,20 +746,17 @@ void AnalysisWZ::FillHistograms(UInt_t   iChannel,
   if (!pt3cut) return;
 
 
-  Double_t hweight = efficiency_weight * xs_weight * dd_weight;
-
-
   // Counters
   //----------------------------------------------------------------------------  
   hCounterRaw[iChannel][iCut][nTight]->Fill(1);
-  hCounterPU [iChannel][iCut][nTight]->Fill(1, pu_weight);
-  hCounterEff[iChannel][iCut][nTight]->Fill(1, efficiency_weight * dd_weight);
-  hCounter   [iChannel][iCut][nTight]->Fill(1, hweight);
+  hCounterPU [iChannel][iCut][nTight]->Fill(1,             efficiency_weight * xs_weight * dd_weight);
+  hCounterEff[iChannel][iCut][nTight]->Fill(1, pu_weight * efficiency_weight             * dd_weight);
+  hCounter   [iChannel][iCut][nTight]->Fill(1, pu_weight * efficiency_weight * xs_weight * dd_weight);
 
   hCounterRaw[iChannel][iCut][LLL]->Fill(1);
-  hCounterPU [iChannel][iCut][LLL]->Fill(1, pu_weight);
-  hCounterEff[iChannel][iCut][LLL]->Fill(1, efficiency_weight * dd_weight);
-  hCounter   [iChannel][iCut][LLL]->Fill(1, hweight);
+  hCounterPU [iChannel][iCut][LLL]->Fill(1,             efficiency_weight * xs_weight * dd_weight);
+  hCounterEff[iChannel][iCut][LLL]->Fill(1, pu_weight * efficiency_weight             * dd_weight);
+  hCounter   [iChannel][iCut][LLL]->Fill(1, pu_weight * efficiency_weight * xs_weight * dd_weight);
 
 
   // MC weight histograms
@@ -771,6 +768,8 @@ void AnalysisWZ::FillHistograms(UInt_t   iChannel,
 
   // Analysis histograms
   //----------------------------------------------------------------------------  
+  Double_t hweight = pu_weight * efficiency_weight * xs_weight * dd_weight;
+
   Double_t deltaPhi = ZLepton1.DeltaPhi(ZLepton2);
   Double_t deltaR1  = WLepton.DeltaR(ZLepton1);
   Double_t deltaR2  = WLepton.DeltaR(ZLepton2);
