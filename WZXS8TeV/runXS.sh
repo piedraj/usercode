@@ -20,6 +20,7 @@ root -l -b -q XS.C+\(MET30,MCmode\)
 
 root -l -b -q drawScaleFactors.C+
 root -l -b -q drawWeights.C+
+root -l -b -q drawElectronScaleSystematic.C+
 
 
 ### ./copyFiguresAndTables.sh

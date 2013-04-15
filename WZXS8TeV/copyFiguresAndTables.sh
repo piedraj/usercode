@@ -6,18 +6,20 @@ OUTPUT_DIR=/nfs/fanae/user/piedra/svn/notes/AN-13-093/trunk
 
 # Figures
 #-------------------------------------------------------------------------------
-cp $INPUT_DIR/pdf/scale_factors/ElecSF.pdf                                           $OUTPUT_DIR/figures/scale_factors/.
-cp $INPUT_DIR/pdf/scale_factors/MuonSF.pdf                                           $OUTPUT_DIR/figures/scale_factors/.
-cp $INPUT_DIR/pdf/scale_factors/DoubleElLead.pdf                                     $OUTPUT_DIR/figures/scale_factors/.
-cp $INPUT_DIR/pdf/scale_factors/DoubleElTrail.pdf                                    $OUTPUT_DIR/figures/scale_factors/.
-cp $INPUT_DIR/pdf/scale_factors/DoubleMuLead.pdf                                     $OUTPUT_DIR/figures/scale_factors/.
-cp $INPUT_DIR/pdf/scale_factors/DoubleMuTrail.pdf                                    $OUTPUT_DIR/figures/scale_factors/.
-cp $INPUT_DIR/pdf/scale_factors/ElecFR_35.pdf                                        $OUTPUT_DIR/figures/scale_factors/.
-cp $INPUT_DIR/pdf/scale_factors/ElecFR_50.pdf                                        $OUTPUT_DIR/figures/scale_factors/.
-cp $INPUT_DIR/pdf/scale_factors/MuonFR_30.pdf                                        $OUTPUT_DIR/figures/scale_factors/.
-cp $INPUT_DIR/pdf/scale_factors/MuonFR_50.pdf                                        $OUTPUT_DIR/figures/scale_factors/.
-cp $INPUT_DIR/pdf/scale_factors/ElecPR.pdf                                           $OUTPUT_DIR/figures/scale_factors/.
-cp $INPUT_DIR/pdf/scale_factors/MuonPR.pdf                                           $OUTPUT_DIR/figures/scale_factors/.
+cp $INPUT_DIR/pdf/scale_factors/ElecSF.pdf                      $OUTPUT_DIR/figures/scale_factors/.
+cp $INPUT_DIR/pdf/scale_factors/MuonSF.pdf                      $OUTPUT_DIR/figures/scale_factors/.
+cp $INPUT_DIR/pdf/scale_factors/DoubleElLead.pdf                $OUTPUT_DIR/figures/scale_factors/.
+cp $INPUT_DIR/pdf/scale_factors/DoubleElTrail.pdf               $OUTPUT_DIR/figures/scale_factors/.
+cp $INPUT_DIR/pdf/scale_factors/DoubleMuLead.pdf                $OUTPUT_DIR/figures/scale_factors/.
+cp $INPUT_DIR/pdf/scale_factors/DoubleMuTrail.pdf               $OUTPUT_DIR/figures/scale_factors/.
+cp $INPUT_DIR/pdf/scale_factors/ElecFR_35.pdf                   $OUTPUT_DIR/figures/scale_factors/.
+cp $INPUT_DIR/pdf/scale_factors/ElecFR_50.pdf                   $OUTPUT_DIR/figures/scale_factors/.
+cp $INPUT_DIR/pdf/scale_factors/MuonFR_30.pdf                   $OUTPUT_DIR/figures/scale_factors/.
+cp $INPUT_DIR/pdf/scale_factors/MuonFR_50.pdf                   $OUTPUT_DIR/figures/scale_factors/.
+cp $INPUT_DIR/pdf/scale_factors/ElecPR.pdf                      $OUTPUT_DIR/figures/scale_factors/.
+cp $INPUT_DIR/pdf/scale_factors/MuonPR.pdf                      $OUTPUT_DIR/figures/scale_factors/.
+cp $INPUT_DIR/pdf/scale_factors/electronScaleUncertainties.pdf  $OUTPUT_DIR/figures/scale_factors/.
+
 cp $INPUT_DIR/pdf/analysis/PPF/ClosureTest/hInvMass2Lep_EEE_ClosureTest.pdf          $OUTPUT_DIR/figures/analysis/PPF/ClosureTest/.
 cp $INPUT_DIR/pdf/analysis/PPF/ClosureTest/hInvMass2Lep_EEM_ClosureTest.pdf          $OUTPUT_DIR/figures/analysis/PPF/ClosureTest/.
 cp $INPUT_DIR/pdf/analysis/PPF/ClosureTest/hInvMass2Lep_MME_ClosureTest.pdf          $OUTPUT_DIR/figures/analysis/PPF/ClosureTest/.
