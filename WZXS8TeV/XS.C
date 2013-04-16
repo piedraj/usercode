@@ -1418,6 +1418,8 @@ void RelativeSystematics(UInt_t channel, UInt_t cut)
 	      
 	      Double_t yUp   = Yield((TH1D*)fUp  ->Get(hname));
 	      Double_t yDown = Yield((TH1D*)fDown->Get(hname));
+
+	      if (process == WZ) printf(" [%s,%8s] y0: %.0f, yUp: %.0f, yDown: %.0f\n", sChannel[channel].Data(), sSystematic[syst].Data(), y0, yUp, yDown);
 	      
 	      Double_t systUp   = RelativeDifference(y0, yUp);
 	      Double_t systDown = RelativeDifference(y0, yDown);

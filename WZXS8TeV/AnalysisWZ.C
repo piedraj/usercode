@@ -126,6 +126,9 @@ void AnalysisWZ::InsideLoop()
 
   for (UInt_t j=0; j<nFakeRate; j++) dataDriven_weight[j] = 1.;
 
+
+  // Set the MET of the event
+  //----------------------------------------------------------------------------
   EventMET = GetMET();
 
 
@@ -142,20 +145,22 @@ void AnalysisWZ::InsideLoop()
   //----------------------------------------------------------------------------
   for (UInt_t i=0; i<T_Muon_Px->size(); i++) {
 
-    TLorentzVector MuonVector(T_Muon_Px->at(i),
-			      T_Muon_Py->at(i),
-			      T_Muon_Pz->at(i),
-			      T_Muon_Energy->at(i));
+    TLorentzVector tmp(T_Muon_Px->at(i),
+		       T_Muon_Py->at(i),
+		       T_Muon_Pz->at(i),
+		       T_Muon_Energy->at(i));
     
-    Double_t eta = fabs(MuonVector.Eta());
-
-    Double_t pt = ScaleLepton(Muon, MuonVector.Pt());
-
-    MuonVector.SetPtEtaPhiM(pt, MuonVector.Eta(), MuonVector.Phi(), MUON_MASS);
-
-    if (pt <= 10.) continue;
+    Double_t eta = fabs(tmp.Eta());
 
     if (eta >= 2.4) continue;
+
+    if (tmp.Pt() <= 10.) continue;
+
+    Double_t pt = ScaleLepton(Muon, tmp.Pt());
+
+    TLorentzVector MuonVector;
+    
+    MuonVector.SetPtEtaPhiM(pt, tmp.Eta(), tmp.Phi(), MUON_MASS);
 
     if (fabs(T_Muon_IP2DBiasedPV->at(i)) > 0.2) continue;
 
@@ -166,6 +171,8 @@ void AnalysisWZ::InsideLoop()
     if (!MuonID(i)) continue;
 
     UInt_t muon_type = (MuonCloseToPV(i) && MuonIsolation(i)) ? Tight : Fail;
+
+    if (muon_type == Tight && pt > 20) EventMET += (tmp - MuonVector);
 
     const Double_t sfMax = MuonSF->GetXaxis()->GetBinCenter(MuonSF->GetNbinsX());
     const Double_t prMax = MuonPR->GetXaxis()->GetBinCenter(MuonPR->GetNbinsX());
@@ -194,26 +201,32 @@ void AnalysisWZ::InsideLoop()
   //----------------------------------------------------------------------------
   for (UInt_t i=0; i<T_Elec_Px->size(); i++) {
 
-    TLorentzVector ElectronVector(T_Elec_Px->at(i),
-				  T_Elec_Py->at(i),
-				  T_Elec_Pz->at(i),
-				  T_Elec_Energy->at(i));
+    TLorentzVector tmp(T_Elec_Px->at(i),
+		       T_Elec_Py->at(i),
+		       T_Elec_Pz->at(i),
+		       T_Elec_Energy->at(i));
 
-    Double_t eta = fabs(ElectronVector.Eta());
-
-    Double_t pt = ScaleLepton(Electron, ElectronVector.Pt(), eta);
-
-    ElectronVector.SetPtEtaPhiM(pt, ElectronVector.Eta(), ElectronVector.Phi(), ELECTRON_MASS);
-
-    if (pt <= 10.) continue;
+    Double_t eta = fabs(tmp.Eta());
 
     if (eta >= 2.5) continue;
 
+    if (tmp.Pt() <= 10.) continue;
+
+    Double_t pt = ScaleLepton(Electron, tmp.Pt(), eta);
+
+    TLorentzVector ElectronVector;
+
+    ElectronVector.SetPtEtaPhiM(pt, tmp.Eta(), tmp.Phi(), ELECTRON_MASS);
+
+    if (fabs(T_Elec_IP2DBiasedPV->at(i)) > 0.02) continue;
+
+    if (fabs(T_Elec_dzPVBiasedPV->at(i)) > 0.1) continue;
+
     if (!ElectronID(i)) continue;
 
-    if (!ElectronCloseToPV(i)) continue;
-
     UInt_t electron_type = (ElectronBDT(i) && ElectronIsolation(i)) ? Tight : Fail;
+
+    if (electron_type == Tight && pt > 20) EventMET += (tmp - ElectronVector);
 
     const Double_t sfMax = ElecSF->GetXaxis()->GetBinCenter(ElecSF->GetNbinsX());
     const Double_t prMax = ElecPR->GetXaxis()->GetBinCenter(ElecPR->GetNbinsX());
@@ -599,20 +612,6 @@ Bool_t AnalysisWZ::ElectronID(UInt_t iElec)
 
 
 //------------------------------------------------------------------------------
-// ElectronCloseToPV
-//------------------------------------------------------------------------------
-Bool_t AnalysisWZ::ElectronCloseToPV(UInt_t iElec) 
-{
-  Bool_t pass = true;
-
-  pass &= (fabs(T_Elec_dzPVBiasedPV->at(iElec)) <= 0.10);
-  pass &= (fabs(T_Elec_IP2DBiasedPV->at(iElec)) <= 0.02);
-
-  return pass;
-}
-
-
-//------------------------------------------------------------------------------
 // ElectronIsolation
 //------------------------------------------------------------------------------
 Bool_t AnalysisWZ::ElectronIsolation(UInt_t iElec) 
@@ -988,9 +987,6 @@ TLorentzVector AnalysisWZ::GetMET()
   Double_t px = T_METPFTypeI_ET * cos(T_METPFTypeI_Phi);
   Double_t py = T_METPFTypeI_ET * sin(T_METPFTypeI_Phi);
 
-  
-  // metSyst
-  //----------------------------------------------------------------------------
   if (systematic == metSyst)
     {
       TRandom* random = new TRandom();
@@ -1001,60 +997,7 @@ TLorentzVector AnalysisWZ::GetMET()
 
   Double_t met = sqrt(px*px + py*py);
 
-  TLorentzVector metv(px, py, 0.0, met);
-
-
-  // muonUpSyst, muonDownSyst
-  //----------------------------------------------------------------------------
-  if (systematic == muonUpSyst || systematic == muonDownSyst)
-    {
-      TLorentzVector oleps, leps;
-
-      for (UInt_t i=0; i<T_Muon_Px->size(); i++) {
-
-	TLorentzVector tmp(T_Muon_Px->at(i),
-			   T_Muon_Py->at(i),
-			   T_Muon_Pz->at(i),
-			   T_Muon_Energy->at(i));
-    
-	oleps += tmp;
-      
-	Double_t pt = ScaleLepton(Muon, tmp.Pt());
-
-	tmp.SetPtEtaPhiM(pt, tmp.Eta(), tmp.Phi(), MUON_MASS);
-
-	leps += tmp;
-      }
-
-      metv += (oleps - leps);
-    }
-
-
-  // electronUpSyst, electronDownSyst
-  //----------------------------------------------------------------------------
-  if (systematic == electronUpSyst || systematic == electronDownSyst)
-    {
-      TLorentzVector oleps, leps;
-
-      for (UInt_t i=0; i<T_Elec_Px->size(); i++) {
-
-	TLorentzVector tmp(T_Elec_Px->at(i),
-			   T_Elec_Py->at(i),
-			   T_Elec_Pz->at(i),
-			   T_Elec_Energy->at(i));
-    
-	oleps += tmp;
-      
-	Double_t pt = ScaleLepton(Electron, tmp.Pt(), tmp.Eta());
-
-	tmp.SetPtEtaPhiM(pt, tmp.Eta(), tmp.Phi(), ELECTRON_MASS);
-
-	leps += tmp;
-      }
-
-      metv += (oleps - leps);
-    }
-
+  TLorentzVector metv(px, py, 0., met);
 
   return metv;
 }
@@ -1123,7 +1066,7 @@ Bool_t AnalysisWZ::PassTrigger()
 
 
 //------------------------------------------------------------------------------
-// ScaleLeptons
+// ScaleLepton
 //------------------------------------------------------------------------------
 Double_t AnalysisWZ::ScaleLepton(UInt_t flavor, Double_t pt, Double_t eta)
 {

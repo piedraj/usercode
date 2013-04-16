@@ -34,8 +34,12 @@ void RunPROOF_WZ(TString  sample     = "WZTo3LNu",
   // Reset PROOF
   //----------------------------------------------------------------------------
   gSystem->Exec("./resetproof.sh -a");
+  gSystem->Exec("./resetproof.sh -a");
+
   gSystem->Exec("rm -f *.d");
   gSystem->Exec("rm -f *.so");
+  gSystem->Exec("rm -f */*.d");
+  gSystem->Exec("rm -f */*.so");
 
   if (runAtOviedo) gSystem->Exec("qdel all");
   else             gSystem->Exec("endproof");

@@ -124,7 +124,6 @@ class AnalysisWZ: public CMSAnalysisSelectorMiniTrees
   void           GetParameters             ();
 			    
   Bool_t         ElectronID                (UInt_t   iElec);
-  Bool_t         ElectronCloseToPV         (UInt_t   iElec);
   Bool_t         ElectronBDT               (UInt_t   iElec);
   Bool_t         ElectronIsolation         (UInt_t   iElec);
 			    	      
