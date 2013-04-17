@@ -87,11 +87,11 @@ void DrawIt(TString name)
 
   TString xtitle;
 
-  if (name.Contains("Lepton"))  xtitle = "lepton";
-  if (name.Contains("Trigger")) xtitle = "trigger";
-  if (name.Contains("Total"))   xtitle = "lepton #upoint trigger";
+  if (name.Contains("Lepton"))  xtitle = "lepton identification SF";
+  if (name.Contains("Trigger")) xtitle = "trigger #varepsilon";
+  if (name.Contains("Total"))   xtitle = "lepton identification SF #upoint trigger #varepsilon";
 
-  AxisFonts(hEEE->GetXaxis(), xtitle + " weight per event");
+  AxisFonts(hEEE->GetXaxis(), xtitle + " per event");
   AxisFonts(hEEE->GetYaxis(), "");
 
   DrawLegend(0.23, 0.82 - 0. * 0.063, hMMM, " #mu#mu#mu", "l", 0.04, 0.2, 0.07);

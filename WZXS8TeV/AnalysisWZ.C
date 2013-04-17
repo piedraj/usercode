@@ -1088,23 +1088,23 @@ Double_t AnalysisWZ::ScaleLepton(UInt_t flavor, Double_t pt, Double_t eta)
       const Double_t InEBMax  = hScaleInEB ->GetXaxis()->GetBinCenter(hScaleInEB ->GetNbinsX());
       const Double_t OutEBMax = hScaleOutEB->GetXaxis()->GetBinCenter(hScaleOutEB->GetNbinsX());
       const Double_t EEMax    = hScaleEE   ->GetXaxis()->GetBinCenter(hScaleEE   ->GetNbinsX());
-
+      
       const Double_t scaleInEB  = hScaleInEB ->GetBinContent(hScaleInEB ->FindBin(min(pt,InEBMax)));
       const Double_t scaleOutEB = hScaleOutEB->GetBinContent(hScaleOutEB->FindBin(min(pt,OutEBMax)));
       const Double_t scaleEE    = hScaleEE   ->GetBinContent(hScaleEE   ->FindBin(min(pt,EEMax)));
-
+      
       if (fabs(eta) < 0.8)
-	{
-	  scale = scaleInEB;
-	}
+      	{
+      	  scale = scaleInEB;
+      	}
       else if (fabs(eta) >= 0.8 && fabs(eta) < 1.479)
-	{
-	  scale = scaleOutEB;
-	}
+      	{
+      	  scale = scaleOutEB;
+      	}
       else
-	{
-	  scale = scaleEE;
-	}
+      	{
+      	  scale = scaleEE;
+      	}
     }
      
   if (systematic == muonDownSyst || systematic == electronDownSyst)

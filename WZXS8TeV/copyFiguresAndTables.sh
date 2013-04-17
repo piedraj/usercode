@@ -19,6 +19,9 @@ cp $INPUT_DIR/pdf/scale_factors/MuonFR_50.pdf                   $OUTPUT_DIR/figu
 cp $INPUT_DIR/pdf/scale_factors/ElecPR.pdf                      $OUTPUT_DIR/figures/scale_factors/.
 cp $INPUT_DIR/pdf/scale_factors/MuonPR.pdf                      $OUTPUT_DIR/figures/scale_factors/.
 cp $INPUT_DIR/pdf/scale_factors/electronScaleUncertainties.pdf  $OUTPUT_DIR/figures/scale_factors/.
+cp $INPUT_DIR/pdf/scale_factors/hLeptonWeight.pdf               $OUTPUT_DIR/figures/scale_factors/.
+cp $INPUT_DIR/pdf/scale_factors/hTriggerWeight.pdf              $OUTPUT_DIR/figures/scale_factors/.
+cp $INPUT_DIR/pdf/scale_factors/hTotalWeight.pdf                $OUTPUT_DIR/figures/scale_factors/.
 
 cp $INPUT_DIR/pdf/analysis/PPF/ClosureTest/hInvMass2Lep_EEE_ClosureTest.pdf          $OUTPUT_DIR/figures/analysis/PPF/ClosureTest/.
 cp $INPUT_DIR/pdf/analysis/PPF/ClosureTest/hInvMass2Lep_EEM_ClosureTest.pdf          $OUTPUT_DIR/figures/analysis/PPF/ClosureTest/.

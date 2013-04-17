@@ -28,9 +28,9 @@
 //
 // scale systematic
 //
-//  xs = 13.89 + 8.06 = 21.95 pb          // Scale x1 ( 85.79 GeV) with 71 < mZ < 111 GeV
-//  xs = 13.33 + 7.72 = 21.05 pb (-4.1%)  // Scale x2 (171.58 GeV) with 71 < mZ < 111 GeV
-//  xs = 14.63 + 8.49.= 23.12 pb (+5.3%)  // Scale /2 ( 42.90 GeV) with 71 < mZ < 111 GeV
+//  xs = 13.89 + 8.06 = 21.95 pb                 // Scale x1 ( 85.79 GeV) with 71 < mZ < 111 GeV
+//  xs = 13.33 + 7.72 = 21.05 pb (-0.9 = -4.1%)  // Scale x2 (171.58 GeV) with 71 < mZ < 111 GeV
+//  xs = 14.63 + 8.49.= 23.12 pb (+1.2 = +5.3%)  // Scale /2 ( 42.90 GeV) with 71 < mZ < 111 GeV
 //
 //
 // pdf systematic
@@ -539,15 +539,15 @@ void PrintSystematics(UInt_t channel, UInt_t cut)
 
   outputfile.open(Form("tex/systematics_%s_%s.tex", sCut[cut].Data(), sChannel[channel].Data()));
 
-  outputfile << Form(" %-30s & %.1f%s & %.1f%s &    $-$ \\\\\n", "luminosity",                    _luminosityUncertainty, "\\%", _luminosityUncertainty, "\\%");
-  outputfile << Form(" %-30s &    $-$ &    $-$ & %.0f%s \\\\\n", "data-driven",                   systematicError[channel][Fakes][fakesSyst], "\\%");
-  outputfile << Form(" %-30s & %.1f%s &    $-$ &    $-$ \\\\\n", "QCD scale",                     systematicError[channel][WZ][qcdSyst],      "\\%");
-  outputfile << Form(" %-30s & %.1f%s &    $-$ &    $-$ \\\\\n", "PDFs",                          systematicError[channel][WZ][pdfSyst],      "\\%");
-  outputfile << Form(" %-30s & %.1f%s & %.1f%s &    $-$ \\\\\n", "\\MET",                         systematicError[channel][WZ][metSyst],      "\\%", systematicError[channel][ZZ][metSyst],      "\\%");
-  outputfile << Form(" %-30s & %.1f%s & %.1f%s &    $-$ \\\\\n", "lepton and trigger efficiency", systematicError[channel][WZ][triggerSyst],  "\\%", systematicError[channel][ZZ][triggerSyst],  "\\%");
-  outputfile << Form(" %-30s & %.1f%s & %.1f%s &    $-$ \\\\\n", "muon momentum scale",           systematicError[channel][WZ][muonSyst],     "\\%", systematicError[channel][ZZ][muonSyst],     "\\%");
-  outputfile << Form(" %-30s & %.1f%s & %.1f%s &    $-$ \\\\\n", "electron energy scale",         systematicError[channel][WZ][electronSyst], "\\%", systematicError[channel][ZZ][electronSyst], "\\%");
-  outputfile << Form(" %-30s & %.1f%s & %.1f%s &    $-$ \\\\\n", "pile-up",                       systematicError[channel][WZ][pileupSyst],   "\\%", systematicError[channel][ZZ][pileupSyst],   "\\%");
+  outputfile << Form(" %-30s & %.1f & %.1f &  $-$ \\\\\n", "luminosity",                    _luminosityUncertainty, _luminosityUncertainty);
+  outputfile << Form(" %-30s &  $-$ &  $-$ & %.0f \\\\\n", "data-driven",                   systematicError[channel][Fakes][fakesSyst]);
+  outputfile << Form(" %-30s & %.1f &  $-$ &  $-$ \\\\\n", "QCD scale",                     systematicError[channel][WZ][qcdSyst]);
+  outputfile << Form(" %-30s & %.1f &  $-$ &  $-$ \\\\\n", "PDFs",                          systematicError[channel][WZ][pdfSyst]);
+  outputfile << Form(" %-30s & %.1f & %.1f &  $-$ \\\\\n", "\\MET",                         systematicError[channel][WZ][metSyst],      systematicError[channel][ZZ][metSyst]);
+  outputfile << Form(" %-30s & %.1f & %.1f &  $-$ \\\\\n", "lepton and trigger efficiency", systematicError[channel][WZ][triggerSyst],  systematicError[channel][ZZ][triggerSyst]);
+  outputfile << Form(" %-30s & %.1f & %.1f &  $-$ \\\\\n", "muon momentum scale",           systematicError[channel][WZ][muonSyst],     systematicError[channel][ZZ][muonSyst]);
+  outputfile << Form(" %-30s & %.1f & %.1f &  $-$ \\\\\n", "electron energy scale",         systematicError[channel][WZ][electronSyst], systematicError[channel][ZZ][electronSyst]);
+  outputfile << Form(" %-30s & %.1f & %.1f &  $-$ \\\\\n", "pile-up",                       systematicError[channel][WZ][pileupSyst],   systematicError[channel][ZZ][pileupSyst]);
 
   outputfile.close();
 }
@@ -1419,8 +1419,6 @@ void RelativeSystematics(UInt_t channel, UInt_t cut)
 	      Double_t yUp   = Yield((TH1D*)fUp  ->Get(hname));
 	      Double_t yDown = Yield((TH1D*)fDown->Get(hname));
 
-	      if (process == WZ) printf(" [%s,%8s] y0: %.0f, yUp: %.0f, yDown: %.0f\n", sChannel[channel].Data(), sSystematic[syst].Data(), y0, yUp, yDown);
-	      
 	      Double_t systUp   = RelativeDifference(y0, yUp);
 	      Double_t systDown = RelativeDifference(y0, yDown);
 
