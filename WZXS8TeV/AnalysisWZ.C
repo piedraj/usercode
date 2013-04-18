@@ -153,11 +153,8 @@ void AnalysisWZ::InsideLoop()
 
     Double_t pt = ScaleLepton(Muon, tmp.Pt());
 
-    TLorentzVector MuonVector;
-    TLorentzVector MuonVector2;
+    TLorentzVector MuonVector = (pt / tmp.Pt()) * tmp;
     
-    MuonVector.SetPtEtaPhiM(pt, tmp.Eta(), tmp.Phi(), MUON_MASS);
-
     if (fabs(T_Muon_IP2DBiasedPV->at(i)) > 0.2) continue;
 
     if (fabs(T_Muon_dzPVBiasedPV->at(i)) > 0.1) continue;
@@ -209,9 +206,7 @@ void AnalysisWZ::InsideLoop()
 
     Double_t pt = ScaleLepton(Electron, tmp.Pt(), eta);
 
-    TLorentzVector ElectronVector;
-
-    ElectronVector.SetPtEtaPhiM(pt, tmp.Eta(), tmp.Phi(), ELECTRON_MASS);
+    TLorentzVector ElectronVector = (pt / tmp.Pt()) * tmp;
 
     if (fabs(T_Elec_IP2DBiasedPV->at(i)) > 0.02) continue;
 

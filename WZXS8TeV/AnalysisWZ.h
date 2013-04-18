@@ -19,9 +19,7 @@
 #include <vector>
 
 
-const Double_t Z_MASS        = 91.1876;  // [GeV]
-const Double_t MUON_MASS     =  0.1057;  // [GeV]
-const Double_t ELECTRON_MASS =  0.0005;  // [GeV]
+const Double_t Z_MASS = 91.1876;  // [GeV]
 
 
 const UInt_t nChannel = 4;
