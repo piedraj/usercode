@@ -7,43 +7,41 @@
 #include "TTree.h"
 
 
-const UInt_t nProcesses = 12;
+const UInt_t nProcesses = 11;
 
-enum {iData, iWW, iWZ, iZZ, iWg, itt, itW, iWj, iDY, iDYtau, iZgamma, iH125};
+enum {iData, iWW, iWZ, iZZ, iWg, itt, itW, iWj, iDY, iDYtau, iH125};
 
 TFile* input[nProcesses];
 
 
 TString process[nProcesses];
 
-process[iData]   = "DataRun2012_Total";
-process[itt]     = "TTbar";
-process[itW]     = "TW";
-process[iWW]     = "WW";
-process[iWZ]     = "WZ";
-process[iZZ]     = "ZZ";
-process[iWg]     = "Wgamma";
-process[iWj]     = "WJetsFakes_Total";
-process[iDY]     = "DY";
-process[iDYtau]  = "DYtautau";
-process[iZgamma] = "Zgamma";
-process[iH125]   = "HWW125";
+process[iData]  = "DataRun2012_Total";
+process[itt]    = "TTbar";
+process[itW]    = "TW";
+process[iWW]    = "WW";
+process[iWZ]    = "WZ";
+process[iZZ]    = "ZZ";
+process[iWg]    = "Wgamma";
+process[iWj]    = "WJetsFakes_Total";
+process[iDY]    = "DY";
+process[iDYtau] = "DYtautau";
+process[iH125]  = "HWW125";
 
 
 Color_t color[nProcesses];
 
-color[iData]   = kBlack;
-color[itt]     = kYellow;
-color[itW]     = kYellow;
-color[iWW]     = kAzure-9;
-color[iWZ]     = kAzure-2;
-color[iZZ]     = kAzure-2;
-color[iWg]     = kAzure-2;
-color[iWj]     = kGray+1;
-color[iDY]     = kGreen+2;
-color[iDYtau]  = kGreen+2;
-color[iZgamma] = kGreen+2;
-color[iH125]   = kRed;
+color[iData]  = kBlack;
+color[itt]    = kYellow;
+color[itW]    = kYellow;
+color[iWW]    = kAzure-9;
+color[iWZ]    = kAzure-2;
+color[iZZ]    = kAzure-2;
+color[iWg]    = kAzure-2;
+color[iWj]    = kGray+1;
+color[iDY]    = kGreen+2;
+color[iDYtau] = kGreen+2;
+color[iH125]  = kRed;
 
 
 Double_t systError[nProcesses];
@@ -51,17 +49,16 @@ Double_t systError[nProcesses];
 systError[iData] = 0.0;
 
 // syst. / yield for the 0-jet bin
-systError[itt]     = 21.7 / 166.0;
-systError[itW]     = 21.7 / 166.0;
-systError[iWW]     = 67.7 / 939.5;
-systError[iWZ]     =  3.3 /  41.2;
-systError[iZZ]     =  3.3 /  41.2;
-systError[iWg]     =  6.1 /  19.3;
-systError[iWj]     = 36.9 / 102.5;
-systError[iDY]     =  9.8 /  58.2;
-systError[iDYtau]  =  9.8 /  58.2;
-systError[iZgamma] =  2.7 /  36.1;
-systError[iH125]   =  2.7 /  36.1;
+systError[itt]    = 21.7 / 166.0;
+systError[itW]    = 21.7 / 166.0;
+systError[iWW]    = 67.7 / 939.5;
+systError[iWZ]    =  3.3 /  41.2;
+systError[iZZ]    =  3.3 /  41.2;
+systError[iWg]    =  6.1 /  19.3;
+systError[iWj]    = 36.9 / 102.5;
+systError[iDY]    =  9.8 /  58.2;
+systError[iDYtau] =  9.8 /  58.2;
+systError[iH125]  =  2.7 /  36.1;
 
 
 // Settings
@@ -173,9 +170,9 @@ void drawDistributions(Int_t    njet       = 0,
   // Top distributions
   //----------------------------------------------------------------------------
   if (0) {
-    DrawHistogram("hbTagDisNTopTaggedTopControlRegion", "2^{nd} jet TCHE", 5, 1, "NULL", -999, -999, false);
-    DrawHistogram("hbTagDisNTopControlRegion",          "2^{nd} jet TCHE", 5, 1, "NULL", -999, -999, false);
-    DrawHistogram("hbTagDisTopTaggedEvents",            "2^{nd} jet TCHE", 5, 1, "NULL", -999, -999, false);
+    DrawHistogram("hbTagDisNTopTaggedTopControlRegion", "2^{nd} jet TCHE", 5, 1, "NULL", -999, 999, false);
+    DrawHistogram("hbTagDisNTopControlRegion",          "2^{nd} jet TCHE", 5, 1, "NULL", -999, 999, false);
+    DrawHistogram("hbTagDisTopTaggedEvents",            "2^{nd} jet TCHE", 5, 1, "NULL", -999, 999, false);
   }
 
 
