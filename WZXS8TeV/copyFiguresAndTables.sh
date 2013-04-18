@@ -62,16 +62,9 @@ cp $INPUT_DIR/tex/MME_ppf.tex  $OUTPUT_DIR/tables/.
 cp $INPUT_DIR/tex/MMM_ppf.tex  $OUTPUT_DIR/tables/.
 
 
-# Systematics
-#-------------------------------------------------------------------------------
-cp $INPUT_DIR/tex/systematics_MET30_EEE.tex  $OUTPUT_DIR/tables/.
-cp $INPUT_DIR/tex/systematics_MET30_EEM.tex  $OUTPUT_DIR/tables/.
-cp $INPUT_DIR/tex/systematics_MET30_MME.tex  $OUTPUT_DIR/tables/.
-cp $INPUT_DIR/tex/systematics_MET30_MMM.tex  $OUTPUT_DIR/tables/.
-
-
 # Final results
 #-------------------------------------------------------------------------------
 cp $INPUT_DIR/pdf/analysis/PPF/MET30/xs_MET30.pdf  $OUTPUT_DIR/figures/analysis/PPF/MET30/.
 cp $INPUT_DIR/tex/xs_MET30_ppf.tex                 $OUTPUT_DIR/tables/.
+cp $INPUT_DIR/tex/systematics_MET30.tex            $OUTPUT_DIR/tables/.
 

@@ -80,6 +80,7 @@ struct Lepton
   Double_t       pr;
   Double_t       lead;
   Double_t       trail;
+  TLorentzVector vraw;
   TLorentzVector v;
 
   Bool_t operator<(const Lepton& a) const

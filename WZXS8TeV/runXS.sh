@@ -4,10 +4,10 @@ rm -rf pdf
 rm -rf png
 rm -rf tex
 
-./merge.sh >& merge.log
-grep Error merge.log
+### ./merge.sh >& merge.log
+### grep Error merge.log
 
-for ((level=0; level<6; level++))
+for ((level=0; level<4; level++))
   do
   for ((mode=0; mode<2; mode++))
     do

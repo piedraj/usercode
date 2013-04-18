@@ -100,14 +100,14 @@ TString pdfChannel[nChannel+1] = {
 };
 
 
-const UInt_t nCut = 6;
+const UInt_t nCut = 4;
 
 enum {
   Exactly3Leptons,
   HasZCandidate,
   MET30,
-  MET40,
-  MET40AntiBtag,
+  //  MET40,
+  //  MET40AntiBtag,
   ClosureTest
 };
 
@@ -115,8 +115,8 @@ TString sCut[nCut] = {
   "Exactly3Leptons",
   "HasZCandidate",
   "MET30",
-  "MET40",
-  "MET40AntiBtag",
+  //  "MET40",
+  //  "MET40AntiBtag",
   "ClosureTest"
 };
 
@@ -196,9 +196,11 @@ vector<UInt_t>  vprocess;
 Double_t        wzEffValue [nChannel+1];
 Double_t        wzEffError [nChannel+1];
 Double_t        xsValue    [nChannel+1];
-Double_t        xsErrorStat[nChannel+1];
-Double_t        xsErrorSyst[nChannel+1];
 Double_t        xsErrorLumi[nChannel+1];
+Double_t        xsErrorStat[nChannel+1];
+Double_t        xsErrorEff [nChannel+1];
+Double_t        xsErrorBkgs[nChannel+1];
+Double_t        xsErrorSyst[nChannel+1];
 
 
 // Member functions
@@ -213,8 +215,7 @@ void     MeasureTheCrossSection   (UInt_t        channel,
 
 void     PrintYields              (UInt_t        channel);
 
-void     PrintSystematics         (UInt_t        channel,
-				   UInt_t        cut);
+void     PrintSystematics         (UInt_t        cut);
 
 void     DrawHistogram            (TString       hname,
 				   UInt_t        channel,
@@ -295,8 +296,6 @@ void XS(UInt_t cut  = MET30,
 
     RelativeSystematics(channel, cut);
 
-    PrintSystematics(channel, cut);
-
     MeasureTheCrossSection(channel, cut);
 
     PrintYields(channel);
@@ -336,6 +335,8 @@ void XS(UInt_t cut  = MET30,
 
   Inclusive();
   
+  PrintSystematics(cut);
+
   DrawCrossSections(cut);
 
   PrintCrossSections(cut);
@@ -395,22 +396,24 @@ void MeasureTheCrossSection(UInt_t channel, UInt_t cut)
 
   // Relative errors
   //----------------------------------------------------------------------------
-  Double_t xsRelativeErrorLumi       = _luminosityUncertainty;
-  Double_t xsRelativeErrorStat       = 1e2 * sqrt(ndata) / (ndata - nbkg);
-  Double_t xsRelativeErrorBackground = 1e2 * ebkg        / (ndata - nbkg);
-  Double_t xsRelativeErrorEfficiency = totalSyst[channel][WZ];
-  Double_t xsRelativeErrorSyst       = 0;
+  Double_t xsRelativeErrorLumi = _luminosityUncertainty;
+  Double_t xsRelativeErrorStat = 1e2 * sqrt(ndata) / (ndata - nbkg);
+  Double_t xsRelativeErrorEff  = totalSyst[channel][WZ];
+  Double_t xsRelativeErrorBkgs = 1e2 * ebkg        / (ndata - nbkg);
+  Double_t xsRelativeErrorSyst = 0;
 
-  xsRelativeErrorSyst += (xsRelativeErrorBackground * xsRelativeErrorBackground);
-  xsRelativeErrorSyst += (xsRelativeErrorEfficiency * xsRelativeErrorEfficiency);
+  xsRelativeErrorSyst += (xsRelativeErrorBkgs * xsRelativeErrorBkgs);
+  xsRelativeErrorSyst += (xsRelativeErrorEff * xsRelativeErrorEff);
   xsRelativeErrorSyst = sqrt(xsRelativeErrorSyst);
 
 
   // Absolute errors
   //----------------------------------------------------------------------------
-  xsErrorStat[channel] = xsRelativeErrorStat * xsValue[channel] / 1e2;  // pb
-  xsErrorSyst[channel] = xsRelativeErrorSyst * xsValue[channel] / 1e2;  // pb
   xsErrorLumi[channel] = xsRelativeErrorLumi * xsValue[channel] / 1e2;  // pb
+  xsErrorStat[channel] = xsRelativeErrorStat * xsValue[channel] / 1e2;  // pb
+  xsErrorEff [channel] = xsRelativeErrorEff  * xsValue[channel] / 1e2;  // pb
+  xsErrorBkgs[channel] = xsRelativeErrorBkgs * xsValue[channel] / 1e2;  // pb
+  xsErrorSyst[channel] = xsRelativeErrorSyst * xsValue[channel] / 1e2;  // pb
 
 
   // Print the results
@@ -533,21 +536,24 @@ void PrintYields(UInt_t channel)
 //------------------------------------------------------------------------------
 // PrintSystematics
 //------------------------------------------------------------------------------
-void PrintSystematics(UInt_t channel, UInt_t cut)
+void PrintSystematics(UInt_t cut)
 {
   ofstream outputfile;
 
-  outputfile.open(Form("tex/systematics_%s_%s.tex", sCut[cut].Data(), sChannel[channel].Data()));
+  outputfile.open(Form("tex/systematics_%s.tex", sCut[cut].Data()));
 
-  outputfile << Form(" %-30s & %.1f & %.1f &  $-$ \\\\\n", "luminosity",                    _luminosityUncertainty, _luminosityUncertainty);
-  outputfile << Form(" %-30s &  $-$ &  $-$ & %.0f \\\\\n", "data-driven",                   systematicError[channel][Fakes][fakesSyst]);
-  outputfile << Form(" %-30s & %.1f &  $-$ &  $-$ \\\\\n", "QCD scale",                     systematicError[channel][WZ][qcdSyst]);
-  outputfile << Form(" %-30s & %.1f &  $-$ &  $-$ \\\\\n", "PDFs",                          systematicError[channel][WZ][pdfSyst]);
-  outputfile << Form(" %-30s & %.1f & %.1f &  $-$ \\\\\n", "\\MET",                         systematicError[channel][WZ][metSyst],      systematicError[channel][ZZ][metSyst]);
-  outputfile << Form(" %-30s & %.1f & %.1f &  $-$ \\\\\n", "lepton and trigger efficiency", systematicError[channel][WZ][triggerSyst],  systematicError[channel][ZZ][triggerSyst]);
-  outputfile << Form(" %-30s & %.1f & %.1f &  $-$ \\\\\n", "muon momentum scale",           systematicError[channel][WZ][muonSyst],     systematicError[channel][ZZ][muonSyst]);
-  outputfile << Form(" %-30s & %.1f & %.1f &  $-$ \\\\\n", "electron energy scale",         systematicError[channel][WZ][electronSyst], systematicError[channel][ZZ][electronSyst]);
-  outputfile << Form(" %-30s & %.1f & %.1f &  $-$ \\\\\n", "pile-up",                       systematicError[channel][WZ][pileupSyst],   systematicError[channel][ZZ][pileupSyst]);
+  outputfile << Form(" %-30s", "QCD scale");                     for (UInt_t i=0; i<nChannel; i++) outputfile << Form(" & %.1f", systematicError[i][WZ][qcdSyst]);      outputfile << "\\\\\n";
+  outputfile << Form(" %-30s", "PDFs");                          for (UInt_t i=0; i<nChannel; i++) outputfile << Form(" & %.1f", systematicError[i][WZ][pdfSyst]);      outputfile << "\\\\\n";
+  outputfile << Form(" %-30s", "\\MET");                         for (UInt_t i=0; i<nChannel; i++) outputfile << Form(" & %.1f", systematicError[i][WZ][metSyst]);      outputfile << "\\\\\n";
+  outputfile << Form(" %-30s", "lepton and trigger efficiency"); for (UInt_t i=0; i<nChannel; i++) outputfile << Form(" & %.1f", systematicError[i][WZ][triggerSyst]);  outputfile << "\\\\\n";
+  outputfile << Form(" %-30s", "muon momentum scale");           for (UInt_t i=0; i<nChannel; i++) outputfile << Form(" & %.1f", systematicError[i][WZ][muonSyst]);     outputfile << "\\\\\n";
+  outputfile << Form(" %-30s", "electron energy scale");         for (UInt_t i=0; i<nChannel; i++) outputfile << Form(" & %.1f", systematicError[i][WZ][electronSyst]); outputfile << "\\\\\n";
+  outputfile << Form(" %-30s", "pile-up");                       for (UInt_t i=0; i<nChannel; i++) outputfile << Form(" & %.1f", systematicError[i][WZ][pileupSyst]);   outputfile << "\\\\\n";
+  outputfile << Form(" %-30s", "WZ efficiency");                 for (UInt_t i=0; i<nChannel; i++) outputfile << Form(" & %.1f", 1e2 * xsErrorEff [i] / xsValue[i]);    outputfile << "\\\\\n"; outputfile << " \\hline\n";
+  outputfile << Form(" %-30s", "backgrounds");                   for (UInt_t i=0; i<nChannel; i++) outputfile << Form(" & %.1f", 1e2 * xsErrorBkgs[i] / xsValue[i]);    outputfile << "\\\\\n"; outputfile << " \\hline\n";
+  outputfile << Form(" %-30s", "statistical");                   for (UInt_t i=0; i<nChannel; i++) outputfile << Form(" & %.1f", 1e2 * xsErrorStat[i] / xsValue[i]);    outputfile << "\\\\\n";
+  outputfile << Form(" %-30s", "systematic");                    for (UInt_t i=0; i<nChannel; i++) outputfile << Form(" & %.1f", 1e2 * xsErrorSyst[i] / xsValue[i]);    outputfile << "\\\\\n";
+  outputfile << Form(" %-30s", "luminosity");                    for (UInt_t i=0; i<nChannel; i++) outputfile << Form(" & %.1f", 1e2 * xsErrorLumi[i] / xsValue[i]);    outputfile << "\\\\\n"; outputfile << " \\hline\n";
 
   outputfile.close();
 }
@@ -1193,7 +1199,7 @@ void DrawCrossSections(UInt_t cut)
   canvas->SetLeftMargin(canvas->GetRightMargin());
 
   Double_t xmin = (xsWplusZ + xsWminusZ) -  8.;
-  Double_t xmax = (xsWplusZ + xsWminusZ) + 25.;
+  Double_t xmax = (xsWplusZ + xsWminusZ) + 23.;
   Double_t ymin = 0.50;
   Double_t ymax = nChannel+1 + ymin;
   
@@ -1239,7 +1245,7 @@ void DrawCrossSections(UInt_t cut)
     gLumiError = sqrt(gLumiError*gLumiError - gSystError*gSystError);
     gSystError = sqrt(gSystError*gSystError - gStatError*gStatError);
 
-    DrawTLatex(xmax-1., y, 0.035, 32, Form("%.2f #pm %.2f #pm %.2f #pm %.2f",
+    DrawTLatex(xmax-1., y, 0.035, 32, Form("%.1f #pm %.1f #pm %.1f #pm %.1f",
 					    x, gStatError, gSystError, gLumiError), 0);
   }
 
@@ -1310,9 +1316,11 @@ void PrintCrossSections(UInt_t cut)
 void Inclusive()
 {
   Double_t x     = 0;
-  Double_t stat  = 0;
-  Double_t syst  = 0;
   Double_t lumi  = 0;
+  Double_t stat  = 0;
+  Double_t eff   = 0;
+  Double_t bkgs  = 0;
+  Double_t syst  = 0;
   Double_t total = 0;
 
   for (UInt_t i=0; i<nChannel; i++)
@@ -1327,17 +1335,21 @@ void Inclusive()
 
       x += (xsValue[i] / xsErrorTotal / xsErrorTotal);
 
-      stat  += (1. / xsErrorStat[i]  / xsErrorStat[i]);
-      syst  += (1. / xsErrorSyst[i]  / xsErrorSyst[i]);
       lumi  += (1. / xsErrorLumi[i]  / xsErrorLumi[i]);
+      stat  += (1. / xsErrorStat[i]  / xsErrorStat[i]);
+      eff   += (1. / xsErrorEff [i]  / xsErrorEff [i]);
+      bkgs  += (1. / xsErrorBkgs[i]  / xsErrorBkgs[i]);
+      syst  += (1. / xsErrorSyst[i]  / xsErrorSyst[i]);
       total += (1. / xsErrorTotal    / xsErrorTotal);
     }
 
   xsValue[nChannel] = x / total;
 
-  xsErrorStat[nChannel] = 1. / sqrt(stat);
-  xsErrorSyst[nChannel] = 1. / sqrt(syst);
   xsErrorLumi[nChannel] = 1. / sqrt(lumi);
+  xsErrorStat[nChannel] = 1. / sqrt(stat);
+  xsErrorEff [nChannel] = 1. / sqrt(eff);
+  xsErrorBkgs[nChannel] = 1. / sqrt(bkgs);
+  xsErrorSyst[nChannel] = 1. / sqrt(syst);
 
 
   // Total efficiency

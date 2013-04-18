@@ -127,11 +127,6 @@ void AnalysisWZ::InsideLoop()
   for (UInt_t j=0; j<nFakeRate; j++) dataDriven_weight[j] = 1.;
 
 
-  // Set the MET of the event
-  //----------------------------------------------------------------------------
-  EventMET = GetMET();
-
-
   // MC filters
   //----------------------------------------------------------------------------
   if (sample.Contains("WGstar") && WgammaFilter()) return;
@@ -159,6 +154,7 @@ void AnalysisWZ::InsideLoop()
     Double_t pt = ScaleLepton(Muon, tmp.Pt());
 
     TLorentzVector MuonVector;
+    TLorentzVector MuonVector2;
     
     MuonVector.SetPtEtaPhiM(pt, tmp.Eta(), tmp.Phi(), MUON_MASS);
 
@@ -172,8 +168,6 @@ void AnalysisWZ::InsideLoop()
 
     UInt_t muon_type = (MuonCloseToPV(i) && MuonIsolation(i)) ? Tight : Fail;
 
-    if (muon_type == Tight && pt > 20) EventMET += (tmp - MuonVector);
-
     const Double_t sfMax = MuonSF->GetXaxis()->GetBinCenter(MuonSF->GetNbinsX());
     const Double_t prMax = MuonPR->GetXaxis()->GetBinCenter(MuonPR->GetNbinsX());
     const Double_t trMax = DoubleMuLead->GetXaxis()->GetBinCenter(DoubleMuLead->GetNbinsX());
@@ -184,6 +178,7 @@ void AnalysisWZ::InsideLoop()
     AnalysisMuon.flavor = Muon;
     AnalysisMuon.type   = muon_type;
     AnalysisMuon.charge = T_Muon_Charge->at(i);
+    AnalysisMuon.vraw   = tmp;
     AnalysisMuon.v      = MuonVector;
     AnalysisMuon.sf     = MuonSF->GetBinContent(MuonSF->FindBin(min(pt,sfMax),eta));
     AnalysisMuon.pr     = MuonPR->GetBinContent(MuonPR->FindBin(min(pt,prMax),eta));
@@ -226,8 +221,6 @@ void AnalysisWZ::InsideLoop()
 
     UInt_t electron_type = (ElectronBDT(i) && ElectronIsolation(i)) ? Tight : Fail;
 
-    if (electron_type == Tight && pt > 20) EventMET += (tmp - ElectronVector);
-
     const Double_t sfMax = ElecSF->GetXaxis()->GetBinCenter(ElecSF->GetNbinsX());
     const Double_t prMax = ElecPR->GetXaxis()->GetBinCenter(ElecPR->GetNbinsX());
     const Double_t trMax = DoubleElLead->GetXaxis()->GetBinCenter(DoubleElLead->GetNbinsX());
@@ -238,6 +231,7 @@ void AnalysisWZ::InsideLoop()
     AnalysisElectron.flavor = Electron;
     AnalysisElectron.type   = electron_type;
     AnalysisElectron.charge = T_Elec_Charge->at(i);
+    AnalysisElectron.vraw   = tmp;
     AnalysisElectron.v      = ElectronVector;
     AnalysisElectron.sf     = ElecSF->GetBinContent(ElecSF->FindBin(min(pt,sfMax),eta));
     AnalysisElectron.pr     = ElecPR->GetBinContent(ElecPR->FindBin(min(pt,prMax),eta));
@@ -258,6 +252,22 @@ void AnalysisWZ::InsideLoop()
   std::sort(AnalysisLeptons.begin(), AnalysisLeptons.end());
 
   std::reverse(AnalysisLeptons.begin(), AnalysisLeptons.end());
+
+
+  // Set the MET of the event
+  //----------------------------------------------------------------------------
+  EventMET = GetMET();
+
+  if (systematic == muonUpSyst ||
+      systematic == muonDownSyst ||
+      systematic == electronUpSyst ||
+      systematic == electronDownSyst)
+    {
+      for (UInt_t i=0; i<3; i++)
+	{
+	  EventMET += (AnalysisLeptons[i].vraw - AnalysisLeptons[i].v);
+	}
+    }
 
 
   // Classify the channels

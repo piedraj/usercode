@@ -9,6 +9,7 @@
 #include "TFrame.h"
 #include "TGraphErrors.h"
 #include "TInterpreter.h"
+#include "TLatex.h"
 #include "TLegend.h"
 #include "TLine.h"
 #include "TString.h"
@@ -34,6 +35,13 @@ void    MakeOutputDirectory(TString       format);
 void    SetGraph           (TGraphErrors* g,
 			    Color_t       color,
 			    Style_t       style);
+
+void    DrawTLatex         (Double_t      x,
+			    Double_t      y,
+			    Double_t      tsize,
+			    Short_t       align,
+			    const char*   text,
+			    Bool_t        setndc = true);
 
 
 void drawElectronScaleSystematic()
@@ -63,7 +71,7 @@ void drawElectronScaleSystematic()
   TAxis* yaxis = (TAxis*)gScaleInEB->GetYaxis();
 
   AxisFonts(xaxis, "electron p_{T} [GeV]");
-  AxisFonts(yaxis, "#Deltam/m (data - simulation)");
+  AxisFonts(yaxis, "#Deltam(data - simulation) / m");
 
   gScaleInEB->SetMinimum(-0.023);
   gScaleInEB->SetMaximum( 0.010);
@@ -82,6 +90,13 @@ void drawElectronScaleSystematic()
   DrawLegend(0.56, 0.31, (TObject*)gScaleOutEB, " Z, 0.8 < |#eta| < 1.48");
   DrawLegend(0.56, 0.24, (TObject*)gScaleEE,    " Z, |#eta| > 1.48");
 
+
+  // CMS titles
+  //----------------------------------------------------------------------------
+  //  DrawTLatex(0.185, 0.975, 0.05, 13, "CMS Preliminary");
+  DrawTLatex(0.940, 0.983, 0.05, 33, "#sqrt{s} = 8 TeV, L = 19.6 fb^{-1}");
+
+
   c1->SaveAs("pdf/scale_factors/electronScaleUncertainties.pdf");
   c1->SaveAs("png/scale_factors/electronScaleUncertainties.png");
 }
@@ -99,7 +114,7 @@ void AxisFonts(TAxis* axis, TString title)
   axis->SetTitleFont  (   42);
   axis->SetTitleSize  (0.050);
 
-  (title.Contains("[GeV]")) ? axis->SetTitleOffset(1.5) : axis->SetTitleOffset(1.8);
+  (title.Contains("[GeV]")) ? axis->SetTitleOffset(1.45) : axis->SetTitleOffset(1.8);
 
   axis->SetTitle(title);
 }
@@ -160,4 +175,25 @@ void SetGraph(TGraphErrors* g,
   g->SetMarkerColor(color);
   g->SetMarkerSize (1.2);
   g->SetMarkerStyle(style);
+}
+
+
+//------------------------------------------------------------------------------
+// DrawTLatex
+//------------------------------------------------------------------------------
+void DrawTLatex(Double_t    x,
+		Double_t    y,
+		Double_t    tsize,
+		Short_t     align,
+		const char* text,
+		Bool_t      setndc)
+{
+  TLatex* tl = new TLatex(x, y, text);
+
+  tl->SetNDC      (setndc);
+  tl->SetTextAlign( align);
+  tl->SetTextFont (    42);
+  tl->SetTextSize ( tsize);
+
+  tl->Draw("same");
 }
