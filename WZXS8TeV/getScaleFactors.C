@@ -1,6 +1,7 @@
 //------------------------------------------------------------------------------
 //
 // scp lxplus.cern.ch:/afs/cern.ch/work/c/calderon/public/LatinoTrees/leptonEffAndFakesHWW/MuFR_Moriond13_jet15_EWKcorr.root             ~/www/AuxiliaryFilesWZXS8TeV/.
+// scp lxplus.cern.ch:/afs/cern.ch/work/c/calderon/public/LatinoTrees/leptonEffAndFakesHWW/MuFR_Moriond13_jet20_EWKcorr.root             ~/www/AuxiliaryFilesWZXS8TeV/.
 // scp lxplus.cern.ch:/afs/cern.ch/work/c/calderon/public/LatinoTrees/leptonEffAndFakesHWW/MuFR_Moriond13_jet30_EWKcorr.root             ~/www/AuxiliaryFilesWZXS8TeV/.
 // scp lxplus.cern.ch:/afs/cern.ch/work/c/calderon/public/LatinoTrees/leptonEffAndFakesHWW/MuFR_Moriond13_jet50_EWKcorr.root             ~/www/AuxiliaryFilesWZXS8TeV/.
 // scp lxplus.cern.ch:/afs/cern.ch/work/c/calderon/public/LatinoTrees/leptonEffAndFakesHWW/fakerates_trigger_Moriond13_ewksub.root       ~/www/AuxiliaryFilesWZXS8TeV/.

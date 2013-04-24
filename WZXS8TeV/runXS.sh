@@ -14,7 +14,7 @@ for ((level=0; level<4; level++))
   do
   for ((mode=0; mode<2; mode++))
     do
-    root -l -b -q XS.C+\($level,$mode\)
+    root -l -b -q "XS.C+($level,$mode)"
   done
 done
 

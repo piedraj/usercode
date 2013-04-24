@@ -103,18 +103,30 @@ TString pdfChannel[nChannel+1] = {
 const UInt_t nCut = 4;
 
 enum {
+  //
+  // Nominal modes
+  //
   Exactly3Leptons,
   HasZCandidate,
   MET30_Z20_Jet30,
-  ClosureTest_Z10_Jet30
+  ClosureTest_Z10_Jet30,
+  //
+  // Test modes
+  //
+  MET30_Z20_Jet15,
+  MET30_Z20_Jet50,
+  MET30_Z10_Jet15,
+  MET30_Z10_Jet30,
+  MET30_Z10_Jet50,
+  ClosureTest_Z20_Jet15,
+  ClosureTest_Z20_Jet30,
+  ClosureTest_Z20_Jet50,
+  ClosureTest_Z10_Jet15,
+  ClosureTest_Z10_Jet50,
+  allCut
 };
 
-TString sCut[nCut] = {
-  "Exactly3Leptons",
-  "HasZCandidate",
-  "MET30_Z20_Jet30",
-  "ClosureTest_Z10_Jet30"
-};
+TString sCut[allCut];
 
 
 const UInt_t nProcess = 9;
@@ -973,6 +985,27 @@ TLegend* DrawLegend(Float_t x1,
 void SetParameters(UInt_t cut,
 		   UInt_t mode)
 {
+  //
+  // Nominal modes
+  //
+  sCut[Exactly3Leptons]       = "Exactly3Leptons";
+  sCut[HasZCandidate]         = "HasZCandidate";
+  sCut[MET30_Z20_Jet30]       = "MET30_Z20_Jet30";
+  sCut[ClosureTest_Z10_Jet30] = "ClosureTest_Z10_Jet30";
+  //
+  // Test modes
+  //
+  sCut[MET30_Z20_Jet15]       = "MET30_Z20_Jet15";
+  sCut[MET30_Z20_Jet50]       = "MET30_Z20_Jet50";
+  sCut[MET30_Z10_Jet15]       = "MET30_Z10_Jet15";
+  sCut[MET30_Z10_Jet30]       = "MET30_Z10_Jet30";
+  sCut[MET30_Z10_Jet50]       = "MET30_Z10_Jet50";
+  sCut[ClosureTest_Z20_Jet15] = "ClosureTest_Z20_Jet15";
+  sCut[ClosureTest_Z20_Jet30] = "ClosureTest_Z20_Jet30";
+  sCut[ClosureTest_Z20_Jet50] = "ClosureTest_Z20_Jet50";
+  sCut[ClosureTest_Z10_Jet15] = "ClosureTest_Z10_Jet15";
+  sCut[ClosureTest_Z10_Jet50] = "ClosureTest_Z10_Jet50";
+
   sProcess[Data]  = "Data";
   sProcess[Fakes] = "Data_PPF";
   sProcess[WZ]    = "WZTo3LNu";
