@@ -36,24 +36,44 @@ enum {FFF, TFF, TTF, TTT, LLL};
 TString sComposition[] = {"FFF", "TFF", "TTF", "TTT", "LLL"};
 
 
-const UInt_t nCut = 6;
+const UInt_t nCut = 16;
 
 enum {
   Exactly3Leptons,
   HasZCandidate,
-  MET30,
+  MET30_Z20_Jet15,
+  MET30_Z20_Jet30,
+  MET30_Z20_Jet50,
+  MET30_Z10_Jet15,
+  MET30_Z10_Jet30,
+  MET30_Z10_Jet50,
   MET40,
   MET40AntiBtag,
-  ClosureTest
+  ClosureTest_Z20_Jet15,
+  ClosureTest_Z20_Jet30,
+  ClosureTest_Z20_Jet50,
+  ClosureTest_Z10_Jet15,
+  ClosureTest_Z10_Jet30,
+  ClosureTest_Z10_Jet50
 };
 
 TString sCut[] = {
   "Exactly3Leptons",
   "HasZCandidate",
-  "MET30",
+  "MET30_Z20_Jet15",
+  "MET30_Z20_Jet30",
+  "MET30_Z20_Jet50",
+  "MET30_Z10_Jet15",
+  "MET30_Z10_Jet30",
+  "MET30_Z10_Jet50",
   "MET40",
   "MET40AntiBtag",
-  "ClosureTest"
+  "ClosureTest_Z20_Jet15",
+  "ClosureTest_Z20_Jet30",
+  "ClosureTest_Z20_Jet50",
+  "ClosureTest_Z10_Jet15",
+  "ClosureTest_Z10_Jet30",
+  "ClosureTest_Z10_Jet50"
 };
 
 
@@ -127,7 +147,6 @@ class AnalysisWZ: public CMSAnalysisSelectorMiniTrees
   Bool_t         ElectronIsolation         (UInt_t   iElec);
 			    	      
   Bool_t         MuonID                    (UInt_t   iMuon);
-  Bool_t         MuonCloseToPV             (UInt_t   iMuon);
   Bool_t         MuonIsolation             (UInt_t   iMuon);
   
   void           FillHistograms            (UInt_t   iChannel,
@@ -198,8 +217,8 @@ class AnalysisWZ: public CMSAnalysisSelectorMiniTrees
   Double_t                    pu_luminosity;
   Double_t                    xs_weight;
   Int_t                       mode;
-  Int_t                       systematic;
   Int_t                       runAtOviedo;
+  Int_t                       systematic;
 
 
   // Data members

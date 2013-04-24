@@ -21,8 +21,8 @@ enum {
 
 
 void RunPROOF_WZ(TString  sample     = "WZTo3LNu",
-		 Int_t    mode       = RAW,
 		 Int_t    systematic = noSyst,
+		 Int_t    mode       = RAW,
 		 Long64_t nEvents    = -1,
 		 Bool_t   update     = true)
 {
@@ -133,8 +133,8 @@ void RunPROOF_WZ(TString  sample     = "WZTo3LNu",
   gPAFOptions->inputParameters->SetNamedDouble("pu_luminosity", pu_luminosity);
   gPAFOptions->inputParameters->SetNamedDouble("xs_weight",     xs_weight);
   gPAFOptions->inputParameters->SetNamedInt   ("mode",          mode);
-  gPAFOptions->inputParameters->SetNamedInt   ("systematic",    systematic);
   gPAFOptions->inputParameters->SetNamedInt   ("runAtOviedo",   runAtOviedo);
+  gPAFOptions->inputParameters->SetNamedInt   ("systematic",    systematic);
 
 
   // Number of events (Long64_t)

@@ -105,19 +105,15 @@ const UInt_t nCut = 4;
 enum {
   Exactly3Leptons,
   HasZCandidate,
-  MET30,
-  //  MET40,
-  //  MET40AntiBtag,
-  ClosureTest
+  MET30_Z20_Jet30,
+  ClosureTest_Z10_Jet30
 };
 
 TString sCut[nCut] = {
   "Exactly3Leptons",
   "HasZCandidate",
-  "MET30",
-  //  "MET40",
-  //  "MET40AntiBtag",
-  "ClosureTest"
+  "MET30_Z20_Jet30",
+  "ClosureTest_Z10_Jet30"
 };
 
 
@@ -283,7 +279,7 @@ Double_t RelativeDifference       (Double_t      x0,
 //------------------------------------------------------------------------------
 // XS
 //------------------------------------------------------------------------------
-void XS(UInt_t cut  = MET30,
+void XS(UInt_t cut  = MET30_Z20_Jet30,
 	UInt_t mode = PPFmode)
 {
   gROOT->SetBatch();
@@ -302,9 +298,9 @@ void XS(UInt_t cut  = MET30,
 
     DrawHistogram("hSumCharges", channel, cut, "q_{1} + q_{2} + q_{3}");
 
-    if (cut == ClosureTest)
+    if (sCut[cut].Contains("ClosureTest"))
       {
-	DrawHistogram("hInvMass2Lep",  channel, cut, "m_{#font[12]{ll}}",                    -1, 0, "GeV",  linY, 71, 111);
+	DrawHistogram("hInvMass2Lep",  channel, cut, "m_{#font[12]{ll}}",                    -1, 0, "GeV",  linY, 81, 101, -999, -999, false);
 	DrawHistogram("hInvMass3Lep",  channel, cut, "m_{#font[12]{3l}}",                     2, 0, "GeV",  linY, 60, 200);
 	DrawHistogram("hPtLeadingJet", channel, cut, "p_{T}^{leading jet}",                   2, 0, "GeV",  linY,  0, 125);
 	DrawHistogram("hPtZLepton1",   channel, cut, "p_{T}^{Z leading lepton}",              2, 0, "GeV",  linY,  0, 125);
@@ -1056,7 +1052,7 @@ Int_t ReadInputFiles()
 
     input[j] = new TFile(_datapath + "/analysis/" + sProcess[j] + ".root");
 
-    TH1D* dummy = (TH1D*)input[j]->Get("hCounter_MME_MET30_TTT");
+    TH1D* dummy = (TH1D*)input[j]->Get("hCounter_MME_MET30_Z20_Jet30_TTT");
 
     if (!dummy)
       {
@@ -1148,7 +1144,7 @@ void MakeOutputDirectory(TString format)
 //------------------------------------------------------------------------------
 void DrawCrossSections(UInt_t cut)
 {
-  if (cut == ClosureTest) return;
+  if (sCut[cut].Contains("ClosureTest")) return;
 
   TGraphErrors* gStat = new TGraphErrors(nChannel+1);
   TGraphErrors* gSyst = new TGraphErrors(nChannel+1);
@@ -1281,7 +1277,7 @@ void DrawCrossSections(UInt_t cut)
 //------------------------------------------------------------------------------
 void PrintCrossSections(UInt_t cut)
 {
-  if (cut == ClosureTest) return;
+  if (sCut[cut].Contains("ClosureTest")) return;
 
   ofstream outputfile;
 
@@ -1296,7 +1292,7 @@ void PrintCrossSections(UInt_t cut)
     {
       if (i == nChannel) outputfile << "\\hline\n";
 
-      outputfile << Form("%s & %.3f $\\pm$ %.3f & %.1f $\\pm$ %.1f (stat.) $\\pm$ %.1f (syst.) $\\pm$ %.1f (lumi.)\\\\\n",
+      outputfile << Form("%s & %.2f $\\pm$ %.2f & %.1f $\\pm$ %.1f (stat.) $\\pm$ %.1f (syst.) $\\pm$ %.1f (lumi.)\\\\\n",
 			 pdfChannel[i].Data(),
 			 1e2 * wzEffValue[i],
 			 1e2 * wzEffError[i],
@@ -1401,14 +1397,9 @@ void RelativeSystematics(UInt_t channel, UInt_t cut)
       
 	  if (syst == triggerSyst)
 	    {
-	      Double_t tmpSyst = 0.0;
+	      Double_t leptonSyst = 1.;
 	      
-	      if (channel == MMM) tmpSyst = sqrt(3.*3. + 3.*3. + 3.*3.);
-	      if (channel == MME) tmpSyst = sqrt(3.*3. + 3.*3. + 4.*4.);
-	      if (channel == EEM) tmpSyst = sqrt(4.*4. + 4.*4. + 3.*3.);
-	      if (channel == EEE) tmpSyst = sqrt(4.*4. + 4.*4. + 4.*4.);
-	      
-	      systematicError[channel][process][syst] = tmpSyst;
+	      systematicError[channel][process][syst] = leptonSyst * sqrt(3.);
 	      
 	      continue;
 	    }

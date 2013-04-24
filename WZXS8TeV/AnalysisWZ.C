@@ -154,6 +154,10 @@ void AnalysisWZ::InsideLoop()
     Double_t pt = ScaleLepton(Muon, tmp.Pt());
 
     TLorentzVector MuonVector = (pt / tmp.Pt()) * tmp;
+
+    Double_t MaxMuIP = (pt < 20) ? 0.01 : 0.02;
+
+    if (fabs(T_Muon_IP2DBiasedPV->at(i)) > MaxMuIP) continue;
     
     if (fabs(T_Muon_IP2DBiasedPV->at(i)) > 0.2) continue;
 
@@ -163,7 +167,7 @@ void AnalysisWZ::InsideLoop()
 
     if (!MuonID(i)) continue;
 
-    UInt_t muon_type = (MuonCloseToPV(i) && MuonIsolation(i)) ? Tight : Fail;
+    UInt_t muon_type = (MuonIsolation(i)) ? Tight : Fail;
 
     const Double_t sfMax = MuonSF->GetXaxis()->GetBinCenter(MuonSF->GetNbinsX());
     const Double_t prMax = MuonPR->GetXaxis()->GetBinCenter(MuonPR->GetNbinsX());
@@ -413,11 +417,29 @@ void AnalysisWZ::InsideLoop()
   //----------------------------------------------------------------------------
   if (EventMET.Et() > 30.)
     {
-      FillHistograms(theChannel, MET30, dataDriven_weight[Jet50]);
+      FillHistograms(theChannel, MET30_Z20_Jet15, dataDriven_weight[Jet15]);
+      FillHistograms(theChannel, MET30_Z20_Jet30, dataDriven_weight[Jet30]);
+      FillHistograms(theChannel, MET30_Z20_Jet50, dataDriven_weight[Jet50]);
+
+      if (fabs(invMass2Lep - Z_MASS) <= 10)
+	{
+	  FillHistograms(theChannel, MET30_Z10_Jet15, dataDriven_weight[Jet15]);
+	  FillHistograms(theChannel, MET30_Z10_Jet30, dataDriven_weight[Jet30]);
+	  FillHistograms(theChannel, MET30_Z10_Jet50, dataDriven_weight[Jet50]);
+	}
     }
   else
     {
-      FillHistograms(theChannel, ClosureTest, dataDriven_weight[Jet30]);
+      FillHistograms(theChannel, ClosureTest_Z20_Jet15, dataDriven_weight[Jet15]);
+      FillHistograms(theChannel, ClosureTest_Z20_Jet30, dataDriven_weight[Jet30]);
+      FillHistograms(theChannel, ClosureTest_Z20_Jet50, dataDriven_weight[Jet50]);
+
+      if (fabs(invMass2Lep - Z_MASS) <= 10)
+	{
+	  FillHistograms(theChannel, ClosureTest_Z10_Jet15, dataDriven_weight[Jet15]);
+	  FillHistograms(theChannel, ClosureTest_Z10_Jet30, dataDriven_weight[Jet30]);
+	  FillHistograms(theChannel, ClosureTest_Z10_Jet50, dataDriven_weight[Jet50]);
+	}
 
       return;
     }
@@ -531,8 +553,8 @@ void AnalysisWZ::GetParameters()
   GetInputParameters()->TheNamedDouble("pu_luminosity", pu_luminosity);
   GetInputParameters()->TheNamedDouble("xs_weight",     xs_weight);
   GetInputParameters()->TheNamedInt   ("mode",          mode);
-  GetInputParameters()->TheNamedInt   ("systematic",    systematic);
   GetInputParameters()->TheNamedInt   ("runAtOviedo",   runAtOviedo);
+  GetInputParameters()->TheNamedInt   ("systematic",    systematic);
 }
 
 
@@ -682,8 +704,9 @@ Bool_t AnalysisWZ::MuonID(UInt_t iMuon)
 
   Bool_t passcutsforGlb = T_Muon_IsGlobalMuon->at(iMuon);
 
-  passcutsforGlb &= (T_Muon_NormChi2GTrk->at(iMuon) < 10);
-  passcutsforGlb &= (T_Muon_NumOfMatches->at(iMuon) >  1);
+  passcutsforGlb &= (T_Muon_NormChi2GTrk   ->at(iMuon) < 10);
+  passcutsforGlb &= (T_Muon_NumOfMatches   ->at(iMuon) >  1);
+  passcutsforGlb &= (T_Muon_NValidHitsSATrk->at(iMuon) >  0);  // NEW
 	
   Bool_t passcutsforSA = T_Muon_IsAllTrackerMuons->at(iMuon);
 
@@ -697,20 +720,7 @@ Bool_t AnalysisWZ::MuonID(UInt_t iMuon)
 
   pass &= (T_Muon_NLayers->at(iMuon) > 5);
 
-  return pass;
-}
-
-
-//------------------------------------------------------------------------------
-// MuonCloseToPV
-//------------------------------------------------------------------------------
-Bool_t AnalysisWZ::MuonCloseToPV(UInt_t iMuon)
-{
-  Double_t pt = ScaleLepton(Muon, T_Muon_Pt->at(iMuon));
-
-  Double_t MaxMuIP = (pt < 20) ? 0.01 : 0.02;
-
-  Bool_t pass = (fabs(T_Muon_IP2DBiasedPV->at(iMuon)) <= MaxMuIP);
+  pass &= (T_Muon_trkKink->at(iMuon) < 20);  // NEW
 
   return pass;
 }
@@ -745,7 +755,7 @@ void AnalysisWZ::FillHistograms(UInt_t   iChannel,
 {
   Bool_t pt3cut = (AnalysisLeptons[2].v.Pt() > 20);
 
-  if (iCut == ClosureTest) pt3cut = !pt3cut;
+  if (sCut[iCut].Contains("ClosureTest")) pt3cut = !pt3cut;
 
   if (!pt3cut) return;
 
@@ -1085,7 +1095,7 @@ Double_t AnalysisWZ::ScaleLepton(UInt_t flavor, Double_t pt, Double_t eta)
   if (flavor == Muon &&
       (systematic == muonUpSyst || systematic == muonDownSyst))
     {
-      scale = 0.01;
+      scale = 0.002;
     }
   else if (flavor == Electron &&
 	   (systematic == electronUpSyst || systematic == electronDownSyst))

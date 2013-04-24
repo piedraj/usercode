@@ -65,18 +65,18 @@ TTGJets          \
 
 
 if [ ${SYSTEMATIC} == 0 ]; then
-
+    
     for SAMPLE in ${DATA_SAMPLES}; do
 	
-	root -l -b -q "RunPROOF_WZ.C(\"${SAMPLE}\",0,${SYSTEMATIC})";
-	root -l -b -q "RunPROOF_WZ.C(\"${SAMPLE}\",1,${SYSTEMATIC})";
+	root -l -b -q "RunPROOF_WZ.C(\"${SAMPLE}\",${SYSTEMATIC},0)";
+	root -l -b -q "RunPROOF_WZ.C(\"${SAMPLE}\",${SYSTEMATIC},1)";
 
     done
 fi
 
 for SAMPLE in ${MC_SAMPLES}; do
     
-    root -l -b -q "RunPROOF_WZ.C(\"${SAMPLE}\",0,${SYSTEMATIC})";
+    root -l -b -q "RunPROOF_WZ.C(\"${SAMPLE}\",${SYSTEMATIC},0)";
     
 done
 

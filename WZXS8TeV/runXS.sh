@@ -1,11 +1,14 @@
 #!/bin/bash
 
+
 rm -rf pdf
 rm -rf png
 rm -rf tex
 
+
 ### ./merge.sh >& merge.log
 ### grep Error merge.log
+
 
 for ((level=0; level<4; level++))
   do
@@ -15,8 +18,6 @@ for ((level=0; level<4; level++))
   done
 done
 
-root -l -b -q XS.C+\(MET30,PPFmode\)
-root -l -b -q XS.C+\(MET30,MCmode\)
 
 root -l -b -q drawScaleFactors.C+
 root -l -b -q drawWeights.C+
