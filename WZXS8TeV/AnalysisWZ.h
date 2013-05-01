@@ -36,44 +36,30 @@ enum {FFF, TFF, TTF, TTT, LLL};
 TString sComposition[] = {"FFF", "TFF", "TTF", "TTT", "LLL"};
 
 
-const UInt_t nCut = 16;
+const UInt_t nCut = 9;
 
 enum {
   Exactly3Leptons,
   HasZCandidate,
-  MET30_Z20_Jet15,
-  MET30_Z20_Jet30,
-  MET30_Z20_Jet50,
-  MET30_Z10_Jet15,
-  MET30_Z10_Jet30,
-  MET30_Z10_Jet50,
-  MET40,
-  MET40AntiBtag,
-  ClosureTest_Z20_Jet15,
-  ClosureTest_Z20_Jet30,
-  ClosureTest_Z20_Jet50,
-  ClosureTest_Z10_Jet15,
-  ClosureTest_Z10_Jet30,
-  ClosureTest_Z10_Jet50
+  MET30_Z20,
+  MET30_Z10,
+  MET40_Z20,
+  MET40_Z10,
+  MET40AntiBtag_Z20,
+  MET40AntiBtag_Z10,
+  ClosureTest_Z10
 };
 
 TString sCut[] = {
   "Exactly3Leptons",
   "HasZCandidate",
-  "MET30_Z20_Jet15",
-  "MET30_Z20_Jet30",
-  "MET30_Z20_Jet50",
-  "MET30_Z10_Jet15",
-  "MET30_Z10_Jet30",
-  "MET30_Z10_Jet50",
-  "MET40",
-  "MET40AntiBtag",
-  "ClosureTest_Z20_Jet15",
-  "ClosureTest_Z20_Jet30",
-  "ClosureTest_Z20_Jet50",
-  "ClosureTest_Z10_Jet15",
-  "ClosureTest_Z10_Jet30",
-  "ClosureTest_Z10_Jet50"
+  "MET30_Z20",
+  "MET30_Z10",
+  "MET40_Z20",
+  "MET40_Z10",
+  "MET40AntiBtag_Z20",
+  "MET40AntiBtag_Z10",
+  "ClosureTest_Z10"
 };
 
 
@@ -83,9 +69,12 @@ enum {Tight, Fail};
 
 enum {RAW, PPF, PPP};
 
-const UInt_t nFakeRate = 3;
 
-enum {Jet15, Jet30, Jet50};
+const UInt_t nFakeRateMuon = 4;
+const UInt_t nFakeRateElec = 3;
+
+enum {MuonJet15, MuonJet20, MuonJet30, MuonJet50};
+enum {ElecJet15, ElecJet35, ElecJet50};
 
 struct Lepton
 {
@@ -94,7 +83,8 @@ struct Lepton
   UInt_t         type;    // Tight, Fail
   Double_t       charge;
   Double_t       sf;
-  Double_t       fr[nFakeRate];
+  Double_t       frMuon[nFakeRateMuon];
+  Double_t       frElec[nFakeRateElec];
   Double_t       pr;
   Double_t       lead;
   Double_t       trail;
@@ -155,8 +145,11 @@ class AnalysisWZ: public CMSAnalysisSelectorMiniTrees
 
   const Bool_t   WgammaFilter              () const;
 
-  Double_t       GetPPFWeight              (UInt_t   jetPt);
-  Double_t       GetPPPWeight              (UInt_t   jetPt);
+  Double_t       GetPPFWeight              (UInt_t   muonJetPt,
+					    UInt_t   elecJetPt);
+
+  Double_t       GetPPPWeight              (UInt_t   muonJetPt,
+					    UInt_t   elecJetPt);
 
   TH2F*          LoadHistogram             (TString  filename,
 					    TString  hname,
@@ -207,6 +200,18 @@ class AnalysisWZ: public CMSAnalysisSelectorMiniTrees
   TH1D*                       hDRWZLepton1 [nChannel][nCut];
   TH1D*                       hDRWZLepton2 [nChannel][nCut];
   TH1D*                       hMtW         [nChannel][nCut];
+  TH1D*                       hNJet30      [nChannel][nCut];
+  TH1D*                       hNBJet30     [nChannel][nCut];
+
+  TH1D*                       hInvMass2Lep_EE;
+  TH1D*                       hInvMass2Lep_EE_BarrelBarrel;
+  TH1D*                       hInvMass2Lep_EE_BarrelEndcap;
+  TH1D*                       hInvMass2Lep_EE_EndcapEndcap;
+
+  TH1D*                       hInvMass2Lep_MM;
+  TH1D*                       hInvMass2Lep_MM_BarrelBarrel;
+  TH1D*                       hInvMass2Lep_MM_BarrelEndcap;
+  TH1D*                       hInvMass2Lep_MM_EndcapEndcap;
 
 
   // Input parameters
@@ -232,6 +237,7 @@ class AnalysisWZ: public CMSAnalysisSelectorMiniTrees
 
   Bool_t                      isData;
 
+  Double_t                    deltaZMass;
   Double_t                    invMass2Lep;
   Double_t                    invMass3Lep;
   Double_t                    sumCharges;
@@ -243,7 +249,8 @@ class AnalysisWZ: public CMSAnalysisSelectorMiniTrees
   Double_t                    mc_trigger_weight;
   Double_t                    mc_total_weight;
 
-  UInt_t                      nBJet;
+  UInt_t                      nJet30;
+  UInt_t                      nBJet30;
   UInt_t                      nElectron;
   UInt_t                      nTight;
   UInt_t                      theChannel;
@@ -256,10 +263,10 @@ class AnalysisWZ: public CMSAnalysisSelectorMiniTrees
 
   // SF, FR, PR and trigger efficiencies
   //----------------------------------------------------------------------------
-  Double_t                    dataDriven_weight[nFakeRate];
+  Double_t                    ddweight[nFakeRateMuon][nFakeRateElec];
 
-  TH2F*                       MuonFR[nFakeRate];
-  TH2F*                       ElecFR[nFakeRate];
+  TH2F*                       MuonFR[nFakeRateMuon];
+  TH2F*                       ElecFR[nFakeRateElec];
   TH2F*                       MuonSF;
   TH2F*                       ElecSF;
   TH2F*                       MuonPR;

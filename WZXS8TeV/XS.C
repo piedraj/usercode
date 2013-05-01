@@ -22,6 +22,19 @@
 
 //------------------------------------------------------------------------------
 //
+//  MCFM 6.6
+//
+//------------------------------------------------------------------------------
+//
+//  xs = 13.24 +  7.68 = 20.92 pb                 // Scale x1 ( 85.79 GeV) with 81 < mZ < 101 GeV
+//  xs = 12.72 +  7.37 = 20.09 pb (-0.8 = -4.0%)  // Scale x2 (171.58 GeV) with 81 < mZ < 101 GeV
+//  xs = 13.94 +  8.09 = 22.03 pb (+1.1 = +5.3%)  // Scale /2 ( 42.90 GeV) with 81 < mZ < 101 GeV
+//
+//------------------------------------------------------------------------------
+
+
+//------------------------------------------------------------------------------
+//
 //  MCFM 6.3
 //
 //------------------------------------------------------------------------------
@@ -51,8 +64,8 @@
 
 // Input parameters for the WZ cross section
 //------------------------------------------------------------------------------
-const Double_t xsWplusZ  = 13.89;  // pb (MCFM with 71 < mZ < 111 GeV)
-const Double_t xsWminusZ =  8.06;  // pb (MCFM with 71 < mZ < 111 GeV)
+const Double_t xsWplusZ  = 13.24;  // pb (MCFM with 81 < mZ < 101 GeV)
+const Double_t xsWminusZ =  7.68;  // pb (MCFM with 81 < mZ < 101 GeV)
 
 const Double_t W2e         = 0.1075;
 const Double_t W2m         = 0.1057;
@@ -60,7 +73,8 @@ const Double_t W2tau       = 0.1125;
 const Double_t Z2ll        = 0.033658;
 const Double_t WZ23lnu     = 3 * Z2ll * (W2e + W2m + W2tau);
 const Double_t ngenWZ      = 2017979;
-const Double_t ngenWZphase = 1449067;  // (71 < mZ < 111 GeV)
+//const Double_t ngenWZphase = 1449067;  // (71 < mZ < 111 GeV)
+const Double_t ngenWZphase = 1390244;  // (81 < mZ < 101 GeV)
 
 
 // Data members
@@ -100,33 +114,17 @@ TString pdfChannel[nChannel+1] = {
 };
 
 
-const UInt_t nCut = 4;
+const UInt_t nCut = 5;
 
 enum {
-  //
-  // Nominal modes
-  //
   Exactly3Leptons,
   HasZCandidate,
-  MET30_Z20_Jet30,
-  ClosureTest_Z10_Jet30,
-  //
-  // Test modes
-  //
-  MET30_Z20_Jet15,
-  MET30_Z20_Jet50,
-  MET30_Z10_Jet15,
-  MET30_Z10_Jet30,
-  MET30_Z10_Jet50,
-  ClosureTest_Z20_Jet15,
-  ClosureTest_Z20_Jet30,
-  ClosureTest_Z20_Jet50,
-  ClosureTest_Z10_Jet15,
-  ClosureTest_Z10_Jet50,
-  allCut
+  MET30_Z20,
+  MET30_Z10,
+  ClosureTest_Z10
 };
 
-TString sCut[allCut];
+TString sCut[nCut];
 
 
 const UInt_t nProcess = 9;
@@ -291,7 +289,7 @@ Double_t RelativeDifference       (Double_t      x0,
 //------------------------------------------------------------------------------
 // XS
 //------------------------------------------------------------------------------
-void XS(UInt_t cut  = MET30_Z20_Jet30,
+void XS(UInt_t cut  = MET30_Z10,
 	UInt_t mode = PPFmode)
 {
   gROOT->SetBatch();
@@ -324,20 +322,21 @@ void XS(UInt_t cut  = MET30_Z20_Jet30,
       }
     else
       {
-	DrawHistogram("hMET",          channel, cut, "E_{T}^{miss}",                          5, 0, "GeV",  linY);
-	DrawHistogram("hInvMass2Lep",  channel, cut, "m_{#font[12]{ll}}",                    -1, 0, "GeV",  linY, 71, 111);
-	DrawHistogram("hInvMass3Lep",  channel, cut, "m_{#font[12]{3l}}",                     5, 0, "GeV",  linY, 60, 350);
-	DrawHistogram("hPtLepton1",    channel, cut, "p_{T}^{first lepton}",                  5, 0, "GeV",  linY);
-	DrawHistogram("hPtLepton2",    channel, cut, "p_{T}^{second lepton}",                 5, 0, "GeV",  linY);
-	DrawHistogram("hPtLepton3",    channel, cut, "p_{T}^{third lepton}",                  5, 0, "GeV",  linY);
-	DrawHistogram("hPtLeadingJet", channel, cut, "p_{T}^{leading jet}",                   5, 0, "GeV",  linY);
-	DrawHistogram("hDPhiZLeptons", channel, cut, "#Delta#phi_{#font[12]{ll}}",           10, 1, "^{o}", linY);
-	DrawHistogram("hPtZLepton1",   channel, cut, "p_{T}^{Z leading lepton}",              5, 0, "GeV",  linY);
-	DrawHistogram("hPtZLepton2",   channel, cut, "p_{T}^{Z trailing lepton}",             5, 0, "GeV",  linY);
-	DrawHistogram("hPtWLepton",    channel, cut, "p_{T}^{W lepton}",                      5, 0, "GeV",  linY);
-	DrawHistogram("hDRWZLepton1",  channel, cut, "#DeltaR(W lepton, Z leading lepton)",   5, 1, "NULL", linY);
-	DrawHistogram("hDRWZLepton2",  channel, cut, "#DeltaR(W lepton, Z trailing lepton)",  5, 1, "NULL", linY);
-	DrawHistogram("hMtW",          channel, cut, "m_{T}^{W}",                             5, 0, "GeV",  linY);
+	DrawHistogram("hMET",          channel, cut, "E_{T}^{miss}",                           5, 0, "GeV",  linY);
+	DrawHistogram("hInvMass2Lep",  channel, cut, "m_{#font[12]{ll}}",                     -1, 0, "GeV",  linY, 76, 106);
+	DrawHistogram("hInvMass3Lep",  channel, cut, "m_{#font[12]{3l}}",                      5, 0, "GeV",  linY, 60, 350);
+	DrawHistogram("hPtLepton1",    channel, cut, "p_{T}^{first lepton}",                   5, 0, "GeV",  linY);
+	DrawHistogram("hPtLepton2",    channel, cut, "p_{T}^{second lepton}",                  5, 0, "GeV",  linY);
+	DrawHistogram("hPtLepton3",    channel, cut, "p_{T}^{third lepton}",                   5, 0, "GeV",  linY);
+	DrawHistogram("hPtLeadingJet", channel, cut, "p_{T}^{leading jet}",                    5, 0, "GeV",  linY);
+	DrawHistogram("hDPhiZLeptons", channel, cut, "#Delta#phi_{#font[12]{ll}}",            10, 1, "^{o}", linY);
+	DrawHistogram("hPtZLepton1",   channel, cut, "p_{T}^{Z leading lepton}",               5, 0, "GeV",  linY);
+	DrawHistogram("hPtZLepton2",   channel, cut, "p_{T}^{Z trailing lepton}",              5, 0, "GeV",  linY);
+	DrawHistogram("hPtWLepton",    channel, cut, "p_{T}^{W lepton}",                       5, 0, "GeV",  linY);
+	DrawHistogram("hDRWZLepton1",  channel, cut, "#DeltaR(W lepton, Z leading lepton)",    5, 1, "NULL", linY);
+	DrawHistogram("hDRWZLepton2",  channel, cut, "#DeltaR(W lepton, Z trailing lepton)",   5, 1, "NULL", linY);
+	DrawHistogram("hMtW",          channel, cut, "m_{T}^{W}",                              5, 0, "GeV",  linY);
+	DrawHistogram("hNJet30",       channel, cut, "number of jets (p_{T}^{jet} > 30 GeV)", -1, 0, "NULL", linY, 0, 6);
       }
   }
 
@@ -985,26 +984,11 @@ TLegend* DrawLegend(Float_t x1,
 void SetParameters(UInt_t cut,
 		   UInt_t mode)
 {
-  //
-  // Nominal modes
-  //
-  sCut[Exactly3Leptons]       = "Exactly3Leptons";
-  sCut[HasZCandidate]         = "HasZCandidate";
-  sCut[MET30_Z20_Jet30]       = "MET30_Z20_Jet30";
-  sCut[ClosureTest_Z10_Jet30] = "ClosureTest_Z10_Jet30";
-  //
-  // Test modes
-  //
-  sCut[MET30_Z20_Jet15]       = "MET30_Z20_Jet15";
-  sCut[MET30_Z20_Jet50]       = "MET30_Z20_Jet50";
-  sCut[MET30_Z10_Jet15]       = "MET30_Z10_Jet15";
-  sCut[MET30_Z10_Jet30]       = "MET30_Z10_Jet30";
-  sCut[MET30_Z10_Jet50]       = "MET30_Z10_Jet50";
-  sCut[ClosureTest_Z20_Jet15] = "ClosureTest_Z20_Jet15";
-  sCut[ClosureTest_Z20_Jet30] = "ClosureTest_Z20_Jet30";
-  sCut[ClosureTest_Z20_Jet50] = "ClosureTest_Z20_Jet50";
-  sCut[ClosureTest_Z10_Jet15] = "ClosureTest_Z10_Jet15";
-  sCut[ClosureTest_Z10_Jet50] = "ClosureTest_Z10_Jet50";
+  sCut[Exactly3Leptons] = "Exactly3Leptons";
+  sCut[HasZCandidate]   = "HasZCandidate";
+  sCut[MET30_Z20]       = "MET30_Z20";
+  sCut[MET30_Z10]       = "MET30_Z10";
+  sCut[ClosureTest_Z10] = "ClosureTest_Z10";
 
   sProcess[Data]  = "Data";
   sProcess[Fakes] = "Data_PPF";
@@ -1083,9 +1067,9 @@ Int_t ReadInputFiles()
 
     UInt_t j = vprocess.at(i);
 
-    input[j] = new TFile(_datapath + "/analysis/" + sProcess[j] + ".root");
+    input[j] = new TFile(_datapath + "CalibratedE/analysis/" + sProcess[j] + ".root");
 
-    TH1D* dummy = (TH1D*)input[j]->Get("hCounter_MME_MET30_Z20_Jet30_TTT");
+    TH1D* dummy = (TH1D*)input[j]->Get("hCounter_MME_" + sCut[MET30_Z10] + "_TTT");
 
     if (!dummy)
       {

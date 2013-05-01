@@ -31,20 +31,6 @@ void RunPROOF_WZ(TString  sample     = "WZTo3LNu",
   Int_t runAtOviedo = (dataPath.Contains("ifca")) ? 0 : 1;
 
 
-  // Reset PROOF
-  //----------------------------------------------------------------------------
-  gSystem->Exec("./resetproof.sh -a");
-  gSystem->Exec("./resetproof.sh -a");
-
-  gSystem->Exec("rm -f *.d");
-  gSystem->Exec("rm -f *.so");
-  gSystem->Exec("rm -f */*.d");
-  gSystem->Exec("rm -f */*.so");
-
-  if (runAtOviedo) gSystem->Exec("qdel all");
-  else             gSystem->Exec("endproof");
-
-
   // PROOF mode
   //----------------------------------------------------------------------------
   gPAFOptions->NSlots = 30;
@@ -83,7 +69,7 @@ void RunPROOF_WZ(TString  sample     = "WZTo3LNu",
     }
   else
     {
-      DatasetManager* dm = new DatasetManager("Summer12_53X", "WH");
+      DatasetManager* dm = new DatasetManager("Summer12_53X", "WH/CalibratedE");
 
       if (update) dm->RedownloadFiles();
 
@@ -105,7 +91,7 @@ void RunPROOF_WZ(TString  sample     = "WZTo3LNu",
 
   // Output file name
   //----------------------------------------------------------------------------
-  TString outputDir = "../WZXS8TeV/results/Summer12_53X/WH";
+  TString outputDir = "../WZXS8TeV/results/Summer12_53X/WH/CalibratedE";
 
   if      (systematic == noSyst)           outputDir += "/analysis";
   else if (systematic == metSyst)          outputDir += "/systematics/met";
@@ -196,18 +182,18 @@ vector<TString> GetRealDataFiles(const char* relativepath,
   TString command("ls ");
 
   command += 
-    fullpath + "/Tree_" + basefile + "A_892.root " +
-    fullpath + "/Tree_" + basefile + "A_892_[0-9].root " +
-    fullpath + "/Tree_" + basefile + "A_892_[0-9][0-9].root " +
-    fullpath + "/Tree_" + basefile + "B_4404.root " +
-    fullpath + "/Tree_" + basefile + "B_4404_[0-9].root " +
-    fullpath + "/Tree_" + basefile + "B_4404_[0-9][0-9].root " +
-    fullpath + "/Tree_" + basefile + "C_7032.root " +
-    fullpath + "/Tree_" + basefile + "C_7032_[0-9].root " +
-    fullpath + "/Tree_" + basefile + "C_7032_[0-9][0-9].root " +
-    fullpath + "/Tree_" + basefile + "D_7274.root " +
-    fullpath + "/Tree_" + basefile + "D_7274_[0-9].root " +
-    fullpath + "/Tree_" + basefile + "D_7274_[0-9][0-9].root";
+    fullpath + "/Tree_" + basefile + "A_???.root " +
+    fullpath + "/Tree_" + basefile + "A_???_[0-9].root " +
+    fullpath + "/Tree_" + basefile + "A_???_[0-9][0-9].root " +
+    fullpath + "/Tree_" + basefile + "B_????.root " +
+    fullpath + "/Tree_" + basefile + "B_????_[0-9].root " +
+    fullpath + "/Tree_" + basefile + "B_????_[0-9][0-9].root " +
+    fullpath + "/Tree_" + basefile + "C_????.root " +
+    fullpath + "/Tree_" + basefile + "C_????_[0-9].root " +
+    fullpath + "/Tree_" + basefile + "C_????_[0-9][0-9].root " +
+    fullpath + "/Tree_" + basefile + "D_????.root " +
+    fullpath + "/Tree_" + basefile + "D_????_[0-9].root " +
+    fullpath + "/Tree_" + basefile + "D_????_[0-9][0-9].root";
 
   command += " 2> /dev/null";
 

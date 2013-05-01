@@ -54,6 +54,7 @@ TH2F*   ElecSF;
 TH2F*   MuonPR;
 TH2F*   ElecPR;
 TH2F*   MuonFR_15;
+TH2F*   MuonFR_20;
 TH2F*   MuonFR_30;
 TH2F*   MuonFR_50;
 TH2F*   ElecFR_15;
@@ -87,6 +88,7 @@ void drawScaleFactors()
   ElecPR = LoadHistogram("ElePR_2012", "h2inverted", "ElecPR");
 
   MuonFR_15 = LoadHistogram("MuFR_Moriond13_jet15_EWKcorr", "FR_pT_eta_EWKcorr", "MuonFR_15");
+  MuonFR_20 = LoadHistogram("MuFR_Moriond13_jet20_EWKcorr", "FR_pT_eta_EWKcorr", "MuonFR_20");
   MuonFR_30 = LoadHistogram("MuFR_Moriond13_jet30_EWKcorr", "FR_pT_eta_EWKcorr", "MuonFR_30");
   MuonFR_50 = LoadHistogram("MuFR_Moriond13_jet50_EWKcorr", "FR_pT_eta_EWKcorr", "MuonFR_50");
 
@@ -104,6 +106,7 @@ void drawScaleFactors()
   DrawIt(MuonPR,        "2012 muon PR");
   DrawIt(ElecPR,        "2012 electron PR");
   DrawIt(MuonFR_15,     "2012 muon FR jet15");
+  DrawIt(MuonFR_20,     "2012 muon FR jet20");
   DrawIt(MuonFR_30,     "2012 muon FR jet30");
   DrawIt(MuonFR_50,     "2012 muon FR jet50");
   DrawIt(ElecFR_15,     "2012 electron FR jet15");
