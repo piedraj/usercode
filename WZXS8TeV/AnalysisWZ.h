@@ -36,30 +36,26 @@ enum {FFF, TFF, TTF, TTT, LLL};
 TString sComposition[] = {"FFF", "TFF", "TTF", "TTT", "LLL"};
 
 
-const UInt_t nCut = 9;
+const UInt_t nCut = 7;
 
 enum {
   Exactly3Leptons,
-  HasZCandidate,
-  MET30_Z20,
-  MET30_Z10,
-  MET40_Z20,
-  MET40_Z10,
-  MET40AntiBtag_Z20,
-  MET40AntiBtag_Z10,
-  ClosureTest_Z10
+  HasZ20,
+  HasZ10,
+  MET30,
+  MET40,
+  MET40AntiBtag,
+  ClosureTest
 };
 
 TString sCut[] = {
   "Exactly3Leptons",
-  "HasZCandidate",
-  "MET30_Z20",
-  "MET30_Z10",
-  "MET40_Z20",
-  "MET40_Z10",
-  "MET40AntiBtag_Z20",
-  "MET40AntiBtag_Z10",
-  "ClosureTest_Z10"
+  "HasZ20",
+  "HasZ10",
+  "MET30",
+  "MET40",
+  "MET40AntiBtag",
+  "ClosureTest"
 };
 
 
@@ -196,6 +192,7 @@ class AnalysisWZ: public CMSAnalysisSelectorMiniTrees
   TH1D*                       hDPhiZLeptons[nChannel][nCut];
   TH1D*                       hPtZLepton1  [nChannel][nCut];
   TH1D*                       hPtZLepton2  [nChannel][nCut];
+  TH1D*                       hPtZ         [nChannel][nCut];
   TH1D*                       hPtWLepton   [nChannel][nCut];
   TH1D*                       hDRWZLepton1 [nChannel][nCut];
   TH1D*                       hDRWZLepton2 [nChannel][nCut];
@@ -237,7 +234,6 @@ class AnalysisWZ: public CMSAnalysisSelectorMiniTrees
 
   Bool_t                      isData;
 
-  Double_t                    deltaZMass;
   Double_t                    invMass2Lep;
   Double_t                    invMass3Lep;
   Double_t                    sumCharges;

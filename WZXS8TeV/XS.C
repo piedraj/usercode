@@ -118,10 +118,10 @@ const UInt_t nCut = 5;
 
 enum {
   Exactly3Leptons,
-  HasZCandidate,
-  MET30_Z20,
-  MET30_Z10,
-  ClosureTest_Z10
+  HasZ20,
+  HasZ10,
+  MET30,
+  ClosureTest
 };
 
 TString sCut[nCut];
@@ -289,7 +289,7 @@ Double_t RelativeDifference       (Double_t      x0,
 //------------------------------------------------------------------------------
 // XS
 //------------------------------------------------------------------------------
-void XS(UInt_t cut  = MET30_Z10,
+void XS(UInt_t cut  = MET30,
 	UInt_t mode = PPFmode)
 {
   gROOT->SetBatch();
@@ -333,10 +333,11 @@ void XS(UInt_t cut  = MET30_Z10,
 	DrawHistogram("hPtZLepton1",   channel, cut, "p_{T}^{Z leading lepton}",               5, 0, "GeV",  linY);
 	DrawHistogram("hPtZLepton2",   channel, cut, "p_{T}^{Z trailing lepton}",              5, 0, "GeV",  linY);
 	DrawHistogram("hPtWLepton",    channel, cut, "p_{T}^{W lepton}",                       5, 0, "GeV",  linY);
+	DrawHistogram("hPtZ",          channel, cut, "p_{T}^{Z}",                             10, 0, "GeV",  linY);
 	DrawHistogram("hDRWZLepton1",  channel, cut, "#DeltaR(W lepton, Z leading lepton)",    5, 1, "NULL", linY);
 	DrawHistogram("hDRWZLepton2",  channel, cut, "#DeltaR(W lepton, Z trailing lepton)",   5, 1, "NULL", linY);
 	DrawHistogram("hMtW",          channel, cut, "m_{T}^{W}",                              5, 0, "GeV",  linY);
-	DrawHistogram("hNJet30",       channel, cut, "number of jets (p_{T}^{jet} > 30 GeV)", -1, 0, "NULL", linY, 0, 6);
+	DrawHistogram("hNJet30",       channel, cut, "number of jets (p_{T}^{jet} > 30 GeV)", -1, 0, "NULL", linY, 0, 4);
       }
   }
 
@@ -715,7 +716,7 @@ void DrawHistogram(TString  hname,
   if (pad1->GetLogy())
     theMax = TMath::Power(10, TMath::Log10(theMax) + 2);
   else
-    theMax *= 1.5;
+    theMax *= 1.55;
 
   hist[Data]->SetMaximum(theMax);
 
@@ -985,10 +986,10 @@ void SetParameters(UInt_t cut,
 		   UInt_t mode)
 {
   sCut[Exactly3Leptons] = "Exactly3Leptons";
-  sCut[HasZCandidate]   = "HasZCandidate";
-  sCut[MET30_Z20]       = "MET30_Z20";
-  sCut[MET30_Z10]       = "MET30_Z10";
-  sCut[ClosureTest_Z10] = "ClosureTest_Z10";
+  sCut[HasZ20]          = "HasZ20";
+  sCut[HasZ10]          = "HasZ10";
+  sCut[MET30]           = "MET30";
+  sCut[ClosureTest]     = "ClosureTest";
 
   sProcess[Data]  = "Data";
   sProcess[Fakes] = "Data_PPF";
@@ -1069,7 +1070,7 @@ Int_t ReadInputFiles()
 
     input[j] = new TFile(_datapath + "CalibratedE/analysis/" + sProcess[j] + ".root");
 
-    TH1D* dummy = (TH1D*)input[j]->Get("hCounter_MME_" + sCut[MET30_Z10] + "_TTT");
+    TH1D* dummy = (TH1D*)input[j]->Get("hCounter_MME_" + sCut[MET30] + "_TTT");
 
     if (!dummy)
       {

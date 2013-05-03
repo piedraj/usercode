@@ -53,6 +53,7 @@ void AnalysisWZ::Initialise()
       hDPhiZLeptons[i][j] = CreateH1D("hDPhiZLeptons" + suffix, "", 320,  0, 3.2);    
       hPtZLepton1  [i][j] = CreateH1D("hPtZLepton1"   + suffix, "", 200,  0, 200);
       hPtZLepton2  [i][j] = CreateH1D("hPtZLepton2"   + suffix, "", 200,  0, 200);
+      hPtZ         [i][j] = CreateH1D("hPtZ"          + suffix, "", 400,  0, 400);
       hPtWLepton   [i][j] = CreateH1D("hPtWLepton"    + suffix, "", 200,  0, 200);    
       hDRWZLepton1 [i][j] = CreateH1D("hDRWZLepton1"  + suffix, "", 200,  0,   6);    
       hDRWZLepton2 [i][j] = CreateH1D("hDRWZLepton2"  + suffix, "", 200,  0,   6);    
@@ -128,7 +129,6 @@ void AnalysisWZ::InsideLoop()
 
   AnalysisLeptons.clear();
 
-  deltaZMass     = 999.;
   invMass2Lep    = 999.;
   invMass3Lep    = 999.;
   transverseMass = 999.;
@@ -294,6 +294,8 @@ void AnalysisWZ::InsideLoop()
   //----------------------------------------------------------------------------
   Bool_t isZee = false;
 
+  Bool_t foundDileptonWithLowMll = false;
+
   for (UInt_t i=0; i<AnalysisLeptons.size(); i++) {
 
     for (UInt_t j=i+1; j<AnalysisLeptons.size(); j++) {
@@ -303,6 +305,8 @@ void AnalysisWZ::InsideLoop()
       if (AnalysisLeptons[i].charge * AnalysisLeptons[j].charge > 0) continue;
 
       Double_t inv_mass = (AnalysisLeptons[i].v + AnalysisLeptons[j].v).M();
+
+      if (inv_mass < 12.) foundDileptonWithLowMll = true;
 
       if (fabs(inv_mass - Z_MASS) < fabs(invMass2Lep - Z_MASS)) {
 
@@ -327,7 +331,7 @@ void AnalysisWZ::InsideLoop()
     }
   }
 
-  deltaZMass = fabs(invMass2Lep - Z_MASS);
+  if (foundDileptonWithLowMll) return;
 
 
   // Fill Z invariant mass at two-lepton level
@@ -463,39 +467,45 @@ void AnalysisWZ::InsideLoop()
   }
 
 
+  // Compute the transverse mass
+  //----------------------------------------------------------------------------
+  const Double_t met  = EventMET.Et();
+  const Double_t lWEt = WLepton.Et();
+  
+  transverseMass = lWEt*lWEt + met*met - 2.*lWEt*met*cos(WLepton.Angle(EventMET.Vect()));
+  
+  transverseMass = sqrt(transverseMass);
+
+
   // Exactly3Leptons
   //----------------------------------------------------------------------------
   FillHistograms(theChannel, Exactly3Leptons, ddweight[MuonJet20][ElecJet35]);
 
 
-  // HasZCandidate
+  // HasZ20
   //----------------------------------------------------------------------------
-  if (deltaZMass > 20.) return;
+  if (fabs(invMass2Lep - Z_MASS) > 20.) return;
 
-  const Double_t met  = EventMET.Et();
-  const Double_t lWEt = WLepton.Et();
+  FillHistograms(theChannel, HasZ20, ddweight[MuonJet20][ElecJet35]);
 
-  transverseMass = lWEt*lWEt + met*met - 2.*lWEt*met*cos(WLepton.Angle(EventMET.Vect()));
+
+  // HasZ10
+  //----------------------------------------------------------------------------
+  if (fabs(invMass2Lep - Z_MASS) > 10.) return;
   
-  transverseMass = sqrt(transverseMass);
-
-  FillHistograms(theChannel, HasZCandidate, ddweight[MuonJet20][ElecJet35]);
+  FillHistograms(theChannel, HasZ10, ddweight[MuonJet20][ElecJet35]);
 
 
   // MET30
   //----------------------------------------------------------------------------
   if (EventMET.Et() > 30.)
     {
-      if (deltaZMass <= 20.) FillHistograms(theChannel, MET30_Z20, ddweight[MuonJet20][ElecJet35]);
-      if (deltaZMass <= 10.) FillHistograms(theChannel, MET30_Z10, ddweight[MuonJet20][ElecJet35]);
+      FillHistograms(theChannel, MET30, ddweight[MuonJet20][ElecJet35]);
     }
   else
     {
-      if (deltaZMass <= 10.)
-	{
-	  FillHistograms(theChannel, ClosureTest_Z10, ddweight[MuonJet20][ElecJet35]);
-	}
-
+      FillHistograms(theChannel, ClosureTest, ddweight[MuonJet20][ElecJet35]);
+      
       return;
     }
 
@@ -504,16 +514,14 @@ void AnalysisWZ::InsideLoop()
   //----------------------------------------------------------------------------
   if (EventMET.Et() <= 40.) return;
 
-  if (deltaZMass <= 20.) FillHistograms(theChannel, MET40_Z20, ddweight[MuonJet20][ElecJet35]);
-  if (deltaZMass <= 10.) FillHistograms(theChannel, MET40_Z10, ddweight[MuonJet20][ElecJet35]);
+  FillHistograms(theChannel, MET40, ddweight[MuonJet20][ElecJet35]);
 
 
   // MET40AntiBtag
   //----------------------------------------------------------------------------
   if (nBJet30 > 0) return;
 
-  if (deltaZMass <= 20.) FillHistograms(theChannel, MET40AntiBtag_Z20, ddweight[MuonJet20][ElecJet35]);
-  if (deltaZMass <= 10.) FillHistograms(theChannel, MET40AntiBtag_Z10, ddweight[MuonJet20][ElecJet35]);
+  FillHistograms(theChannel, MET40AntiBtag, ddweight[MuonJet20][ElecJet35]);
 }
 
 
@@ -845,24 +853,25 @@ void AnalysisWZ::FillHistograms(UInt_t   iChannel,
   Double_t deltaR1  = WLepton.DeltaR(ZLepton1);
   Double_t deltaR2  = WLepton.DeltaR(ZLepton2);
 
-  hNPV         [iChannel][iCut]->Fill(T_Vertex_z->size(),        hweight);
-  hMET         [iChannel][iCut]->Fill(EventMET.Et(),             hweight);
-  hSumCharges  [iChannel][iCut]->Fill(sumCharges,                hweight);
-  hInvMass2Lep [iChannel][iCut]->Fill(invMass2Lep,               hweight);
-  hInvMass3Lep [iChannel][iCut]->Fill(invMass3Lep,               hweight);
-  hPtLepton1   [iChannel][iCut]->Fill(AnalysisLeptons[0].v.Pt(), hweight);
-  hPtLepton2   [iChannel][iCut]->Fill(AnalysisLeptons[1].v.Pt(), hweight);
-  hPtLepton3   [iChannel][iCut]->Fill(AnalysisLeptons[2].v.Pt(), hweight);
-  hPtLeadingJet[iChannel][iCut]->Fill(ptLeadingJet,              hweight);
-  hDPhiZLeptons[iChannel][iCut]->Fill(fabs(deltaPhi),            hweight);
-  hPtZLepton1  [iChannel][iCut]->Fill(ZLepton1.Pt(),             hweight);
-  hPtZLepton2  [iChannel][iCut]->Fill(ZLepton2.Pt(),             hweight);
-  hPtWLepton   [iChannel][iCut]->Fill(WLepton.Pt(),              hweight);
-  hDRWZLepton1 [iChannel][iCut]->Fill(deltaR1,                   hweight);
-  hDRWZLepton2 [iChannel][iCut]->Fill(deltaR2,                   hweight);
-  hMtW         [iChannel][iCut]->Fill(transverseMass,            hweight);
-  hNJet30      [iChannel][iCut]->Fill(nJet30,                    hweight);
-  hNBJet30     [iChannel][iCut]->Fill(nBJet30,                   hweight);
+  hNPV         [iChannel][iCut]->Fill(T_Vertex_z->size(),         hweight);
+  hMET         [iChannel][iCut]->Fill(EventMET.Et(),              hweight);
+  hSumCharges  [iChannel][iCut]->Fill(sumCharges,                 hweight);
+  hInvMass2Lep [iChannel][iCut]->Fill(invMass2Lep,                hweight);
+  hInvMass3Lep [iChannel][iCut]->Fill(invMass3Lep,                hweight);
+  hPtLepton1   [iChannel][iCut]->Fill(AnalysisLeptons[0].v.Pt(),  hweight);
+  hPtLepton2   [iChannel][iCut]->Fill(AnalysisLeptons[1].v.Pt(),  hweight);
+  hPtLepton3   [iChannel][iCut]->Fill(AnalysisLeptons[2].v.Pt(),  hweight);
+  hPtLeadingJet[iChannel][iCut]->Fill(ptLeadingJet,               hweight);
+  hDPhiZLeptons[iChannel][iCut]->Fill(fabs(deltaPhi),             hweight);
+  hPtZLepton1  [iChannel][iCut]->Fill(ZLepton1.Pt(),              hweight);
+  hPtZLepton2  [iChannel][iCut]->Fill(ZLepton2.Pt(),              hweight);
+  hPtZ         [iChannel][iCut]->Fill((ZLepton1 + ZLepton2).Pt(), hweight);
+  hPtWLepton   [iChannel][iCut]->Fill(WLepton.Pt(),               hweight);
+  hDRWZLepton1 [iChannel][iCut]->Fill(deltaR1,                    hweight);
+  hDRWZLepton2 [iChannel][iCut]->Fill(deltaR2,                    hweight);
+  hMtW         [iChannel][iCut]->Fill(transverseMass,             hweight);
+  hNJet30      [iChannel][iCut]->Fill(nJet30,                     hweight);
+  hNBJet30     [iChannel][iCut]->Fill(nBJet30,                    hweight);
 }
 
 
