@@ -1403,7 +1403,7 @@ void RelativeSystematics(UInt_t channel, UInt_t cut)
 	}
 
       if (syst == fakesSyst) {systematicError[channel][Fakes][syst] = 36.0; continue;}
-      if (syst == qcdSyst)   {systematicError[channel][WZ]   [syst] =  5.3; continue;}
+      if (syst == qcdSyst)   {systematicError[channel][WZ]   [syst] =  1.6; continue;}
       if (syst == pdfSyst)   {systematicError[channel][WZ]   [syst] =  3.0; continue;}
 
       for (UInt_t i=0; i<vprocess.size(); i++)

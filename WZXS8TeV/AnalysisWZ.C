@@ -713,44 +713,9 @@ Bool_t AnalysisWZ::ElectronIsolation(UInt_t iElec)
 		      T_Elec_Pz->at(iElec),
 		      T_Elec_Energy->at(iElec));
 
-  Double_t AEff04 = 0.;
+  Double_t pt = ScaleLepton(Electron, Elec.Pt(), Elec.Eta());
 
-  if (fabs(Elec.Eta()) < 1.0)
-    {
-      AEff04 = 0.21;  // ± 0.001
-    }
-  else if (fabs(Elec.Eta()) >= 1.0 && fabs(Elec.Eta()) < 1.479)
-    {
-      AEff04 = 0.21;  // ± 0.002
-    }
-  else if (fabs(Elec.Eta()) >= 1.479 && fabs(Elec.Eta()) < 2.0)
-    {
-      AEff04 = 0.11;  // ± 0.001
-    }
-  else if (fabs(Elec.Eta()) >= 2.0 && fabs(Elec.Eta()) < 2.2)
-    {
-      AEff04 = 0.14;  // ± 0.001
-    }
-  else if (fabs(Elec.Eta()) >= 2.2 && fabs(Elec.Eta()) < 2.3)
-    {
-      AEff04 = 0.18;  // ± 0.002
-    }
-  else if (fabs(Elec.Eta()) >= 2.3 && fabs(Elec.Eta()) < 2.4)
-    {
-      AEff04 = 0.19;  // ± 0.003
-    }
-  else if (fabs(Elec.Eta()) >= 2.4)
-    {
-      AEff04 = 0.26;  // ± 0.004
-    }
-
-  Double_t charged = T_Elec_chargedHadronIso->at(iElec);
-  Double_t neutral = T_Elec_neutralHadronIso->at(iElec);
-  Double_t photon  = T_Elec_photonIso->at(iElec);
-  Double_t rho     = T_Event_RhoIso;
-  Double_t pt      = ScaleLepton(Electron, Elec.Pt(), Elec.Eta());
-
-  Double_t relIso = (charged + max(0., neutral + photon - rho*AEff04)) / pt;
+  Double_t relIso = T_Elec_Iso->at(iElec) / pt;
 
   Bool_t pass = (relIso < 0.15);
 
