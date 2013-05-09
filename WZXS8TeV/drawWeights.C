@@ -43,7 +43,7 @@ void drawWeights()
 
   gInterpreter->ExecuteMacro("./HiggsPaperStyle.C");
 
-  f = new TFile("results/Summer12_53X/WH/analysis/WZTo3LNu.root");
+  f = new TFile("results/Summer12_53X/WH/CalibratedE/analysis/WZTo3LNu.root");
 
   DrawIt("hLeptonWeight");
   DrawIt("hTriggerWeight");

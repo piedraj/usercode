@@ -1020,7 +1020,7 @@ void SetParameters(UInt_t cut,
   _mode      = mode;
   _localpath = GuessLocalBasePath();
   
-  _datapath = Form("%s/piedra/work/WZXS8TeV/results/Summer12_53X/WH/",
+  _datapath = Form("%s/piedra/work/WZXS8TeV/results/Summer12_53X/WH/CalibratedE",
 		   _localpath.Data());
 
   MakeOutputDirectory("pdf");
@@ -1068,7 +1068,7 @@ Int_t ReadInputFiles()
 
     UInt_t j = vprocess.at(i);
 
-    input[j] = new TFile(_datapath + "CalibratedE/analysis/" + sProcess[j] + ".root");
+    input[j] = new TFile(_datapath + "/analysis/" + sProcess[j] + ".root");
 
     TH1D* dummy = (TH1D*)input[j]->Get("hCounter_MME_" + sCut[MET30] + "_TTT");
 
