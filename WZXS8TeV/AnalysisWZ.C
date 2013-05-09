@@ -421,18 +421,22 @@ void AnalysisWZ::InsideLoop()
 
   // Data-driven estimates
   //----------------------------------------------------------------------------
-  if (mode == PPF)
-    {
-      for (UInt_t iMuon=0; iMuon<nFakeRateMuon; iMuon++)
-	for (UInt_t iElec=0; iElec<nFakeRateElec; iElec++)
-	  ddweight[iMuon][iElec] = GetPPFWeight(iMuon,iElec);
-    }
-  else if (mode == PPP)
-    {
-      for (UInt_t iMuon=0; iMuon<nFakeRateMuon; iMuon++)
-	for (UInt_t iElec=0; iElec<nFakeRateElec; iElec++)
+  for (UInt_t iMuon=0; iMuon<nFakeRateMuon; iMuon++) {
+    for (UInt_t iElec=0; iElec<nFakeRateElec; iElec++) {
+
+      if (mode == PPP)
+	{
 	  ddweight[iMuon][iElec] = GetPPPWeight(iMuon,iElec);
+	}
+      else if (mode == PPF)
+	{
+	  ddweight[iMuon][iElec] =
+	    GetPPFWeight(iMuon,iElec) +
+	    GetPFFWeight(iMuon,iElec) +
+	    GetFFFWeight(iMuon,iElec);
+	}
     }
+  }
 
 
   // Deal with jets
@@ -920,7 +924,7 @@ const Bool_t AnalysisWZ::WgammaFilter() const
 
 
 //------------------------------------------------------------------------------
-// GetPPFWeight
+// GetPPPWeight
 //------------------------------------------------------------------------------
 // Weight rules
 //
@@ -930,6 +934,41 @@ const Bool_t AnalysisWZ::WgammaFilter() const
 // Fail  estimated as   FAKE: pf
 //
 // common factor: 1/(p-f)
+//------------------------------------------------------------------------------
+Double_t AnalysisWZ::GetPPPWeight(UInt_t muonJetPt, UInt_t elecJetPt)
+{
+  Double_t promptProbability[3];
+
+  for (UInt_t i=0; i<3; i++) {
+    
+    Lepton lep = AnalysisLeptons[i];
+
+    Double_t f = (lep.flavor == Muon) ? lep.frMuon[muonJetPt] : lep.frElec[elecJetPt];
+
+    Double_t p = lep.pr;
+
+    if (lep.type == Tight)
+      {
+	promptProbability[i] = p * (1 - f);
+      }
+    else if (lep.type == Fail)
+      {
+	promptProbability[i] = p * f;
+      }
+
+    promptProbability[i] /= (p - f);
+  }
+
+  Double_t PPP = promptProbability[0] * promptProbability[1] * promptProbability[2];
+
+  if (nTight == 0 || nTight == 2) PPP *= -1.;
+
+  return PPP;
+}
+
+
+//------------------------------------------------------------------------------
+// GetPPFWeight
 //------------------------------------------------------------------------------
 Double_t AnalysisWZ::GetPPFWeight(UInt_t muonJetPt, UInt_t elecJetPt)
 {
@@ -965,19 +1004,61 @@ Double_t AnalysisWZ::GetPPFWeight(UInt_t muonJetPt, UInt_t elecJetPt)
 
   Double_t result = PPF + PFP + FPP;
 
-  if (nTight == 1) result *= -1.;
-  if (nTight == 3) result *= -1.;
+  if (nTight == 1 || nTight == 3) result *= -1.;
 
   return result;
 }
 
 
 //------------------------------------------------------------------------------
-// GetPPPWeight
+// GetPFFWeight
 //------------------------------------------------------------------------------
-Double_t AnalysisWZ::GetPPPWeight(UInt_t muonJetPt, UInt_t elecJetPt)
+Double_t AnalysisWZ::GetPFFWeight(UInt_t muonJetPt, UInt_t elecJetPt)
 {
   Double_t promptProbability[3];
+  Double_t fakeProbability[3];
+
+  for (UInt_t i=0; i<3; i++) {
+
+    Lepton lep = AnalysisLeptons[i];
+
+    Double_t f = (lep.flavor == Muon) ? lep.frMuon[muonJetPt] : lep.frElec[elecJetPt];
+
+    Double_t p = lep.pr;
+
+    if (lep.type == Tight)
+      {
+	promptProbability[i] = p * (1 - f);
+	fakeProbability[i]   = f * (1 - p);
+      }
+    else if (lep.type == Fail)
+      {
+	promptProbability[i] = p * f;
+	fakeProbability[i]   = p * f;
+      }
+
+    promptProbability[i] /= (p - f);
+    fakeProbability[i]   /= (p - f);
+  }
+
+  Double_t PFF = promptProbability[0] * fakeProbability[1]   * fakeProbability[2];
+  Double_t FPF = fakeProbability[0]   * promptProbability[1] * fakeProbability[2];
+  Double_t FFP = fakeProbability[0]   * fakeProbability[1]   * promptProbability[2];
+
+  Double_t result = PFF + FPF + FFP;
+
+  if (nTight == 0 || nTight == 2) result *= -1.;
+
+  return result;
+}
+
+
+//------------------------------------------------------------------------------
+// GetFFFWeight
+//------------------------------------------------------------------------------
+Double_t AnalysisWZ::GetFFFWeight(UInt_t muonJetPt, UInt_t elecJetPt)
+{
+  Double_t fakeProbability[3];
 
   for (UInt_t i=0; i<3; i++) {
     
@@ -989,22 +1070,21 @@ Double_t AnalysisWZ::GetPPPWeight(UInt_t muonJetPt, UInt_t elecJetPt)
 
     if (lep.type == Tight)
       {
-	promptProbability[i] = p * (1 - f);
+	fakeProbability[i] = f * (1 - p);
       }
     else if (lep.type == Fail)
       {
-	promptProbability[i] = p * f;
+	fakeProbability[i] = p * f;
       }
 
-    promptProbability[i] /= (p - f);
+    fakeProbability[i] /= (p - f);
   }
 
-  Double_t PPP = promptProbability[0] * promptProbability[1] * promptProbability[2];
+  Double_t FFF = fakeProbability[0] * fakeProbability[1] * fakeProbability[2];
 
-  if (nTight == 0) PPP *= -1.;
-  if (nTight == 2) PPP *= -1.;
+  if (nTight == 1 || nTight == 3) FFF *= -1.;
 
-  return PPP;
+  return FFF;
 }
 
 

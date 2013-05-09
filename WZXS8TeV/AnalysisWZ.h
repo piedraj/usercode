@@ -141,11 +141,10 @@ class AnalysisWZ: public CMSAnalysisSelectorMiniTrees
 
   const Bool_t   WgammaFilter              () const;
 
-  Double_t       GetPPFWeight              (UInt_t   muonJetPt,
-					    UInt_t   elecJetPt);
-
-  Double_t       GetPPPWeight              (UInt_t   muonJetPt,
-					    UInt_t   elecJetPt);
+  Double_t       GetPPPWeight              (UInt_t   muonJetPt, UInt_t elecJetPt);
+  Double_t       GetPPFWeight              (UInt_t   muonJetPt, UInt_t elecJetPt);
+  Double_t       GetPFFWeight              (UInt_t   muonJetPt, UInt_t elecJetPt);
+  Double_t       GetFFFWeight              (UInt_t   muonJetPt, UInt_t elecJetPt);
 
   TH2F*          LoadHistogram             (TString  filename,
 					    TString  hname,
