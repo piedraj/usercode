@@ -10,7 +10,7 @@ rm -rf tex
 ### grep Error merge.log
 
 
-for ((level=0; level<5; level++))
+for ((level=0; level<6; level++))
   do
   for ((mode=0; mode<2; mode++))
     do

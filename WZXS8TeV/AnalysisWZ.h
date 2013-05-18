@@ -36,9 +36,10 @@ enum {FFF, TFF, TTF, TTT, LLL};
 TString sComposition[] = {"FFF", "TFF", "TTF", "TTT", "LLL"};
 
 
-const UInt_t nCut = 7;
+const UInt_t nCut = 8;
 
 enum {
+  AtLeast3Leptons,
   Exactly3Leptons,
   HasZ20,
   HasZ10,
@@ -49,6 +50,7 @@ enum {
 };
 
 TString sCut[] = {
+  "AtLeast3Leptons",
   "Exactly3Leptons",
   "HasZ20",
   "HasZ10",
@@ -199,15 +201,9 @@ class AnalysisWZ: public CMSAnalysisSelectorMiniTrees
   TH1D*                       hNJet30      [nChannel][nCut];
   TH1D*                       hNBJet30     [nChannel][nCut];
 
-  TH1D*                       hInvMass2Lep_EE;
-  TH1D*                       hInvMass2Lep_EE_BarrelBarrel;
-  TH1D*                       hInvMass2Lep_EE_BarrelEndcap;
-  TH1D*                       hInvMass2Lep_EE_EndcapEndcap;
-
-  TH1D*                       hInvMass2Lep_MM;
-  TH1D*                       hInvMass2Lep_MM_BarrelBarrel;
-  TH1D*                       hInvMass2Lep_MM_BarrelEndcap;
-  TH1D*                       hInvMass2Lep_MM_EndcapEndcap;
+  TH1D*                       hInvMass2LepBB[2];
+  TH1D*                       hInvMass2LepBE[2];
+  TH1D*                       hInvMass2LepEE[2];
 
 
   // Input parameters

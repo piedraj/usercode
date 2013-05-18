@@ -114,9 +114,10 @@ TString pdfChannel[nChannel+1] = {
 };
 
 
-const UInt_t nCut = 5;
+const UInt_t nCut = 6;
 
 enum {
+  AtLeast3Leptons,
   Exactly3Leptons,
   HasZ20,
   HasZ10,
@@ -308,37 +309,22 @@ void XS(UInt_t cut  = MET30,
 
     DrawHistogram("hSumCharges", channel, cut, "q_{1} + q_{2} + q_{3}");
 
-    if (sCut[cut].Contains("ClosureTest"))
-      {
-	DrawHistogram("hInvMass2Lep",  channel, cut, "m_{#font[12]{ll}}",                    -1, 0, "GeV",  linY, 81, 101, -999, -999, false);
-	DrawHistogram("hInvMass3Lep",  channel, cut, "m_{#font[12]{3l}}",                     2, 0, "GeV",  linY, 60, 200);
-	DrawHistogram("hPtLeadingJet", channel, cut, "p_{T}^{leading jet}",                   2, 0, "GeV",  linY,  0, 125);
-	DrawHistogram("hPtZLepton1",   channel, cut, "p_{T}^{Z leading lepton}",              2, 0, "GeV",  linY,  0, 125);
-	DrawHistogram("hPtZLepton2",   channel, cut, "p_{T}^{Z trailing lepton}",             2, 0, "GeV",  linY,  0, 125);
-	DrawHistogram("hMtW",          channel, cut, "m_{T}^{W}",                             2, 0, "GeV",  linY,  0,  50);
-	DrawHistogram("hDPhiZLeptons", channel, cut, "#Delta#phi_{#font[12]{ll}}",           10, 1, "^{o}", linY);
-	DrawHistogram("hDRWZLepton1",  channel, cut, "#DeltaR(W lepton, Z leading lepton)",   5, 1, "NULL", linY);
-	DrawHistogram("hDRWZLepton2",  channel, cut, "#DeltaR(W lepton, Z trailing lepton)",  5, 1, "NULL", linY);
-      }
-    else
-      {
-	DrawHistogram("hMET",          channel, cut, "E_{T}^{miss}",                           5, 0, "GeV",  linY);
-	DrawHistogram("hInvMass2Lep",  channel, cut, "m_{#font[12]{ll}}",                     -1, 0, "GeV",  linY, 76, 106);
-	DrawHistogram("hInvMass3Lep",  channel, cut, "m_{#font[12]{3l}}",                      5, 0, "GeV",  linY, 60, 350);
-	DrawHistogram("hPtLepton1",    channel, cut, "p_{T}^{first lepton}",                   5, 0, "GeV",  linY);
-	DrawHistogram("hPtLepton2",    channel, cut, "p_{T}^{second lepton}",                  5, 0, "GeV",  linY);
-	DrawHistogram("hPtLepton3",    channel, cut, "p_{T}^{third lepton}",                   5, 0, "GeV",  linY);
-	DrawHistogram("hPtLeadingJet", channel, cut, "p_{T}^{leading jet}",                    5, 0, "GeV",  linY);
-	DrawHistogram("hDPhiZLeptons", channel, cut, "#Delta#phi_{#font[12]{ll}}",            10, 1, "^{o}", linY);
-	DrawHistogram("hPtZLepton1",   channel, cut, "p_{T}^{Z leading lepton}",               5, 0, "GeV",  linY);
-	DrawHistogram("hPtZLepton2",   channel, cut, "p_{T}^{Z trailing lepton}",              5, 0, "GeV",  linY);
-	DrawHistogram("hPtWLepton",    channel, cut, "p_{T}^{W lepton}",                       5, 0, "GeV",  linY);
-	DrawHistogram("hPtZ",          channel, cut, "p_{T}^{Z}",                             10, 0, "GeV",  linY);
-	DrawHistogram("hDRWZLepton1",  channel, cut, "#DeltaR(W lepton, Z leading lepton)",    5, 1, "NULL", linY);
-	DrawHistogram("hDRWZLepton2",  channel, cut, "#DeltaR(W lepton, Z trailing lepton)",   5, 1, "NULL", linY);
-	DrawHistogram("hMtW",          channel, cut, "m_{T}^{W}",                              5, 0, "GeV",  linY);
-	DrawHistogram("hNJet30",       channel, cut, "number of jets (p_{T}^{jet} > 30 GeV)", -1, 0, "NULL", linY, 0, 4);
-      }
+    DrawHistogram("hMET",          channel, cut, "E_{T}^{miss}",                           5, 0, "GeV",  linY);
+    DrawHistogram("hInvMass2Lep",  channel, cut, "m_{#font[12]{ll}}",                     -1, 0, "GeV",  linY, 76, 106);
+    DrawHistogram("hInvMass3Lep",  channel, cut, "m_{#font[12]{3l}}",                      5, 0, "GeV",  linY, 60, 350);
+    DrawHistogram("hPtLepton1",    channel, cut, "p_{T}^{first lepton}",                   5, 0, "GeV",  linY);
+    DrawHistogram("hPtLepton2",    channel, cut, "p_{T}^{second lepton}",                  5, 0, "GeV",  linY);
+    DrawHistogram("hPtLepton3",    channel, cut, "p_{T}^{third lepton}",                   5, 0, "GeV",  linY);
+    DrawHistogram("hPtLeadingJet", channel, cut, "p_{T}^{leading jet}",                    5, 0, "GeV",  linY);
+    DrawHistogram("hDPhiZLeptons", channel, cut, "#Delta#phi_{#font[12]{ll}}",            10, 1, "^{o}", linY);
+    DrawHistogram("hPtZLepton1",   channel, cut, "p_{T}^{Z leading lepton}",               5, 0, "GeV",  linY);
+    DrawHistogram("hPtZLepton2",   channel, cut, "p_{T}^{Z trailing lepton}",              5, 0, "GeV",  linY);
+    DrawHistogram("hPtWLepton",    channel, cut, "p_{T}^{W lepton}",                       5, 0, "GeV",  linY);
+    DrawHistogram("hPtZ",          channel, cut, "p_{T}^{Z}",                             10, 0, "GeV",  linY);
+    DrawHistogram("hDRWZLepton1",  channel, cut, "#DeltaR(W lepton, Z leading lepton)",    5, 1, "NULL", linY);
+    DrawHistogram("hDRWZLepton2",  channel, cut, "#DeltaR(W lepton, Z trailing lepton)",   5, 1, "NULL", linY);
+    DrawHistogram("hMtW",          channel, cut, "m_{T}^{W}",                              5, 0, "GeV",  linY);
+    DrawHistogram("hNJet30",       channel, cut, "number of jets (p_{T}^{jet} > 30 GeV)", -1, 0, "NULL", linY, 0, 4);
   }
 
   Inclusive();
@@ -645,10 +631,10 @@ void DrawHistogram(TString  hname,
   //----------------------------------------------------------------------------
   TH1D* allmc = (TH1D*)hist[Data]->Clone("allmc");
 
-  allmc->SetFillColor  (kGray+2);
+  allmc->SetFillColor  (kGray+1);
   allmc->SetFillStyle  (   3345);
-  allmc->SetLineColor  (kGray+2);
-  allmc->SetMarkerColor(kGray+2);
+  allmc->SetLineColor  (kGray+1);
+  allmc->SetMarkerColor(kGray+1);
   allmc->SetMarkerSize (      0);
 
   for (Int_t ibin=1; ibin<=allmc->GetNbinsX(); ibin++) {
@@ -985,6 +971,7 @@ TLegend* DrawLegend(Float_t x1,
 void SetParameters(UInt_t cut,
 		   UInt_t mode)
 {
+  sCut[AtLeast3Leptons] = "AtLeast3Leptons";
   sCut[Exactly3Leptons] = "Exactly3Leptons";
   sCut[HasZ20]          = "HasZ20";
   sCut[HasZ10]          = "HasZ10";

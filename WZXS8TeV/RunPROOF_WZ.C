@@ -20,7 +20,7 @@ enum {
 };
 
 
-void RunPROOF_WZ(TString  sample     = "WZTo3LNu",
+void RunPROOF_WZ(TString  sample     = "DoubleMu",
 		 Int_t    systematic = noSyst,
 		 Int_t    mode       = RAW,
 		 Long64_t nEvents    = -1,

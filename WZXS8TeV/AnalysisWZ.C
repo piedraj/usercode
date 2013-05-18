@@ -63,15 +63,14 @@ void AnalysisWZ::Initialise()
     }
   }
 
-  hInvMass2Lep_EE              = CreateH1D("hInvMass2Lep_EE",              "", 2000, 0, 200);
-  hInvMass2Lep_EE_BarrelBarrel = CreateH1D("hInvMass2Lep_EE_BarrelBarrel", "", 2000, 0, 200);
-  hInvMass2Lep_EE_BarrelEndcap = CreateH1D("hInvMass2Lep_EE_BarrelEndcap", "", 2000, 0, 200);
-  hInvMass2Lep_EE_EndcapEndcap = CreateH1D("hInvMass2Lep_EE_EndcapEndcap", "", 2000, 0, 200);
+  for (UInt_t i=0; i<2; i++) {
 
-  hInvMass2Lep_MM              = CreateH1D("hInvMass2Lep_MM",              "", 2000, 0, 200);
-  hInvMass2Lep_MM_BarrelBarrel = CreateH1D("hInvMass2Lep_MM_BarrelBarrel", "", 2000, 0, 200);
-  hInvMass2Lep_MM_BarrelEndcap = CreateH1D("hInvMass2Lep_MM_BarrelEndcap", "", 2000, 0, 200);
-  hInvMass2Lep_MM_EndcapEndcap = CreateH1D("hInvMass2Lep_MM_EndcapEndcap", "", 2000, 0, 200);
+    TString suffix = (i == Muon) ? "MM" : "EE";
+
+    hInvMass2LepBB[i] = CreateH1D("hInvMass2LepBB_" + suffix, "", 2000, 0, 200);
+    hInvMass2LepBE[i] = CreateH1D("hInvMass2LepBE_" + suffix, "", 2000, 0, 200);
+    hInvMass2LepEE[i] = CreateH1D("hInvMass2LepEE_" + suffix, "", 2000, 0, 200);
+  }
 
 
   // SF, FR, PR and trigger efficiencies histograms
@@ -153,6 +152,11 @@ void AnalysisWZ::InsideLoop()
   if (sample.Contains("WJets_Madgraph") && T_Gen_bSt3_Px->size() > 0) return;
 
 
+  // HLT
+  //----------------------------------------------------------------------------
+  if (!PassTrigger()) return;
+
+
   // Loop over muons
   //----------------------------------------------------------------------------
   for (UInt_t i=0; i<T_Muon_Px->size(); i++) {
@@ -166,25 +170,27 @@ void AnalysisWZ::InsideLoop()
 
     if (eta >= 2.4) continue;
 
-    if (tmp.Pt() <= 10.) continue;
+    if (tmp.Pt() <= 8.) continue;
 
     Double_t pt = ScaleLepton(Muon, tmp.Pt());
 
+    if (pt <= 10.) continue;
+
     TLorentzVector MuonVector = (pt / tmp.Pt()) * tmp;
 
-    Double_t MaxMuIP = (pt < 20) ? 0.01 : 0.02;
+    if (fabs(T_Muon_IP2DBiasedPV->at(i)) >= 0.2) continue;
 
-    if (fabs(T_Muon_IP2DBiasedPV->at(i)) > MaxMuIP) continue;
-    
-    if (fabs(T_Muon_IP2DBiasedPV->at(i)) > 0.2) continue;
+    if (fabs(T_Muon_dzPVBiasedPV->at(i)) >= 0.1) continue;
 
-    if (fabs(T_Muon_dzPVBiasedPV->at(i)) > 0.1) continue;
-
-    if (T_Muon_MVARings->at(i) < -0.6) continue;
+    if (T_Muon_MVARings->at(i) <= -0.6) continue;
 
     if (!MuonID(i)) continue;
 
-    UInt_t muon_type = (MuonIsolation(i)) ? Tight : Fail;
+    Double_t MaxMuIP = (pt < 20) ? 0.01 : 0.02;
+
+    Bool_t passIP = (fabs(T_Muon_IP2DBiasedPV->at(i)) < MaxMuIP);
+
+    UInt_t muon_type = (MuonIsolation(i) && passIP) ? Tight : Fail;
 
     const Double_t sfMax = MuonSF->GetXaxis()->GetBinCenter(MuonSF->GetNbinsX());
     const Double_t prMax = MuonPR->GetXaxis()->GetBinCenter(MuonPR->GetNbinsX());
@@ -223,19 +229,21 @@ void AnalysisWZ::InsideLoop()
 
     if (eta >= 2.5) continue;
 
-    if (tmp.Pt() <= 10.) continue;
+    if (tmp.Pt() <= 8.) continue;
 
     Double_t pt = ScaleLepton(Electron, tmp.Pt(), eta);
 
+    if (pt <= 10.) continue;
+
     TLorentzVector ElectronVector = (pt / tmp.Pt()) * tmp;
-
-    if (fabs(T_Elec_IP2DBiasedPV->at(i)) > 0.02) continue;
-
-    if (fabs(T_Elec_dzPVBiasedPV->at(i)) > 0.1) continue;
 
     if (!ElectronID(i)) continue;
 
-    UInt_t electron_type = (ElectronBDT(i) && ElectronIsolation(i)) ? Tight : Fail;
+    Bool_t passIP = (fabs(T_Elec_IP2DBiasedPV->at(i)) < 0.02);
+
+    passIP &= (fabs(T_Elec_dzPVBiasedPV->at(i)) < 0.1);
+
+    UInt_t electron_type = (ElectronBDT(i) && ElectronIsolation(i) && passIP) ? Tight : Fail;
 
     const Double_t sfMax = ElecSF->GetXaxis()->GetBinCenter(ElecSF->GetNbinsX());
     const Double_t prMax = ElecPR->GetXaxis()->GetBinCenter(ElecPR->GetNbinsX());
@@ -293,6 +301,7 @@ void AnalysisWZ::InsideLoop()
   // Make Z and W candidates
   //----------------------------------------------------------------------------
   Bool_t isZee = false;
+  Bool_t isZmm = false;
 
   Bool_t foundDileptonWithLowMll = false;
 
@@ -316,8 +325,9 @@ void AnalysisWZ::InsideLoop()
 	ZLepton2 = AnalysisLeptons[j].v;
 
 	isZee = (AnalysisLeptons[i].flavor == Electron) ? true : false; 
+	isZmm = (AnalysisLeptons[i].flavor == Muon)     ? true : false; 
 
-	if (AnalysisLeptons.size() == 3) {
+	if (AnalysisLeptons.size() >= 3) {
 	
 	  for (UInt_t k=0; k<3; k++) {
 	
@@ -333,34 +343,32 @@ void AnalysisWZ::InsideLoop()
 
   if (foundDileptonWithLowMll) return;
 
+  if (!isZee & !isZmm) return;
+
 
   // Fill Z invariant mass at two-lepton level
   //----------------------------------------------------------------------------
-   if (isZee) hInvMass2Lep_EE->Fill(invMass2Lep, pu_weight * xs_weight);
-   else       hInvMass2Lep_MM->Fill(invMass2Lep, pu_weight * xs_weight);
+  UInt_t index = (isZee) ? Electron : Muon;
 
-   if (fabs(ZLepton1.Eta()) < 1.479 && fabs(ZLepton2.Eta()) < 1.479)
-     {
-       if (isZee) hInvMass2Lep_EE_BarrelBarrel->Fill(invMass2Lep, pu_weight * xs_weight);
-       else       hInvMass2Lep_MM_BarrelBarrel->Fill(invMass2Lep, pu_weight * xs_weight);
-     }
-   else if (fabs(ZLepton1.Eta()) < 1.479 || fabs(ZLepton2.Eta()) < 1.479)
-     {
-       if (isZee) hInvMass2Lep_EE_BarrelEndcap->Fill(invMass2Lep, pu_weight * xs_weight);
-       else       hInvMass2Lep_MM_BarrelEndcap->Fill(invMass2Lep, pu_weight * xs_weight);
-     }
-   else
-     {
-      if (isZee) hInvMass2Lep_EE_EndcapEndcap->Fill(invMass2Lep, pu_weight * xs_weight);
-      else       hInvMass2Lep_MM_EndcapEndcap->Fill(invMass2Lep, pu_weight * xs_weight);
+  if (fabs(ZLepton1.Eta()) < 1.479 && fabs(ZLepton2.Eta()) < 1.479)
+    {
+      hInvMass2LepBB[index]->Fill(invMass2Lep, pu_weight * xs_weight);
+    }
+  else if (fabs(ZLepton1.Eta()) < 1.479 || fabs(ZLepton2.Eta()) < 1.479)
+    {
+      hInvMass2LepBE[index]->Fill(invMass2Lep, pu_weight * xs_weight);
+    }
+  else
+    {
+      hInvMass2LepEE[index]->Fill(invMass2Lep, pu_weight * xs_weight);
     }
 
 
-  // Require exactly 3 leptons
+  // Require at least three leptons
   //----------------------------------------------------------------------------
-  if (AnalysisLeptons.size() != 3) return;
+  if (AnalysisLeptons.size() < 3) return;
 
-  
+
   // Set the MET of the event
   //----------------------------------------------------------------------------
   EventMET = GetMET();
@@ -395,14 +403,6 @@ void AnalysisWZ::InsideLoop()
   else if (nElectron == 1) theChannel = MME;
   else if (nElectron == 2) theChannel = EEM;
   else if (nElectron == 3) theChannel = EEE;
-
-  if (sample.Contains("DoubleMu")       && nElectron > 1) return;
-  if (sample.Contains("DoubleElectron") && nElectron < 2) return;
-
-
-  // HLT
-  //----------------------------------------------------------------------------
-  if (!PassTrigger()) return;
 
 
   // Apply lepton SF and trigger efficiencies
@@ -481,8 +481,17 @@ void AnalysisWZ::InsideLoop()
   transverseMass = sqrt(transverseMass);
 
 
+  // AtLeast3Leptons
+  //----------------------------------------------------------------------------
+  FillHistograms(theChannel, AtLeast3Leptons, ddweight[MuonJet20][ElecJet35]);
+
+
   // Exactly3Leptons
   //----------------------------------------------------------------------------
+  if (AnalysisLeptons.size() != 3) return;
+
+  if (AnalysisLeptons[2].v.Pt() <= 20) return;
+
   FillHistograms(theChannel, Exactly3Leptons, ddweight[MuonJet20][ElecJet35]);
 
 
@@ -701,7 +710,7 @@ Bool_t AnalysisWZ::ElectronID(UInt_t iElec)
 
   pass &= T_Elec_passConversionVeto->at(iElec);
 
-  pass &= (T_Elec_nHits->at(iElec) <= 0);
+  pass &= (T_Elec_nHits->at(iElec) == 0);
 
   return pass;
 }
@@ -734,13 +743,11 @@ Bool_t AnalysisWZ::MuonID(UInt_t iMuon)
 {
   Double_t pt = ScaleLepton(Muon, T_Muon_Pt->at(iMuon));
 
-  Double_t ptResolution = T_Muon_deltaPt->at(iMuon) / pt;
-
   Bool_t passcutsforGlb = T_Muon_IsGlobalMuon->at(iMuon);
 
   passcutsforGlb &= (T_Muon_NormChi2GTrk   ->at(iMuon) < 10);
   passcutsforGlb &= (T_Muon_NumOfMatches   ->at(iMuon) >  1);
-  passcutsforGlb &= (T_Muon_NValidHitsSATrk->at(iMuon) >  0);  // NEW
+  passcutsforGlb &= (T_Muon_NValidHitsSATrk->at(iMuon) >  0);
 	
   Bool_t passcutsforSA = T_Muon_IsAllTrackerMuons->at(iMuon);
 
@@ -748,13 +755,15 @@ Bool_t AnalysisWZ::MuonID(UInt_t iMuon)
 
   Bool_t pass = (passcutsforGlb || passcutsforSA);
 
-  pass &= (fabs(ptResolution) < 0.1);
+  pass &= (fabs(T_Muon_deltaPt->at(iMuon) / pt) < 0.1);
 	
   pass &= T_Muon_isPFMuon->at(iMuon);
 
   pass &= (T_Muon_NLayers->at(iMuon) > 5);
 
-  pass &= (T_Muon_trkKink->at(iMuon) < 20);  // NEW
+  pass &= (T_Muon_trkKink->at(iMuon) < 20);
+
+  pass &= (T_Muon_NValidPixelHitsInTrk->at(iMuon) > 0);  // NEW
 
   return pass;
 }
@@ -771,10 +780,10 @@ Bool_t AnalysisWZ::MuonIsolation(UInt_t iMuon)
 
   Double_t isoCut = -1;
 
-  if (pt <= 20) isoCut = (fabs(eta) < 1.479) ? 0.82 : 0.86;
-  else          isoCut = (fabs(eta) < 1.479) ? 0.86 : 0.82;
+  if (pt <= 20) isoCut = (fabs(eta) < 1.479) ? 0.86 : 0.82;
+  else          isoCut = (fabs(eta) < 1.479) ? 0.82 : 0.86;
 
-  Bool_t pass = (T_Muon_MVARings->at(iMuon) >= isoCut);
+  Bool_t pass = (T_Muon_MVARings->at(iMuon) > isoCut);
 
   return pass;
 }
@@ -787,13 +796,6 @@ void AnalysisWZ::FillHistograms(UInt_t   iChannel,
 				UInt_t   iCut,
 				Double_t dd_weight)
 {
-  Bool_t pt3cut = (AnalysisLeptons[2].v.Pt() > 20);
-
-  if (sCut[iCut].Contains("ClosureTest")) pt3cut = !pt3cut;
-
-  if (!pt3cut) return;
-
-
   // Counters
   //----------------------------------------------------------------------------  
   hCounterRaw[iChannel][iCut][nTight]->Fill(1);
@@ -1169,26 +1171,17 @@ Bool_t AnalysisWZ::PassTrigger()
   
   Bool_t pass = false;
 
-  if (sample.Contains("DoubleMu"))
+  if (sample.Contains("MuEG"))
     {
-      pass = T_passTriggerDoubleMu;
+      pass = T_passTriggerElMu;
+    }
+  else if (sample.Contains("DoubleMu"))
+    {
+      pass = (!T_passTriggerElMu && T_passTriggerDoubleMu);
     }
   else if (sample.Contains("DoubleElectron"))
     {
-      pass = T_passTriggerDoubleEl;
-    }
-  else if (sample.Contains("MuEG"))
-    {
-      pass = T_passTriggerElMu;
-
-      if (nElectron > 1)
-	{
-	  pass &= (!T_passTriggerDoubleEl);
-	}
-      else
-	{
-	  pass &= (!T_passTriggerDoubleMu);
-	}
+      pass = (!T_passTriggerElMu && !T_passTriggerDoubleMu && T_passTriggerDoubleEl);
     }
 
   return pass;
