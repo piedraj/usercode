@@ -243,7 +243,9 @@ void AnalysisWZ::InsideLoop()
 
     passIP &= (fabs(T_Elec_dzPVBiasedPV->at(i)) < 0.1);
 
-    UInt_t electron_type = (ElectronBDT(i) && ElectronIsolation(i) && passIP) ? Tight : Fail;
+    if (!passIP) continue;
+
+    UInt_t electron_type = (ElectronBDT(i) && ElectronIsolation(i)) ? Tight : Fail;
 
     const Double_t sfMax = ElecSF->GetXaxis()->GetBinCenter(ElecSF->GetNbinsX());
     const Double_t prMax = ElecPR->GetXaxis()->GetBinCenter(ElecPR->GetNbinsX());
@@ -327,15 +329,14 @@ void AnalysisWZ::InsideLoop()
 	isZee = (AnalysisLeptons[i].flavor == Electron) ? true : false; 
 	isZmm = (AnalysisLeptons[i].flavor == Muon)     ? true : false; 
 
-	if (AnalysisLeptons.size() >= 3) {
+	if (AnalysisLeptons.size() != 3) continue;
 	
-	  for (UInt_t k=0; k<3; k++) {
+	for (UInt_t k=0; k<3; k++) {
 	
-	    if (k == i) continue;
-	    if (k == j) continue;
+	  if (k == i) continue;
+	  if (k == j) continue;
 
-	    WLepton = AnalysisLeptons[k].v;
-	  }
+	  WLepton = AnalysisLeptons[k].v;
 	}
       }
     }
@@ -364,9 +365,9 @@ void AnalysisWZ::InsideLoop()
     }
 
 
-  // Require at least three leptons
+  // Require exactly three leptons
   //----------------------------------------------------------------------------
-  if (AnalysisLeptons.size() < 3) return;
+  if (AnalysisLeptons.size() != 3) return;
 
 
   // Set the MET of the event
@@ -481,15 +482,13 @@ void AnalysisWZ::InsideLoop()
   transverseMass = sqrt(transverseMass);
 
 
-  // AtLeast3Leptons
+  // Exactly3SoftLeptons
   //----------------------------------------------------------------------------
-  FillHistograms(theChannel, AtLeast3Leptons, ddweight[MuonJet20][ElecJet35]);
+  FillHistograms(theChannel, Exactly3SoftLeptons, ddweight[MuonJet20][ElecJet35]);
 
 
   // Exactly3Leptons
   //----------------------------------------------------------------------------
-  if (AnalysisLeptons.size() != 3) return;
-
   if (AnalysisLeptons[2].v.Pt() <= 20) return;
 
   FillHistograms(theChannel, Exactly3Leptons, ddweight[MuonJet20][ElecJet35]);

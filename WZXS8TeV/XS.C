@@ -117,7 +117,7 @@ TString pdfChannel[nChannel+1] = {
 const UInt_t nCut = 6;
 
 enum {
-  AtLeast3Leptons,
+  Exactly3SoftLeptons,
   Exactly3Leptons,
   HasZ20,
   HasZ10,
@@ -971,12 +971,12 @@ TLegend* DrawLegend(Float_t x1,
 void SetParameters(UInt_t cut,
 		   UInt_t mode)
 {
-  sCut[AtLeast3Leptons] = "AtLeast3Leptons";
-  sCut[Exactly3Leptons] = "Exactly3Leptons";
-  sCut[HasZ20]          = "HasZ20";
-  sCut[HasZ10]          = "HasZ10";
-  sCut[MET30]           = "MET30";
-  sCut[ClosureTest]     = "ClosureTest";
+  sCut[Exactly3SoftLeptons] = "Exactly3SoftLeptons";
+  sCut[Exactly3Leptons]     = "Exactly3Leptons";
+  sCut[HasZ20]              = "HasZ20";
+  sCut[HasZ10]              = "HasZ10";
+  sCut[MET30]               = "MET30";
+  sCut[ClosureTest]         = "ClosureTest";
 
   sProcess[Data]  = "Data";
   sProcess[Fakes] = "Data_PPF";

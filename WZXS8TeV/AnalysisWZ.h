@@ -39,7 +39,7 @@ TString sComposition[] = {"FFF", "TFF", "TTF", "TTT", "LLL"};
 const UInt_t nCut = 8;
 
 enum {
-  AtLeast3Leptons,
+  Exactly3SoftLeptons,
   Exactly3Leptons,
   HasZ20,
   HasZ10,
@@ -50,7 +50,7 @@ enum {
 };
 
 TString sCut[] = {
-  "AtLeast3Leptons",
+  "Exactly3SoftLeptons",
   "Exactly3Leptons",
   "HasZ20",
   "HasZ10",
