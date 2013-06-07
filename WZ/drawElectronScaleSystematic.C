@@ -51,7 +51,7 @@ void drawElectronScaleSystematic()
 
   gInterpreter->ExecuteMacro("./HiggsPaperStyle.C");
 
-  TFile* file = TFile::Open("../WZLatino/AuxiliaryFilesWZXS8TeV/gScaleSyst-8TeV.root");
+  TFile* file = TFile::Open("../WZ/AuxiliaryFilesWZXS8TeV/gScaleSyst-8TeV.root");
 
   TGraphErrors* gScaleInEB  = (TGraphErrors*)file->Get("gScaleInEB");
   TGraphErrors* gScaleOutEB = (TGraphErrors*)file->Get("gScaleOutEB");

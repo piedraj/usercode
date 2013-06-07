@@ -986,7 +986,7 @@ TH2F* LoadHistogram(TString filename,
 		    TString hname,
 		    TString cname)
 {
-  TString path = "/nfs/fanae/user/piedra/work/WZLatino/AuxiliaryFilesWZXS8TeV/";
+  TString path = "/nfs/fanae/user/piedra/work/WZ/AuxiliaryFilesWZXS8TeV/";
 
   TFile* inputfile = TFile::Open(path + filename + ".root");
 
@@ -1005,7 +1005,7 @@ TH2F* LoadHistogram(TString filename,
 //------------------------------------------------------------------------------
 TH1F* GetHistogramFromGraph(TString hname, TString gname)
 {
-  TString path = "/nfs/fanae/user/piedra/work/WZLatino/AuxiliaryFilesWZXS8TeV/";
+  TString path = "/nfs/fanae/user/piedra/work/WZ/AuxiliaryFilesWZXS8TeV/";
 
   TFile* inputfile = TFile::Open(path + "gScaleSyst-8TeV.root");
 

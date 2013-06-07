@@ -240,7 +240,7 @@ TH2F* LoadHistogram(TString filename,
 		    TString hname,
 		    TString cname)
 {
-  TFile* inputfile = TFile::Open(localpath + "/piedra/work/WZLatino/AuxiliaryFilesWZXS8TeV/" + filename + ".root");
+  TFile* inputfile = TFile::Open(localpath + "/piedra/work/WZ/AuxiliaryFilesWZXS8TeV/" + filename + ".root");
 
   TH2F* hist = (TH2F*)inputfile->Get(hname)->Clone(cname);
 

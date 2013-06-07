@@ -1,7 +1,7 @@
 #!/bin/bash
 
 
-INPUT_DIR=/nfs/fanae/user/piedra/work/WZLatino
+INPUT_DIR=/nfs/fanae/user/piedra/work/WZ
 OUTPUT_DIR=/nfs/fanae/user/piedra/svn/notes/AN-13-093/trunk
 
 

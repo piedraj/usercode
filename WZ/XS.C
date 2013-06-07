@@ -1031,7 +1031,7 @@ void SetParameters(UInt_t cut,
   _mode      = mode;
   _localpath = GuessLocalBasePath();
   
-  _datapath = Form("%s/piedra/work/WZLatino/results",
+  _datapath = Form("%s/piedra/work/WZ/results",
 		   _localpath.Data());
 
   MakeOutputDirectory("pdf");
@@ -1341,7 +1341,6 @@ void PrintCrossSections(UInt_t cut)
 void Inclusive()
 {
   Double_t x     = 0;
-  Double_t lumi  = 0;
   Double_t stat  = 0;
   Double_t eff   = 0;
   Double_t bkgs  = 0;
@@ -1362,7 +1361,6 @@ void Inclusive()
 
       x += (xsValue[i] / xsErrorTotal / xsErrorTotal);
 
-      lumi  += (1. / xsErrorLumi [i]  / xsErrorLumi [i]);
       stat  += (1. / xsErrorStat [i]  / xsErrorStat [i]);
       eff   += (1. / xsErrorEff  [i]  / xsErrorEff  [i]);
       bkgs  += (1. / xsErrorBkgs [i]  / xsErrorBkgs [i]);
@@ -1374,7 +1372,7 @@ void Inclusive()
 
   xsValue[nChannel] = x / total;
 
-  xsErrorLumi [nChannel] = 1. / sqrt(lumi);
+  xsErrorLumi [nChannel] = _luminosityUncertainty * xsValue[nChannel] / 1e2;
   xsErrorStat [nChannel] = 1. / sqrt(stat);
   xsErrorEff  [nChannel] = 1. / sqrt(eff);
   xsErrorBkgs [nChannel] = 1. / sqrt(bkgs);
