@@ -1,20 +1,5 @@
-#include "TCanvas.h"
-#include "TFile.h"
-#include "TFrame.h"
-#include "TGraphErrors.h"
-#include "TH1.h"
-#include "TH2.h"
-#include "THStack.h"
-#include "TInterpreter.h"
-#include "TLatex.h"
-#include "TLegend.h"
-#include "TLine.h"
-#include "TMath.h"
-#include "TMultiGraph.h"
-#include "TROOT.h"
-#include "TStyle.h"
-#include "TSystem.h"
-#include "TTree.h"
+#include "DrawFunctions.h"
+
 #include <fstream>
 #include <iostream>
 #include <vector>
@@ -64,8 +49,8 @@
 
 // Input parameters for the WZ cross section
 //------------------------------------------------------------------------------
-const Double_t xsWplusZ  = 13.89;  // pb (MCFM with 71 < mZ < 111 GeV)
-const Double_t xsWminusZ =  8.06;  // pb (MCFM with 71 < mZ < 111 GeV)
+const Double_t xsWPlusZ  = 13.89;  // pb (MCFM with 71 < mZ < 111 GeV)
+const Double_t xsWMinusZ =  8.06;  // pb (MCFM with 71 < mZ < 111 GeV)
 
 const Double_t W2e         = 0.1075;
 const Double_t W2m         = 0.1057;
@@ -145,6 +130,21 @@ TFile*  input   [nProcess];
 TString sProcess[nProcess];
 
 
+const UInt_t nCharge = 3;
+
+enum {
+  WPlus,
+  WMinus,
+  WInclusive
+};
+
+const TString sCharge[nCharge] = {
+  "WPlus",
+  "WMinus",
+  "WInclusive"
+};
+
+
 // Systematics
 //------------------------------------------------------------------------------
 const UInt_t nSystematic = 8;
@@ -185,13 +185,14 @@ enum {MCmode, PPFmode, PPPmode};
 //------------------------------------------------------------------------------
 Double_t        _luminosity;
 Double_t        _luminosityUncertainty;
-Double_t        _yoffset;
+Double_t        _xs_nlo;
 Int_t           _verbosity;
 TString         _localpath;
 TString         _datapath;
 TString         _output;
 UInt_t          _cut;
 UInt_t          _mode;
+UInt_t          _wcharge;
 
 vector<UInt_t>  vprocess;
 
@@ -213,7 +214,8 @@ Double_t        xsErrorSyst [nChannel+1];
 // Member functions
 //------------------------------------------------------------------------------
 void     SetParameters            (UInt_t        cut,
-				   UInt_t        mode);
+				   UInt_t        mode,
+				   UInt_t        wcharge);
 
 Int_t    ReadInputFiles           ();
 
@@ -238,36 +240,6 @@ void     DrawHistogram            (TString       hname,
 				   Double_t      ymax         = -999,
 				   Bool_t        moveOverflow = true);
 
-Double_t GetMaximumIncludingErrors(TH1*          h,
-				   Double_t      xmin = -999,
-				   Double_t      xmax = -999);
-
-void     MoveOverflowBins         (TH1*          h,
-				   Double_t      xmin = -999,
-				   Double_t      xmax = -999);
-
-void     SetAxis                  (TH1*          hist,
-				   TString       xtitle,
-				   TString       ytitle,
-				   Float_t       size,
-				   Float_t       offset);
-
-void     DrawTLatex               (Double_t      x,
-				   Double_t      y,
-				   Double_t      tsize,
-				   Short_t       align,
-				   const char*   text,
-				   Bool_t        setndc = true);
-
-TLegend* DrawLegend               (Float_t       x1,
-				   Float_t       y1,
-				   TH1*          hist,
-				   TString       label,
-				   TString       option,
-				   Float_t       tsize   = 0.03,
-				   Float_t       xoffset = 0.20,
-				   Float_t       yoffset = _yoffset);
-
 Double_t Yield                    (TH1*          h);
 
 TString  GuessLocalBasePath       ();
@@ -290,12 +262,13 @@ Double_t RelativeDifference       (Double_t      x0,
 //------------------------------------------------------------------------------
 // XS
 //------------------------------------------------------------------------------
-void XS(UInt_t cut  = HasZ,
-	UInt_t mode = PPFmode)
+void XS(UInt_t cut     = MET30,
+	UInt_t mode    = PPFmode,
+	UInt_t wcharge = WInclusive)
 {
   gROOT->SetBatch();
 
-  SetParameters(cut, mode);
+  SetParameters(cut, mode, wcharge);
 
   if (ReadInputFiles() < 0) return;
 
@@ -346,10 +319,10 @@ void MeasureTheCrossSection(UInt_t channel, UInt_t cut)
   Double_t nsignal = 0;
   Double_t nbkg    = 0;
   Double_t ebkg    = 0;
-  Double_t efakes  = 0;  // NEW
-  Double_t eother  = 0;  // NEW
+  Double_t efakes  = 0;
+  Double_t eother  = 0;
 
-  TString suffix = "_" + sChannel[channel] + "_" + sCut[cut] + "_LLL";
+  TString suffix = "_" + sChannel[channel] + "_" + sCut[cut] + "_" + sCharge[_wcharge] + "_LLL";
 
   Double_t nWZ = Yield((TH1D*)input[WZ]->Get("hCounterEff" + suffix));
 
@@ -412,8 +385,8 @@ void MeasureTheCrossSection(UInt_t channel, UInt_t cut)
   //----------------------------------------------------------------------------
   Double_t xsRelativeErrorStat  = 1e2 * sqrt(ndata) / (ndata - nbkg);
   Double_t xsRelativeErrorBkgs  = 1e2 * ebkg        / (ndata - nbkg);
-  Double_t xsRelativeErrorFakes = 1e2 * efakes      / (ndata - nbkg);  // NEW
-  Double_t xsRelativeErrorOther = 1e2 * eother      / (ndata - nbkg);  // NEW
+  Double_t xsRelativeErrorFakes = 1e2 * efakes      / (ndata - nbkg);
+  Double_t xsRelativeErrorOther = 1e2 * eother      / (ndata - nbkg);
   Double_t xsRelativeErrorLumi  = _luminosityUncertainty;
   Double_t xsRelativeErrorEff   = totalSyst[channel][WZ];
   Double_t xsRelativeErrorSyst  = 0;
@@ -450,7 +423,7 @@ void MeasureTheCrossSection(UInt_t channel, UInt_t cut)
 	     xsErrorStat[channel],
 	     xsErrorSyst[channel],
 	     xsErrorLumi[channel]);
-      printf("       xs(NLO) = %.2f pb\n", xsWplusZ + xsWminusZ);
+      printf("       xs(NLO) = %.2f pb\n", _xs_nlo);
       printf("\n");
     }
 }
@@ -497,7 +470,7 @@ void PrintYields(UInt_t channel)
 	{
 	  UInt_t k = vprocess.at(j);
 
-	  TString hname = "hCounter_" + sChannel[channel] + "_" + sCut[i] + "_LLL";
+	  TString hname = "hCounter_" + sChannel[channel] + "_" + sCut[i] + "_" + sCharge[_wcharge] + "_LLL";
 
 	  hist[k] = (TH1D*)input[k]->Get(hname);
 
@@ -596,7 +569,7 @@ void DrawHistogram(TString  hname,
 		   Double_t ymax,
 		   Bool_t   moveOverflow)
 {
-  hname += "_" + sChannel[channel] + "_" + sCut[cut];
+  hname += "_" + sChannel[channel] + "_" + sCut[cut] + "_" + sCharge[_wcharge];
 
   TCanvas* canvas = new TCanvas(hname, hname, 550, 720);
 
@@ -740,7 +713,7 @@ void DrawHistogram(TString  hname,
   //----------------------------------------------------------------------------
   Double_t x0     = 0.720;
   Double_t y0     = 0.834;
-  Double_t delta  = _yoffset + 0.001;
+  Double_t delta  = 0.048 + 0.001;
   Double_t ndelta = 0;
   
   DrawLegend(x0 - 0.49, y0 - ndelta, hist[Data], Form(" data (%.0f)", Yield(hist[Data])), "lp"); ndelta += delta;
@@ -825,177 +798,11 @@ void DrawHistogram(TString  hname,
 
 
 //------------------------------------------------------------------------------
-// GetMaximumIncludingErrors
-//------------------------------------------------------------------------------
-Double_t GetMaximumIncludingErrors(TH1*     h,
-				   Double_t xmin,
-				   Double_t xmax)
-{
-  UInt_t nbins = h->GetNbinsX();
-
-  TAxis* axis = (TAxis*)h->GetXaxis();
-  
-  Int_t firstBin = (xmin != -999) ? axis->FindBin(xmin) : 1;
-  Int_t lastBin  = (xmax != -999) ? axis->FindBin(xmax) : nbins;
-
-  Float_t maxWithErrors = 0;
-
-  for (Int_t i=firstBin; i<=lastBin; i++) {
-
-    Float_t binHeight = h->GetBinContent(i) + h->GetBinError(i);
-
-    if (binHeight > maxWithErrors) maxWithErrors = binHeight;
-  }
-
-  return maxWithErrors;
-}
-
-
-//------------------------------------------------------------------------------
-// MoveOverflowBins
-//------------------------------------------------------------------------------
-void MoveOverflowBins(TH1*     h,
-		      Double_t xmin,
-		      Double_t xmax)
-{
-  UInt_t nbins = h->GetNbinsX();
-
-  TAxis* axis = (TAxis*)h->GetXaxis();
-  
-  UInt_t firstBin = (xmin != -999) ? axis->FindBin(xmin) : 1;
-  UInt_t lastBin  = (xmax != -999) ? axis->FindBin(xmax) : nbins;
-
-  Double_t firstVal = 0;
-  Double_t firstErr = 0;
-
-  Double_t lastVal = 0;
-  Double_t lastErr = 0;
-
-  for (UInt_t i=0; i<=nbins+1; i++) {
-
-    if (i <= firstBin) {
-      firstVal += h->GetBinContent(i);
-      firstErr += (h->GetBinError(i)*h->GetBinError(i));
-    }
-
-    if (i >= lastBin) {
-      lastVal += h->GetBinContent(i);
-      lastErr += (h->GetBinError(i)*h->GetBinError(i));
-    }
-
-    if (i < firstBin || i > lastBin) {
-      h->SetBinContent(i, 0);
-      h->SetBinError  (i, 0);
-    }
-  }
-
-  firstErr = sqrt(firstErr);
-  lastErr  = sqrt(lastErr);
-
-  h->SetBinContent(firstBin, firstVal);
-  h->SetBinError  (firstBin, firstErr);
-
-  h->SetBinContent(lastBin, lastVal);
-  h->SetBinError  (lastBin, lastErr);
-}
-
-
-//------------------------------------------------------------------------------
-// SetAxis
-//------------------------------------------------------------------------------
-void SetAxis(TH1*    hist,
-	     TString xtitle,
-	     TString ytitle,
-	     Float_t size,
-	     Float_t offset)
-{
-  TAxis* xaxis = (TAxis*)hist->GetXaxis();
-  TAxis* yaxis = (TAxis*)hist->GetYaxis();
-
-  xaxis->SetLabelFont(42);
-  yaxis->SetLabelFont(42);
-  xaxis->SetTitleFont(42);
-  yaxis->SetTitleFont(42);
-
-  xaxis->SetLabelOffset(0.025);
-  yaxis->SetLabelOffset(0.025);
-  xaxis->SetTitleOffset(1.4);
-  yaxis->SetTitleOffset(offset);
-
-  xaxis->SetLabelSize(size);
-  yaxis->SetLabelSize(size);
-  xaxis->SetTitleSize(size);
-  yaxis->SetTitleSize(size);
-
-  xaxis->SetTitle(xtitle);
-  yaxis->SetTitle(ytitle);
-
-  xaxis->SetNdivisions(505);
-  yaxis->SetNdivisions(505);
-
-  yaxis->CenterTitle();
-
-  gPad->GetFrame()->DrawClone();
-  gPad->RedrawAxis();
-}
-
-
-//------------------------------------------------------------------------------
-// DrawTLatex
-//------------------------------------------------------------------------------
-void DrawTLatex(Double_t    x,
-		Double_t    y,
-		Double_t    tsize,
-		Short_t     align,
-		const char* text,
-		Bool_t      setndc)
-{
-  TLatex* tl = new TLatex(x, y, text);
-
-  tl->SetNDC      (setndc);
-  tl->SetTextAlign( align);
-  tl->SetTextFont (    42);
-  tl->SetTextSize ( tsize);
-
-  tl->Draw("same");
-}
-
-
-//------------------------------------------------------------------------------
-// DrawLegend
-//------------------------------------------------------------------------------
-TLegend* DrawLegend(Float_t x1,
-		    Float_t y1,
-		    TH1*    hist,
-		    TString label,
-		    TString option,
-		    Float_t tsize,
-		    Float_t xoffset,
-		    Float_t yoffset)
-{
-  TLegend* legend = new TLegend(x1,
-				y1,
-				x1 + xoffset,
-				y1 + yoffset);
-  
-  legend->SetBorderSize(    0);
-  legend->SetFillColor (    0);
-  legend->SetTextAlign (   12);
-  legend->SetTextFont  (   42);
-  legend->SetTextSize  (tsize);
-
-  legend->AddEntry(hist, label.Data(), option.Data());
-  legend->Draw();
-
-  return legend;
-}
-
-
-//------------------------------------------------------------------------------
 // SetParameters
 //------------------------------------------------------------------------------
 void SetParameters(UInt_t cut,
-		   UInt_t mode)
+		   UInt_t mode,
+		   UInt_t wcharge)
 {
   //  sCut[Exactly3Leptons] = "Exactly3Leptons";
   sCut[HasZ]            = "HasZ";
@@ -1025,11 +832,24 @@ void SetParameters(UInt_t cut,
   _luminosity            = 19602.0;  // pb
   _luminosityUncertainty =     4.4;  // %
 
-  _yoffset   = 0.048;
   _verbosity = 2;
   _cut       = cut;
   _mode      = mode;
+  _wcharge   = wcharge;
   _localpath = GuessLocalBasePath();
+
+  if (_wcharge == WPlus)
+    {
+      _xs_nlo = xsWPlusZ;
+    }
+  else if (_wcharge == WMinus)
+    {
+      _xs_nlo = xsWMinusZ;
+    }
+  else
+    {
+      _xs_nlo = xsWPlusZ + xsWMinusZ;
+    }
   
   _datapath = Form("%s/piedra/work/WZ/results",
 		   _localpath.Data());
@@ -1038,8 +858,6 @@ void SetParameters(UInt_t cut,
   MakeOutputDirectory("png");
 
   gSystem->mkdir("tex", kTRUE);
-
-  gInterpreter->ExecuteMacro("HiggsPaperStyle.C");
 
   gStyle->SetEndErrorSize    (  5);
   gStyle->SetHatchesLineWidth(  1);
@@ -1081,7 +899,7 @@ Int_t ReadInputFiles()
 
     input[j] = new TFile(_datapath + "/analysis/" + sProcess[j] + ".root");
 
-    TH1D* dummy = (TH1D*)input[j]->Get("hCounter_MME_" + sCut[MET30] + "_TTT");
+    TH1D* dummy = (TH1D*)input[j]->Get("hCounter_MME_" + sCut[MET30] + "_" + sCharge[_wcharge] + "_TTT");
 
     if (!dummy)
       {
@@ -1093,24 +911,6 @@ Int_t ReadInputFiles()
   }
 
   return 0;
-}
-
-
-//------------------------------------------------------------------------------
-// Yield
-//------------------------------------------------------------------------------
-Double_t Yield(TH1* h)
-{
-  if (h)
-    {
-      Int_t nbins = h->GetNbinsX();
-      
-      return h->Integral(0, nbins+1);
-    }
-  else
-    {
-      return 0.;
-    }
 }
 
 
@@ -1223,8 +1023,8 @@ void DrawCrossSections(UInt_t cut)
 
   canvas->SetLeftMargin(canvas->GetRightMargin());
 
-  Double_t xmin = (xsWplusZ + xsWminusZ) -  8.;
-  Double_t xmax = (xsWplusZ + xsWminusZ) + 23.;
+  Double_t xmin = _xs_nlo -  8.;
+  Double_t xmax = _xs_nlo + 23.;
   Double_t ymin = 0.50;
   Double_t ymax = nChannel+1 + ymin;
   
@@ -1237,8 +1037,7 @@ void DrawCrossSections(UInt_t cut)
   
   // NLO WZ cross-section
   //----------------------------------------------------------------------------
-  TLine* line = new TLine(xsWplusZ+xsWminusZ, ymin,
-			  xsWplusZ+xsWminusZ, ymax);
+  TLine* line = new TLine(_xs_nlo, ymin, _xs_nlo, ymax);
 
   line->SetLineColor(kGray+2);
   line->SetLineStyle(3);
@@ -1296,8 +1095,10 @@ void DrawCrossSections(UInt_t cut)
   canvas->GetFrame()->DrawClone();
   canvas->RedrawAxis();
 
-  canvas->SaveAs(Form("pdf/%s/xs_%s.pdf", _output.Data(), sCut[cut].Data()));
-  canvas->SaveAs(Form("png/%s/xs_%s.png", _output.Data(), sCut[cut].Data()));
+  TString xs_name = "xs_" + sCut[cut] + "_" + sCharge[_wcharge];
+
+  canvas->SaveAs(Form("pdf/%s/%s.pdf", _output.Data(), xs_name.Data()));
+  canvas->SaveAs(Form("png/%s/%s.png", _output.Data(), xs_name.Data()));
 }
 
 
@@ -1436,7 +1237,7 @@ void RelativeSystematics(UInt_t channel, UInt_t cut)
 	      continue;
 	    }
 	  
-	  TString hname = "hCounter_" + sChannel[channel] + "_" + sCut[cut] + "_TTT";
+	  TString hname = "hCounter_" + sChannel[channel] + "_" + sCut[cut] + "_" + sCharge[_wcharge] + "_TTT";
 	
 	  TString suffix = "/" + sProcess[process] + ".root";
 
@@ -1464,7 +1265,7 @@ void RelativeSystematics(UInt_t channel, UInt_t cut)
 	    }
 	  else if (syst == pileupSyst)
 	    {
-	      TString hnamePU = "hCounterPU_" + sChannel[channel] + "_" + sCut[cut] + "_TTT";
+	      TString hnamePU = "hCounterPU_" + sChannel[channel] + "_" + sCut[cut] + "_" + sCharge[_wcharge] + "_TTT";
 
 	      y1 = Yield((TH1D*)f0->Get(hnamePU));
 	    }

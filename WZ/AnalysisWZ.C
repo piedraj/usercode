@@ -92,6 +92,21 @@ const TString sCut[nCut] = {
 };
 
 
+const UInt_t nCharge = 3;
+
+enum {
+  WPlus,
+  WMinus,
+  WInclusive
+};
+
+const TString sCharge[nCharge] = {
+  "WPlus",
+  "WMinus",
+  "WInclusive"
+};
+
+
 enum {Muon, Electron};
 
 enum {Fail, Tight};
@@ -173,34 +188,34 @@ void           CounterSummary       (TString title);
 //==============================================================================
 TH1F*                         hFakeDifference[nChannel];
 
-TH1F*                         hCounterRaw[nChannel][nCut][nComposition];
-TH1F*                         hCounterPU [nChannel][nCut][nComposition];
-TH1F*                         hCounterEff[nChannel][nCut][nComposition];
-TH1F*                         hCounter   [nChannel][nCut][nComposition];
+TH1F*                         hCounterRaw[nChannel][nCut][nCharge][nComposition];
+TH1F*                         hCounterPU [nChannel][nCut][nCharge][nComposition];
+TH1F*                         hCounterEff[nChannel][nCut][nCharge][nComposition];
+TH1F*                         hCounter   [nChannel][nCut][nCharge][nComposition];
 
-TH1F*                         hLeptonWeight [nChannel][nCut];
-TH1F*                         hTriggerWeight[nChannel][nCut];
-TH1F*                         hTotalWeight  [nChannel][nCut];
+TH1F*                         hLeptonWeight [nChannel][nCut][nCharge];
+TH1F*                         hTriggerWeight[nChannel][nCut][nCharge];
+TH1F*                         hTotalWeight  [nChannel][nCut][nCharge];
 
-TH1F*                         hNPV         [nChannel][nCut];
-TH1F*                         hMET         [nChannel][nCut];
-TH1F*                         hSumCharges  [nChannel][nCut];
-TH1F*                         hInvMass2Lep [nChannel][nCut];
-TH1F*                         hInvMass3Lep [nChannel][nCut];
-TH1F*                         hPtLepton1   [nChannel][nCut];
-TH1F*                         hPtLepton2   [nChannel][nCut];
-TH1F*                         hPtLepton3   [nChannel][nCut];
-TH1F*                         hPtLeadingJet[nChannel][nCut];
-TH1F*                         hDPhiZLeptons[nChannel][nCut];
-TH1F*                         hPtZLepton1  [nChannel][nCut];
-TH1F*                         hPtZLepton2  [nChannel][nCut];
-TH1F*                         hPtZ         [nChannel][nCut];
-TH1F*                         hPtWLepton   [nChannel][nCut];
-TH1F*                         hDRWZLepton1 [nChannel][nCut];
-TH1F*                         hDRWZLepton2 [nChannel][nCut];
-TH1F*                         hMtW         [nChannel][nCut];
-TH1F*                         hNJet30      [nChannel][nCut];
-TH1F*                         hNBJet30     [nChannel][nCut];
+TH1F*                         hNPV         [nChannel][nCut][nCharge];
+TH1F*                         hMET         [nChannel][nCut][nCharge];
+TH1F*                         hSumCharges  [nChannel][nCut][nCharge];
+TH1F*                         hInvMass2Lep [nChannel][nCut][nCharge];
+TH1F*                         hInvMass3Lep [nChannel][nCut][nCharge];
+TH1F*                         hPtLepton1   [nChannel][nCut][nCharge];
+TH1F*                         hPtLepton2   [nChannel][nCut][nCharge];
+TH1F*                         hPtLepton3   [nChannel][nCut][nCharge];
+TH1F*                         hPtLeadingJet[nChannel][nCut][nCharge];
+TH1F*                         hDPhiZLeptons[nChannel][nCut][nCharge];
+TH1F*                         hPtZLepton1  [nChannel][nCut][nCharge];
+TH1F*                         hPtZLepton2  [nChannel][nCut][nCharge];
+TH1F*                         hPtZ         [nChannel][nCut][nCharge];
+TH1F*                         hPtWLepton   [nChannel][nCut][nCharge];
+TH1F*                         hDRWZLepton1 [nChannel][nCut][nCharge];
+TH1F*                         hDRWZLepton2 [nChannel][nCut][nCharge];
+TH1F*                         hMtW         [nChannel][nCut][nCharge];
+TH1F*                         hNJet30      [nChannel][nCut][nCharge];
+TH1F*                         hNBJet30     [nChannel][nCut][nCharge];
 
 TH1F*                         hInvMass2LepBB[2];
 TH1F*                         hInvMass2LepBE[2];
@@ -220,6 +235,7 @@ Float_t                       invMass2Lep;
 Float_t                       invMass3Lep;
 Float_t                       sumCharges;
 Float_t                       transverseMass;
+Float_t                       WCharge;
 
 UInt_t                        nElectron;
 UInt_t                        nTight;
@@ -331,46 +347,49 @@ void AnalysisWZ(TString sample,
   // Histogram definition
   //----------------------------------------------------------------------------
   TH1::SetDefaultSumw2();
-
+  
   for (UInt_t i=0; i<nChannel; i++) {
     
     hFakeDifference[i] = new TH1F(Form("hFakeDifference_%d", i), "", 160, -0.4, 0.4);
 
     for (UInt_t j=0; j<nCut; j++) {
 
-      TString suffix = "_" + sChannel[i] + "_" + sCut[j];
+      for (UInt_t iCharge=0; iCharge<nCharge; iCharge++) {
 
-      for (UInt_t k=0; k<nComposition; k++) {
+	TString suffix = "_" + sChannel[i] + "_" + sCut[j] + "_" + sCharge[iCharge];
+	
+	for (UInt_t k=0; k<nComposition; k++) {
 
-	hCounterRaw[i][j][k] = new TH1F("hCounterRaw" + suffix + "_" + sComposition[k], "", 3, 0, 3);
-	hCounterPU [i][j][k] = new TH1F("hCounterPU"  + suffix + "_" + sComposition[k], "", 3, 0, 3);
-	hCounterEff[i][j][k] = new TH1F("hCounterEff" + suffix + "_" + sComposition[k], "", 3, 0, 3);
-	hCounter   [i][j][k] = new TH1F("hCounter"    + suffix + "_" + sComposition[k], "", 3, 0, 3);
+	  hCounterRaw[i][j][iCharge][k] = new TH1F("hCounterRaw" + suffix + "_" + sComposition[k], "", 3, 0, 3);
+	  hCounterPU [i][j][iCharge][k] = new TH1F("hCounterPU"  + suffix + "_" + sComposition[k], "", 3, 0, 3);
+	  hCounterEff[i][j][iCharge][k] = new TH1F("hCounterEff" + suffix + "_" + sComposition[k], "", 3, 0, 3);
+	  hCounter   [i][j][iCharge][k] = new TH1F("hCounter"    + suffix + "_" + sComposition[k], "", 3, 0, 3);
+	}
+
+	hLeptonWeight [i][j][iCharge] = new TH1F("hLeptonWeight"  + suffix, "", 90, 0.75, 1.05);
+	hTriggerWeight[i][j][iCharge] = new TH1F("hTriggerWeight" + suffix, "", 90, 0.75, 1.05);
+	hTotalWeight  [i][j][iCharge] = new TH1F("hTotalWeight"   + suffix, "", 90, 0.75, 1.05);
+
+	hNPV         [i][j][iCharge] = new TH1F("hNPV"          + suffix, "",  50,  0,  50);
+	hMET         [i][j][iCharge] = new TH1F("hMET"          + suffix, "", 200,  0, 200);
+	hSumCharges  [i][j][iCharge] = new TH1F("hSumCharges"   + suffix, "",   9, -4,   5);
+	hInvMass2Lep [i][j][iCharge] = new TH1F("hInvMass2Lep"  + suffix, "", 200,  0, 200);
+	hInvMass3Lep [i][j][iCharge] = new TH1F("hInvMass3Lep"  + suffix, "", 400,  0, 400);
+	hPtLepton1   [i][j][iCharge] = new TH1F("hPtLepton1"    + suffix, "", 200,  0, 200);
+	hPtLepton2   [i][j][iCharge] = new TH1F("hPtLepton2"    + suffix, "", 200,  0, 200);
+	hPtLepton3   [i][j][iCharge] = new TH1F("hPtLepton3"    + suffix, "", 200,  0, 200);    
+	hPtLeadingJet[i][j][iCharge] = new TH1F("hPtLeadingJet" + suffix, "", 200,  0, 200);    
+	hDPhiZLeptons[i][j][iCharge] = new TH1F("hDPhiZLeptons" + suffix, "", 320,  0, 3.2);    
+	hPtZLepton1  [i][j][iCharge] = new TH1F("hPtZLepton1"   + suffix, "", 200,  0, 200);
+	hPtZLepton2  [i][j][iCharge] = new TH1F("hPtZLepton2"   + suffix, "", 200,  0, 200);
+	hPtZ         [i][j][iCharge] = new TH1F("hPtZ"          + suffix, "", 400,  0, 400);
+	hPtWLepton   [i][j][iCharge] = new TH1F("hPtWLepton"    + suffix, "", 200,  0, 200);    
+	hDRWZLepton1 [i][j][iCharge] = new TH1F("hDRWZLepton1"  + suffix, "", 200,  0,   6);    
+	hDRWZLepton2 [i][j][iCharge] = new TH1F("hDRWZLepton2"  + suffix, "", 200,  0,   6);    
+	hMtW         [i][j][iCharge] = new TH1F("hMtW"          + suffix, "", 200,  0, 200);    
+	hNJet30      [i][j][iCharge] = new TH1F("hNJet30"       + suffix, "",  10,  0,  10);    
+	hNBJet30     [i][j][iCharge] = new TH1F("hNBJet30"      + suffix, "",  10,  0,  10);    
       }
-
-      hLeptonWeight [i][j] = new TH1F("hLeptonWeight"  + suffix, "", 90, 0.75, 1.05);
-      hTriggerWeight[i][j] = new TH1F("hTriggerWeight" + suffix, "", 90, 0.75, 1.05);
-      hTotalWeight  [i][j] = new TH1F("hTotalWeight"   + suffix, "", 90, 0.75, 1.05);
-
-      hNPV         [i][j] = new TH1F("hNPV"          + suffix, "",  50,  0,  50);
-      hMET         [i][j] = new TH1F("hMET"          + suffix, "", 200,  0, 200);
-      hSumCharges  [i][j] = new TH1F("hSumCharges"   + suffix, "",   9, -4,   5);
-      hInvMass2Lep [i][j] = new TH1F("hInvMass2Lep"  + suffix, "", 200,  0, 200);
-      hInvMass3Lep [i][j] = new TH1F("hInvMass3Lep"  + suffix, "", 400,  0, 400);
-      hPtLepton1   [i][j] = new TH1F("hPtLepton1"    + suffix, "", 200,  0, 200);
-      hPtLepton2   [i][j] = new TH1F("hPtLepton2"    + suffix, "", 200,  0, 200);
-      hPtLepton3   [i][j] = new TH1F("hPtLepton3"    + suffix, "", 200,  0, 200);    
-      hPtLeadingJet[i][j] = new TH1F("hPtLeadingJet" + suffix, "", 200,  0, 200);    
-      hDPhiZLeptons[i][j] = new TH1F("hDPhiZLeptons" + suffix, "", 320,  0, 3.2);    
-      hPtZLepton1  [i][j] = new TH1F("hPtZLepton1"   + suffix, "", 200,  0, 200);
-      hPtZLepton2  [i][j] = new TH1F("hPtZLepton2"   + suffix, "", 200,  0, 200);
-      hPtZ         [i][j] = new TH1F("hPtZ"          + suffix, "", 400,  0, 400);
-      hPtWLepton   [i][j] = new TH1F("hPtWLepton"    + suffix, "", 200,  0, 200);    
-      hDRWZLepton1 [i][j] = new TH1F("hDRWZLepton1"  + suffix, "", 200,  0,   6);    
-      hDRWZLepton2 [i][j] = new TH1F("hDRWZLepton2"  + suffix, "", 200,  0,   6);    
-      hMtW         [i][j] = new TH1F("hMtW"          + suffix, "", 200,  0, 200);    
-      hNJet30      [i][j] = new TH1F("hNJet30"       + suffix, "",  10,  0,  10);    
-      hNBJet30     [i][j] = new TH1F("hNBJet30"      + suffix, "",  10,  0,  10);    
     }
   }
   
@@ -483,6 +502,7 @@ void AnalysisWZ(TString sample,
     invMass2Lep    = 999.;
     invMass3Lep    = 999.;
     transverseMass = 999.;
+    WCharge        = 0.;
     sumCharges     = 0.;
     nElectron      = 0;
     nTight         = 0;
@@ -734,7 +754,7 @@ void AnalysisWZ(TString sample,
       
 	if (AnalysisLeptons[i].flavor != AnalysisLeptons[j].flavor) continue;
 
-	if (AnalysisLeptons[i].charge * AnalysisLeptons[j].charge > 0) continue;
+	if (AnalysisLeptons[i].charge * AnalysisLeptons[j].charge > 0.) continue;
 
 	Float_t inv_mass = (AnalysisLeptons[i].v + AnalysisLeptons[j].v).M();
 
@@ -758,6 +778,8 @@ void AnalysisWZ(TString sample,
 	    if (k == j) continue;
 	    
 	    WLepton = AnalysisLeptons[k].v;
+
+	    WCharge = AnalysisLeptons[k].charge;
 	  }
 	}
       }
@@ -766,6 +788,8 @@ void AnalysisWZ(TString sample,
     //    if (foundDileptonWithLowMll) continue;
 
     if (!isZee && !isZmm) continue;
+
+    if (fabs(WCharge) < 1.) continue;
 
 
     // Fill Z invariant mass at two-lepton level
@@ -901,54 +925,59 @@ void AnalysisWZ(TString sample,
 //------------------------------------------------------------------------------
 void FillHistograms(UInt_t iChannel, UInt_t iCut)
 {
-  Float_t hweight = puW * efficiency_weight * xs_weight * dd_weight;
-
-
-  // Counters
-  //----------------------------------------------------------------------------
-  hCounterRaw[iChannel][iCut][nTight]->Fill(1);
-  hCounterPU [iChannel][iCut][nTight]->Fill(1,       efficiency_weight * xs_weight * dd_weight);
-  hCounterEff[iChannel][iCut][nTight]->Fill(1, puW * efficiency_weight             * dd_weight);
-  hCounter   [iChannel][iCut][nTight]->Fill(1, puW * efficiency_weight * xs_weight * dd_weight);
-
-  hCounterRaw[iChannel][iCut][LLL]->Fill(1);
-  hCounterPU [iChannel][iCut][LLL]->Fill(1,       efficiency_weight * xs_weight * dd_weight);
-  hCounterEff[iChannel][iCut][LLL]->Fill(1, puW * efficiency_weight             * dd_weight);
-  hCounter   [iChannel][iCut][LLL]->Fill(1, puW * efficiency_weight * xs_weight * dd_weight);
-
-
-  // MC weight histograms
-  //----------------------------------------------------------------------------
-  hLeptonWeight [theChannel][iCut]->Fill(mc_lepton_weight,  puW);
-  hTriggerWeight[theChannel][iCut]->Fill(mc_trigger_weight, puW);
-  hTotalWeight  [theChannel][iCut]->Fill(mc_total_weight,   puW);
-
-
-  // Analysis histograms
-  //----------------------------------------------------------------------------
+  Float_t hweight  = puW * efficiency_weight * xs_weight * dd_weight;
   Float_t deltaPhi = ZLepton1.DeltaPhi(ZLepton2);
   Float_t deltaR1  = WLepton.DeltaR(ZLepton1);
   Float_t deltaR2  = WLepton.DeltaR(ZLepton2);
 
-  hNPV         [iChannel][iCut]->Fill(nvtx,                       hweight);
-  hMET         [iChannel][iCut]->Fill(EventMET.Et(),              hweight);
-  hSumCharges  [iChannel][iCut]->Fill(sumCharges,                 hweight);
-  hInvMass2Lep [iChannel][iCut]->Fill(invMass2Lep,                hweight);
-  hInvMass3Lep [iChannel][iCut]->Fill(invMass3Lep,                hweight);
-  hPtLepton1   [iChannel][iCut]->Fill(AnalysisLeptons[0].v.Pt(),  hweight);
-  hPtLepton2   [iChannel][iCut]->Fill(AnalysisLeptons[1].v.Pt(),  hweight);
-  hPtLepton3   [iChannel][iCut]->Fill(AnalysisLeptons[2].v.Pt(),  hweight);
-  hPtLeadingJet[iChannel][iCut]->Fill(jetpt[0],                   hweight);
-  hDPhiZLeptons[iChannel][iCut]->Fill(fabs(deltaPhi),             hweight);
-  hPtZLepton1  [iChannel][iCut]->Fill(ZLepton1.Pt(),              hweight);
-  hPtZLepton2  [iChannel][iCut]->Fill(ZLepton2.Pt(),              hweight);
-  hPtZ         [iChannel][iCut]->Fill((ZLepton1 + ZLepton2).Pt(), hweight);
-  hPtWLepton   [iChannel][iCut]->Fill(WLepton.Pt(),               hweight);
-  hDRWZLepton1 [iChannel][iCut]->Fill(deltaR1,                    hweight);
-  hDRWZLepton2 [iChannel][iCut]->Fill(deltaR2,                    hweight);
-  hMtW         [iChannel][iCut]->Fill(transverseMass,             hweight);
-  hNJet30      [iChannel][iCut]->Fill(njet,                       hweight);
-  hNBJet30     [iChannel][iCut]->Fill(nbjet,                      hweight);
+  for (UInt_t iCharge=0; iCharge<nCharge; iCharge++)
+    {
+      if (iCharge == WPlus  && WCharge < 0.) continue;
+      if (iCharge == WMinus && WCharge > 0.) continue;
+
+
+      // Counters
+      //------------------------------------------------------------------------
+      hCounterRaw[iChannel][iCut][iCharge][nTight]->Fill(1);
+      hCounterPU [iChannel][iCut][iCharge][nTight]->Fill(1,       efficiency_weight * xs_weight * dd_weight);
+      hCounterEff[iChannel][iCut][iCharge][nTight]->Fill(1, puW * efficiency_weight             * dd_weight);
+      hCounter   [iChannel][iCut][iCharge][nTight]->Fill(1, puW * efficiency_weight * xs_weight * dd_weight);
+
+      hCounterRaw[iChannel][iCut][iCharge][LLL]->Fill(1);
+      hCounterPU [iChannel][iCut][iCharge][LLL]->Fill(1,       efficiency_weight * xs_weight * dd_weight);
+      hCounterEff[iChannel][iCut][iCharge][LLL]->Fill(1, puW * efficiency_weight             * dd_weight);
+      hCounter   [iChannel][iCut][iCharge][LLL]->Fill(1, puW * efficiency_weight * xs_weight * dd_weight);
+
+
+      // MC weight histograms
+      //------------------------------------------------------------------------
+      hLeptonWeight [theChannel][iCut][iCharge]->Fill(mc_lepton_weight,  puW);
+      hTriggerWeight[theChannel][iCut][iCharge]->Fill(mc_trigger_weight, puW);
+      hTotalWeight  [theChannel][iCut][iCharge]->Fill(mc_total_weight,   puW);
+
+
+      // Analysis histograms
+      //------------------------------------------------------------------------
+      hNPV         [iChannel][iCut][iCharge]->Fill(nvtx,                       hweight);
+      hMET         [iChannel][iCut][iCharge]->Fill(EventMET.Et(),              hweight);
+      hSumCharges  [iChannel][iCut][iCharge]->Fill(sumCharges,                 hweight);
+      hInvMass2Lep [iChannel][iCut][iCharge]->Fill(invMass2Lep,                hweight);
+      hInvMass3Lep [iChannel][iCut][iCharge]->Fill(invMass3Lep,                hweight);
+      hPtLepton1   [iChannel][iCut][iCharge]->Fill(AnalysisLeptons[0].v.Pt(),  hweight);
+      hPtLepton2   [iChannel][iCut][iCharge]->Fill(AnalysisLeptons[1].v.Pt(),  hweight);
+      hPtLepton3   [iChannel][iCut][iCharge]->Fill(AnalysisLeptons[2].v.Pt(),  hweight);
+      hPtLeadingJet[iChannel][iCut][iCharge]->Fill(jetpt[0],                   hweight);
+      hDPhiZLeptons[iChannel][iCut][iCharge]->Fill(fabs(deltaPhi),             hweight);
+      hPtZLepton1  [iChannel][iCut][iCharge]->Fill(ZLepton1.Pt(),              hweight);
+      hPtZLepton2  [iChannel][iCut][iCharge]->Fill(ZLepton2.Pt(),              hweight);
+      hPtZ         [iChannel][iCut][iCharge]->Fill((ZLepton1 + ZLepton2).Pt(), hweight);
+      hPtWLepton   [iChannel][iCut][iCharge]->Fill(WLepton.Pt(),               hweight);
+      hDRWZLepton1 [iChannel][iCut][iCharge]->Fill(deltaR1,                    hweight);
+      hDRWZLepton2 [iChannel][iCut][iCharge]->Fill(deltaR2,                    hweight);
+      hMtW         [iChannel][iCut][iCharge]->Fill(transverseMass,             hweight);
+      hNJet30      [iChannel][iCut][iCharge]->Fill(njet,                       hweight);
+      hNBJet30     [iChannel][iCut][iCharge]->Fill(nbjet,                      hweight);
+    }
 }
 
 
@@ -1284,10 +1313,10 @@ void CounterSummary(TString title)
 
 	TString composition = (j == 0) ? sComposition[k] + " " : "";
 
-	Float_t integral = hCounter[j][i][k]->Integral();
+	Float_t integral = hCounter[j][i][WInclusive][k]->Integral();
 
-	if      (title.Contains("No")) integral = hCounterRaw[j][i][k]->Integral();
-	else if (title.Contains("PU")) integral = hCounterPU [j][i][k]->Integral();
+	if      (title.Contains("No")) integral = hCounterRaw[j][i][WInclusive][k]->Integral();
+	else if (title.Contains("PU")) integral = hCounterPU [j][i][WInclusive][k]->Integral();
 
 	txt_output << Form(" %s%10.0f", composition.Data(), integral);
       }
