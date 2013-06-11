@@ -3,17 +3,7 @@
 // drawElectronScaleSystematic
 //
 //------------------------------------------------------------------------------
-#include "TAxis.h"
-#include "TCanvas.h"
-#include "TFile.h"
-#include "TFrame.h"
-#include "TGraphErrors.h"
-#include "TInterpreter.h"
-#include "TLatex.h"
-#include "TLegend.h"
-#include "TLine.h"
-#include "TString.h"
-#include "TSystem.h"
+#include "DrawFunctions.h"
 
 
 // Member functions
@@ -21,14 +11,14 @@
 void     AxisFonts         (TAxis*        axis,
 			    TString       title);
 
-TLegend* DrawLegend        (Float_t       x1,
-			    Float_t       y1,
-			    TObject*      hist,
-			    TString       label,
-			    TString       option  = "p",
-			    Float_t       tsize   = 0.04,
-			    Float_t       xoffset = 0.20,
-			    Float_t       yoffset = 0.07);
+//TLegend* DrawLegend        (Float_t       x1,
+//			    Float_t       y1,
+//			    TObject*      hist,
+//			    TString       label,
+//			    TString       option  = "p",
+//			    Float_t       tsize   = 0.04,
+//			    Float_t       xoffset = 0.20,
+//			    Float_t       yoffset = 0.07);
 
 void    MakeOutputDirectory(TString       format);
 
@@ -36,20 +26,18 @@ void    SetGraph           (TGraphErrors* g,
 			    Color_t       color,
 			    Style_t       style);
 
-void    DrawTLatex         (Double_t      x,
-			    Double_t      y,
-			    Double_t      tsize,
-			    Short_t       align,
-			    const char*   text,
-			    Bool_t        setndc = true);
+//void    DrawTLatex         (Double_t      x,
+//			    Double_t      y,
+//			    Double_t      tsize,
+//			    Short_t       align,
+//			    const char*   text,
+//			    Bool_t        setndc = true);
 
 
 void drawElectronScaleSystematic()
 {
   MakeOutputDirectory("pdf");
   MakeOutputDirectory("png");
-
-  gInterpreter->ExecuteMacro("./HiggsPaperStyle.C");
 
   TFile* file = TFile::Open("../WZ/AuxiliaryFilesWZXS8TeV/gScaleSyst-8TeV.root");
 
@@ -123,31 +111,31 @@ void AxisFonts(TAxis* axis, TString title)
 //------------------------------------------------------------------------------
 // DrawLegend
 //------------------------------------------------------------------------------
-TLegend* DrawLegend(Float_t  x1,
-		    Float_t  y1,
-		    TObject* hist,
-		    TString  label,
-		    TString  option,
-		    Float_t  tsize,
-		    Float_t  xoffset,
-		    Float_t  yoffset)
-{
-  TLegend* legend = new TLegend(x1,
-				y1,
-				x1 + xoffset,
-				y1 + yoffset);
-  
-  legend->SetBorderSize(    0);
-  legend->SetFillColor (    0);
-  legend->SetTextAlign (   12);
-  legend->SetTextFont  (   42);
-  legend->SetTextSize  (tsize);
-
-  legend->AddEntry(hist, label.Data(), option.Data());
-  legend->Draw();
-
-  return legend;
-}
+//TLegend* DrawLegend(Float_t  x1,
+//		    Float_t  y1,
+//		    TObject* hist,
+//		    TString  label,
+//		    TString  option,
+//		    Float_t  tsize,
+//		    Float_t  xoffset,
+//		    Float_t  yoffset)
+//{
+//  TLegend* legend = new TLegend(x1,
+//				y1,
+//				x1 + xoffset,
+//				y1 + yoffset);
+//  
+//  legend->SetBorderSize(    0);
+//  legend->SetFillColor (    0);
+//  legend->SetTextAlign (   12);
+//  legend->SetTextFont  (   42);
+//  legend->SetTextSize  (tsize);
+//
+//  legend->AddEntry(hist, label.Data(), option.Data());
+//  legend->Draw();
+//
+//  return legend;
+//}
 
 
 //------------------------------------------------------------------------------
@@ -181,19 +169,19 @@ void SetGraph(TGraphErrors* g,
 //------------------------------------------------------------------------------
 // DrawTLatex
 //------------------------------------------------------------------------------
-void DrawTLatex(Double_t    x,
-		Double_t    y,
-		Double_t    tsize,
-		Short_t     align,
-		const char* text,
-		Bool_t      setndc)
-{
-  TLatex* tl = new TLatex(x, y, text);
-
-  tl->SetNDC      (setndc);
-  tl->SetTextAlign( align);
-  tl->SetTextFont (    42);
-  tl->SetTextSize ( tsize);
-
-  tl->Draw("same");
-}
+//void DrawTLatex(Double_t    x,
+//		Double_t    y,
+//		Double_t    tsize,
+//		Short_t     align,
+//		const char* text,
+//		Bool_t      setndc)
+//{
+//  TLatex* tl = new TLatex(x, y, text);
+//
+//  tl->SetNDC      (setndc);
+//  tl->SetTextAlign( align);
+//  tl->SetTextFont (    42);
+//  tl->SetTextSize ( tsize);
+//
+//  tl->Draw("same");
+//}

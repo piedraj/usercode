@@ -3,46 +3,28 @@
 // drawScaleFactors
 //
 //------------------------------------------------------------------------------
-#include "TCanvas.h"
-#include "TColor.h"
-#include "TFile.h"
-#include "TFrame.h"
-#include "TH1.h"
-#include "TH2.h"
-#include "TInterpreter.h"
-#include "TLatex.h"
-#include "TLegend.h"
-#include "TPaletteAxis.h"
-#include "TROOT.h"
-#include "TStyle.h"
-#include "TSystem.h"
+#include "DrawFunctions.h"
 
 
 // Member functions
 //------------------------------------------------------------------------------
-void    DrawIt             (TH2F*       h,
-			    TString     title);
+void      DrawIt             (TH2F*   h,
+			      TString title);
 
-void    AxisFonts          (TAxis*      axis,
-			    TString     title);
+void      AxisFonts          (TAxis*  axis,
+			      TString title);
 
-void    TH2FAxisFonts      (TH2F*       h,
-			    TString     coordinate,
-			    TString     title);
+void      TH2FAxisFonts      (TH2F*   h,
+			      TString coordinate,
+			      TString title);
 
-void    DrawTLatex         (Double_t    x,
-			    Double_t    y,
-			    Double_t    tsize,
-			    Short_t     align,
-			    const char* text);
+TH2F*     LoadHistogram      (TString filename,
+			      TString hname,
+			      TString cname);
 
-TH2F*   LoadHistogram      (TString     filename,
-			    TString     hname,
-			    TString     cname);
+TString   GuessLocalBasePath ();
 
-TString GuessLocalBasePath ();
-
-void    MakeOutputDirectory(TString     format);
+void      MakeOutputDirectory(TString format);
 
 
 // Data members
@@ -68,12 +50,6 @@ void drawScaleFactors()
 
   localpath = GuessLocalBasePath();
 
-  gInterpreter->ExecuteMacro("./HiggsPaperStyle.C");
-
-  gStyle->SetOptStat(0);
-
-  gStyle->SetPalette(1,0);
-
 
   // SF, FR and PR histograms
   //----------------------------------------------------------------------------
@@ -83,7 +59,8 @@ void drawScaleFactors()
   ElecPR = LoadHistogram("ElePR_Moriond13_2012", "h2inverted", "ElecPR");
 
   MuonFR = LoadHistogram("MuFR_Moriond13_jet15_EWKcorr",  "FR_pT_eta_EWKcorr", "MuonFR_Jet15");
-  ElecFR = LoadHistogram("EleFR_Moriond13_jet35_EWKcorr", "fakeElH2",          "ElecFR_Jet35");
+  ElecFR = LoadHistogram("EleFR_Moriond13_jet15_EWKcorr", "fakeElH2",          "ElecFR_Jet15");
+  //  ElecFR = LoadHistogram("EleFR_Moriond13_jet35_EWKcorr", "fakeElH2",          "ElecFR_Jet35");
 
   DoubleElLead  = LoadHistogram("triggerEfficiencies", "DoubleElLead",  "DoubleElLead");
   DoubleMuLead  = LoadHistogram("triggerEfficiencies", "DoubleMuLead",  "DoubleMuLead");
@@ -95,7 +72,7 @@ void drawScaleFactors()
   DrawIt(MuonPR,        "2012 muon PR");
   DrawIt(ElecPR,        "2012 electron PR");
   DrawIt(MuonFR,        "2012 muon FR jet15");
-  DrawIt(ElecFR,        "2012 electron FR jet35");
+  DrawIt(ElecFR,        "2012 electron FR jet15");
   DrawIt(DoubleElLead,  "2012 leading electron trigger efficiency");
   DrawIt(DoubleMuLead,  "2012 leading muon trigger efficiency");
   DrawIt(DoubleElTrail, "2012 trailing electron trigger efficiency");
@@ -210,26 +187,6 @@ void TH2FAxisFonts(TH2F*   h,
   if (coordinate.Contains("y")) axis = h->GetYaxis();
 
   AxisFonts(axis, title);
-}
-
-
-//------------------------------------------------------------------------------
-// DrawTLatex
-//------------------------------------------------------------------------------
-void DrawTLatex(Double_t    x,
-                Double_t    y,
-                Double_t    tsize,
-                Short_t     align,
-                const char* text)
-{
-  TLatex* tl = new TLatex(x, y, text);
-
-  tl->SetNDC();
-  tl->SetTextAlign(align);
-  tl->SetTextFont (   42);
-  tl->SetTextSize (tsize);
-
-  tl->Draw("same");
 }
 
 

@@ -57,9 +57,12 @@ const Double_t W2m         = 0.1057;
 const Double_t W2tau       = 0.1125;
 const Double_t Z2ll        = 0.033658;
 const Double_t WZ23lnu     = 3 * Z2ll * (W2e + W2m + W2tau);
-const Double_t ngenWZ      = 2017979;
-const Double_t ngenWZphase = 1449067;  // (71 < mZ < 111 GeV)
-//const Double_t ngenWZphase = 1390244;  // (81 < mZ < 101 GeV)
+const Double_t ngenWPlusZ  = 906262;  // (71 < mZ < 111 GeV)
+const Double_t ngenWMinusZ = 542805;  // (71 < mZ < 111 GeV)
+
+//const Double_t ngenWZ = 2017979;
+//const Double_t ngenWZ = 1449067;  // (71 < mZ < 111 GeV)
+//const Double_t ngenWZ = 1390244;  // (81 < mZ < 101 GeV)
 
 
 // Data members
@@ -133,15 +136,15 @@ TString sProcess[nProcess];
 const UInt_t nCharge = 3;
 
 enum {
+  WInclusive,
   WPlus,
-  WMinus,
-  WInclusive
+  WMinus
 };
 
 const TString sCharge[nCharge] = {
+  "WInclusive",
   "WPlus",
-  "WMinus",
-  "WInclusive"
+  "WMinus"
 };
 
 
@@ -186,6 +189,7 @@ enum {MCmode, PPFmode, PPPmode};
 Double_t        _luminosity;
 Double_t        _luminosityUncertainty;
 Double_t        _xs_nlo;
+Double_t        _ngenWZ;
 Int_t           _verbosity;
 TString         _localpath;
 TString         _datapath;
@@ -283,7 +287,7 @@ void XS(UInt_t cut     = MET30,
     DrawHistogram("hSumCharges", channel, cut, "q_{1} + q_{2} + q_{3}");
 
     DrawHistogram("hMET",          channel, cut, "E_{T}^{miss}",                           5, 0, "GeV",  linY);
-    DrawHistogram("hInvMass2Lep",  channel, cut, "m_{#font[12]{ll}}",                     -1, 0, "GeV",  linY, 76, 106);
+    DrawHistogram("hInvMass2Lep",  channel, cut, "m_{#font[12]{ll}}",                     -1, 0, "GeV",  linY, 70, 112);
     DrawHistogram("hInvMass3Lep",  channel, cut, "m_{#font[12]{3l}}",                      5, 0, "GeV",  linY, 60, 350);
     DrawHistogram("hPtLepton1",    channel, cut, "p_{T}^{first lepton}",                   5, 0, "GeV",  linY);
     DrawHistogram("hPtLepton2",    channel, cut, "p_{T}^{second lepton}",                  5, 0, "GeV",  linY);
@@ -375,7 +379,7 @@ void MeasureTheCrossSection(UInt_t channel, UInt_t cut)
 
   // Estimate the cross section
   //----------------------------------------------------------------------------
-  wzEffValue[channel] = nWZ / ngenWZphase;
+  wzEffValue[channel] = nWZ / _ngenWZ;
   wzEffError[channel] = totalSyst[channel][WZ] * wzEffValue[channel] / 1e2;
 
   xsValue[channel] = (ndata - nbkg) / (_luminosity * wzEffValue[channel] * WZ23lnu);
@@ -531,7 +535,9 @@ void PrintSystematics(UInt_t cut)
 {
   ofstream outputfile;
 
-  outputfile.open(Form("tex/systematics_%s.tex", sCut[cut].Data()));
+  TString filename = Form("tex/systematics_%s_%s.tex", sCut[cut].Data(), sCharge[_wcharge].Data());
+
+  outputfile.open(filename);
 
   outputfile << Form(" %-30s", "QCD scale");                     for (UInt_t i=0; i<nChannel; i++) outputfile << Form(" & %.1f", systematicError[i][WZ][qcdSyst]);      outputfile << "\\\\\n";
   outputfile << Form(" %-30s", "PDFs");                          for (UInt_t i=0; i<nChannel; i++) outputfile << Form(" & %.1f", systematicError[i][WZ][pdfSyst]);      outputfile << "\\\\\n";
@@ -716,26 +722,26 @@ void DrawHistogram(TString  hname,
   Double_t delta  = 0.048 + 0.001;
   Double_t ndelta = 0;
   
-  DrawLegend(x0 - 0.49, y0 - ndelta, hist[Data], Form(" data (%.0f)", Yield(hist[Data])), "lp"); ndelta += delta;
-  DrawLegend(x0 - 0.49, y0 - ndelta, allmc,      Form(" all (%.0f)",  Yield(allmc)),      "f");  ndelta += delta;
-  DrawLegend(x0 - 0.49, y0 - ndelta, hist[WZ],   Form(" WZ (%.0f)",   Yield(hist[WZ])),   "f");  ndelta += delta;
+  DrawLegend(x0 - 0.49, y0 - ndelta, (TObject*)hist[Data], Form(" data (%.0f)", Yield(hist[Data])), "lp"); ndelta += delta;
+  DrawLegend(x0 - 0.49, y0 - ndelta, (TObject*)allmc,      Form(" all (%.0f)",  Yield(allmc)),      "f");  ndelta += delta;
+  DrawLegend(x0 - 0.49, y0 - ndelta, (TObject*)hist[WZ],   Form(" WZ (%.0f)",   Yield(hist[WZ])),   "f");  ndelta += delta;
 
   if (_mode == MCmode)
     {
-      DrawLegend(x0 - 0.49, y0 - ndelta, hist[Top],   Form(" top (%.0f)",    Yield(hist[Top])),   "f"); ndelta += delta;
-      DrawLegend(x0 - 0.49, y0 - ndelta, hist[ZJets], Form(" Z+jets (%.0f)", Yield(hist[ZJets])), "f"); ndelta += delta;
+      DrawLegend(x0 - 0.49, y0 - ndelta, (TObject*)hist[Top],   Form(" top (%.0f)",    Yield(hist[Top])),   "f"); ndelta += delta;
+      DrawLegend(x0 - 0.49, y0 - ndelta, (TObject*)hist[ZJets], Form(" Z+jets (%.0f)", Yield(hist[ZJets])), "f"); ndelta += delta;
     }
   else if (_mode == PPFmode)
     {
-      DrawLegend(x0 - 0.49, y0 - ndelta, hist[Fakes], Form(" data-driven (%.0f)", Yield(hist[Fakes])), "f"); ndelta += delta;
+      DrawLegend(x0 - 0.49, y0 - ndelta, (TObject*)hist[Fakes], Form(" data-driven (%.0f)", Yield(hist[Fakes])), "f"); ndelta += delta;
     }
 
   ndelta = 0;
   
-  DrawLegend(x0 - 0.22, y0 - ndelta, hist[ZZ],  Form(" ZZ (%.0f)",                          Yield(hist[ZZ])),  "f"); ndelta += delta;
-  DrawLegend(x0 - 0.22, y0 - ndelta, hist[ZG],  Form(" Z #rightarrow 4#font[12]{l} (%.0f)", Yield(hist[ZG])),  "f"); ndelta += delta;
-  DrawLegend(x0 - 0.22, y0 - ndelta, hist[VVV], Form(" VVV (%.0f)",                         Yield(hist[VVV])), "f"); ndelta += delta;
-  DrawLegend(x0 - 0.22, y0 - ndelta, hist[WV],  Form(" WV (%.0f)",                          Yield(hist[WV])),  "f"); ndelta += delta;
+  DrawLegend(x0 - 0.22, y0 - ndelta, (TObject*)hist[ZZ],  Form(" ZZ (%.0f)",                          Yield(hist[ZZ])),  "f"); ndelta += delta;
+  DrawLegend(x0 - 0.22, y0 - ndelta, (TObject*)hist[ZG],  Form(" Z #rightarrow 4#font[12]{l} (%.0f)", Yield(hist[ZG])),  "f"); ndelta += delta;
+  DrawLegend(x0 - 0.22, y0 - ndelta, (TObject*)hist[VVV], Form(" VVV (%.0f)",                         Yield(hist[VVV])), "f"); ndelta += delta;
+  DrawLegend(x0 - 0.22, y0 - ndelta, (TObject*)hist[WV],  Form(" WV (%.0f)",                          Yield(hist[WV])),  "f"); ndelta += delta;
 
 
   // CMS titles
@@ -841,14 +847,17 @@ void SetParameters(UInt_t cut,
   if (_wcharge == WPlus)
     {
       _xs_nlo = xsWPlusZ;
+      _ngenWZ = ngenWPlusZ;
     }
   else if (_wcharge == WMinus)
     {
       _xs_nlo = xsWMinusZ;
+      _ngenWZ = ngenWMinusZ;
     }
   else
     {
       _xs_nlo = xsWPlusZ + xsWMinusZ;
+      _ngenWZ = ngenWPlusZ + ngenWMinusZ;
     }
   
   _datapath = Form("%s/piedra/work/WZ/results",
@@ -1113,7 +1122,10 @@ void PrintCrossSections(UInt_t cut)
 
   TString suffix = (_mode == MCmode) ? "mc" : "ppf";
 
-  outputfile.open(Form("tex/xs_%s_%s.tex", sCut[cut].Data(), suffix.Data()));
+  outputfile.open(Form("tex/xs_%s_%s_%s.tex",
+		       sCut[cut].Data(),
+		       sCharge[_wcharge].Data(),
+		       suffix.Data()));
 
 
   // Print

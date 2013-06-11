@@ -4,14 +4,14 @@
 //------------------------------------------------------------------------------
 // DrawLegend
 //------------------------------------------------------------------------------
-TLegend* DrawLegend(Float_t x1,
-		    Float_t y1,
-		    TH1*    hist,
-		    TString label,
-		    TString option,
-		    Float_t tsize,
-		    Float_t xoffset,
-		    Float_t yoffset)
+TLegend* DrawLegend(Float_t  x1,
+		    Float_t  y1,
+		    TObject* hist,
+		    TString  label,
+		    TString  option,
+		    Float_t  tsize,
+		    Float_t  xoffset,
+		    Float_t  yoffset)
 {
   TLegend* legend = new TLegend(x1,
 				y1,

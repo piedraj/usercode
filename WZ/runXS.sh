@@ -10,7 +10,10 @@ for ((level=0; level<3; level++))
   do
   for ((mode=0; mode<2; mode++))
     do
-    root -l -b -q "XS.C+($level,$mode)"
+    for ((wcharge=0; wcharge<1; wcharge++))
+      do
+      root -l -b -q "XS.C+($level,$mode,$wcharge)"
+    done
   done
 done
 

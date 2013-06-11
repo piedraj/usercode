@@ -3,37 +3,22 @@
 // drawWeights
 //
 //------------------------------------------------------------------------------
-#include "TCanvas.h"
-#include "TFile.h"
-#include "TFrame.h"
-#include "TH1.h"
-#include "TInterpreter.h"
-#include "TLegend.h"
-#include "TSystem.h"
+#include "DrawFunctions.h"
 
 
 // Member functions
 //------------------------------------------------------------------------------
-void     DrawIt            (TString     title);
+void      DrawIt             (TString title);
 
-void     AxisFonts         (TAxis*      axis,
-			    TString     title);
+void      AxisFonts          (TAxis*  axis,
+			      TString title);
 
-TLegend* DrawLegend        (Float_t     x1,
-			    Float_t     y1,
-			    TH1*        hist,
-			    TString     label,
-			    TString     option,
-			    Float_t     tsize,
-			    Float_t     xoffset,
-			    Float_t     yoffset);
-
-void    MakeOutputDirectory(TString     format);
+void      MakeOutputDirectory(TString format);
 
 
 // Data members
 //------------------------------------------------------------------------------
-TFile* f;
+TFile* wzfile;
 
 
 void drawWeights()
@@ -41,9 +26,7 @@ void drawWeights()
   MakeOutputDirectory("pdf");
   MakeOutputDirectory("png");
 
-  gInterpreter->ExecuteMacro("./HiggsPaperStyle.C");
-
-  f = new TFile("results/analysis/074_WZJetsMad.root");
+  wzfile = new TFile("results/analysis/074_WZJetsMad.root");
 
   DrawIt("hLeptonWeight");
   DrawIt("hTriggerWeight");
@@ -56,10 +39,10 @@ void drawWeights()
 //------------------------------------------------------------------------------
 void DrawIt(TString name)
 {
-  TH1F* hMMM = (TH1F*)f->Get(name + "_MMM_Exactly3Leptons");
-  TH1F* hMME = (TH1F*)f->Get(name + "_MME_Exactly3Leptons");
-  TH1F* hEEE = (TH1F*)f->Get(name + "_EEE_Exactly3Leptons");
-  TH1F* hEEM = (TH1F*)f->Get(name + "_EEM_Exactly3Leptons");
+  TH1F* hMMM = (TH1F*)wzfile->Get(name + "_MMM_Exactly3Leptons_WInclusive");
+  TH1F* hMME = (TH1F*)wzfile->Get(name + "_MME_Exactly3Leptons_WInclusive");
+  TH1F* hEEE = (TH1F*)wzfile->Get(name + "_EEE_Exactly3Leptons_WInclusive");
+  TH1F* hEEM = (TH1F*)wzfile->Get(name + "_EEM_Exactly3Leptons_WInclusive");
 
   hMMM->SetLineColor(kRed);
   hMME->SetLineColor(kBlack);
@@ -94,10 +77,10 @@ void DrawIt(TString name)
   AxisFonts(hEEE->GetXaxis(), xtitle + " per event");
   AxisFonts(hEEE->GetYaxis(), "");
 
-  DrawLegend(0.23, 0.82 - 0. * 0.063, hMMM, " #mu#mu#mu", "l", 0.04, 0.2, 0.07);
-  DrawLegend(0.23, 0.82 - 1. * 0.063, hEEE, " eee",       "l", 0.04, 0.2, 0.07);
-  DrawLegend(0.23, 0.82 - 2. * 0.063, hMME, " #mu#mue",   "l", 0.04, 0.2, 0.07);
-  DrawLegend(0.23, 0.82 - 3. * 0.063, hEEM, " ee#mu",     "l", 0.04, 0.2, 0.07);
+  DrawLegend(0.23, 0.82 - 0. * 0.063, (TObject*)hMMM, " #mu#mu#mu", "l", 0.04, 0.2, 0.07);
+  DrawLegend(0.23, 0.82 - 1. * 0.063, (TObject*)hEEE, " eee",       "l", 0.04, 0.2, 0.07);
+  DrawLegend(0.23, 0.82 - 2. * 0.063, (TObject*)hMME, " #mu#mue",   "l", 0.04, 0.2, 0.07);
+  DrawLegend(0.23, 0.82 - 3. * 0.063, (TObject*)hEEM, " ee#mu",     "l", 0.04, 0.2, 0.07);
   
   c1->GetFrame()->DrawClone();
 
@@ -120,36 +103,6 @@ void AxisFonts(TAxis* axis, TString title)
   axis->SetTitleSize  (0.050);
 
   axis->SetTitle(title);
-}
-
-
-//------------------------------------------------------------------------------
-// DrawLegend
-//------------------------------------------------------------------------------
-TLegend* DrawLegend(Float_t x1,
-		    Float_t y1,
-		    TH1*    hist,
-		    TString label,
-		    TString option,
-		    Float_t tsize,
-		    Float_t xoffset,
-		    Float_t yoffset)
-{
-  TLegend* legend = new TLegend(x1,
-				y1,
-				x1 + xoffset,
-				y1 + yoffset);
-  
-  legend->SetBorderSize(    0);
-  legend->SetFillColor (    0);
-  legend->SetTextAlign (   12);
-  legend->SetTextFont  (   42);
-  legend->SetTextSize  (tsize);
-
-  legend->AddEntry(hist, label.Data(), option.Data());
-  legend->Draw();
-
-  return legend;
 }
 
 

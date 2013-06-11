@@ -15,6 +15,7 @@
 #include "TLine.h"
 #include "TMath.h"
 #include "TMultiGraph.h"
+#include "TPaletteAxis.h"
 #include "TROOT.h"
 #include "TStyle.h"
 #include "TSystem.h"
@@ -23,9 +24,9 @@
 
 TLegend*  DrawLegend               (Float_t       x1,
 				    Float_t       y1,
-				    TH1*          hist,
+				    TObject*      hist,
 				    TString       label,
-				    TString       option,
+				    TString       option  = "p",
 				    Float_t       tsize   = 0.030,
 				    Float_t       xoffset = 0.200,
 				    Float_t       yoffset = 0.048);
