@@ -1085,9 +1085,15 @@ void DrawCrossSections(UInt_t cut)
   DrawTLatex(0.940, 0.983, 0.05, 33,
 	     Form("#sqrt{s} = 8 TeV, L = %.1f fb^{-1}", _luminosity/1e3));
 
+  TString swz = "";
+
+  if      (_wcharge == WPlus)  swz = "W^{+}Z";
+  else if (_wcharge == WMinus) swz = "W^{-}Z";
+  else                         swz = "W^{#pm}Z";
+  
   dummy->GetXaxis()->CenterTitle();
   dummy->GetXaxis()->SetTitleOffset(1.4);
-  dummy->GetXaxis()->SetTitle("#sigma(pp #rightarrow WZ) [pb]");
+  dummy->GetXaxis()->SetTitle(Form("#sigma(pp #rightarrow %s) [pb]", swz.Data()));
   dummy->GetYaxis()->SetTitle("");
 
 
