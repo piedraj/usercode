@@ -102,10 +102,11 @@ TString pdfChannel[nChannel+1] = {
 };
 
 
-const UInt_t nCut = 3;
+const UInt_t nCut = 4;
 
 enum {
   //  Exactly3Leptons,
+  Exactly3LeptonsM3L,
   HasZ,
   MET30,
   ClosureTest
@@ -512,12 +513,12 @@ void PrintYields(UInt_t channel)
   if (_mode == MCmode)  {outputfile << Form(" %-20s", "Z+jets");      for (UInt_t i=0; i<nCut; i++) outputfile << Form(" & %3.0f $\\pm$ %2.0f", nZJets[i], sqrt(nZJets[i])); outputfile << "\\\\\n";}
   if (_mode == PPFmode) {outputfile << Form(" %-20s", "data-driven"); for (UInt_t i=0; i<nCut; i++) outputfile << Form(" & %3.0f $\\pm$ %2.0f", nFakes[i], sqrt(nFakes[i])); outputfile << "\\\\\n";}
 
-  outputfile << Form(" %-20s", "ZZ");              for (UInt_t i=0; i<nCut; i++) outputfile << Form(" & %3.0f $\\pm$ %2.0f", nZZ[i],  sqrt(nZZ[i]));  outputfile << "\\\\\n";
-  outputfile << Form(" %-20s", "Z $\\to 4\\ell$"); for (UInt_t i=0; i<nCut; i++) outputfile << Form(" & %3.0f $\\pm$ %2.0f", nZG[i],  sqrt(nZG[i]));  outputfile << "\\\\\n";
-  outputfile << Form(" %-20s", "WV");              for (UInt_t i=0; i<nCut; i++) outputfile << Form(" & %3.0f $\\pm$ %2.0f", nWV[i],  sqrt(nWV[i]));  outputfile << "\\\\\n";
-  outputfile << Form(" %-20s", "VVV");             for (UInt_t i=0; i<nCut; i++) outputfile << Form(" & %3.0f $\\pm$ %2.0f", nVVV[i], sqrt(nVVV[i])); outputfile << "\\\\\n";
-  outputfile << Form(" %-20s", "backgrounds");     for (UInt_t i=0; i<nCut; i++) outputfile << Form(" & %3.0f $\\pm$ %2.0f", nBkg[i], sqrt(nBkg[i])); outputfile << "\\\\\n";
-  outputfile << Form(" %-20s", "WZ");              for (UInt_t i=0; i<nCut; i++) outputfile << Form(" & %3.0f $\\pm$ %2.0f", nWZ[i],  sqrt(nWZ[i]));  outputfile << "\\\\\n";
+  outputfile << Form(" %-20s", "ZZ");                              for (UInt_t i=0; i<nCut; i++) outputfile << Form(" & %3.0f $\\pm$ %2.0f", nZZ[i],  sqrt(nZZ[i]));  outputfile << "\\\\\n";
+  outputfile << Form(" %-20s", "Z$\\gamma\\to\\ell\\ell\\gamma$"); for (UInt_t i=0; i<nCut; i++) outputfile << Form(" & %3.0f $\\pm$ %2.0f", nZG[i],  sqrt(nZG[i]));  outputfile << "\\\\\n";
+  outputfile << Form(" %-20s", "WV");                              for (UInt_t i=0; i<nCut; i++) outputfile << Form(" & %3.0f $\\pm$ %2.0f", nWV[i],  sqrt(nWV[i]));  outputfile << "\\\\\n";
+  outputfile << Form(" %-20s", "VVV");                             for (UInt_t i=0; i<nCut; i++) outputfile << Form(" & %3.0f $\\pm$ %2.0f", nVVV[i], sqrt(nVVV[i])); outputfile << "\\\\\n";
+  outputfile << Form(" %-20s", "backgrounds");                     for (UInt_t i=0; i<nCut; i++) outputfile << Form(" & %3.0f $\\pm$ %2.0f", nBkg[i], sqrt(nBkg[i])); outputfile << "\\\\\n";
+  outputfile << Form(" %-20s", "WZ");                              for (UInt_t i=0; i<nCut; i++) outputfile << Form(" & %3.0f $\\pm$ %2.0f", nWZ[i],  sqrt(nWZ[i]));  outputfile << "\\\\\n";
 
   outputfile << " \\hline\n";
 
@@ -738,10 +739,10 @@ void DrawHistogram(TString  hname,
 
   ndelta = 0;
   
-  DrawLegend(x0 - 0.22, y0 - ndelta, (TObject*)hist[ZZ],  Form(" ZZ (%.0f)",                          Yield(hist[ZZ])),  "f"); ndelta += delta;
-  DrawLegend(x0 - 0.22, y0 - ndelta, (TObject*)hist[ZG],  Form(" Z #rightarrow 4#font[12]{l} (%.0f)", Yield(hist[ZG])),  "f"); ndelta += delta;
-  DrawLegend(x0 - 0.22, y0 - ndelta, (TObject*)hist[VVV], Form(" VVV (%.0f)",                         Yield(hist[VVV])), "f"); ndelta += delta;
-  DrawLegend(x0 - 0.22, y0 - ndelta, (TObject*)hist[WV],  Form(" WV (%.0f)",                          Yield(hist[WV])),  "f"); ndelta += delta;
+  DrawLegend(x0 - 0.22, y0 - ndelta, (TObject*)hist[ZZ],  Form(" ZZ (%.0f)",                                      Yield(hist[ZZ])),  "f"); ndelta += delta;
+  DrawLegend(x0 - 0.22, y0 - ndelta, (TObject*)hist[ZG],  Form(" Z#gamma #rightarrow #font[12]{ll}#gamma (%.0f)", Yield(hist[ZG])),  "f"); ndelta += delta;
+  DrawLegend(x0 - 0.22, y0 - ndelta, (TObject*)hist[VVV], Form(" VVV (%.0f)",                                     Yield(hist[VVV])), "f"); ndelta += delta;
+  DrawLegend(x0 - 0.22, y0 - ndelta, (TObject*)hist[WV],  Form(" WV (%.0f)",                                      Yield(hist[WV])),  "f"); ndelta += delta;
 
 
   // CMS titles
@@ -810,10 +811,11 @@ void SetParameters(UInt_t cut,
 		   UInt_t mode,
 		   UInt_t wcharge)
 {
-  //  sCut[Exactly3Leptons] = "Exactly3Leptons";
-  sCut[HasZ]            = "HasZ";
-  sCut[MET30]           = "MET30";
-  sCut[ClosureTest]     = "ClosureTest";
+  //  sCut[Exactly3Leptons]    = "Exactly3Leptons";
+  sCut[Exactly3LeptonsM3L] = "Exactly3LeptonsM3L";
+  sCut[HasZ]               = "HasZ";
+  sCut[MET30]              = "MET30";
+  sCut[ClosureTest]        = "ClosureTest";
 
   sProcess[Data]  = "Data";
   sProcess[Fakes] = "Data_PPF";

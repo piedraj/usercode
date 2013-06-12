@@ -9,9 +9,9 @@ OUTPUT_DIR=/nfs/fanae/user/piedra/svn/notes/AN-13-093/trunk
 #-------------------------------------------------------------------------------
 mkdir -p $OUTPUT_DIR/figures/scale_factors
 mkdir -p $OUTPUT_DIR/tables/.
-#mkdir -p $OUTPUT_DIR/figures/analysis/MC/Exactly3Leptons/.
+#mkdir -p $OUTPUT_DIR/figures/analysis/MC/Exactly3LeptonsM3L/.
 #mkdir -p $OUTPUT_DIR/figures/analysis/MC/MET30/.
-#mkdir -p $OUTPUT_DIR/figures/analysis/PPF/Exactly3Leptons/.
+mkdir -p $OUTPUT_DIR/figures/analysis/PPF/Exactly3LeptonsM3L/.
 mkdir -p $OUTPUT_DIR/figures/analysis/PPF/HasZ/.
 mkdir -p $OUTPUT_DIR/figures/analysis/PPF/MET30/.
 mkdir -p $OUTPUT_DIR/figures/analysis/PPF/ClosureTest/.
@@ -48,35 +48,56 @@ cp $INPUT_DIR/pdf/analysis/PPF/ClosureTest/hPtLeadingJet_MMM_ClosureTest_WInclus
 
 # MC figures
 #-------------------------------------------------------------------------------
-#cp $INPUT_DIR/pdf/analysis/MC/Exactly3Leptons/hInvMass3Lep_EEE_Exactly3Leptons_WInclusive.pdf  $OUTPUT_DIR/figures/analysis/MC/Exactly3Leptons/.
-#cp $INPUT_DIR/pdf/analysis/MC/Exactly3Leptons/hInvMass3Lep_EEM_Exactly3Leptons_WInclusive.pdf  $OUTPUT_DIR/figures/analysis/MC/Exactly3Leptons/.
-#cp $INPUT_DIR/pdf/analysis/MC/Exactly3Leptons/hInvMass3Lep_MME_Exactly3Leptons_WInclusive.pdf  $OUTPUT_DIR/figures/analysis/MC/Exactly3Leptons/.
-#cp $INPUT_DIR/pdf/analysis/MC/Exactly3Leptons/hInvMass3Lep_MMM_Exactly3Leptons_WInclusive.pdf  $OUTPUT_DIR/figures/analysis/MC/Exactly3Leptons/.
-#cp $INPUT_DIR/pdf/analysis/MC/MET30/hInvMass2Lep_EEE_MET30_WInclusive.pdf                      $OUTPUT_DIR/figures/analysis/MC/MET30/.
-#cp $INPUT_DIR/pdf/analysis/MC/MET30/hInvMass2Lep_EEM_MET30_WInclusive.pdf                      $OUTPUT_DIR/figures/analysis/MC/MET30/.
-#cp $INPUT_DIR/pdf/analysis/MC/MET30/hInvMass2Lep_MME_MET30_WInclusive.pdf                      $OUTPUT_DIR/figures/analysis/MC/MET30/.
-#cp $INPUT_DIR/pdf/analysis/MC/MET30/hInvMass2Lep_MMM_MET30_WInclusive.pdf                      $OUTPUT_DIR/figures/analysis/MC/MET30/.
-#cp $INPUT_DIR/pdf/analysis/MC/MET30/hNJet30_EEE_MET30_WInclusive.pdf                           $OUTPUT_DIR/figures/analysis/MC/MET30/.
-#cp $INPUT_DIR/pdf/analysis/MC/MET30/hNJet30_EEM_MET30_WInclusive.pdf                           $OUTPUT_DIR/figures/analysis/MC/MET30/.
-#cp $INPUT_DIR/pdf/analysis/MC/MET30/hNJet30_MME_MET30_WInclusive.pdf                           $OUTPUT_DIR/figures/analysis/MC/MET30/.
-#cp $INPUT_DIR/pdf/analysis/MC/MET30/hNJet30_MMM_MET30_WInclusive.pdf                           $OUTPUT_DIR/figures/analysis/MC/MET30/.
-#cp $INPUT_DIR/pdf/analysis/MC/MET30/hPtZ_EEE_MET30_WInclusive.pdf                              $OUTPUT_DIR/figures/analysis/MC/MET30/.
-#cp $INPUT_DIR/pdf/analysis/MC/MET30/hPtZ_EEM_MET30_WInclusive.pdf                              $OUTPUT_DIR/figures/analysis/MC/MET30/.
-#cp $INPUT_DIR/pdf/analysis/MC/MET30/hPtZ_MME_MET30_WInclusive.pdf                              $OUTPUT_DIR/figures/analysis/MC/MET30/.
-#cp $INPUT_DIR/pdf/analysis/MC/MET30/hPtZ_MMM_MET30_WInclusive.pdf                              $OUTPUT_DIR/figures/analysis/MC/MET30/.
+#cp $INPUT_DIR/pdf/analysis/MC/Exactly3LeptonsM3L/hInvMass3Lep_EEE_Exactly3LeptonsM3L_WInclusive.pdf  $OUTPUT_DIR/figures/analysis/MC/Exactly3LeptonsM3L/.
+#cp $INPUT_DIR/pdf/analysis/MC/Exactly3LeptonsM3L/hInvMass3Lep_EEM_Exactly3LeptonsM3L_WInclusive.pdf  $OUTPUT_DIR/figures/analysis/MC/Exactly3LeptonsM3L/.
+#cp $INPUT_DIR/pdf/analysis/MC/Exactly3LeptonsM3L/hInvMass3Lep_MME_Exactly3LeptonsM3L_WInclusive.pdf  $OUTPUT_DIR/figures/analysis/MC/Exactly3LeptonsM3L/.
+#cp $INPUT_DIR/pdf/analysis/MC/Exactly3LeptonsM3L/hInvMass3Lep_MMM_Exactly3LeptonsM3L_WInclusive.pdf  $OUTPUT_DIR/figures/analysis/MC/Exactly3LeptonsM3L/.
+#cp $INPUT_DIR/pdf/analysis/MC/MET30/hInvMass2Lep_EEE_MET30_WInclusive.pdf                            $OUTPUT_DIR/figures/analysis/MC/MET30/.
+#cp $INPUT_DIR/pdf/analysis/MC/MET30/hInvMass2Lep_EEM_MET30_WInclusive.pdf                            $OUTPUT_DIR/figures/analysis/MC/MET30/.
+#cp $INPUT_DIR/pdf/analysis/MC/MET30/hInvMass2Lep_MME_MET30_WInclusive.pdf                            $OUTPUT_DIR/figures/analysis/MC/MET30/.
+#cp $INPUT_DIR/pdf/analysis/MC/MET30/hInvMass2Lep_MMM_MET30_WInclusive.pdf                            $OUTPUT_DIR/figures/analysis/MC/MET30/.
+#cp $INPUT_DIR/pdf/analysis/MC/MET30/hNJet30_EEE_MET30_WInclusive.pdf                                 $OUTPUT_DIR/figures/analysis/MC/MET30/.
+#cp $INPUT_DIR/pdf/analysis/MC/MET30/hNJet30_EEM_MET30_WInclusive.pdf                                 $OUTPUT_DIR/figures/analysis/MC/MET30/.
+#cp $INPUT_DIR/pdf/analysis/MC/MET30/hNJet30_MME_MET30_WInclusive.pdf                                 $OUTPUT_DIR/figures/analysis/MC/MET30/.
+#cp $INPUT_DIR/pdf/analysis/MC/MET30/hNJet30_MMM_MET30_WInclusive.pdf                                 $OUTPUT_DIR/figures/analysis/MC/MET30/.
+#cp $INPUT_DIR/pdf/analysis/MC/MET30/hPtZ_EEE_MET30_WInclusive.pdf                                    $OUTPUT_DIR/figures/analysis/MC/MET30/.
+#cp $INPUT_DIR/pdf/analysis/MC/MET30/hPtZ_EEM_MET30_WInclusive.pdf                                    $OUTPUT_DIR/figures/analysis/MC/MET30/.
+#cp $INPUT_DIR/pdf/analysis/MC/MET30/hPtZ_MME_MET30_WInclusive.pdf                                    $OUTPUT_DIR/figures/analysis/MC/MET30/.
+#cp $INPUT_DIR/pdf/analysis/MC/MET30/hPtZ_MMM_MET30_WInclusive.pdf                                    $OUTPUT_DIR/figures/analysis/MC/MET30/.
 
 
 # Data-driven figures
 #-------------------------------------------------------------------------------
-#cp $INPUT_DIR/pdf/analysis/PPF/Exactly3Leptons/hInvMass3Lep_EEE_Exactly3Leptons_WInclusive.pdf  $OUTPUT_DIR/figures/analysis/PPF/Exactly3Leptons/.
-#cp $INPUT_DIR/pdf/analysis/PPF/Exactly3Leptons/hInvMass3Lep_EEM_Exactly3Leptons_WInclusive.pdf  $OUTPUT_DIR/figures/analysis/PPF/Exactly3Leptons/.
-#cp $INPUT_DIR/pdf/analysis/PPF/Exactly3Leptons/hInvMass3Lep_MME_Exactly3Leptons_WInclusive.pdf  $OUTPUT_DIR/figures/analysis/PPF/Exactly3Leptons/.
-#cp $INPUT_DIR/pdf/analysis/PPF/Exactly3Leptons/hInvMass3Lep_MMM_Exactly3Leptons_WInclusive.pdf  $OUTPUT_DIR/figures/analysis/PPF/Exactly3Leptons/.
 #cp $INPUT_DIR/pdf/analysis/PPF/MET30/hNJet30_EEE_MET30_WInclusive.pdf                           $OUTPUT_DIR/figures/analysis/PPF/MET30/.
 #cp $INPUT_DIR/pdf/analysis/PPF/MET30/hNJet30_EEM_MET30_WInclusive.pdf                           $OUTPUT_DIR/figures/analysis/PPF/MET30/.
 #cp $INPUT_DIR/pdf/analysis/PPF/MET30/hNJet30_MME_MET30_WInclusive.pdf                           $OUTPUT_DIR/figures/analysis/PPF/MET30/.
 #cp $INPUT_DIR/pdf/analysis/PPF/MET30/hNJet30_MMM_MET30_WInclusive.pdf                           $OUTPUT_DIR/figures/analysis/PPF/MET30/.
 
+
+cp $INPUT_DIR/pdf/analysis/PPF/Exactly3LeptonsM3L/hPtZ_EEE_Exactly3LeptonsM3L_WInclusive.pdf           $OUTPUT_DIR/figures/analysis/PPF/Exactly3LeptonsM3L/.
+cp $INPUT_DIR/pdf/analysis/PPF/Exactly3LeptonsM3L/hPtZ_EEM_Exactly3LeptonsM3L_WInclusive.pdf           $OUTPUT_DIR/figures/analysis/PPF/Exactly3LeptonsM3L/.
+cp $INPUT_DIR/pdf/analysis/PPF/Exactly3LeptonsM3L/hPtZ_MME_Exactly3LeptonsM3L_WInclusive.pdf           $OUTPUT_DIR/figures/analysis/PPF/Exactly3LeptonsM3L/.
+cp $INPUT_DIR/pdf/analysis/PPF/Exactly3LeptonsM3L/hPtZ_MMM_Exactly3LeptonsM3L_WInclusive.pdf           $OUTPUT_DIR/figures/analysis/PPF/Exactly3LeptonsM3L/.
+cp $INPUT_DIR/pdf/analysis/PPF/Exactly3LeptonsM3L/hPtWLepton_EEE_Exactly3LeptonsM3L_WInclusive.pdf     $OUTPUT_DIR/figures/analysis/PPF/Exactly3LeptonsM3L/.
+cp $INPUT_DIR/pdf/analysis/PPF/Exactly3LeptonsM3L/hPtWLepton_EEM_Exactly3LeptonsM3L_WInclusive.pdf     $OUTPUT_DIR/figures/analysis/PPF/Exactly3LeptonsM3L/.
+cp $INPUT_DIR/pdf/analysis/PPF/Exactly3LeptonsM3L/hPtWLepton_MME_Exactly3LeptonsM3L_WInclusive.pdf     $OUTPUT_DIR/figures/analysis/PPF/Exactly3LeptonsM3L/.
+cp $INPUT_DIR/pdf/analysis/PPF/Exactly3LeptonsM3L/hPtWLepton_MMM_Exactly3LeptonsM3L_WInclusive.pdf     $OUTPUT_DIR/figures/analysis/PPF/Exactly3LeptonsM3L/.
+cp $INPUT_DIR/pdf/analysis/PPF/Exactly3LeptonsM3L/hPtLeadingJet_EEE_Exactly3LeptonsM3L_WInclusive.pdf  $OUTPUT_DIR/figures/analysis/PPF/Exactly3LeptonsM3L/.
+cp $INPUT_DIR/pdf/analysis/PPF/Exactly3LeptonsM3L/hPtLeadingJet_EEM_Exactly3LeptonsM3L_WInclusive.pdf  $OUTPUT_DIR/figures/analysis/PPF/Exactly3LeptonsM3L/.
+cp $INPUT_DIR/pdf/analysis/PPF/Exactly3LeptonsM3L/hPtLeadingJet_MME_Exactly3LeptonsM3L_WInclusive.pdf  $OUTPUT_DIR/figures/analysis/PPF/Exactly3LeptonsM3L/.
+cp $INPUT_DIR/pdf/analysis/PPF/Exactly3LeptonsM3L/hPtLeadingJet_MMM_Exactly3LeptonsM3L_WInclusive.pdf  $OUTPUT_DIR/figures/analysis/PPF/Exactly3LeptonsM3L/.
+cp $INPUT_DIR/pdf/analysis/PPF/Exactly3LeptonsM3L/hMET_EEE_Exactly3LeptonsM3L_WInclusive.pdf           $OUTPUT_DIR/figures/analysis/PPF/Exactly3LeptonsM3L/.
+cp $INPUT_DIR/pdf/analysis/PPF/Exactly3LeptonsM3L/hMET_EEM_Exactly3LeptonsM3L_WInclusive.pdf           $OUTPUT_DIR/figures/analysis/PPF/Exactly3LeptonsM3L/.
+cp $INPUT_DIR/pdf/analysis/PPF/Exactly3LeptonsM3L/hMET_MME_Exactly3LeptonsM3L_WInclusive.pdf           $OUTPUT_DIR/figures/analysis/PPF/Exactly3LeptonsM3L/.
+cp $INPUT_DIR/pdf/analysis/PPF/Exactly3LeptonsM3L/hMET_MMM_Exactly3LeptonsM3L_WInclusive.pdf           $OUTPUT_DIR/figures/analysis/PPF/Exactly3LeptonsM3L/.
+cp $INPUT_DIR/pdf/analysis/PPF/Exactly3LeptonsM3L/hInvMass2Lep_EEE_Exactly3LeptonsM3L_WInclusive.pdf   $OUTPUT_DIR/figures/analysis/PPF/Exactly3LeptonsM3L/.
+cp $INPUT_DIR/pdf/analysis/PPF/Exactly3LeptonsM3L/hInvMass2Lep_EEM_Exactly3LeptonsM3L_WInclusive.pdf   $OUTPUT_DIR/figures/analysis/PPF/Exactly3LeptonsM3L/.
+cp $INPUT_DIR/pdf/analysis/PPF/Exactly3LeptonsM3L/hInvMass2Lep_MME_Exactly3LeptonsM3L_WInclusive.pdf   $OUTPUT_DIR/figures/analysis/PPF/Exactly3LeptonsM3L/.
+cp $INPUT_DIR/pdf/analysis/PPF/Exactly3LeptonsM3L/hInvMass2Lep_MMM_Exactly3LeptonsM3L_WInclusive.pdf   $OUTPUT_DIR/figures/analysis/PPF/Exactly3LeptonsM3L/.
+cp $INPUT_DIR/pdf/analysis/PPF/Exactly3LeptonsM3L/hMtW_EEE_Exactly3LeptonsM3L_WInclusive.pdf           $OUTPUT_DIR/figures/analysis/PPF/Exactly3LeptonsM3L/.
+cp $INPUT_DIR/pdf/analysis/PPF/Exactly3LeptonsM3L/hMtW_EEM_Exactly3LeptonsM3L_WInclusive.pdf           $OUTPUT_DIR/figures/analysis/PPF/Exactly3LeptonsM3L/.
+cp $INPUT_DIR/pdf/analysis/PPF/Exactly3LeptonsM3L/hMtW_MME_Exactly3LeptonsM3L_WInclusive.pdf           $OUTPUT_DIR/figures/analysis/PPF/Exactly3LeptonsM3L/.
+cp $INPUT_DIR/pdf/analysis/PPF/Exactly3LeptonsM3L/hMtW_MMM_Exactly3LeptonsM3L_WInclusive.pdf           $OUTPUT_DIR/figures/analysis/PPF/Exactly3LeptonsM3L/.
 
 cp $INPUT_DIR/pdf/analysis/PPF/HasZ/hPtZ_EEE_HasZ_WInclusive.pdf                                 $OUTPUT_DIR/figures/analysis/PPF/HasZ/.
 cp $INPUT_DIR/pdf/analysis/PPF/HasZ/hPtZ_EEM_HasZ_WInclusive.pdf                                 $OUTPUT_DIR/figures/analysis/PPF/HasZ/.

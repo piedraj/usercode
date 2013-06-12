@@ -73,10 +73,11 @@ const TString sComposition[nComposition] = {
 };
 
 
-const UInt_t nCut = 5;
+const UInt_t nCut = 6;
 
 enum {
   Exactly3Leptons,
+  Exactly3LeptonsM3L,
   HasZ,
   MET30,
   MET30AntiBtag,
@@ -85,6 +86,7 @@ enum {
 
 const TString sCut[nCut] = {
   "Exactly3Leptons",
+  "Exactly3LeptonsM3L",
   "HasZ",
   "MET30",
   "MET30AntiBtag",
@@ -747,7 +749,7 @@ void AnalysisWZ(TString sample,
     Bool_t isZee = false;
     Bool_t isZmm = false;
 
-    Bool_t foundDileptonWithLowMll = false;
+    //    Bool_t foundDileptonWithLowMll = false;
 
     for (UInt_t i=0; i<AnalysisLeptons.size(); i++) {
 
@@ -759,7 +761,7 @@ void AnalysisWZ(TString sample,
 
 	Float_t inv_mass = (AnalysisLeptons[i].v + AnalysisLeptons[j].v).M();
 
-	if (inv_mass < 12.) foundDileptonWithLowMll = true;
+	//	if (inv_mass < 12.) foundDileptonWithLowMll = true;
 
 	if (fabs(inv_mass - Z_MASS) < fabs(invMass2Lep - Z_MASS)) {
 
@@ -874,6 +876,10 @@ void AnalysisWZ(TString sample,
     // Fill histograms
     //--------------------------------------------------------------------------
     FillHistograms(theChannel, Exactly3Leptons);
+
+    if (invMass3Lep <= 100.) continue;
+
+    FillHistograms(theChannel, Exactly3LeptonsM3L);
 
     if (ZLepton1.Pt() <= 20.) continue;
 
