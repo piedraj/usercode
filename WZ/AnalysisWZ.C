@@ -240,10 +240,9 @@ Float_t                       transverseMass;
 Float_t                       WCharge;
 
 UInt_t                        nElectron;
+UInt_t                        nJet30;
 UInt_t                        nTight;
 UInt_t                        theChannel;
-
-TString                       directory;
 
 TFile*                        root_output;
 ofstream                      txt_output;
@@ -254,6 +253,7 @@ ofstream                      txt_output;
 TString                       _sample;
 Int_t                         _systematic;
 Int_t                         _mode;
+TString                       _directory;
 
 
 // Weights;
@@ -314,6 +314,16 @@ Float_t                       phi          [nobjects];
 Float_t                       pt           [nobjects];
 
 
+// Create tree for aTGC
+//------------------------------------------------------------------------------
+TTree*                        tgcTree;
+
+Float_t                       ptz;
+
+
+
+
+
 //==============================================================================
 //
 // AnalysisWZ
@@ -321,29 +331,34 @@ Float_t                       pt           [nobjects];
 //==============================================================================
 void AnalysisWZ(TString sample,
 		Int_t   systematic,
-		Int_t   mode)
+		Int_t   mode,
+		TString directory)
 {
   _sample     = sample;
   _systematic = systematic;
   _mode       = mode;
+  _directory  = directory;
 
-  directory = "results";
+  if      (_systematic == noSyst)           _directory += "/analysis";
+  else if (_systematic == metUpSyst)        _directory += "/systematics/metUp";
+  else if (_systematic == metDownSyst)      _directory += "/systematics/metDown";
+  else if (_systematic == muonUpSyst)       _directory += "/systematics/muonUp";
+  else if (_systematic == muonDownSyst)     _directory += "/systematics/muonDown";
+  else if (_systematic == electronUpSyst)   _directory += "/systematics/electronUp";
+  else if (_systematic == electronDownSyst) _directory += "/systematics/electronDown";
 
-  if      (_systematic == noSyst)           directory += "/analysis";
-  else if (_systematic == metUpSyst)        directory += "/systematics/metUp";
-  else if (_systematic == metDownSyst)      directory += "/systematics/metDown";
-  else if (_systematic == muonUpSyst)       directory += "/systematics/muonUp";
-  else if (_systematic == muonDownSyst)     directory += "/systematics/muonDown";
-  else if (_systematic == electronUpSyst)   directory += "/systematics/electronUp";
-  else if (_systematic == electronDownSyst) directory += "/systematics/electronDown";
-
-  gSystem->mkdir(directory, kTRUE);
+  gSystem->mkdir(_directory, kTRUE);
 
   TString filename = _sample;
 
   if (_mode == PPF) filename += "_PPF";
 
-  root_output = new TFile(directory + "/" + filename + ".root", "recreate");
+  root_output = new TFile(_directory + "/" + filename + ".root", "recreate");
+
+  tgcTree = new TTree("tgcTree", "tgcTree");
+
+  tgcTree->Branch("channel", &theChannel);
+  tgcTree->Branch("ptz",     &ptz);
 
 
   // Histogram definition
@@ -505,9 +520,11 @@ void AnalysisWZ(TString sample,
     invMass2Lep    = 999.;
     invMass3Lep    = 999.;
     transverseMass = 999.;
-    WCharge        = 0.;
+    ptz            = 0.;
     sumCharges     = 0.;
+    WCharge        = 0.;
     nElectron      = 0;
+    nJet30         = 0;
     nTight         = 0;
 
 
@@ -608,11 +625,34 @@ void AnalysisWZ(TString sample,
 
       if (jetpt[i] <= 0.) continue;
 
-      TLorentzVector tlv;
+      TLorentzVector Jet;
+      
+      Jet.SetPtEtaPhiM(jetpt[i], jeteta[i], jetphi[i], 0);
 
-      tlv.SetPtEtaPhiM(jetpt[i], jeteta[i], jetphi[i], 0);
+      SelectedJets.push_back(Jet);
 
-      SelectedJets.push_back(tlv);
+
+      // Count the number of (cleaned) jets with pt > 30 GeV
+      //------------------------------------------------------------------------
+      if (jetpt[i] <= 30.) continue;
+
+      if (fabs(jeteta[i]) >= 4.7) continue;
+
+      Bool_t thisJetIsLepton = false;
+
+      for (UInt_t j=0; j<AnalysisLeptons.size(); j++)
+	{
+	  if (fabs(Jet.DeltaR(AnalysisLeptons[j].v)) < 0.3)
+	    {
+	      thisJetIsLepton = true;
+	      
+	      break;
+	    }
+	}
+
+      if (thisJetIsLepton) continue;
+
+      nJet30++;
     }
 
 
@@ -635,7 +675,7 @@ void AnalysisWZ(TString sample,
 	    if (_systematic == metDownSyst) scale = -scale;
 
 	    TLorentzVector Jet = SelectedJets[i];
-	    
+
 	    if (Jet.Pt() <= 30. || fabs(Jet.Eta() >= 5.))
 	      {
 		approxMET -= Jet;
@@ -648,20 +688,20 @@ void AnalysisWZ(TString sample,
 		continue;
 	      }
 
-	    Bool_t leptoninsideJet = false;
+	    Bool_t thisJetIsLepton = false;
 
 	    for (UInt_t j=0; j<AnalysisLeptons.size(); j++)
 	      {
 		if (fabs(Jet.DeltaR(AnalysisLeptons[j].v)) <= 0.3)
 		  {
-		    leptoninsideJet = true;
-
+		    thisJetIsLepton = true;
+		    
 		    break;
 		  }
 	      }
 
-	    if (leptoninsideJet) continue;
-
+	    if (thisJetIsLepton) continue;
+	    
 	    approxMET -= Jet;
 
 	    Jet.SetPx(Jet.Px() * (1. + scale));
@@ -901,6 +941,10 @@ void AnalysisWZ(TString sample,
 
     FillHistograms(theChannel, MET30);
 
+    ptz = (ZLepton1 + ZLepton2).Pt();
+
+    tgcTree->Fill();
+
     if (nbjet > 0) continue;
 
     FillHistograms(theChannel, MET30AntiBtag);
@@ -912,7 +956,7 @@ void AnalysisWZ(TString sample,
   // Summary
   //
   //============================================================================
-  txt_output.open(Form("%s/%s.txt", directory.Data(), filename.Data()));
+  txt_output.open(Form("%s/%s.txt", _directory.Data(), filename.Data()));
 
   txt_output << Form("\n %39s results with %7.1f pb\n", filename.Data(), luminosity);
 
@@ -921,8 +965,13 @@ void AnalysisWZ(TString sample,
 
   txt_output.close();
 
+
   root_output->cd();
+
+  tgcTree->Write();
+
   root_output->Write("", TObject::kOverwrite);
+
   root_output->Close();
 }
 
@@ -982,7 +1031,7 @@ void FillHistograms(UInt_t iChannel, UInt_t iCut)
       hDRWZLepton1 [iChannel][iCut][iCharge]->Fill(deltaR1,                    hweight);
       hDRWZLepton2 [iChannel][iCut][iCharge]->Fill(deltaR2,                    hweight);
       hMtW         [iChannel][iCut][iCharge]->Fill(transverseMass,             hweight);
-      hNJet30      [iChannel][iCut][iCharge]->Fill(njet,                       hweight);
+      hNJet30      [iChannel][iCut][iCharge]->Fill(nJet30,                     hweight);
       hNBJet30     [iChannel][iCut][iCharge]->Fill(nbjet,                      hweight);
     }
 }

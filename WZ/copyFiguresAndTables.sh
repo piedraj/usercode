@@ -68,12 +68,6 @@ cp $INPUT_DIR/pdf/analysis/PPF/ClosureTest/hPtLeadingJet_MMM_ClosureTest_WInclus
 
 # Data-driven figures
 #-------------------------------------------------------------------------------
-#cp $INPUT_DIR/pdf/analysis/PPF/MET30/hNJet30_EEE_MET30_WInclusive.pdf                           $OUTPUT_DIR/figures/analysis/PPF/MET30/.
-#cp $INPUT_DIR/pdf/analysis/PPF/MET30/hNJet30_EEM_MET30_WInclusive.pdf                           $OUTPUT_DIR/figures/analysis/PPF/MET30/.
-#cp $INPUT_DIR/pdf/analysis/PPF/MET30/hNJet30_MME_MET30_WInclusive.pdf                           $OUTPUT_DIR/figures/analysis/PPF/MET30/.
-#cp $INPUT_DIR/pdf/analysis/PPF/MET30/hNJet30_MMM_MET30_WInclusive.pdf                           $OUTPUT_DIR/figures/analysis/PPF/MET30/.
-
-
 cp $INPUT_DIR/pdf/analysis/PPF/Exactly3LeptonsM3L/hPtZ_EEE_Exactly3LeptonsM3L_WInclusive.pdf           $OUTPUT_DIR/figures/analysis/PPF/Exactly3LeptonsM3L/.
 cp $INPUT_DIR/pdf/analysis/PPF/Exactly3LeptonsM3L/hPtZ_EEM_Exactly3LeptonsM3L_WInclusive.pdf           $OUTPUT_DIR/figures/analysis/PPF/Exactly3LeptonsM3L/.
 cp $INPUT_DIR/pdf/analysis/PPF/Exactly3LeptonsM3L/hPtZ_MME_Exactly3LeptonsM3L_WInclusive.pdf           $OUTPUT_DIR/figures/analysis/PPF/Exactly3LeptonsM3L/.
@@ -98,6 +92,10 @@ cp $INPUT_DIR/pdf/analysis/PPF/Exactly3LeptonsM3L/hMtW_EEE_Exactly3LeptonsM3L_WI
 cp $INPUT_DIR/pdf/analysis/PPF/Exactly3LeptonsM3L/hMtW_EEM_Exactly3LeptonsM3L_WInclusive.pdf           $OUTPUT_DIR/figures/analysis/PPF/Exactly3LeptonsM3L/.
 cp $INPUT_DIR/pdf/analysis/PPF/Exactly3LeptonsM3L/hMtW_MME_Exactly3LeptonsM3L_WInclusive.pdf           $OUTPUT_DIR/figures/analysis/PPF/Exactly3LeptonsM3L/.
 cp $INPUT_DIR/pdf/analysis/PPF/Exactly3LeptonsM3L/hMtW_MMM_Exactly3LeptonsM3L_WInclusive.pdf           $OUTPUT_DIR/figures/analysis/PPF/Exactly3LeptonsM3L/.
+cp $INPUT_DIR/pdf/analysis/PPF/Exactly3LeptonsM3L/hNJet30_EEE_Exactly3LeptonsM3L_WInclusive.pdf        $OUTPUT_DIR/figures/analysis/PPF/Exactly3LeptonsM3L/.
+cp $INPUT_DIR/pdf/analysis/PPF/Exactly3LeptonsM3L/hNJet30_EEM_Exactly3LeptonsM3L_WInclusive.pdf        $OUTPUT_DIR/figures/analysis/PPF/Exactly3LeptonsM3L/.
+cp $INPUT_DIR/pdf/analysis/PPF/Exactly3LeptonsM3L/hNJet30_MME_Exactly3LeptonsM3L_WInclusive.pdf        $OUTPUT_DIR/figures/analysis/PPF/Exactly3LeptonsM3L/.
+cp $INPUT_DIR/pdf/analysis/PPF/Exactly3LeptonsM3L/hNJet30_MMM_Exactly3LeptonsM3L_WInclusive.pdf        $OUTPUT_DIR/figures/analysis/PPF/Exactly3LeptonsM3L/.
 
 cp $INPUT_DIR/pdf/analysis/PPF/HasZ/hPtZ_EEE_HasZ_WInclusive.pdf                                 $OUTPUT_DIR/figures/analysis/PPF/HasZ/.
 cp $INPUT_DIR/pdf/analysis/PPF/HasZ/hPtZ_EEM_HasZ_WInclusive.pdf                                 $OUTPUT_DIR/figures/analysis/PPF/HasZ/.
@@ -123,6 +121,10 @@ cp $INPUT_DIR/pdf/analysis/PPF/HasZ/hMtW_EEE_HasZ_WInclusive.pdf                
 cp $INPUT_DIR/pdf/analysis/PPF/HasZ/hMtW_EEM_HasZ_WInclusive.pdf                                 $OUTPUT_DIR/figures/analysis/PPF/HasZ/.
 cp $INPUT_DIR/pdf/analysis/PPF/HasZ/hMtW_MME_HasZ_WInclusive.pdf                                 $OUTPUT_DIR/figures/analysis/PPF/HasZ/.
 cp $INPUT_DIR/pdf/analysis/PPF/HasZ/hMtW_MMM_HasZ_WInclusive.pdf                                 $OUTPUT_DIR/figures/analysis/PPF/HasZ/.
+cp $INPUT_DIR/pdf/analysis/PPF/HasZ/hNJet30_EEE_HasZ_WInclusive.pdf                              $OUTPUT_DIR/figures/analysis/PPF/HasZ/.
+cp $INPUT_DIR/pdf/analysis/PPF/HasZ/hNJet30_EEM_HasZ_WInclusive.pdf                              $OUTPUT_DIR/figures/analysis/PPF/HasZ/.
+cp $INPUT_DIR/pdf/analysis/PPF/HasZ/hNJet30_MME_HasZ_WInclusive.pdf                              $OUTPUT_DIR/figures/analysis/PPF/HasZ/.
+cp $INPUT_DIR/pdf/analysis/PPF/HasZ/hNJet30_MMM_HasZ_WInclusive.pdf                              $OUTPUT_DIR/figures/analysis/PPF/HasZ/.
 
 cp $INPUT_DIR/pdf/analysis/PPF/MET30/hPtZ_EEE_MET30_WInclusive.pdf                               $OUTPUT_DIR/figures/analysis/PPF/MET30/.
 cp $INPUT_DIR/pdf/analysis/PPF/MET30/hPtZ_EEM_MET30_WInclusive.pdf                               $OUTPUT_DIR/figures/analysis/PPF/MET30/.
@@ -148,24 +150,30 @@ cp $INPUT_DIR/pdf/analysis/PPF/MET30/hMtW_EEE_MET30_WInclusive.pdf              
 cp $INPUT_DIR/pdf/analysis/PPF/MET30/hMtW_EEM_MET30_WInclusive.pdf                               $OUTPUT_DIR/figures/analysis/PPF/MET30/.
 cp $INPUT_DIR/pdf/analysis/PPF/MET30/hMtW_MME_MET30_WInclusive.pdf                               $OUTPUT_DIR/figures/analysis/PPF/MET30/.
 cp $INPUT_DIR/pdf/analysis/PPF/MET30/hMtW_MMM_MET30_WInclusive.pdf                               $OUTPUT_DIR/figures/analysis/PPF/MET30/.
+cp $INPUT_DIR/pdf/analysis/PPF/MET30/hNJet30_EEE_MET30_WInclusive.pdf                           $OUTPUT_DIR/figures/analysis/PPF/MET30/.
+cp $INPUT_DIR/pdf/analysis/PPF/MET30/hNJet30_EEM_MET30_WInclusive.pdf                           $OUTPUT_DIR/figures/analysis/PPF/MET30/.
+cp $INPUT_DIR/pdf/analysis/PPF/MET30/hNJet30_MME_MET30_WInclusive.pdf                           $OUTPUT_DIR/figures/analysis/PPF/MET30/.
+cp $INPUT_DIR/pdf/analysis/PPF/MET30/hNJet30_MMM_MET30_WInclusive.pdf                           $OUTPUT_DIR/figures/analysis/PPF/MET30/.
 
 
 # Yields
 #-------------------------------------------------------------------------------
-cp $INPUT_DIR/tex/EEE_mc.tex  $OUTPUT_DIR/tables/.
-cp $INPUT_DIR/tex/EEM_mc.tex  $OUTPUT_DIR/tables/.
-cp $INPUT_DIR/tex/MME_mc.tex  $OUTPUT_DIR/tables/.
-cp $INPUT_DIR/tex/MMM_mc.tex  $OUTPUT_DIR/tables/.
+cp $INPUT_DIR/tex/EEE_WInclusive_mc.tex  $OUTPUT_DIR/tables/.
+cp $INPUT_DIR/tex/EEM_WInclusive_mc.tex  $OUTPUT_DIR/tables/.
+cp $INPUT_DIR/tex/MME_WInclusive_mc.tex  $OUTPUT_DIR/tables/.
+cp $INPUT_DIR/tex/MMM_WInclusive_mc.tex  $OUTPUT_DIR/tables/.
 
-cp $INPUT_DIR/tex/EEE_ppf.tex  $OUTPUT_DIR/tables/.
-cp $INPUT_DIR/tex/EEM_ppf.tex  $OUTPUT_DIR/tables/.
-cp $INPUT_DIR/tex/MME_ppf.tex  $OUTPUT_DIR/tables/.
-cp $INPUT_DIR/tex/MMM_ppf.tex  $OUTPUT_DIR/tables/.
+cp $INPUT_DIR/tex/EEE_WInclusive_ppf.tex  $OUTPUT_DIR/tables/.
+cp $INPUT_DIR/tex/EEM_WInclusive_ppf.tex  $OUTPUT_DIR/tables/.
+cp $INPUT_DIR/tex/MME_WInclusive_ppf.tex  $OUTPUT_DIR/tables/.
+cp $INPUT_DIR/tex/MMM_WInclusive_ppf.tex  $OUTPUT_DIR/tables/.
 
 
 # Final results
 #-------------------------------------------------------------------------------
 cp $INPUT_DIR/pdf/analysis/PPF/MET30/xs_MET30_WInclusive.pdf  $OUTPUT_DIR/figures/analysis/PPF/MET30/.
+cp $INPUT_DIR/pdf/analysis/PPF/MET30/xs_MET30_WPlus.pdf       $OUTPUT_DIR/figures/analysis/PPF/MET30/.
+cp $INPUT_DIR/pdf/analysis/PPF/MET30/xs_MET30_WMinus.pdf      $OUTPUT_DIR/figures/analysis/PPF/MET30/.
 cp $INPUT_DIR/tex/xs_MET30_WInclusive_ppf.tex                 $OUTPUT_DIR/tables/.
 cp $INPUT_DIR/tex/systematics_MET30_WInclusive.tex            $OUTPUT_DIR/tables/.
 

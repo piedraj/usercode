@@ -52,17 +52,14 @@
 const Double_t xsWPlusZ  = 13.89;  // pb (MCFM with 71 < mZ < 111 GeV)
 const Double_t xsWMinusZ =  8.06;  // pb (MCFM with 71 < mZ < 111 GeV)
 
-const Double_t W2e         = 0.1075;
-const Double_t W2m         = 0.1057;
-const Double_t W2tau       = 0.1125;
-const Double_t Z2ll        = 0.033658;
-const Double_t WZ23lnu     = 3 * Z2ll * (W2e + W2m + W2tau);
+const Double_t W2e     = 0.1075;    // +- 0.0013
+const Double_t W2m     = 0.1057;    // +- 0.0015
+const Double_t W2tau   = 0.1125;    // +- 0.0020
+const Double_t Z2ll    = 0.033658;  // +- 0.000023;
+const Double_t WZ23lnu = 3 * Z2ll * (W2e + W2m + W2tau);
+
 const Double_t ngenWPlusZ  = 906262;  // (71 < mZ < 111 GeV)
 const Double_t ngenWMinusZ = 542805;  // (71 < mZ < 111 GeV)
-
-//const Double_t ngenWZ = 2017979;
-//const Double_t ngenWZ = 1449067;  // (71 < mZ < 111 GeV)
-//const Double_t ngenWZ = 1390244;  // (81 < mZ < 101 GeV)
 
 
 // Data members
@@ -267,8 +264,8 @@ Double_t RelativeDifference       (Double_t      x0,
 //------------------------------------------------------------------------------
 // XS
 //------------------------------------------------------------------------------
-void XS(UInt_t cut     = MET30,
-	UInt_t mode    = PPFmode,
+void XS(UInt_t cut     = ClosureTest,
+	UInt_t mode    = MCmode,
 	UInt_t wcharge = WInclusive)
 {
   gROOT->SetBatch();
@@ -285,33 +282,32 @@ void XS(UInt_t cut     = MET30,
 
     PrintYields(channel);
 
-    DrawHistogram("hSumCharges", channel, cut, "q_{1} + q_{2} + q_{3}");
-
-    DrawHistogram("hMET",          channel, cut, "E_{T}^{miss}",                           5, 0, "GeV",  linY);
-    DrawHistogram("hInvMass2Lep",  channel, cut, "m_{#font[12]{ll}}",                     -1, 0, "GeV",  linY, 70, 112);
-    DrawHistogram("hInvMass3Lep",  channel, cut, "m_{#font[12]{3l}}",                      5, 0, "GeV",  linY, 60, 350);
-    DrawHistogram("hPtLepton1",    channel, cut, "p_{T}^{first lepton}",                   5, 0, "GeV",  linY);
-    DrawHistogram("hPtLepton2",    channel, cut, "p_{T}^{second lepton}",                  5, 0, "GeV",  linY);
-    DrawHistogram("hPtLepton3",    channel, cut, "p_{T}^{third lepton}",                   5, 0, "GeV",  linY);
-    DrawHistogram("hPtLeadingJet", channel, cut, "p_{T}^{leading jet}",                    5, 0, "GeV",  linY);
-    DrawHistogram("hDPhiZLeptons", channel, cut, "#Delta#phi_{#font[12]{ll}}",            10, 1, "^{o}", linY);
-    DrawHistogram("hPtZLepton1",   channel, cut, "p_{T}^{Z leading lepton}",               5, 0, "GeV",  linY);
-    DrawHistogram("hPtZLepton2",   channel, cut, "p_{T}^{Z trailing lepton}",              5, 0, "GeV",  linY);
-    DrawHistogram("hPtWLepton",    channel, cut, "p_{T}^{W lepton}",                       5, 0, "GeV",  linY);
-    DrawHistogram("hPtZ",          channel, cut, "p_{T}^{Z}",                             10, 0, "GeV",  linY);
-    DrawHistogram("hDRWZLepton1",  channel, cut, "#DeltaR(W lepton, Z leading lepton)",    5, 1, "NULL", linY);
-    DrawHistogram("hDRWZLepton2",  channel, cut, "#DeltaR(W lepton, Z trailing lepton)",   5, 1, "NULL", linY);
-    DrawHistogram("hMtW",          channel, cut, "m_{T}^{W}",                              5, 0, "GeV",  linY);
-    DrawHistogram("hNJet30",       channel, cut, "number of jets (p_{T}^{jet} > 30 GeV)", -1, 0, "NULL", linY, 0, 4);
+    DrawHistogram("hSumCharges",   channel, cut, "q_{1} + q_{2} + q_{3}");
+//    DrawHistogram("hMET",          channel, cut, "E_{T}^{miss}",                           5, 0, "GeV",  linY);
+//    DrawHistogram("hInvMass2Lep",  channel, cut, "m_{#font[12]{ll}}",                     -1, 0, "GeV",  linY, 70, 112);
+//    DrawHistogram("hInvMass3Lep",  channel, cut, "m_{#font[12]{3l}}",                      5, 0, "GeV",  linY, 60, 350);
+//    DrawHistogram("hPtLepton1",    channel, cut, "p_{T}^{first lepton}",                   5, 0, "GeV",  linY);
+//    DrawHistogram("hPtLepton2",    channel, cut, "p_{T}^{second lepton}",                  5, 0, "GeV",  linY);
+//    DrawHistogram("hPtLepton3",    channel, cut, "p_{T}^{third lepton}",                   5, 0, "GeV",  linY);
+//    DrawHistogram("hPtLeadingJet", channel, cut, "p_{T}^{leading jet}",                    5, 0, "GeV",  linY);
+//    DrawHistogram("hDPhiZLeptons", channel, cut, "#Delta#phi_{#font[12]{ll}}",            10, 1, "^{o}", linY);
+//    DrawHistogram("hPtZLepton1",   channel, cut, "p_{T}^{Z leading lepton}",               5, 0, "GeV",  linY);
+//    DrawHistogram("hPtZLepton2",   channel, cut, "p_{T}^{Z trailing lepton}",              5, 0, "GeV",  linY);
+//    DrawHistogram("hPtWLepton",    channel, cut, "p_{T}^{W lepton}",                       5, 0, "GeV",  linY);
+//    DrawHistogram("hPtZ",          channel, cut, "p_{T}^{Z}",                             10, 0, "GeV",  linY);
+//    DrawHistogram("hDRWZLepton1",  channel, cut, "#DeltaR(W lepton, Z leading lepton)",    5, 1, "NULL", linY);
+//    DrawHistogram("hDRWZLepton2",  channel, cut, "#DeltaR(W lepton, Z trailing lepton)",   5, 1, "NULL", linY);
+//    DrawHistogram("hMtW",          channel, cut, "m_{T}^{W}",                              5, 0, "GeV",  linY);
+//    DrawHistogram("hNJet30",       channel, cut, "number of jets (p_{T}^{jet} > 30 GeV)", -1, 0, "NULL", linY, 0, 4);
   }
 
-  Inclusive();
-  
-  PrintSystematics(cut);
-
-  DrawCrossSections(cut);
-
-  PrintCrossSections(cut);
+//  Inclusive();
+//  
+//  PrintSystematics(cut);
+//
+//  DrawCrossSections(cut);
+//
+//  PrintCrossSections(cut);
 }
 
 
@@ -443,7 +439,10 @@ void PrintYields(UInt_t channel)
 
   TString suffix = (_mode == MCmode) ? "mc" : "ppf";
 
-  outputfile.open(Form("tex/%s_%s.tex", sChannel[channel].Data(), suffix.Data()));
+  outputfile.open(Form("tex/%s_%s_%s.tex",
+		       sChannel[channel].Data(),
+		       sCharge[_wcharge].Data(),
+		       suffix.Data()));
 
   Double_t nData [nCut];
   Double_t nFakes[nCut];
@@ -513,12 +512,12 @@ void PrintYields(UInt_t channel)
   if (_mode == MCmode)  {outputfile << Form(" %-20s", "Z+jets");      for (UInt_t i=0; i<nCut; i++) outputfile << Form(" & %3.0f $\\pm$ %2.0f", nZJets[i], sqrt(nZJets[i])); outputfile << "\\\\\n";}
   if (_mode == PPFmode) {outputfile << Form(" %-20s", "data-driven"); for (UInt_t i=0; i<nCut; i++) outputfile << Form(" & %3.0f $\\pm$ %2.0f", nFakes[i], sqrt(nFakes[i])); outputfile << "\\\\\n";}
 
-  outputfile << Form(" %-20s", "ZZ");                              for (UInt_t i=0; i<nCut; i++) outputfile << Form(" & %3.0f $\\pm$ %2.0f", nZZ[i],  sqrt(nZZ[i]));  outputfile << "\\\\\n";
-  outputfile << Form(" %-20s", "Z$\\gamma\\to\\ell\\ell\\gamma$"); for (UInt_t i=0; i<nCut; i++) outputfile << Form(" & %3.0f $\\pm$ %2.0f", nZG[i],  sqrt(nZG[i]));  outputfile << "\\\\\n";
-  outputfile << Form(" %-20s", "WV");                              for (UInt_t i=0; i<nCut; i++) outputfile << Form(" & %3.0f $\\pm$ %2.0f", nWV[i],  sqrt(nWV[i]));  outputfile << "\\\\\n";
-  outputfile << Form(" %-20s", "VVV");                             for (UInt_t i=0; i<nCut; i++) outputfile << Form(" & %3.0f $\\pm$ %2.0f", nVVV[i], sqrt(nVVV[i])); outputfile << "\\\\\n";
-  outputfile << Form(" %-20s", "backgrounds");                     for (UInt_t i=0; i<nCut; i++) outputfile << Form(" & %3.0f $\\pm$ %2.0f", nBkg[i], sqrt(nBkg[i])); outputfile << "\\\\\n";
-  outputfile << Form(" %-20s", "WZ");                              for (UInt_t i=0; i<nCut; i++) outputfile << Form(" & %3.0f $\\pm$ %2.0f", nWZ[i],  sqrt(nWZ[i]));  outputfile << "\\\\\n";
+  outputfile << Form(" %-20s", "ZZ");          for (UInt_t i=0; i<nCut; i++) outputfile << Form(" & %3.0f $\\pm$ %2.0f", nZZ[i],  sqrt(nZZ[i]));  outputfile << "\\\\\n";
+  outputfile << Form(" %-20s", "Z$\\gamma$");  for (UInt_t i=0; i<nCut; i++) outputfile << Form(" & %3.0f $\\pm$ %2.0f", nZG[i],  sqrt(nZG[i]));  outputfile << "\\\\\n";
+  outputfile << Form(" %-20s", "WV");          for (UInt_t i=0; i<nCut; i++) outputfile << Form(" & %3.0f $\\pm$ %2.0f", nWV[i],  sqrt(nWV[i]));  outputfile << "\\\\\n";
+  outputfile << Form(" %-20s", "VVV");         for (UInt_t i=0; i<nCut; i++) outputfile << Form(" & %3.0f $\\pm$ %2.0f", nVVV[i], sqrt(nVVV[i])); outputfile << "\\\\\n";
+  outputfile << Form(" %-20s", "backgrounds"); for (UInt_t i=0; i<nCut; i++) outputfile << Form(" & %3.0f $\\pm$ %2.0f", nBkg[i], sqrt(nBkg[i])); outputfile << "\\\\\n";
+  outputfile << Form(" %-20s", "WZ");          for (UInt_t i=0; i<nCut; i++) outputfile << Form(" & %3.0f $\\pm$ %2.0f", nWZ[i],  sqrt(nWZ[i]));  outputfile << "\\\\\n";
 
   outputfile << " \\hline\n";
 
@@ -739,16 +738,46 @@ void DrawHistogram(TString  hname,
 
   ndelta = 0;
   
-  DrawLegend(x0 - 0.22, y0 - ndelta, (TObject*)hist[ZZ],  Form(" ZZ (%.0f)",                                      Yield(hist[ZZ])),  "f"); ndelta += delta;
-  DrawLegend(x0 - 0.22, y0 - ndelta, (TObject*)hist[ZG],  Form(" Z#gamma #rightarrow #font[12]{ll}#gamma (%.0f)", Yield(hist[ZG])),  "f"); ndelta += delta;
-  DrawLegend(x0 - 0.22, y0 - ndelta, (TObject*)hist[VVV], Form(" VVV (%.0f)",                                     Yield(hist[VVV])), "f"); ndelta += delta;
-  DrawLegend(x0 - 0.22, y0 - ndelta, (TObject*)hist[WV],  Form(" WV (%.0f)",                                      Yield(hist[WV])),  "f"); ndelta += delta;
+  DrawLegend(x0 - 0.22, y0 - ndelta, (TObject*)hist[ZZ],  Form(" ZZ (%.0f)",      Yield(hist[ZZ])),  "f"); ndelta += delta;
+  DrawLegend(x0 - 0.22, y0 - ndelta, (TObject*)hist[ZG],  Form(" Z#gamma (%.0f)", Yield(hist[ZG])),  "f"); ndelta += delta;
+  DrawLegend(x0 - 0.22, y0 - ndelta, (TObject*)hist[VVV], Form(" VVV (%.0f)",     Yield(hist[VVV])), "f"); ndelta += delta;
+  DrawLegend(x0 - 0.22, y0 - ndelta, (TObject*)hist[WV],  Form(" WV (%.0f)",      Yield(hist[WV])),  "f"); ndelta += delta;
 
 
   // CMS titles
   //----------------------------------------------------------------------------
   DrawTLatex(0.185, 0.975, 0.05, 13, lChannel[channel]);
   DrawTLatex(0.940, 0.983, 0.05, 33, Form("#sqrt{s} = 8 TeV, L = %.1f fb^{-1}", _luminosity/1e3));
+
+
+  // Fakes checks / systematics
+  //----------------------------------------------------------------------------
+  if (hname.Contains("hSumCharges"))
+    {
+      if (_mode == MCmode)
+	{
+	  printf(" [%s]   Z+jets and top MC: %5.1f\n",
+		 sChannel[channel].Data(),
+		 Yield(hist[Top]) + Yield(hist[ZJets]));
+	}
+      else if (_mode == PPFmode)
+	{
+	  Double_t dataMinusMc = Yield(hist[Data]);
+	  
+	  dataMinusMc -= Yield(hist[WZ]);
+	  dataMinusMc -= Yield(hist[ZZ]);
+	  dataMinusMc -= Yield(hist[ZG]);
+	  dataMinusMc -= Yield(hist[VVV]);
+	  dataMinusMc -= Yield(hist[WV]);
+
+	  printf(" [%s]   data-MC: %5.1f   data PPF: %5.1f   delta: %5.1f\%s\n",
+		 sChannel[channel].Data(),
+		 dataMinusMc,
+		 Yield(hist[Fakes]),
+		 1e2 * fabs(dataMinusMc - Yield(hist[Fakes])) / dataMinusMc,
+		 "%");
+	}
+    }
 
 
   //----------------------------------------------------------------------------
@@ -840,7 +869,7 @@ void SetParameters(UInt_t cut,
   _luminosity            = 19602.0;  // pb
   _luminosityUncertainty =     4.4;  // %
 
-  _verbosity = 2;
+  _verbosity = 0;
   _cut       = cut;
   _mode      = mode;
   _wcharge   = wcharge;
@@ -1257,12 +1286,12 @@ void RelativeSystematics(UInt_t channel, UInt_t cut)
 	      continue;
 	    }
 	  
-	  TString hname = "hCounter_" + sChannel[channel] + "_" + sCut[cut] + "_" + sCharge[_wcharge] + "_TTT";
-	
 	  TString suffix = "/" + sProcess[process] + ".root";
 
 	  TFile* f0 = new TFile(_datapath + "/analysis" + suffix);
 
+	  TString hname = "hCounter_" + sChannel[channel] + "_" + sCut[cut] + "_" + sCharge[_wcharge] + "_TTT";
+	
 	  Double_t y0 = Yield((TH1D*)f0->Get(hname));
 
 	  Double_t y1;
