@@ -5,6 +5,9 @@
 #include <vector>
 
 
+#include "TMatrixD.h"
+
+
 //------------------------------------------------------------------------------
 //
 //  MCFM 6.6
@@ -209,7 +212,6 @@ Double_t        xsValue     [nChannel+1];
 Double_t        xsErrorLumi [nChannel+1];
 Double_t        xsErrorStat [nChannel+1];
 Double_t        xsErrorEff  [nChannel+1];
-Double_t        xsErrorBkgs [nChannel+1];
 Double_t        xsErrorSyst [nChannel+1];
 
 
@@ -253,6 +255,8 @@ TString  GuessLocalBasePath       ();
 void     MakeOutputDirectory      (TString       format);
 
 void     Inclusive                ();
+
+void     BlueMethod               (UInt_t        cut);
 
 void     RelativeSystematics      (UInt_t        channel,
 				   UInt_t        cut);
@@ -318,6 +322,8 @@ void XS(UInt_t cut     = MET30,
   }
 
   Inclusive();
+
+  BlueMethod(cut);
   
   PrintSystematics(cut);
 
@@ -403,8 +409,8 @@ Double_t CrossSectionValue(UInt_t channel,
 	  }
 	else
 	  {
-	    if (syst == zzSyst && j == ZZ) process_yield *= (1. + 0.12);
-	    if (syst == zgSyst && j == ZG) process_yield *= (1. + 0.20);
+	    if (syst == zzSyst && j == ZZ) process_yield *= (1. + 0.15);
+	    if (syst == zgSyst && j == ZG) process_yield *= (1. + 0.15);
 	    
 	    nbkg += process_yield;
 	  }
@@ -432,7 +438,6 @@ void MeasureTheCrossSection(UInt_t channel,
   Double_t ndata   = 0;
   Double_t nsignal = 0;
   Double_t nbkg    = 0;
-  Double_t ebkg    = 0;
 
   TString suffix = "_" + sChannel[channel] + "_" + sCut[cut] + "_" + sCharge[_wcharge] + "_LLL";
 
@@ -455,16 +460,8 @@ void MeasureTheCrossSection(UInt_t channel,
     else
       {
 	nbkg += process_yield;
-
-	Double_t ebkgStat = sqrt(process_yield);
-	Double_t ebkgSyst = totalSyst[channel][j] * process_yield / 1e2;
-
-	ebkg += (ebkgStat * ebkgStat);
-	ebkg += (ebkgSyst * ebkgSyst);
       }
   }
-
-  ebkg = sqrt(ebkg);
 
 
   // Estimate the cross section
@@ -478,7 +475,6 @@ void MeasureTheCrossSection(UInt_t channel,
   // Relative errors
   //----------------------------------------------------------------------------
   Double_t xsRelativeErrorStat = 1e2 * sqrt(ndata) / (ndata - nbkg);
-  Double_t xsRelativeErrorBkgs = 1e2 * ebkg        / (ndata - nbkg);
   Double_t xsRelativeErrorLumi = _luminosityUncertainty;
   Double_t xsRelativeErrorEff  = totalSyst[channel][WZ];
 
@@ -488,7 +484,6 @@ void MeasureTheCrossSection(UInt_t channel,
   xsErrorLumi [channel] = xsRelativeErrorLumi  * xsValue[channel] / 1e2;  // pb
   xsErrorStat [channel] = xsRelativeErrorStat  * xsValue[channel] / 1e2;  // pb
   xsErrorEff  [channel] = xsRelativeErrorEff   * xsValue[channel] / 1e2;  // pb
-  xsErrorBkgs [channel] = xsRelativeErrorBkgs  * xsValue[channel] / 1e2;  // pb
 
 
   Double_t xsRelativeSystematicSum = 0;
@@ -1285,7 +1280,6 @@ void Inclusive()
   Double_t x     = 0;
   Double_t stat  = 0;
   Double_t eff   = 0;
-  Double_t bkgs  = 0;
   Double_t syst  = 0;
   Double_t total = 0;
 
@@ -1303,7 +1297,6 @@ void Inclusive()
 
       stat  += (1. / xsErrorStat [i]  / xsErrorStat [i]);
       eff   += (1. / xsErrorEff  [i]  / xsErrorEff  [i]);
-      bkgs  += (1. / xsErrorBkgs [i]  / xsErrorBkgs [i]);
       syst  += (1. / xsErrorSyst [i]  / xsErrorSyst [i]);
       total += (1. / xsErrorTotal     / xsErrorTotal);
     }
@@ -1313,7 +1306,6 @@ void Inclusive()
   xsErrorLumi [nChannel] = _luminosityUncertainty * xsValue[nChannel] / 1e2;
   xsErrorStat [nChannel] = 1. / sqrt(stat);
   xsErrorEff  [nChannel] = 1. / sqrt(eff);
-  xsErrorBkgs [nChannel] = 1. / sqrt(bkgs);
   xsErrorSyst [nChannel] = 1. / sqrt(syst);
 
 
@@ -1356,8 +1348,8 @@ void RelativeSystematics(UInt_t channel, UInt_t cut)
       if (syst == fakesSyst) {systematicError[channel][Fakes][syst] = 36.0; continue;}
       if (syst == qcdSyst)   {systematicError[channel][WZ]   [syst] =  1.6; continue;}
       if (syst == pdfSyst)   {systematicError[channel][WZ]   [syst] =  0.7; continue;}
-      if (syst == zzSyst)    {systematicError[channel][ZZ]   [syst] = 12.0; continue;}
-      if (syst == zgSyst)    {systematicError[channel][ZG]   [syst] = 20.0; continue;}
+      if (syst == zzSyst)    {systematicError[channel][ZZ]   [syst] = 15.0; continue;}
+      if (syst == zgSyst)    {systematicError[channel][ZG]   [syst] = 15.0; continue;}
 
       for (UInt_t i=0; i<vprocess.size(); i++)
 	{
@@ -1439,53 +1431,6 @@ void RelativeSystematics(UInt_t channel, UInt_t cut)
       
       totalSyst[channel][process] = sqrt(totalSyst[channel][process]);
     }
-
-
-  // Print
-  //----------------------------------------------------------------------------
-  if (_verbosity < 2) return;
-
-  printf("\n%10s ", " ");
-
-  for (UInt_t i=0; i<vprocess.size(); i++)
-    {
-      UInt_t process = vprocess.at(i);
-
-      if (process == Data) continue;
-
-      printf(" %16s ", sProcess[process].Data());
-    }
-  
-  printf("\n");
-  
-  for (UInt_t syst=0; syst<nSystematic; syst++) {
-    
-    printf("%10s ", sSystematic[syst].Data());
-    
-    for (UInt_t i=0; i<vprocess.size(); i++)
-      {
-	UInt_t process = vprocess.at(i);
-
-	if (process == Data) continue;
-
-	printf(" %16.1f ", systematicError[channel][process][syst]);
-      }
-    
-    printf("\n");
-  }
-
-  printf("%10s ", "total");
-  
-  for (UInt_t i=0; i<vprocess.size(); i++)
-    {
-      UInt_t process = vprocess.at(i);
-
-      if (process == Data) continue;
-
-      printf(" %16.1f ", totalSyst[channel][process]);
-    }
-      
-  printf("\n\n");
 }
 
 
@@ -1498,4 +1443,117 @@ Double_t RelativeDifference(Double_t x0, Double_t x1)
   if (x1 < 1) return 0;
 
   return 1e2 * fabs(x1 - x0) / x0;
+}
+
+
+//------------------------------------------------------------------------------
+// BlueMethod
+//------------------------------------------------------------------------------
+void BlueMethod(UInt_t cut)
+{
+  Double_t commonSystMatrix[nChannel][nChannel];
+
+  for (UInt_t i=0; i<nChannel; i++) {
+    for (UInt_t j=0; j<nChannel; j++) {
+
+      commonSystMatrix[i][j] =
+    
+	//	(xsRelativeSystematic[i][fakesSyst]   [cut] * xsRelativeSystematic[j][fakesSyst]   [cut]) +
+	(xsRelativeSystematic[i][qcdSyst]     [cut] * xsRelativeSystematic[j][qcdSyst]     [cut]) +
+	(xsRelativeSystematic[i][pdfSyst]     [cut] * xsRelativeSystematic[j][pdfSyst]     [cut]) +
+	(xsRelativeSystematic[i][metSyst]     [cut] * xsRelativeSystematic[j][metSyst]     [cut]) +
+	(xsRelativeSystematic[i][triggerSyst] [cut] * xsRelativeSystematic[j][triggerSyst] [cut]) +
+	(xsRelativeSystematic[i][muonSyst]    [cut] * xsRelativeSystematic[j][muonSyst]    [cut]) +
+	(xsRelativeSystematic[i][electronSyst][cut] * xsRelativeSystematic[j][electronSyst][cut]) +
+	(xsRelativeSystematic[i][pileupSyst]  [cut] * xsRelativeSystematic[j][pileupSyst]  [cut]) +
+	(xsRelativeSystematic[i][zzSyst]      [cut] * xsRelativeSystematic[j][zzSyst]      [cut]) +
+	(xsRelativeSystematic[i][zgSyst]      [cut] * xsRelativeSystematic[j][zgSyst]      [cut]) +
+	(xsRelativeSystematic[i][nSystematic] [cut] * xsRelativeSystematic[j][nSystematic] [cut]);
+      
+      commonSystMatrix[i][j] /= 1e4;
+    }
+  }
+
+
+  // 0(mmm-mmm) 4(mmm-eee)  8(mmm-mme) 12(mmm-eem)
+  // 1(mmm-eee) 5(eee-eee)  9(eee-mme) 13(eee-eem)
+  // 2(mmm-mme) 6(eee-mme) 10(mme-mme) 14(mme-eem)
+  // 3(mmm-eem) 7(eee-eem) 11(mme-eem) 15(eem-eem)
+
+  Double_t elm[16];
+
+  for (UInt_t i=0; i<16; i++) elm[i] = 0;
+
+  elm[ 0] = pow(xsErrorSyst[0],2) + pow(xsErrorStat[0],2);
+  elm[ 5] = pow(xsErrorSyst[1],2) + pow(xsErrorStat[1],2);
+  elm[10] = pow(xsErrorSyst[2],2) + pow(xsErrorStat[2],2);
+  elm[15] = pow(xsErrorSyst[3],2) + pow(xsErrorStat[3],2);
+
+  elm[ 4] = elm[ 1] = xsValue[MMM] * xsValue[EEE] * commonSystMatrix[MMM][EEE];
+  elm[ 8] = elm[ 2] = xsValue[MMM] * xsValue[MME] * commonSystMatrix[MMM][MME];
+  elm[12] = elm[ 3] = xsValue[MMM] * xsValue[EEM] * commonSystMatrix[MMM][EEM];
+  elm[ 9] = elm[ 6] = xsValue[EEE] * xsValue[MME] * commonSystMatrix[EEE][MME];
+  elm[13] = elm[ 7] = xsValue[EEE] * xsValue[EEM] * commonSystMatrix[EEE][EEM];
+  elm[14] = elm[11] = xsValue[MME] * xsValue[EEM] * commonSystMatrix[MME][EEM];
+
+
+  TMatrixD errorMatrix(nChannel, nChannel, elm);
+
+  TMatrixD errorMatrixCopy(errorMatrix);
+
+  errorMatrix.Invert();
+
+
+  // Get norm and alpha factors for each channel
+  //----------------------------------------------------------------------------
+  Double_t *mRef = errorMatrix.GetMatrixArray();
+
+  Double_t norm = 0.;
+
+  Double_t alpha[nChannel] = {0., 0., 0., 0.};
+
+  for (UInt_t i=0; i<16; i++) norm += mRef[i];
+
+  for (UInt_t i=0; i<nChannel;i++) {
+    for (UInt_t j=0; j<nChannel;j++) {
+      alpha[i] += mRef[i*4+j];
+    }
+    alpha[i] /= norm;
+  }
+
+  xsValue[nChannel] =
+    alpha[0] * xsValue[0] +
+    alpha[1] * xsValue[1] +
+    alpha[2] * xsValue[2] +
+    alpha[3] * xsValue[3];
+
+  Double_t combined_error = 0.;
+
+  Double_t *copyRef = errorMatrixCopy.GetMatrixArray();
+
+  for (UInt_t i=0;i<nChannel;i++) {
+    for (UInt_t j=0;j<nChannel;j++) {
+
+      combined_error += alpha[i] * alpha[j] * copyRef[i*4+j];
+    }
+  }
+
+  Double_t stat_err_tot2 =
+    pow(alpha[0] * xsErrorStat[0],2) +
+    pow(alpha[1] * xsErrorStat[1],2) +
+    pow(alpha[2] * xsErrorStat[2],2) +
+    pow(alpha[3] * xsErrorStat[3],2);
+  
+  xsErrorStat[nChannel] = sqrt(stat_err_tot2);
+  xsErrorSyst[nChannel] = sqrt (combined_error - stat_err_tot2);
+
+  combined_error = sqrt(combined_error);
+ 
+  xsErrorLumi[nChannel] = _luminosityUncertainty * xsValue[nChannel] / 1e2;
+
+  if (cut == MET30 && _wcharge == WInclusive)
+    {
+      for (UInt_t i=0; i<nChannel; i++)
+	printf(" alpha(%s) = %.2f\n", sChannel[i].Data(), alpha[i]);
+    }
 }
