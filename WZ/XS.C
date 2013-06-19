@@ -16,9 +16,6 @@
 //  xs = 13.94 +  8.09 = 22.03 pb (+1.1 = +5.3%)  // Scale /2 ( 42.90 GeV) with 81 < mZ < 101 GeV
 //
 //------------------------------------------------------------------------------
-
-
-//------------------------------------------------------------------------------
 //
 //  MCFM 6.3
 //
@@ -102,7 +99,6 @@ TString pdfChannel[nChannel+1] = {
 const UInt_t nCut = 4;
 
 enum {
-  //  Exactly3Leptons,
   Exactly3LeptonsM3L,
   HasZ,
   MET30,
@@ -148,7 +144,7 @@ const TString sCharge[nCharge] = {
 
 // Systematics
 //------------------------------------------------------------------------------
-const UInt_t nSystematic = 8;
+const UInt_t nSystematic = 10;
 
 enum {
   fakesSyst,
@@ -158,7 +154,9 @@ enum {
   triggerSyst,
   muonSyst,
   electronSyst,
-  pileupSyst
+  pileupSyst,
+  zzSyst,
+  zgSyst
 };
 
 TString sSystematic[nSystematic] = {
@@ -169,12 +167,16 @@ TString sSystematic[nSystematic] = {
   "trigger",
   "muon",
   "electron",
-  "pileup"
+  "pileup",
+  "zz",
+  "zg"
 };
 
 Double_t totalSyst[nChannel][nProcess];
 
 Double_t systematicError[nChannel][nProcess][nSystematic];
+
+Double_t xsRelativeSystematic[nChannel][nSystematic+1][nCut];
 
 
 enum {linY, logY};
@@ -208,8 +210,6 @@ Double_t        xsErrorLumi [nChannel+1];
 Double_t        xsErrorStat [nChannel+1];
 Double_t        xsErrorEff  [nChannel+1];
 Double_t        xsErrorBkgs [nChannel+1];
-Double_t        xsErrorFakes[nChannel+1];
-Double_t        xsErrorOther[nChannel+1];
 Double_t        xsErrorSyst [nChannel+1];
 
 
@@ -220,6 +220,10 @@ void     SetParameters            (UInt_t        cut,
 				   UInt_t        wcharge);
 
 Int_t    ReadInputFiles           ();
+
+Double_t CrossSectionValue        (UInt_t        channel,
+				   UInt_t        cut,
+				   Int_t         syst = -1);
 
 void     MeasureTheCrossSection   (UInt_t        channel,
 				   UInt_t        cut);
@@ -264,9 +268,10 @@ Double_t RelativeDifference       (Double_t      x0,
 //------------------------------------------------------------------------------
 // XS
 //------------------------------------------------------------------------------
-void XS(UInt_t cut     = ClosureTest,
-	UInt_t mode    = MCmode,
-	UInt_t wcharge = WInclusive)
+void XS(UInt_t cut     = MET30,
+	UInt_t mode    = PPFmode,
+	UInt_t wcharge = WInclusive,
+	Bool_t draw    = true)
 {
   gROOT->SetBatch();
 
@@ -278,50 +283,156 @@ void XS(UInt_t cut     = ClosureTest,
 
     RelativeSystematics(channel, cut);
 
+    for (UInt_t syst=0; syst<nSystematic; syst++)
+      {
+	Double_t y0 = CrossSectionValue(channel, cut);
+	Double_t y1 = CrossSectionValue(channel, cut, syst); 
+
+	xsRelativeSystematic[channel][syst][cut] = 1e2 * fabs(y1 - y0) / y0;
+      }
+
     MeasureTheCrossSection(channel, cut);
 
     PrintYields(channel);
 
-    DrawHistogram("hSumCharges",   channel, cut, "q_{1} + q_{2} + q_{3}");
-//    DrawHistogram("hMET",          channel, cut, "E_{T}^{miss}",                           5, 0, "GeV",  linY);
-//    DrawHistogram("hInvMass2Lep",  channel, cut, "m_{#font[12]{ll}}",                     -1, 0, "GeV",  linY, 70, 112);
-//    DrawHistogram("hInvMass3Lep",  channel, cut, "m_{#font[12]{3l}}",                      5, 0, "GeV",  linY, 60, 350);
-//    DrawHistogram("hPtLepton1",    channel, cut, "p_{T}^{first lepton}",                   5, 0, "GeV",  linY);
-//    DrawHistogram("hPtLepton2",    channel, cut, "p_{T}^{second lepton}",                  5, 0, "GeV",  linY);
-//    DrawHistogram("hPtLepton3",    channel, cut, "p_{T}^{third lepton}",                   5, 0, "GeV",  linY);
-//    DrawHistogram("hPtLeadingJet", channel, cut, "p_{T}^{leading jet}",                    5, 0, "GeV",  linY);
-//    DrawHistogram("hDPhiZLeptons", channel, cut, "#Delta#phi_{#font[12]{ll}}",            10, 1, "^{o}", linY);
-//    DrawHistogram("hPtZLepton1",   channel, cut, "p_{T}^{Z leading lepton}",               5, 0, "GeV",  linY);
-//    DrawHistogram("hPtZLepton2",   channel, cut, "p_{T}^{Z trailing lepton}",              5, 0, "GeV",  linY);
-//    DrawHistogram("hPtWLepton",    channel, cut, "p_{T}^{W lepton}",                       5, 0, "GeV",  linY);
-//    DrawHistogram("hPtZ",          channel, cut, "p_{T}^{Z}",                             10, 0, "GeV",  linY);
-//    DrawHistogram("hDRWZLepton1",  channel, cut, "#DeltaR(W lepton, Z leading lepton)",    5, 1, "NULL", linY);
-//    DrawHistogram("hDRWZLepton2",  channel, cut, "#DeltaR(W lepton, Z trailing lepton)",   5, 1, "NULL", linY);
-//    DrawHistogram("hMtW",          channel, cut, "m_{T}^{W}",                              5, 0, "GeV",  linY);
-//    DrawHistogram("hNJet30",       channel, cut, "number of jets (p_{T}^{jet} > 30 GeV)", -1, 0, "NULL", linY, 0, 4);
+    if (draw)
+      {
+	DrawHistogram("hSumCharges",   channel, cut, "q_{1} + q_{2} + q_{3}");
+	DrawHistogram("hMET",          channel, cut, "E_{T}^{miss}",                           5, 0, "GeV",  linY);
+	DrawHistogram("hInvMass2Lep",  channel, cut, "m_{#font[12]{ll}}",                     -1, 0, "GeV",  linY, 70, 112);
+	DrawHistogram("hInvMass3Lep",  channel, cut, "m_{#font[12]{3l}}",                      5, 0, "GeV",  linY, 60, 350);
+	DrawHistogram("hPtLepton1",    channel, cut, "p_{T}^{first lepton}",                   5, 0, "GeV",  linY);
+	DrawHistogram("hPtLepton2",    channel, cut, "p_{T}^{second lepton}",                  5, 0, "GeV",  linY);
+	DrawHistogram("hPtLepton3",    channel, cut, "p_{T}^{third lepton}",                   5, 0, "GeV",  linY);
+	DrawHistogram("hPtLeadingJet", channel, cut, "p_{T}^{leading jet}",                    5, 0, "GeV",  linY);
+	DrawHistogram("hDPhiZLeptons", channel, cut, "#Delta#phi_{#font[12]{ll}}",            10, 1, "^{o}", linY);
+	DrawHistogram("hPtZLepton1",   channel, cut, "p_{T}^{Z leading lepton}",               5, 0, "GeV",  linY);
+	DrawHistogram("hPtZLepton2",   channel, cut, "p_{T}^{Z trailing lepton}",              5, 0, "GeV",  linY);
+	DrawHistogram("hPtWLepton",    channel, cut, "p_{T}^{W lepton}",                       5, 0, "GeV",  linY);
+	DrawHistogram("hPtZ",          channel, cut, "p_{T}^{Z}",                             10, 0, "GeV",  linY);
+	DrawHistogram("hDRWZLepton1",  channel, cut, "#DeltaR(W lepton, Z leading lepton)",    5, 1, "NULL", linY);
+	DrawHistogram("hDRWZLepton2",  channel, cut, "#DeltaR(W lepton, Z trailing lepton)",   5, 1, "NULL", linY);
+	DrawHistogram("hMtW",          channel, cut, "m_{T}^{W}",                              5, 0, "GeV",  linY);
+	DrawHistogram("hNJet30",       channel, cut, "number of jets (p_{T}^{jet} > 30 GeV)", -1, 0, "NULL", linY, 0, 4);
+      }
   }
 
-//  Inclusive();
-//  
-//  PrintSystematics(cut);
-//
-//  DrawCrossSections(cut);
-//
-//  PrintCrossSections(cut);
+  Inclusive();
+  
+  PrintSystematics(cut);
+
+  if (draw) DrawCrossSections(cut);
+
+  PrintCrossSections(cut);
+}
+
+
+//------------------------------------------------------------------------------
+// CrossSectionValue
+//------------------------------------------------------------------------------
+Double_t CrossSectionValue(UInt_t channel,
+			   UInt_t cut,
+			   Int_t  syst)
+{
+  Double_t ndata = 0;
+  Double_t nbkg  = 0;
+  Double_t ebkg  = 0;
+  Double_t nWZ   = 0;
+
+  TString suffix = "_" + sChannel[channel] + "_" + sCut[cut] + "_" + sCharge[_wcharge] + "_LLL";
+
+  for (UInt_t i=0; i<vprocess.size(); i++) {
+
+    UInt_t j = vprocess.at(i);
+
+    TString prefix = (j == WZ) ? "hCounterEff" : "hCounter";
+
+    Double_t process_yield = Yield((TH1D*)input[j]->Get(prefix + suffix));
+
+    Double_t eStat = sqrt(process_yield);
+
+    if (j != Data && j != WZ) ebkg += (eStat * eStat);
+
+    if (j == Data)
+      {
+	ndata = process_yield;
+      }
+    else if (j == Fakes)
+      {
+	if (syst == fakesSyst) process_yield *= (1. + 0.36);
+
+	nbkg += process_yield;
+      }
+    else
+      {
+	if (syst == muonSyst || syst == electronSyst || syst == metSyst)
+	  {
+	    TFile* fUp   = new TFile(_datapath + "/systematics/" + sSystematic[syst] + "Up/"   + sProcess[j] + ".root");
+	    TFile* fDown = new TFile(_datapath + "/systematics/" + sSystematic[syst] + "Down/" + sProcess[j] + ".root");
+	    
+	    Double_t yUp   = Yield((TH1D*)fUp  ->Get(prefix + suffix));
+	    Double_t yDown = Yield((TH1D*)fDown->Get(prefix + suffix));
+	    
+	    Double_t systUp   = RelativeDifference(process_yield, yUp);
+	    Double_t systDown = RelativeDifference(process_yield, yDown);
+	    
+	    process_yield = (systUp > systDown) ? yUp : yDown;
+	    
+	    fUp  ->Close();
+	    fDown->Close();
+	  }
+	else if (syst == pileupSyst)
+	  {
+	    TFile* f1 = new TFile(_datapath + "/systematics/" + sSystematic[syst] + "/" + sProcess[j] + ".root");
+	    
+	    process_yield = Yield((TH1D*)f1->Get(prefix + suffix));
+	    
+	    f1->Close();
+	  }
+	else if (syst == triggerSyst)
+	  {
+	    process_yield *= (1. + sqrt(3.) / 1e2);
+	  }
+
+	if (j == WZ)
+	  {
+	    nWZ = process_yield;
+
+	    if (syst == qcdSyst) nWZ *= (1. + 0.016);
+	    if (syst == pdfSyst) nWZ *= (1. + 0.007);
+	  }
+	else
+	  {
+	    if (syst == zzSyst && j == ZZ) process_yield *= (1. + 0.12);
+	    if (syst == zgSyst && j == ZG) process_yield *= (1. + 0.20);
+	    
+	    nbkg += process_yield;
+	  }
+      }
+  }
+
+  wzEffValue[channel] = nWZ / _ngenWZ;
+
+  ebkg = sqrt(ebkg);
+
+  xsRelativeSystematic[channel][nSystematic][cut] = 1e2 * ebkg / (ndata - nbkg);  // DIRTY
+
+  Double_t theXS = (ndata - nbkg) / (_luminosity * (nWZ / _ngenWZ) * WZ23lnu);
+
+  return theXS;
 }
 
 
 //------------------------------------------------------------------------------
 // MeasureTheCrossSection
 //------------------------------------------------------------------------------
-void MeasureTheCrossSection(UInt_t channel, UInt_t cut)
+void MeasureTheCrossSection(UInt_t channel,
+			    UInt_t cut)
 {
   Double_t ndata   = 0;
   Double_t nsignal = 0;
   Double_t nbkg    = 0;
   Double_t ebkg    = 0;
-  Double_t efakes  = 0;
-  Double_t eother  = 0;
 
   TString suffix = "_" + sChannel[channel] + "_" + sCut[cut] + "_" + sCharge[_wcharge] + "_LLL";
 
@@ -343,22 +454,6 @@ void MeasureTheCrossSection(UInt_t channel, UInt_t cut)
       }
     else
       {
-	if (j == Fakes)
-	  {
-	    Double_t eStat = sqrt(process_yield);
-	    Double_t eSyst = totalSyst[channel][j] * process_yield / 1e2;
-
-	    efakes = (eStat * eStat) + (eSyst * eSyst);
-	  }
-	else
-	  {
-	    Double_t eStat = sqrt(process_yield);
-	    Double_t eSyst = totalSyst[channel][j] * process_yield / 1e2;
-
-	    eother += (eStat * eStat);
-	    eother += (eSyst * eSyst);
-	  }
-
 	nbkg += process_yield;
 
 	Double_t ebkgStat = sqrt(process_yield);
@@ -369,9 +464,7 @@ void MeasureTheCrossSection(UInt_t channel, UInt_t cut)
       }
   }
 
-  ebkg   = sqrt(ebkg);
-  efakes = sqrt(efakes);
-  eother = sqrt(eother);
+  ebkg = sqrt(ebkg);
 
 
   // Estimate the cross section
@@ -384,17 +477,10 @@ void MeasureTheCrossSection(UInt_t channel, UInt_t cut)
 
   // Relative errors
   //----------------------------------------------------------------------------
-  Double_t xsRelativeErrorStat  = 1e2 * sqrt(ndata) / (ndata - nbkg);
-  Double_t xsRelativeErrorBkgs  = 1e2 * ebkg        / (ndata - nbkg);
-  Double_t xsRelativeErrorFakes = 1e2 * efakes      / (ndata - nbkg);
-  Double_t xsRelativeErrorOther = 1e2 * eother      / (ndata - nbkg);
-  Double_t xsRelativeErrorLumi  = _luminosityUncertainty;
-  Double_t xsRelativeErrorEff   = totalSyst[channel][WZ];
-  Double_t xsRelativeErrorSyst  = 0;
-
-  xsRelativeErrorSyst += (xsRelativeErrorBkgs * xsRelativeErrorBkgs);
-  xsRelativeErrorSyst += (xsRelativeErrorEff * xsRelativeErrorEff);
-  xsRelativeErrorSyst = sqrt(xsRelativeErrorSyst);
+  Double_t xsRelativeErrorStat = 1e2 * sqrt(ndata) / (ndata - nbkg);
+  Double_t xsRelativeErrorBkgs = 1e2 * ebkg        / (ndata - nbkg);
+  Double_t xsRelativeErrorLumi = _luminosityUncertainty;
+  Double_t xsRelativeErrorEff  = totalSyst[channel][WZ];
 
 
   // Absolute errors
@@ -403,9 +489,16 @@ void MeasureTheCrossSection(UInt_t channel, UInt_t cut)
   xsErrorStat [channel] = xsRelativeErrorStat  * xsValue[channel] / 1e2;  // pb
   xsErrorEff  [channel] = xsRelativeErrorEff   * xsValue[channel] / 1e2;  // pb
   xsErrorBkgs [channel] = xsRelativeErrorBkgs  * xsValue[channel] / 1e2;  // pb
-  xsErrorFakes[channel] = xsRelativeErrorFakes * xsValue[channel] / 1e2;  // pb
-  xsErrorOther[channel] = xsRelativeErrorOther * xsValue[channel] / 1e2;  // pb
-  xsErrorSyst [channel] = xsRelativeErrorSyst  * xsValue[channel] / 1e2;  // pb
+
+
+  Double_t xsRelativeSystematicSum = 0;
+
+  for (UInt_t k=0; k<=nSystematic; k++)
+    xsRelativeSystematicSum += (xsRelativeSystematic[channel][k][cut] * xsRelativeSystematic[channel][k][cut]);
+
+  xsRelativeSystematicSum = sqrt(xsRelativeSystematicSum);
+
+  xsErrorSyst [channel] = xsRelativeSystematicSum * xsValue[channel] / 1e2;
 
 
   // Print the results
@@ -539,20 +632,20 @@ void PrintSystematics(UInt_t cut)
 
   outputfile.open(filename);
 
-  outputfile << Form(" %-30s", "QCD scale");                     for (UInt_t i=0; i<nChannel; i++) outputfile << Form(" & %.1f", systematicError[i][WZ][qcdSyst]);      outputfile << "\\\\\n";
-  outputfile << Form(" %-30s", "PDFs");                          for (UInt_t i=0; i<nChannel; i++) outputfile << Form(" & %.1f", systematicError[i][WZ][pdfSyst]);      outputfile << "\\\\\n";
-  outputfile << Form(" %-30s", "\\MET");                         for (UInt_t i=0; i<nChannel; i++) outputfile << Form(" & %.1f", systematicError[i][WZ][metSyst]);      outputfile << "\\\\\n";
-  outputfile << Form(" %-30s", "lepton and trigger efficiency"); for (UInt_t i=0; i<nChannel; i++) outputfile << Form(" & %.1f", systematicError[i][WZ][triggerSyst]);  outputfile << "\\\\\n";
-  outputfile << Form(" %-30s", "muon momentum scale");           for (UInt_t i=0; i<nChannel; i++) outputfile << Form(" & %.1f", systematicError[i][WZ][muonSyst]);     outputfile << "\\\\\n";
-  outputfile << Form(" %-30s", "electron energy scale");         for (UInt_t i=0; i<nChannel; i++) outputfile << Form(" & %.1f", systematicError[i][WZ][electronSyst]); outputfile << "\\\\\n";
-  outputfile << Form(" %-30s", "pile-up");                       for (UInt_t i=0; i<nChannel; i++) outputfile << Form(" & %.1f", systematicError[i][WZ][pileupSyst]);   outputfile << "\\\\\n";
-  //  outputfile << Form(" %-30s", "WZ efficiency");                 for (UInt_t i=0; i<nChannel; i++) outputfile << Form(" & %.1f", 1e2 * xsErrorEff  [i] / xsValue[i]);   outputfile << "\\\\\n"; outputfile << " \\hline\n";
-  //  outputfile << Form(" %-30s", "backgrounds");                   for (UInt_t i=0; i<nChannel; i++) outputfile << Form(" & %.1f", 1e2 * xsErrorBkgs [i] / xsValue[i]);   outputfile << "\\\\\n"; outputfile << " \\hline\n";
-  outputfile << Form(" %-30s", "data-driven");                   for (UInt_t i=0; i<nChannel; i++) outputfile << Form(" & %.1f", 1e2 * xsErrorFakes[i] / xsValue[i]);   outputfile << "\\\\\n";
-  outputfile << Form(" %-30s", "other backgrounds");             for (UInt_t i=0; i<nChannel; i++) outputfile << Form(" & %.1f", 1e2 * xsErrorOther[i] / xsValue[i]);   outputfile << "\\\\\n"; outputfile << " \\hline\n";
-  outputfile << Form(" %-30s", "statistical");                   for (UInt_t i=0; i<nChannel; i++) outputfile << Form(" & %.1f", 1e2 * xsErrorStat [i] / xsValue[i]);   outputfile << "\\\\\n";
-  outputfile << Form(" %-30s", "systematic");                    for (UInt_t i=0; i<nChannel; i++) outputfile << Form(" & %.1f", 1e2 * xsErrorSyst [i] / xsValue[i]);   outputfile << "\\\\\n";
-  outputfile << Form(" %-30s", "luminosity");                    for (UInt_t i=0; i<nChannel; i++) outputfile << Form(" & %.1f", 1e2 * xsErrorLumi [i] / xsValue[i]);   outputfile << "\\\\\n"; outputfile << " \\hline\n";
+  outputfile << Form(" %-30s", "QCD scale");                     for (UInt_t i=0; i<nChannel; i++) outputfile << Form(" & %.1f", xsRelativeSystematic[i][qcdSyst][cut]);      outputfile << "\\\\\n";
+  outputfile << Form(" %-30s", "PDFs");                          for (UInt_t i=0; i<nChannel; i++) outputfile << Form(" & %.1f", xsRelativeSystematic[i][pdfSyst][cut]);      outputfile << "\\\\\n";
+  outputfile << Form(" %-30s", "lepton and trigger efficiency"); for (UInt_t i=0; i<nChannel; i++) outputfile << Form(" & %.1f", xsRelativeSystematic[i][triggerSyst][cut]);  outputfile << "\\\\\n";
+  outputfile << Form(" %-30s", "\\MET");                         for (UInt_t i=0; i<nChannel; i++) outputfile << Form(" & %.1f", xsRelativeSystematic[i][metSyst][cut]);      outputfile << "\\\\\n";
+  outputfile << Form(" %-30s", "muon momentum scale");           for (UInt_t i=0; i<nChannel; i++) outputfile << Form(" & %.1f", xsRelativeSystematic[i][muonSyst][cut]);     outputfile << "\\\\\n";
+  outputfile << Form(" %-30s", "electron energy scale");         for (UInt_t i=0; i<nChannel; i++) outputfile << Form(" & %.1f", xsRelativeSystematic[i][electronSyst][cut]); outputfile << "\\\\\n";
+  outputfile << Form(" %-30s", "pile-up");                       for (UInt_t i=0; i<nChannel; i++) outputfile << Form(" & %.1f", xsRelativeSystematic[i][pileupSyst][cut]);   outputfile << "\\\\\n";
+  outputfile << Form(" %-30s", "ZZ cross section");              for (UInt_t i=0; i<nChannel; i++) outputfile << Form(" & %.1f", xsRelativeSystematic[i][zzSyst][cut]);       outputfile << "\\\\\n";
+  outputfile << Form(" %-30s", "Z$\\gamma$ cross section");      for (UInt_t i=0; i<nChannel; i++) outputfile << Form(" & %.1f", xsRelativeSystematic[i][zgSyst][cut]);       outputfile << "\\\\\n";
+  outputfile << Form(" %-30s", "data-driven");                   for (UInt_t i=0; i<nChannel; i++) outputfile << Form(" & %.1f", xsRelativeSystematic[i][fakesSyst][cut]);    outputfile << "\\\\\n";
+  outputfile << Form(" %-30s", "backgrounds");                   for (UInt_t i=0; i<nChannel; i++) outputfile << Form(" & %.1f", xsRelativeSystematic[i][nSystematic][cut]);  outputfile << "\\\\\n"; outputfile << " \\hline\n";
+  outputfile << Form(" %-30s", "statistical");                   for (UInt_t i=0; i<nChannel; i++) outputfile << Form(" & %.1f", 1e2 * xsErrorStat [i] / xsValue[i]);         outputfile << "\\\\\n";
+  outputfile << Form(" %-30s", "systematic");                    for (UInt_t i=0; i<nChannel; i++) outputfile << Form(" & %.1f", 1e2 * xsErrorSyst [i] / xsValue[i]);         outputfile << "\\\\\n";
+  outputfile << Form(" %-30s", "luminosity");                    for (UInt_t i=0; i<nChannel; i++) outputfile << Form(" & %.1f", 1e2 * xsErrorLumi [i] / xsValue[i]);         outputfile << "\\\\\n"; outputfile << " \\hline\n";
 
   outputfile.close();
 }
@@ -752,7 +845,7 @@ void DrawHistogram(TString  hname,
 
   // Fakes checks / systematics
   //----------------------------------------------------------------------------
-  if (hname.Contains("hSumCharges"))
+  if (hname.Contains("hSumCharges") && _verbosity > 2)
     {
       if (_mode == MCmode)
 	{
@@ -840,7 +933,6 @@ void SetParameters(UInt_t cut,
 		   UInt_t mode,
 		   UInt_t wcharge)
 {
-  //  sCut[Exactly3Leptons]    = "Exactly3Leptons";
   sCut[Exactly3LeptonsM3L] = "Exactly3LeptonsM3L";
   sCut[HasZ]               = "HasZ";
   sCut[MET30]              = "MET30";
@@ -1194,8 +1286,6 @@ void Inclusive()
   Double_t stat  = 0;
   Double_t eff   = 0;
   Double_t bkgs  = 0;
-  Double_t fakes = 0;
-  Double_t other = 0;
   Double_t syst  = 0;
   Double_t total = 0;
 
@@ -1214,8 +1304,6 @@ void Inclusive()
       stat  += (1. / xsErrorStat [i]  / xsErrorStat [i]);
       eff   += (1. / xsErrorEff  [i]  / xsErrorEff  [i]);
       bkgs  += (1. / xsErrorBkgs [i]  / xsErrorBkgs [i]);
-      fakes += (1. / xsErrorFakes[i]  / xsErrorFakes[i]);
-      other += (1. / xsErrorOther[i]  / xsErrorOther[i]);
       syst  += (1. / xsErrorSyst [i]  / xsErrorSyst [i]);
       total += (1. / xsErrorTotal     / xsErrorTotal);
     }
@@ -1226,7 +1314,6 @@ void Inclusive()
   xsErrorStat [nChannel] = 1. / sqrt(stat);
   xsErrorEff  [nChannel] = 1. / sqrt(eff);
   xsErrorBkgs [nChannel] = 1. / sqrt(bkgs);
-  xsErrorFakes[nChannel] = 1. / sqrt(fakes);
   xsErrorSyst [nChannel] = 1. / sqrt(syst);
 
 
@@ -1269,6 +1356,8 @@ void RelativeSystematics(UInt_t channel, UInt_t cut)
       if (syst == fakesSyst) {systematicError[channel][Fakes][syst] = 36.0; continue;}
       if (syst == qcdSyst)   {systematicError[channel][WZ]   [syst] =  1.6; continue;}
       if (syst == pdfSyst)   {systematicError[channel][WZ]   [syst] =  0.7; continue;}
+      if (syst == zzSyst)    {systematicError[channel][ZZ]   [syst] = 12.0; continue;}
+      if (syst == zgSyst)    {systematicError[channel][ZG]   [syst] = 20.0; continue;}
 
       for (UInt_t i=0; i<vprocess.size(); i++)
 	{
@@ -1294,7 +1383,7 @@ void RelativeSystematics(UInt_t channel, UInt_t cut)
 	
 	  Double_t y0 = Yield((TH1D*)f0->Get(hname));
 
-	  Double_t y1;
+	  Double_t y1 = y0;
 	  
 	  if (syst == muonSyst || syst == electronSyst || syst == metSyst)
 	    {
@@ -1313,12 +1402,6 @@ void RelativeSystematics(UInt_t channel, UInt_t cut)
 	      fDown->Close();
 	    }
 	  else if (syst == pileupSyst)
-	    {
-	      TString hnamePU = "hCounterPU_" + sChannel[channel] + "_" + sCut[cut] + "_" + sCharge[_wcharge] + "_TTT";
-
-	      y1 = Yield((TH1D*)f0->Get(hnamePU));
-	    }
-	  else
 	    {
 	      TFile* f1 = new TFile(_datapath + "/systematics/" + sSystematic[syst] + suffix);
 

@@ -11,6 +11,7 @@ if [ $# -lt 1 ]; then
     echo "  4 = muonDownSyst"
     echo "  5 = electronUpSyst"
     echo "  6 = electronDownSyst"
+    echo "  7 = pileupSyst"
     echo "  "
     exit -1
 fi

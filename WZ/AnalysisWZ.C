@@ -144,7 +144,8 @@ enum {
   muonUpSyst,
   muonDownSyst,
   electronUpSyst,
-  electronDownSyst
+  electronDownSyst,
+  pileupSyst
 };
 
 
@@ -191,7 +192,6 @@ void           CounterSummary       (TString title);
 TH1F*                         hFakeDifference[nChannel];
 
 TH1F*                         hCounterRaw[nChannel][nCut][nCharge][nComposition];
-TH1F*                         hCounterPU [nChannel][nCut][nCharge][nComposition];
 TH1F*                         hCounterEff[nChannel][nCut][nCharge][nComposition];
 TH1F*                         hCounter   [nChannel][nCut][nCharge][nComposition];
 
@@ -263,6 +263,7 @@ Float_t                       dd_weight;
 Float_t                       mc_lepton_weight;
 Float_t                       mc_trigger_weight;
 Float_t                       mc_total_weight;
+Float_t                       pu_weight;
 Float_t                       xs_weight;
 
 
@@ -346,6 +347,7 @@ void AnalysisWZ(TString sample,
   else if (_systematic == muonDownSyst)     _directory += "/systematics/muonDown";
   else if (_systematic == electronUpSyst)   _directory += "/systematics/electronUp";
   else if (_systematic == electronDownSyst) _directory += "/systematics/electronDown";
+  else if (_systematic == pileupSyst)       _directory += "/systematics/pileup";
 
   gSystem->mkdir(_directory, kTRUE);
 
@@ -378,7 +380,6 @@ void AnalysisWZ(TString sample,
 	for (UInt_t k=0; k<nComposition; k++) {
 
 	  hCounterRaw[i][j][iCharge][k] = new TH1F("hCounterRaw" + suffix + "_" + sComposition[k], "", 3, 0, 3);
-	  hCounterPU [i][j][iCharge][k] = new TH1F("hCounterPU"  + suffix + "_" + sComposition[k], "", 3, 0, 3);
 	  hCounterEff[i][j][iCharge][k] = new TH1F("hCounterEff" + suffix + "_" + sComposition[k], "", 3, 0, 3);
 	  hCounter   [i][j][iCharge][k] = new TH1F("hCounter"    + suffix + "_" + sComposition[k], "", 3, 0, 3);
 	}
@@ -429,7 +430,6 @@ void AnalysisWZ(TString sample,
 
   MuonFR = LoadHistogram("MuFR_Moriond13_jet15_EWKcorr",  "FR_pT_eta_EWKcorr", "MuonFR_Jet15");
   ElecFR = LoadHistogram("EleFR_Moriond13_jet15_EWKcorr", "fakeElH2",          "ElecFR_Jet15");
-  //  ElecFR = LoadHistogram("EleFR_Moriond13_jet35_EWKcorr", "fakeElH2",          "ElecFR_Jet35");
 
   DoubleElLead  = LoadHistogram("triggerEfficiencies", "DoubleElLead",  "DoubleElLead");
   DoubleMuLead  = LoadHistogram("triggerEfficiencies", "DoubleMuLead",  "DoubleMuLead");
@@ -531,6 +531,8 @@ void AnalysisWZ(TString sample,
     // GetEntry
     //--------------------------------------------------------------------------
     tree->GetEntry(ievent);
+
+    pu_weight = (_systematic == pileupSyst) ? 1.0 : puW;
 
     if (!trigger) continue;
 
@@ -841,15 +843,15 @@ void AnalysisWZ(TString sample,
 
     if (fabs(ZLepton1.Eta()) < 1.479 && fabs(ZLepton2.Eta()) < 1.479)
       {
-	hInvMass2LepBB[index]->Fill(invMass2Lep, puW * xs_weight);
+	hInvMass2LepBB[index]->Fill(invMass2Lep, pu_weight * xs_weight);
       }
     else if (fabs(ZLepton1.Eta()) < 1.479 || fabs(ZLepton2.Eta()) < 1.479)
       {
-	hInvMass2LepBE[index]->Fill(invMass2Lep, puW * xs_weight);
+	hInvMass2LepBE[index]->Fill(invMass2Lep, pu_weight * xs_weight);
       }
     else
       {
-	hInvMass2LepEE[index]->Fill(invMass2Lep, puW * xs_weight);
+	hInvMass2LepEE[index]->Fill(invMass2Lep, pu_weight * xs_weight);
       }
 
 
@@ -981,7 +983,7 @@ void AnalysisWZ(TString sample,
 //------------------------------------------------------------------------------
 void FillHistograms(UInt_t iChannel, UInt_t iCut)
 {
-  Float_t hweight  = puW * efficiency_weight * xs_weight * dd_weight;
+  Float_t hweight  = pu_weight * efficiency_weight * xs_weight * dd_weight;
   Float_t deltaPhi = ZLepton1.DeltaPhi(ZLepton2);
   Float_t deltaR1  = WLepton.DeltaR(ZLepton1);
   Float_t deltaR2  = WLepton.DeltaR(ZLepton2);
@@ -995,21 +997,19 @@ void FillHistograms(UInt_t iChannel, UInt_t iCut)
       // Counters
       //------------------------------------------------------------------------
       hCounterRaw[iChannel][iCut][iCharge][nTight]->Fill(1);
-      hCounterPU [iChannel][iCut][iCharge][nTight]->Fill(1,       efficiency_weight * xs_weight * dd_weight);
-      hCounterEff[iChannel][iCut][iCharge][nTight]->Fill(1, puW * efficiency_weight             * dd_weight);
-      hCounter   [iChannel][iCut][iCharge][nTight]->Fill(1, puW * efficiency_weight * xs_weight * dd_weight);
+      hCounterEff[iChannel][iCut][iCharge][nTight]->Fill(1, pu_weight * efficiency_weight             * dd_weight);
+      hCounter   [iChannel][iCut][iCharge][nTight]->Fill(1, pu_weight * efficiency_weight * xs_weight * dd_weight);
 
       hCounterRaw[iChannel][iCut][iCharge][LLL]->Fill(1);
-      hCounterPU [iChannel][iCut][iCharge][LLL]->Fill(1,       efficiency_weight * xs_weight * dd_weight);
-      hCounterEff[iChannel][iCut][iCharge][LLL]->Fill(1, puW * efficiency_weight             * dd_weight);
-      hCounter   [iChannel][iCut][iCharge][LLL]->Fill(1, puW * efficiency_weight * xs_weight * dd_weight);
+      hCounterEff[iChannel][iCut][iCharge][LLL]->Fill(1, pu_weight * efficiency_weight             * dd_weight);
+      hCounter   [iChannel][iCut][iCharge][LLL]->Fill(1, pu_weight * efficiency_weight * xs_weight * dd_weight);
 
 
       // MC weight histograms
       //------------------------------------------------------------------------
-      hLeptonWeight [theChannel][iCut][iCharge]->Fill(mc_lepton_weight,  puW);
-      hTriggerWeight[theChannel][iCut][iCharge]->Fill(mc_trigger_weight, puW);
-      hTotalWeight  [theChannel][iCut][iCharge]->Fill(mc_total_weight,   puW);
+      hLeptonWeight [theChannel][iCut][iCharge]->Fill(mc_lepton_weight,  pu_weight);
+      hTriggerWeight[theChannel][iCut][iCharge]->Fill(mc_trigger_weight, pu_weight);
+      hTotalWeight  [theChannel][iCut][iCharge]->Fill(mc_total_weight,   pu_weight);
 
 
       // Analysis histograms
@@ -1371,8 +1371,7 @@ void CounterSummary(TString title)
 
 	Float_t integral = hCounter[j][i][WInclusive][k]->Integral();
 
-	if      (title.Contains("No")) integral = hCounterRaw[j][i][WInclusive][k]->Integral();
-	else if (title.Contains("PU")) integral = hCounterPU [j][i][WInclusive][k]->Integral();
+	if (title.Contains("No")) integral = hCounterRaw[j][i][WInclusive][k]->Integral();
 
 	txt_output << Form(" %s%10.0f", composition.Data(), integral);
       }

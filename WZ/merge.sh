@@ -9,6 +9,7 @@ results/systematics/muonUp       \
 results/systematics/muonDown     \
 results/systematics/electronUp   \
 results/systematics/electronDown \
+results/systematics/pileup       \
 "
 
 
