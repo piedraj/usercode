@@ -52,14 +52,14 @@
 const Double_t xsWPlusZ  = 13.89;  // pb (MCFM with 71 < mZ < 111 GeV)
 const Double_t xsWMinusZ =  8.06;  // pb (MCFM with 71 < mZ < 111 GeV)
 
-const Double_t W2e     = 0.1075;    // +- 0.0013
-const Double_t W2m     = 0.1057;    // +- 0.0015
-const Double_t W2tau   = 0.1125;    // +- 0.0020
-const Double_t Z2ll    = 0.033658;  // +- 0.000023;
-const Double_t WZ23lnu = 3 * Z2ll * (W2e + W2m + W2tau);
-
 const Double_t ngenWPlusZ  = 906262;  // (71 < mZ < 111 GeV)
 const Double_t ngenWMinusZ = 542805;  // (71 < mZ < 111 GeV)
+
+const Double_t W2e     = 0.1075;
+const Double_t W2m     = 0.1057;
+const Double_t W2tau   = 0.1125;
+const Double_t Z2ll    = 0.033658;
+const Double_t WZ23lnu = 3 * Z2ll * (W2e + W2m + W2tau);
 
 
 // Data members
@@ -104,6 +104,7 @@ const UInt_t nCut = 4;
 enum {
   Exactly3LeptonsM3L,
   HasZ,
+  //  PreMET30,
   MET30,
   ClosureTest
 };
@@ -144,6 +145,18 @@ const TString sCharge[nCharge] = {
   "WMinus"
 };
 
+const Double_t ngenWZ[nCharge] = {
+  ngenWPlusZ+ngenWMinusZ,
+  ngenWPlusZ,
+  ngenWMinusZ
+};  
+
+const Double_t xs_nlo[nCharge] = {
+  xsWPlusZ+xsWMinusZ,
+  xsWPlusZ,
+  xsWMinusZ
+};
+
 
 // Systematics
 //------------------------------------------------------------------------------
@@ -179,8 +192,6 @@ Double_t totalSyst[nChannel][nProcess];
 
 Double_t systematicError[nChannel][nProcess][nSystematic];
 
-Double_t xsRelativeSystematic[nChannel][nSystematic+1][nCut];
-
 
 enum {linY, logY};
 
@@ -191,8 +202,6 @@ enum {MCmode, PPFmode, PPPmode};
 //------------------------------------------------------------------------------
 Double_t        _luminosity;
 Double_t        _luminosityUncertainty;
-Double_t        _xs_nlo;
-Double_t        _ngenWZ;
 Int_t           _verbosity;
 TString         _localpath;
 TString         _datapath;
@@ -201,18 +210,26 @@ UInt_t          _cut;
 UInt_t          _mode;
 UInt_t          _wcharge;
 
-vector<UInt_t>  vprocess;
+vector<UInt_t>   vprocess;
 
 
 // Save the cross section
 //------------------------------------------------------------------------------
-Double_t        wzEffValue  [nChannel+1];
-Double_t        wzEffError  [nChannel+1];
-Double_t        xsValue     [nChannel+1];
-Double_t        xsErrorLumi [nChannel+1];
-Double_t        xsErrorStat [nChannel+1];
-Double_t        xsErrorEff  [nChannel+1];
-Double_t        xsErrorSyst [nChannel+1];
+Double_t         wzEffValue  [nChannel+1];
+Double_t         wzEffError  [nChannel+1];
+Double_t         xsValue     [nChannel+1];
+Double_t         xsErrorLumi [nChannel+1];
+Double_t         xsErrorStat [nChannel+1];
+Double_t         xsErrorSyst [nChannel+1];
+Double_t         xsSystematic[nChannel][nSystematic+1][nCut];
+
+
+// Save the ratio
+//------------------------------------------------------------------------------
+Double_t         ratioValue     [nChannel+1];
+Double_t         ratioErrorStat [nChannel+1];
+Double_t         ratioErrorSyst [nChannel+1];
+Double_t         ratioSystematic[nChannel][nSystematic+1][nCut];
 
 
 // Member functions
@@ -223,11 +240,17 @@ void     SetParameters            (UInt_t        cut,
 
 Int_t    ReadInputFiles           ();
 
-Double_t CrossSectionValue        (UInt_t        channel,
+void     CrossSection             (Double_t&     xsVal,
+				   Double_t&     xsErr,
+				   Double_t&     wzEff,
+				   UInt_t        wcharge,
+				   UInt_t        channel,
 				   UInt_t        cut,
 				   Int_t         syst = -1);
 
-void     MeasureTheCrossSection   (UInt_t        channel,
+void     CrossSectionRatio        (UInt_t        wchargeNum,
+				   UInt_t        wchargeDen,
+				   UInt_t        channel,
 				   UInt_t        cut);
 
 void     PrintYields              (UInt_t        channel);
@@ -254,9 +277,8 @@ TString  GuessLocalBasePath       ();
 
 void     MakeOutputDirectory      (TString       format);
 
-void     Inclusive                ();
-
-void     BlueMethod               (UInt_t        cut);
+void     BlueMethod               (UInt_t        cut,
+				   Bool_t        xsratio = false);
 
 void     RelativeSystematics      (UInt_t        channel,
 				   UInt_t        cut);
@@ -265,8 +287,20 @@ void     DrawCrossSections        (UInt_t        cut);
 
 void     PrintCrossSections       (UInt_t        cut);
 
+void     PrintRatios              (UInt_t        cut,
+				   UInt_t        wchargeNum,
+				   UInt_t        wchargeDen);
+
 Double_t RelativeDifference       (Double_t      x0,
 				   Double_t      x1);
+
+Double_t Ratio                    (Double_t      a,
+				   Double_t      b);
+
+Double_t RatioError               (Double_t      a,
+				   Double_t      b,
+				   Double_t      aErr,
+				   Double_t      bErr);
 
 
 //------------------------------------------------------------------------------
@@ -277,26 +311,60 @@ void XS(UInt_t cut     = MET30,
 	UInt_t wcharge = WInclusive,
 	Bool_t draw    = true)
 {
-  gROOT->SetBatch();
-
   SetParameters(cut, mode, wcharge);
 
   if (ReadInputFiles() < 0) return;
+
+  wzEffValue[nChannel] = 0.0;
+  wzEffError[nChannel] = 0.0;
 
   for (UInt_t channel=0; channel<nChannel; channel++) {
 
     RelativeSystematics(channel, cut);
 
+
+    // Measure the cross section
+    //--------------------------------------------------------------------------
+    CrossSection(xsValue[channel],
+		 xsErrorStat[channel],
+		 wzEffValue[channel],
+		 _wcharge,
+		 channel,
+		 cut);
+
     for (UInt_t syst=0; syst<nSystematic; syst++)
       {
-	Double_t y0 = CrossSectionValue(channel, cut);
-	Double_t y1 = CrossSectionValue(channel, cut, syst); 
+	Double_t xsVal, xsErr, wzEff;
 
-	xsRelativeSystematic[channel][syst][cut] = 1e2 * fabs(y1 - y0) / y0;
+	CrossSection(xsVal,
+		     xsErr,
+		     wzEff,
+		     _wcharge,
+		     channel,
+		     cut,
+		     syst); 
+
+	xsSystematic[channel][syst][cut] = fabs(xsVal - xsValue[channel]);
       }
 
-    MeasureTheCrossSection(channel, cut);
+    xsErrorSyst[channel] = 0;
 
+    for (UInt_t k=0; k<=nSystematic; k++)
+      xsErrorSyst[channel] += (xsSystematic[channel][k][cut] * xsSystematic[channel][k][cut]);
+
+    xsErrorSyst[channel] = sqrt(xsErrorSyst[channel]);
+
+    xsErrorLumi[channel] = _luminosityUncertainty * xsValue[channel] / 1e2;
+
+    wzEffError[channel] = totalSyst[channel][WZ] * wzEffValue[channel] / 1e2;
+
+    wzEffValue[nChannel] += wzEffValue[channel];
+
+    wzEffError[nChannel] += (wzEffError[channel] * wzEffError[channel]);
+
+    
+    // Print table with yields and draw histograms
+    //--------------------------------------------------------------------------
     PrintYields(channel);
 
     if (draw)
@@ -321,8 +389,11 @@ void XS(UInt_t cut     = MET30,
       }
   }
 
-  Inclusive();
+  wzEffError[nChannel] = sqrt(wzEffError[nChannel]);
 
+
+  // Final numbers
+  //----------------------------------------------------------------------------
   BlueMethod(cut);
   
   PrintSystematics(cut);
@@ -330,22 +401,52 @@ void XS(UInt_t cut     = MET30,
   if (draw) DrawCrossSections(cut);
 
   PrintCrossSections(cut);
+
+
+  // Cross section ratio
+  //----------------------------------------------------------------------------
+  if (wcharge == WInclusive) {
+    
+
+    // W- / W+
+    //--------------------------------------------------------------------------
+    for (UInt_t channel=0; channel<nChannel; channel++)
+      CrossSectionRatio(WMinus, WPlus, channel, cut);
+
+    BlueMethod(cut, true);
+
+    PrintRatios(cut, WMinus, WPlus);
+
+
+    // W+ / W-
+    //--------------------------------------------------------------------------
+    for (UInt_t channel=0; channel<nChannel; channel++)
+      CrossSectionRatio(WPlus, WMinus, channel, cut);
+
+    BlueMethod(cut, true);
+
+    PrintRatios(cut, WPlus, WMinus);
+  }
 }
 
 
 //------------------------------------------------------------------------------
-// CrossSectionValue
+// CrossSection
 //------------------------------------------------------------------------------
-Double_t CrossSectionValue(UInt_t channel,
-			   UInt_t cut,
-			   Int_t  syst)
+void CrossSection(Double_t& xsVal,
+		  Double_t& xsErr,
+		  Double_t& wzEff,
+		  UInt_t    wcharge,
+		  UInt_t    channel,
+		  UInt_t    cut,
+		  Int_t     syst)
 {
   Double_t ndata = 0;
   Double_t nbkg  = 0;
   Double_t ebkg  = 0;
   Double_t nWZ   = 0;
 
-  TString suffix = "_" + sChannel[channel] + "_" + sCut[cut] + "_" + sCharge[_wcharge] + "_LLL";
+  TString suffix = "_" + sChannel[channel] + "_" + sCut[cut] + "_" + sCharge[wcharge] + "_LLL";
 
   for (UInt_t i=0; i<vprocess.size(); i++) {
 
@@ -417,103 +518,61 @@ Double_t CrossSectionValue(UInt_t channel,
       }
   }
 
-  wzEffValue[channel] = nWZ / _ngenWZ;
+  wzEff = nWZ / ngenWZ[wcharge];
 
-  ebkg = sqrt(ebkg);
+  xsVal = (ndata - nbkg) / (_luminosity * wzEff * WZ23lnu);
 
-  xsRelativeSystematic[channel][nSystematic][cut] = 1e2 * ebkg / (ndata - nbkg);  // DIRTY
+  xsErr = sqrt(ndata) / (_luminosity * wzEff * WZ23lnu);
 
-  Double_t theXS = (ndata - nbkg) / (_luminosity * (nWZ / _ngenWZ) * WZ23lnu);
 
-  return theXS;
+  if (wcharge == WInclusive)
+    {
+      ebkg = sqrt(ebkg);
+      
+      xsSystematic[channel][nSystematic][cut] = ebkg / (_luminosity * wzEff * WZ23lnu);  // DIRTY
+    }
 }
 
 
 //------------------------------------------------------------------------------
-// MeasureTheCrossSection
+// CrossSectionRatio
 //------------------------------------------------------------------------------
-void MeasureTheCrossSection(UInt_t channel,
-			    UInt_t cut)
+void CrossSectionRatio(UInt_t wchargeNum,
+		       UInt_t wchargeDen,
+		       UInt_t channel,
+		       UInt_t cut)
 {
-  Double_t ndata   = 0;
-  Double_t nsignal = 0;
-  Double_t nbkg    = 0;
+  Double_t xsValNum, xsErrNum, wzEffNum;
+  Double_t xsValDen, xsErrDen, wzEffDen;
 
-  TString suffix = "_" + sChannel[channel] + "_" + sCut[cut] + "_" + sCharge[_wcharge] + "_LLL";
+  CrossSection(xsValNum, xsErrNum, wzEffNum, wchargeNum, channel, cut);
+  CrossSection(xsValDen, xsErrDen, wzEffDen, wchargeDen, channel, cut);
 
-  Double_t nWZ = Yield((TH1D*)input[WZ]->Get("hCounterEff" + suffix));
+  ratioValue    [channel] = Ratio     (xsValNum, xsValDen);
+  ratioErrorStat[channel] = RatioError(xsValNum, xsValDen, xsErrNum, xsErrDen);
+  ratioErrorSyst[channel] = 0.0;
 
-  for (UInt_t i=0; i<vprocess.size(); i++) {
-
-    UInt_t j = vprocess.at(i);
-
-    Double_t process_yield = Yield((TH1D*)input[j]->Get("hCounter" + suffix));
-
-    if (j == Data)
-      {
-	ndata = process_yield;
-      }
-    else if (j == WZ)
-      {
-	nsignal = process_yield;
-      }
-    else
-      {
-	nbkg += process_yield;
-      }
-  }
-
-
-  // Estimate the cross section
-  //----------------------------------------------------------------------------
-  wzEffValue[channel] = nWZ / _ngenWZ;
-  wzEffError[channel] = totalSyst[channel][WZ] * wzEffValue[channel] / 1e2;
-
-  xsValue[channel] = (ndata - nbkg) / (_luminosity * wzEffValue[channel] * WZ23lnu);
-
-
-  // Relative errors
-  //----------------------------------------------------------------------------
-  Double_t xsRelativeErrorStat = 1e2 * sqrt(ndata) / (ndata - nbkg);
-  Double_t xsRelativeErrorLumi = _luminosityUncertainty;
-  Double_t xsRelativeErrorEff  = totalSyst[channel][WZ];
-
-
-  // Absolute errors
-  //----------------------------------------------------------------------------
-  xsErrorLumi [channel] = xsRelativeErrorLumi  * xsValue[channel] / 1e2;  // pb
-  xsErrorStat [channel] = xsRelativeErrorStat  * xsValue[channel] / 1e2;  // pb
-  xsErrorEff  [channel] = xsRelativeErrorEff   * xsValue[channel] / 1e2;  // pb
-
-
-  Double_t xsRelativeSystematicSum = 0;
-
-  for (UInt_t k=0; k<=nSystematic; k++)
-    xsRelativeSystematicSum += (xsRelativeSystematic[channel][k][cut] * xsRelativeSystematic[channel][k][cut]);
-
-  xsRelativeSystematicSum = sqrt(xsRelativeSystematicSum);
-
-  xsErrorSyst [channel] = xsRelativeSystematicSum * xsValue[channel] / 1e2;
-
-
-  // Print the results
-  //----------------------------------------------------------------------------
-  if (_verbosity > 0)
+  for (UInt_t syst=0; syst<=nSystematic; syst++)
     {
-      printf("\n");
-      printf(" WZ efficiency = (%.3f +- %.3f)%s\n", 1e2 * wzEffValue[channel], 1e2 * wzEffError[channel], "%");
-      printf("          nbkg = %5.1f +- %4.1f\n",   nbkg,       sqrt(nbkg));
-      printf("         ndata = %5.1f +- %4.1f\n",   ndata,      sqrt(ndata));
-      printf("  ndata - nbkg = %5.1f +- %4.1f\n",   ndata-nbkg, sqrt(ndata+nbkg));
-      printf("       nsignal = %5.1f +- %4.1f\n",   nsignal,    sqrt(nsignal));
-      printf("\n       xs(%s) = %.2f +- %.2f (stat) +- %.2f (syst) +- %.2f (lumi) pb\n",
-	     sChannel   [channel].Data(),
-	     xsValue    [channel],
-	     xsErrorStat[channel],
-	     xsErrorSyst[channel],
-	     xsErrorLumi[channel]);
-      printf("       xs(NLO) = %.2f pb\n", _xs_nlo);
-      printf("\n");
+      CrossSection(xsValNum, xsErrNum, wzEffNum, wchargeNum, channel, cut, syst);
+      CrossSection(xsValDen, xsErrDen, wzEffDen, wchargeDen, channel, cut, syst);
+
+      ratioSystematic[channel][syst][cut] = fabs(Ratio(xsValNum, xsValDen) - ratioValue[channel]);
+
+      ratioErrorSyst[channel] += (ratioSystematic[channel][syst][cut] * ratioSystematic[channel][syst][cut]);
+    }
+
+  ratioErrorSyst[channel] = sqrt(ratioErrorSyst[channel]);
+
+  if (_verbosity > 1)
+    {
+      printf(" [%s] xs(%s)/xs(%s) = %.2f +- %.2f (stat.) +- %.2f (syst.)\n",
+	     sChannel[channel].Data(),
+	     sCharge[wchargeNum].Data(),
+	     sCharge[wchargeDen].Data(),
+	     ratioValue    [channel],
+	     ratioErrorStat[channel],
+	     ratioErrorSyst[channel]);
     }
 }
 
@@ -627,20 +686,25 @@ void PrintSystematics(UInt_t cut)
 
   outputfile.open(filename);
 
-  outputfile << Form(" %-30s", "QCD scale");                     for (UInt_t i=0; i<nChannel; i++) outputfile << Form(" & %.1f", xsRelativeSystematic[i][qcdSyst][cut]);      outputfile << "\\\\\n";
-  outputfile << Form(" %-30s", "PDFs");                          for (UInt_t i=0; i<nChannel; i++) outputfile << Form(" & %.1f", xsRelativeSystematic[i][pdfSyst][cut]);      outputfile << "\\\\\n";
-  outputfile << Form(" %-30s", "lepton and trigger efficiency"); for (UInt_t i=0; i<nChannel; i++) outputfile << Form(" & %.1f", xsRelativeSystematic[i][triggerSyst][cut]);  outputfile << "\\\\\n";
-  outputfile << Form(" %-30s", "\\MET");                         for (UInt_t i=0; i<nChannel; i++) outputfile << Form(" & %.1f", xsRelativeSystematic[i][metSyst][cut]);      outputfile << "\\\\\n";
-  outputfile << Form(" %-30s", "muon momentum scale");           for (UInt_t i=0; i<nChannel; i++) outputfile << Form(" & %.1f", xsRelativeSystematic[i][muonSyst][cut]);     outputfile << "\\\\\n";
-  outputfile << Form(" %-30s", "electron energy scale");         for (UInt_t i=0; i<nChannel; i++) outputfile << Form(" & %.1f", xsRelativeSystematic[i][electronSyst][cut]); outputfile << "\\\\\n";
-  outputfile << Form(" %-30s", "pile-up");                       for (UInt_t i=0; i<nChannel; i++) outputfile << Form(" & %.1f", xsRelativeSystematic[i][pileupSyst][cut]);   outputfile << "\\\\\n";
-  outputfile << Form(" %-30s", "ZZ cross section");              for (UInt_t i=0; i<nChannel; i++) outputfile << Form(" & %.1f", xsRelativeSystematic[i][zzSyst][cut]);       outputfile << "\\\\\n";
-  outputfile << Form(" %-30s", "Z$\\gamma$ cross section");      for (UInt_t i=0; i<nChannel; i++) outputfile << Form(" & %.1f", xsRelativeSystematic[i][zgSyst][cut]);       outputfile << "\\\\\n";
-  outputfile << Form(" %-30s", "data-driven");                   for (UInt_t i=0; i<nChannel; i++) outputfile << Form(" & %.1f", xsRelativeSystematic[i][fakesSyst][cut]);    outputfile << "\\\\\n";
-  outputfile << Form(" %-30s", "backgrounds");                   for (UInt_t i=0; i<nChannel; i++) outputfile << Form(" & %.1f", xsRelativeSystematic[i][nSystematic][cut]);  outputfile << "\\\\\n"; outputfile << " \\hline\n";
-  outputfile << Form(" %-30s", "statistical");                   for (UInt_t i=0; i<nChannel; i++) outputfile << Form(" & %.1f", 1e2 * xsErrorStat [i] / xsValue[i]);         outputfile << "\\\\\n";
-  outputfile << Form(" %-30s", "systematic");                    for (UInt_t i=0; i<nChannel; i++) outputfile << Form(" & %.1f", 1e2 * xsErrorSyst [i] / xsValue[i]);         outputfile << "\\\\\n";
-  outputfile << Form(" %-30s", "luminosity");                    for (UInt_t i=0; i<nChannel; i++) outputfile << Form(" & %.1f", 1e2 * xsErrorLumi [i] / xsValue[i]);         outputfile << "\\\\\n"; outputfile << " \\hline\n";
+  outputfile << Form(" %-30s", "QCD scale");                     for (UInt_t i=0; i<nChannel; i++) outputfile << Form(" & %.1f", (1e2 / xsValue[i]) * xsSystematic[i][qcdSyst][cut]);      outputfile << "\\\\\n";
+  outputfile << Form(" %-30s", "PDFs");                          for (UInt_t i=0; i<nChannel; i++) outputfile << Form(" & %.1f", (1e2 / xsValue[i]) * xsSystematic[i][pdfSyst][cut]);      outputfile << "\\\\\n";
+  outputfile << Form(" %-30s", "lepton and trigger efficiency"); for (UInt_t i=0; i<nChannel; i++) outputfile << Form(" & %.1f", (1e2 / xsValue[i]) * xsSystematic[i][triggerSyst][cut]);  outputfile << "\\\\\n";
+  outputfile << Form(" %-30s", "\\MET");                         for (UInt_t i=0; i<nChannel; i++) outputfile << Form(" & %.1f", (1e2 / xsValue[i]) * xsSystematic[i][metSyst][cut]);      outputfile << "\\\\\n";
+  outputfile << Form(" %-30s", "muon momentum scale");           for (UInt_t i=0; i<nChannel; i++) outputfile << Form(" & %.1f", (1e2 / xsValue[i]) * xsSystematic[i][muonSyst][cut]);     outputfile << "\\\\\n";
+  outputfile << Form(" %-30s", "electron energy scale");         for (UInt_t i=0; i<nChannel; i++) outputfile << Form(" & %.1f", (1e2 / xsValue[i]) * xsSystematic[i][electronSyst][cut]); outputfile << "\\\\\n";
+  outputfile << Form(" %-30s", "pile-up");                       for (UInt_t i=0; i<nChannel; i++) outputfile << Form(" & %.1f", (1e2 / xsValue[i]) * xsSystematic[i][pileupSyst][cut]);   outputfile << "\\\\\n";
+  outputfile << Form(" %-30s", "ZZ cross section");              for (UInt_t i=0; i<nChannel; i++) outputfile << Form(" & %.1f", (1e2 / xsValue[i]) * xsSystematic[i][zzSyst][cut]);       outputfile << "\\\\\n";
+  outputfile << Form(" %-30s", "Z$\\gamma$ cross section");      for (UInt_t i=0; i<nChannel; i++) outputfile << Form(" & %.1f", (1e2 / xsValue[i]) * xsSystematic[i][zgSyst][cut]);       outputfile << "\\\\\n";
+  outputfile << Form(" %-30s", "data-driven");                   for (UInt_t i=0; i<nChannel; i++) outputfile << Form(" & %.1f", (1e2 / xsValue[i]) * xsSystematic[i][fakesSyst][cut]);    outputfile << "\\\\\n";
+  outputfile << Form(" %-30s", "backgrounds");                   for (UInt_t i=0; i<nChannel; i++) outputfile << Form(" & %.1f", (1e2 / xsValue[i]) * xsSystematic[i][nSystematic][cut]);  outputfile << "\\\\\n";
+
+  outputfile << " \\hline\n";
+
+  outputfile << Form(" %-30s", "statistical"); for (UInt_t i=0; i<nChannel; i++) outputfile << Form(" & %.1f", (1e2 / xsValue[i]) * xsErrorStat[i]); outputfile << "\\\\\n";
+  outputfile << Form(" %-30s", "systematic");  for (UInt_t i=0; i<nChannel; i++) outputfile << Form(" & %.1f", (1e2 / xsValue[i]) * xsErrorSyst[i]); outputfile << "\\\\\n";
+  outputfile << Form(" %-30s", "luminosity");  for (UInt_t i=0; i<nChannel; i++) outputfile << Form(" & %.1f", (1e2 / xsValue[i]) * xsErrorLumi[i]); outputfile << "\\\\\n";
+
+  outputfile << " \\hline\n";
 
   outputfile.close();
 }
@@ -787,8 +851,8 @@ void DrawHistogram(TString  hname,
 
   // Adjust scale
   //----------------------------------------------------------------------------
-  Float_t theMax   = GetMaximumIncludingErrors(hist[Data], xmin, xmax);
-  Float_t theMaxMC = GetMaximumIncludingErrors(allmc,      xmin, xmax);
+  Double_t theMax   = GetMaximumIncludingErrors(hist[Data], xmin, xmax);
+  Double_t theMaxMC = GetMaximumIncludingErrors(allmc,      xmin, xmax);
 
   if (theMaxMC > theMax) theMax = theMaxMC;
 
@@ -884,12 +948,12 @@ void DrawHistogram(TString  hname,
     Double_t dtValue = ratio->GetBinContent(ibin);
     Double_t dtError = ratio->GetBinError  (ibin);
 
-    Double_t ratioValue       = (mcValue > 0) ? dtValue/mcValue : 0.0;
-    Double_t ratioError       = (mcValue > 0) ? dtError/mcValue : 0.0;
+    Double_t ratioVal         = (mcValue > 0) ? dtValue/mcValue : 0.0;
+    Double_t ratioErr         = (mcValue > 0) ? dtError/mcValue : 0.0;
     Double_t uncertaintyError = (mcValue > 0) ? mcError/mcValue : 0.0;
 
-    ratio->SetBinContent(ibin, ratioValue);
-    ratio->SetBinError  (ibin, ratioError);
+    ratio->SetBinContent(ibin, ratioVal);
+    ratio->SetBinError  (ibin, ratioErr);
 
     uncertainty->SetBinContent(ibin, 1.0);
     uncertainty->SetBinError  (ibin, uncertaintyError);
@@ -928,8 +992,11 @@ void SetParameters(UInt_t cut,
 		   UInt_t mode,
 		   UInt_t wcharge)
 {
+  gROOT->SetBatch(0);
+
   sCut[Exactly3LeptonsM3L] = "Exactly3LeptonsM3L";
   sCut[HasZ]               = "HasZ";
+  //  sCut[PreMET30]           = "PreMET30";
   sCut[MET30]              = "MET30";
   sCut[ClosureTest]        = "ClosureTest";
 
@@ -962,22 +1029,6 @@ void SetParameters(UInt_t cut,
   _wcharge   = wcharge;
   _localpath = GuessLocalBasePath();
 
-  if (_wcharge == WPlus)
-    {
-      _xs_nlo = xsWPlusZ;
-      _ngenWZ = ngenWPlusZ;
-    }
-  else if (_wcharge == WMinus)
-    {
-      _xs_nlo = xsWMinusZ;
-      _ngenWZ = ngenWMinusZ;
-    }
-  else
-    {
-      _xs_nlo = xsWPlusZ + xsWMinusZ;
-      _ngenWZ = ngenWPlusZ + ngenWMinusZ;
-    }
-  
   _datapath = Form("%s/piedra/work/WZ/results",
 		   _localpath.Data());
 
@@ -1100,8 +1151,6 @@ void MakeOutputDirectory(TString format)
 //------------------------------------------------------------------------------
 void DrawCrossSections(UInt_t cut)
 {
-  if (sCut[cut].Contains("ClosureTest")) return;
-
   TGraphErrors* gStat = new TGraphErrors(nChannel+1);
   TGraphErrors* gSyst = new TGraphErrors(nChannel+1);
   TGraphErrors* gLumi = new TGraphErrors(nChannel+1);
@@ -1150,8 +1199,8 @@ void DrawCrossSections(UInt_t cut)
 
   canvas->SetLeftMargin(canvas->GetRightMargin());
 
-  Double_t xmin = _xs_nlo -  8.;
-  Double_t xmax = _xs_nlo + 23.;
+  Double_t xmin = xs_nlo[_wcharge] -  8.;
+  Double_t xmax = xs_nlo[_wcharge] + 23.;
   Double_t ymin = 0.50;
   Double_t ymax = nChannel+1 + ymin;
   
@@ -1164,7 +1213,7 @@ void DrawCrossSections(UInt_t cut)
   
   // NLO WZ cross-section
   //----------------------------------------------------------------------------
-  TLine* line = new TLine(_xs_nlo, ymin, _xs_nlo, ymax);
+  TLine* line = new TLine(xs_nlo[_wcharge], ymin, xs_nlo[_wcharge], ymax);
 
   line->SetLineColor(kGray+2);
   line->SetLineStyle(3);
@@ -1240,8 +1289,6 @@ void DrawCrossSections(UInt_t cut)
 //------------------------------------------------------------------------------
 void PrintCrossSections(UInt_t cut)
 {
-  if (sCut[cut].Contains("ClosureTest")) return;
-
   ofstream outputfile;
 
   TString suffix = (_mode == MCmode) ? "mc" : "ppf";
@@ -1273,54 +1320,37 @@ void PrintCrossSections(UInt_t cut)
 
 
 //------------------------------------------------------------------------------
-// Inclusive
+// PrintRatios
 //------------------------------------------------------------------------------
-void Inclusive()
+void PrintRatios(UInt_t cut,
+		 UInt_t wchargeNum,
+		 UInt_t wchargeDen)
 {
-  Double_t x     = 0;
-  Double_t stat  = 0;
-  Double_t eff   = 0;
-  Double_t syst  = 0;
-  Double_t total = 0;
+  ofstream outputfile;
 
-  for (UInt_t i=0; i<nChannel; i++)
-    {
-      Double_t xsErrorTotal = 0;
+  TString suffix = (_mode == MCmode) ? "mc" : "ppf";
 
-      xsErrorTotal += (xsErrorStat[i] * xsErrorStat[i]);
-      xsErrorTotal += (xsErrorSyst[i] * xsErrorSyst[i]);
-      xsErrorTotal += (xsErrorLumi[i] * xsErrorLumi[i]);
-
-      xsErrorTotal = sqrt(xsErrorTotal);
-
-      x += (xsValue[i] / xsErrorTotal / xsErrorTotal);
-
-      stat  += (1. / xsErrorStat [i]  / xsErrorStat [i]);
-      eff   += (1. / xsErrorEff  [i]  / xsErrorEff  [i]);
-      syst  += (1. / xsErrorSyst [i]  / xsErrorSyst [i]);
-      total += (1. / xsErrorTotal     / xsErrorTotal);
-    }
-
-  xsValue[nChannel] = x / total;
-
-  xsErrorLumi [nChannel] = _luminosityUncertainty * xsValue[nChannel] / 1e2;
-  xsErrorStat [nChannel] = 1. / sqrt(stat);
-  xsErrorEff  [nChannel] = 1. / sqrt(eff);
-  xsErrorSyst [nChannel] = 1. / sqrt(syst);
+  outputfile.open(Form("tex/ratio%s%s_%s_%s.tex",
+		       sCharge[wchargeNum].Data(),
+		       sCharge[wchargeDen].Data(),
+		       sCut[cut].Data(),
+		       suffix.Data()));
 
 
-  // Total efficiency
+  // Print
   //----------------------------------------------------------------------------
-  wzEffValue[nChannel] = 0.0;
-  wzEffError[nChannel] = 0.0;
-
-  for (UInt_t i=0; i<nChannel; i++)
+  for (UInt_t i=0; i<nChannel+1; i++)
     {
-      wzEffValue[nChannel] += wzEffValue[i];
-      wzEffError[nChannel] += (wzEffError[i] * wzEffError[i]);
+      if (i == nChannel) outputfile << "\\hline\n";
+
+      outputfile << Form("%s & %.2f $\\pm$ %.2f (stat.) $\\pm$ %.2f (syst.)\\\\\n",
+			 pdfChannel[i].Data(),
+			 ratioValue[i],
+			 ratioErrorStat[i],
+			 ratioErrorSyst[i]);
     }
 
-  wzEffError[nChannel] = sqrt(wzEffError[nChannel]);
+  outputfile.close();
 }
 
 
@@ -1449,111 +1479,182 @@ Double_t RelativeDifference(Double_t x0, Double_t x1)
 //------------------------------------------------------------------------------
 // BlueMethod
 //------------------------------------------------------------------------------
-void BlueMethod(UInt_t cut)
+void BlueMethod(UInt_t cut,
+		Bool_t xsratio)
 {
+  UInt_t nMatrixElements = nChannel * nChannel;
+
   Double_t commonSystMatrix[nChannel][nChannel];
 
   for (UInt_t i=0; i<nChannel; i++) {
     for (UInt_t j=0; j<nChannel; j++) {
 
-      commonSystMatrix[i][j] =
-    
-	//	(xsRelativeSystematic[i][fakesSyst]   [cut] * xsRelativeSystematic[j][fakesSyst]   [cut]) +
-	(xsRelativeSystematic[i][qcdSyst]     [cut] * xsRelativeSystematic[j][qcdSyst]     [cut]) +
-	(xsRelativeSystematic[i][pdfSyst]     [cut] * xsRelativeSystematic[j][pdfSyst]     [cut]) +
-	(xsRelativeSystematic[i][metSyst]     [cut] * xsRelativeSystematic[j][metSyst]     [cut]) +
-	(xsRelativeSystematic[i][triggerSyst] [cut] * xsRelativeSystematic[j][triggerSyst] [cut]) +
-	(xsRelativeSystematic[i][muonSyst]    [cut] * xsRelativeSystematic[j][muonSyst]    [cut]) +
-	(xsRelativeSystematic[i][electronSyst][cut] * xsRelativeSystematic[j][electronSyst][cut]) +
-	(xsRelativeSystematic[i][pileupSyst]  [cut] * xsRelativeSystematic[j][pileupSyst]  [cut]) +
-	(xsRelativeSystematic[i][zzSyst]      [cut] * xsRelativeSystematic[j][zzSyst]      [cut]) +
-	(xsRelativeSystematic[i][zgSyst]      [cut] * xsRelativeSystematic[j][zgSyst]      [cut]) +
-	(xsRelativeSystematic[i][nSystematic] [cut] * xsRelativeSystematic[j][nSystematic] [cut]);
-      
-      commonSystMatrix[i][j] /= 1e4;
+      commonSystMatrix[i][j] = 0.0;
+
+      for (UInt_t k=0; k<=nSystematic; k++) {
+
+	if (k == fakesSyst) continue;
+	
+	if (xsratio)
+	  {
+	    commonSystMatrix[i][j] += (ratioSystematic[i][k][cut] * ratioSystematic[j][k][cut]);
+	  }
+	else
+	  {
+	    commonSystMatrix[i][j] += (xsSystematic[i][k][cut] * xsSystematic[j][k][cut]);
+	  }
+      }
+    }
+  }
+
+  Double_t elm[nMatrixElements];
+
+  for (UInt_t i=0; i<nChannel; i++) {
+    for (UInt_t j=i; j<nChannel; j++) {
+
+      if (j == i)
+	{
+	  if (xsratio)
+	    {
+	      elm[4*i+j] = pow(ratioErrorStat[i],2) + pow(ratioErrorSyst[i],2);
+	    }
+	  else
+	    {
+	      elm[4*i+j] = pow(xsErrorStat[i],2) + pow(xsErrorSyst[i],2);
+	    }
+	}
+      else
+	{
+	  elm[4*i+j] = elm[4*j+i] = commonSystMatrix[i][j];
+	}
     }
   }
 
 
-  // 0(mmm-mmm) 4(mmm-eee)  8(mmm-mme) 12(mmm-eem)
-  // 1(mmm-eee) 5(eee-eee)  9(eee-mme) 13(eee-eem)
-  // 2(mmm-mme) 6(eee-mme) 10(mme-mme) 14(mme-eem)
-  // 3(mmm-eem) 7(eee-eem) 11(mme-eem) 15(eem-eem)
-
-  Double_t elm[16];
-
-  for (UInt_t i=0; i<16; i++) elm[i] = 0;
-
-  elm[ 0] = pow(xsErrorSyst[0],2) + pow(xsErrorStat[0],2);
-  elm[ 5] = pow(xsErrorSyst[1],2) + pow(xsErrorStat[1],2);
-  elm[10] = pow(xsErrorSyst[2],2) + pow(xsErrorStat[2],2);
-  elm[15] = pow(xsErrorSyst[3],2) + pow(xsErrorStat[3],2);
-
-  elm[ 4] = elm[ 1] = xsValue[MMM] * xsValue[EEE] * commonSystMatrix[MMM][EEE];
-  elm[ 8] = elm[ 2] = xsValue[MMM] * xsValue[MME] * commonSystMatrix[MMM][MME];
-  elm[12] = elm[ 3] = xsValue[MMM] * xsValue[EEM] * commonSystMatrix[MMM][EEM];
-  elm[ 9] = elm[ 6] = xsValue[EEE] * xsValue[MME] * commonSystMatrix[EEE][MME];
-  elm[13] = elm[ 7] = xsValue[EEE] * xsValue[EEM] * commonSystMatrix[EEE][EEM];
-  elm[14] = elm[11] = xsValue[MME] * xsValue[EEM] * commonSystMatrix[MME][EEM];
-
-
+  // Deal with the error matrix
+  //----------------------------------------------------------------------------
   TMatrixD errorMatrix(nChannel, nChannel, elm);
 
   TMatrixD errorMatrixCopy(errorMatrix);
 
   errorMatrix.Invert();
 
-
-  // Get norm and alpha factors for each channel
-  //----------------------------------------------------------------------------
   Double_t *mRef = errorMatrix.GetMatrixArray();
 
   Double_t norm = 0.;
 
   Double_t alpha[nChannel] = {0., 0., 0., 0.};
 
-  for (UInt_t i=0; i<16; i++) norm += mRef[i];
+  for (UInt_t i=0; i<nMatrixElements; i++) norm += mRef[i];
 
   for (UInt_t i=0; i<nChannel;i++) {
     for (UInt_t j=0; j<nChannel;j++) {
-      alpha[i] += mRef[i*4+j];
+
+      alpha[i] += mRef[4*i+j];
     }
+
     alpha[i] /= norm;
   }
 
-  xsValue[nChannel] =
-    alpha[0] * xsValue[0] +
-    alpha[1] * xsValue[1] +
-    alpha[2] * xsValue[2] +
-    alpha[3] * xsValue[3];
-
-  Double_t combined_error = 0.;
+  Double_t combined_error = 0.0;
 
   Double_t *copyRef = errorMatrixCopy.GetMatrixArray();
 
   for (UInt_t i=0;i<nChannel;i++) {
     for (UInt_t j=0;j<nChannel;j++) {
 
-      combined_error += alpha[i] * alpha[j] * copyRef[i*4+j];
+      combined_error += alpha[i] * alpha[j] * copyRef[4*i + j];
     }
   }
 
-  Double_t stat_err_tot2 =
-    pow(alpha[0] * xsErrorStat[0],2) +
-    pow(alpha[1] * xsErrorStat[1],2) +
-    pow(alpha[2] * xsErrorStat[2],2) +
-    pow(alpha[3] * xsErrorStat[3],2);
-  
-  xsErrorStat[nChannel] = sqrt(stat_err_tot2);
-  xsErrorSyst[nChannel] = sqrt (combined_error - stat_err_tot2);
 
-  combined_error = sqrt(combined_error);
- 
-  xsErrorLumi[nChannel] = _luminosityUncertainty * xsValue[nChannel] / 1e2;
-
-  if (cut == MET30 && _wcharge == WInclusive)
+  // Get the inclusive values
+  //----------------------------------------------------------------------------
+  if (xsratio)
     {
-      for (UInt_t i=0; i<nChannel; i++)
-	printf(" alpha(%s) = %.2f\n", sChannel[i].Data(), alpha[i]);
+      ratioValue    [nChannel] = 0.0;
+      ratioErrorStat[nChannel] = 0.0;
+
+      for (UInt_t i=0; i<nChannel; i++) {
+
+	ratioValue[nChannel] += alpha[i] * ratioValue[i];
+
+	ratioErrorStat[nChannel] += pow(alpha[i] * ratioErrorStat[i],2);
+      }
+
+      ratioErrorSyst[nChannel] = sqrt (combined_error - ratioErrorStat[nChannel]);
+      ratioErrorStat[nChannel] = sqrt(ratioErrorStat[nChannel]);
     }
+  else
+    {
+      xsValue    [nChannel] = 0.0;
+      xsErrorStat[nChannel] = 0.0;
+
+      for (UInt_t i=0; i<nChannel; i++) {
+
+	xsValue[nChannel] += alpha[i] * xsValue[i];
+	
+	xsErrorStat[nChannel] += pow(alpha[i] * xsErrorStat[i],2);
+      }
+  
+      xsErrorSyst[nChannel] = sqrt (combined_error - xsErrorStat[nChannel]);
+      xsErrorStat[nChannel] = sqrt(xsErrorStat[nChannel]);
+      xsErrorLumi[nChannel] = _luminosityUncertainty * xsValue[nChannel] / 1e2;
+    }
+
+
+  // Print
+  //----------------------------------------------------------------------------
+  if (_verbosity > 1 && cut == MET30 && _wcharge == WInclusive)
+    {
+      printf("\n");
+
+      for (UInt_t i=0; i<nChannel; i++)
+	printf("       alpha(%s) = %.2f\n", sChannel[i].Data(), alpha[i]);
+
+      if (xsratio)
+	{
+	  printf("\n       ratio(BLUE) = %.2f +- %.2f (stat) +- %.2f (syst)\n\n",
+		 ratioValue[nChannel],
+		 ratioErrorStat[nChannel],
+		 ratioErrorSyst[nChannel]);
+	}
+      else
+	{
+	  printf("\n       xs(BLUE) = %.2f +- %.2f (stat) +- %.2f (syst) +- %.2f (lumi) pb\n\n",
+		 xsValue[nChannel],
+		 xsErrorStat[nChannel],
+		 xsErrorSyst[nChannel],
+		 xsErrorLumi[nChannel]);
+	}
+    }
+}
+
+
+//------------------------------------------------------------------------------
+// Ratio
+//------------------------------------------------------------------------------
+Double_t Ratio(Double_t a,
+	       Double_t b)
+{
+  if (b == 0) return 0.0;
+
+  return a / b;
+}
+
+
+//------------------------------------------------------------------------------
+// RatioError
+//------------------------------------------------------------------------------
+Double_t RatioError(Double_t a,
+		    Double_t b,
+		    Double_t aErr,
+		    Double_t bErr)
+{
+  if (b == 0) return 0.0;
+
+  if (aErr < 0) aErr = sqrt(a);
+  if (bErr < 0) bErr = sqrt(b);
+
+  return Ratio(a,b) * sqrt((aErr/a)*(aErr/a) + (bErr/b)*(bErr/b));
 }

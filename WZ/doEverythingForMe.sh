@@ -5,6 +5,7 @@
 ./run.sh 4
 ./run.sh 5
 ./run.sh 6
+./run.sh 7
 
 ./merge.sh
 

@@ -73,12 +73,13 @@ const TString sComposition[nComposition] = {
 };
 
 
-const UInt_t nCut = 6;
+const UInt_t nCut = 7;
 
 enum {
   Exactly3Leptons,
   Exactly3LeptonsM3L,
   HasZ,
+  PreMET30,
   MET30,
   MET30AntiBtag,
   ClosureTest
@@ -88,6 +89,7 @@ const TString sCut[nCut] = {
   "Exactly3Leptons",
   "Exactly3LeptonsM3L",
   "HasZ",
+  "PreMET30",
   "MET30",
   "MET30AntiBtag",
   "ClosureTest"
@@ -458,13 +460,11 @@ void AnalysisWZ(TString sample,
 
   if (isData)
     {
-      path = "/pool/ciencias/LatinosSkims/ReducedTrees/R53X_S1_V08_S2_V09_S3_V13/Data_LooseLoose/4L";  // nominal
-      //      path = "/pool/ciencias/LatinosSkims/ReducedTrees/R53X_S1_V09_S2_V10_S3_V17/Data_LooseLoose";     // ReReco
+      path = "/pool/ciencias/LatinosSkims/ReducedTrees/R53X_S1_V08_S2_V09_S3_V13/Data_LooseLoose/4L";
     }
   else
     {
-      path = "/pool/ciencias/LatinosSkims/ReducedTrees/R53X_S1_V09_S2_V10_S3_V17/MC_LooseLoose";            // ReReco
-      //      path = "/pool/ciencias/LatinosSkims/ReducedTrees/R53X_S1_V08_S2_V09_S3_V13/Data_LooseLoose_fakeW/4L"; // fakes
+      path = "/pool/ciencias/LatinosSkims/ReducedTrees/R53X_S1_V09_S2_V10_S3_V17/MC_LooseLoose";
     }
 
   tree->Add(path + "/latino_" + _sample + ".root");
@@ -938,6 +938,8 @@ void AnalysisWZ(TString sample,
       }
 
     if (WLepton.Pt() <= 20.) continue;
+
+    FillHistograms(theChannel, PreMET30);
 
     if (EventMET.Et() <= 30.) continue;
 

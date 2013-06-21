@@ -175,5 +175,7 @@ cp $INPUT_DIR/pdf/analysis/PPF/MET30/xs_MET30_WInclusive.pdf  $OUTPUT_DIR/figure
 cp $INPUT_DIR/pdf/analysis/PPF/MET30/xs_MET30_WPlus.pdf       $OUTPUT_DIR/figures/analysis/PPF/MET30/.
 cp $INPUT_DIR/pdf/analysis/PPF/MET30/xs_MET30_WMinus.pdf      $OUTPUT_DIR/figures/analysis/PPF/MET30/.
 cp $INPUT_DIR/tex/xs_MET30_WInclusive_ppf.tex                 $OUTPUT_DIR/tables/.
+cp $INPUT_DIR/tex/ratioWMinusWPlus_MET30_ppf.tex              $OUTPUT_DIR/tables/.
+cp $INPUT_DIR/tex/ratioWPlusWMinus_MET30_ppf.tex              $OUTPUT_DIR/tables/.
 cp $INPUT_DIR/tex/systematics_MET30_WInclusive.tex            $OUTPUT_DIR/tables/.
 

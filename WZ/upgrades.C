@@ -42,7 +42,7 @@ void upgrades()
   printf("\n %30s",  "$\\delta$");                  for (UInt_t channel=0; channel<nChannel; channel++) {printf(" & %3.0f%s", 1e2 * fabs(zjetsMc[channel] - dataPPF[channel]) / zjetsMc[channel], "\\%");}
   printf("\\\\\\hline");
 
-  printf("\n %30s",  "data $-$ MC");                for (UInt_t channel=0; channel<nChannel; channel++) {printf(" & %3.0f  ", dataMinusMc[channel]);}
+  printf("\n %30s",  "data $-$ MC (WZ and ZZ)");    for (UInt_t channel=0; channel<nChannel; channel++) {printf(" & %3.0f  ", dataMinusMc[channel]);}
   printf("\\\\");
   printf("\n %30s",  "data-driven from data");      for (UInt_t channel=0; channel<nChannel; channel++) {printf(" & %3.0f  ", dataPPF[channel]);}
   printf("\\\\");
