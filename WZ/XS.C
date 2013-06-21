@@ -309,7 +309,7 @@ Double_t RatioError               (Double_t      a,
 void XS(UInt_t cut     = MET30,
 	UInt_t mode    = PPFmode,
 	UInt_t wcharge = WInclusive,
-	Bool_t draw    = true)
+	Bool_t draw    = false)
 {
   SetParameters(cut, mode, wcharge);
 
@@ -566,13 +566,14 @@ void CrossSectionRatio(UInt_t wchargeNum,
 
   if (_verbosity > 1)
     {
-      printf(" [%s] xs(%s)/xs(%s) = %.2f +- %.2f (stat.) +- %.2f (syst.)\n",
+      printf(" [%s] xs(%s)/xs(%s) = %.4f +- %.4f (stat.) +- %.4f (syst.) \t 1/ratio = %.4f\n",
 	     sChannel[channel].Data(),
 	     sCharge[wchargeNum].Data(),
 	     sCharge[wchargeDen].Data(),
 	     ratioValue    [channel],
 	     ratioErrorStat[channel],
-	     ratioErrorSyst[channel]);
+	     ratioErrorSyst[channel],
+	     1. / ratioValue[channel]);
     }
 }
 
@@ -992,7 +993,7 @@ void SetParameters(UInt_t cut,
 		   UInt_t mode,
 		   UInt_t wcharge)
 {
-  gROOT->SetBatch(0);
+  gROOT->SetBatch();
 
   sCut[Exactly3LeptonsM3L] = "Exactly3LeptonsM3L";
   sCut[HasZ]               = "HasZ";
@@ -1610,18 +1611,19 @@ void BlueMethod(UInt_t cut,
       printf("\n");
 
       for (UInt_t i=0; i<nChannel; i++)
-	printf("       alpha(%s) = %.2f\n", sChannel[i].Data(), alpha[i]);
+	printf("       alpha(%s) = %.3f\n", sChannel[i].Data(), alpha[i]);
 
       if (xsratio)
 	{
-	  printf("\n       ratio(BLUE) = %.2f +- %.2f (stat) +- %.2f (syst)\n\n",
+	  printf("\n       ratio(BLUE) = %.4f +- %.4f (stat) +- %.4f (syst) \t 1/ratio = %.4f\n\n",
 		 ratioValue[nChannel],
 		 ratioErrorStat[nChannel],
-		 ratioErrorSyst[nChannel]);
+		 ratioErrorSyst[nChannel],
+		 1. / ratioValue[nChannel]);
 	}
       else
 	{
-	  printf("\n       xs(BLUE) = %.2f +- %.2f (stat) +- %.2f (syst) +- %.2f (lumi) pb\n\n",
+	  printf("\n       xs(BLUE) = %.4f +- %.4f (stat) +- %.4f (syst) +- %.4f (lumi) pb\n\n",
 		 xsValue[nChannel],
 		 xsErrorStat[nChannel],
 		 xsErrorSyst[nChannel],
