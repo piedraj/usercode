@@ -6,10 +6,11 @@
 ./run.sh 5
 ./run.sh 6
 ./run.sh 7
+./run.sh 8
 
 ./merge.sh
 
-#./runXS.sh
+./runXS.sh
 
-#./copyFiguresAndTables.sh
+./copyFiguresAndTables.sh
 

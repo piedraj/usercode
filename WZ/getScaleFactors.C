@@ -1,8 +1,14 @@
 //------------------------------------------------------------------------------
 //
+// scp lxplus.cern.ch:/afs/cern.ch/work/c/calderon/public/LatinoTrees/leptonEffAndFakesHWW/MuFR_Moriond13_jet05_EWKcorr.root             ~/www/AuxiliaryFilesWZXS8TeV/.
+// scp lxplus.cern.ch:/afs/cern.ch/work/c/calderon/public/LatinoTrees/leptonEffAndFakesHWW/MuFR_Moriond13_jet10_EWKcorr.root             ~/www/AuxiliaryFilesWZXS8TeV/.
 // scp lxplus.cern.ch:/afs/cern.ch/work/c/calderon/public/LatinoTrees/leptonEffAndFakesHWW/MuFR_Moriond13_jet15_EWKcorr.root             ~/www/AuxiliaryFilesWZXS8TeV/.
 // scp lxplus.cern.ch:/afs/cern.ch/work/c/calderon/public/LatinoTrees/leptonEffAndFakesHWW/MuFR_Moriond13_jet20_EWKcorr.root             ~/www/AuxiliaryFilesWZXS8TeV/.
+// scp lxplus.cern.ch:/afs/cern.ch/work/c/calderon/public/LatinoTrees/leptonEffAndFakesHWW/MuFR_Moriond13_jet25_EWKcorr.root             ~/www/AuxiliaryFilesWZXS8TeV/.
 // scp lxplus.cern.ch:/afs/cern.ch/work/c/calderon/public/LatinoTrees/leptonEffAndFakesHWW/MuFR_Moriond13_jet30_EWKcorr.root             ~/www/AuxiliaryFilesWZXS8TeV/.
+// scp lxplus.cern.ch:/afs/cern.ch/work/c/calderon/public/LatinoTrees/leptonEffAndFakesHWW/MuFR_Moriond13_jet35_EWKcorr.root             ~/www/AuxiliaryFilesWZXS8TeV/.
+// scp lxplus.cern.ch:/afs/cern.ch/work/c/calderon/public/LatinoTrees/leptonEffAndFakesHWW/MuFR_Moriond13_jet40_EWKcorr.root             ~/www/AuxiliaryFilesWZXS8TeV/.
+// scp lxplus.cern.ch:/afs/cern.ch/work/c/calderon/public/LatinoTrees/leptonEffAndFakesHWW/MuFR_Moriond13_jet45_EWKcorr.root             ~/www/AuxiliaryFilesWZXS8TeV/.
 // scp lxplus.cern.ch:/afs/cern.ch/work/c/calderon/public/LatinoTrees/leptonEffAndFakesHWW/MuFR_Moriond13_jet50_EWKcorr.root             ~/www/AuxiliaryFilesWZXS8TeV/.
 // scp lxplus.cern.ch:/afs/cern.ch/work/c/calderon/public/LatinoTrees/leptonEffAndFakesHWW/fakerates_trigger_Moriond13_ewksub.root       ~/www/AuxiliaryFilesWZXS8TeV/.
 // scp lxplus.cern.ch:/afs/cern.ch/work/c/calderon/public/LatinoTrees/leptonEffAndFakesHWW/fakerates_trigger_Moriond13_ewksub_jet15.root ~/www/AuxiliaryFilesWZXS8TeV/.

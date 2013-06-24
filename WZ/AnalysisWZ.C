@@ -147,7 +147,8 @@ enum {
   muonDownSyst,
   electronUpSyst,
   electronDownSyst,
-  pileupSyst
+  pileupSyst,
+  fakesSyst
 };
 
 
@@ -332,24 +333,27 @@ Float_t                       ptz;
 // AnalysisWZ
 //
 //==============================================================================
-void AnalysisWZ(TString sample,
-		Int_t   systematic,
-		Int_t   mode,
-		TString directory)
+void AnalysisWZ(TString  sample,
+		Int_t    systematic,
+		Int_t    mode,
+		Int_t    muonJetPt,
+		Int_t    elecJetPt,
+		TString  directory)
 {
   _sample     = sample;
   _systematic = systematic;
   _mode       = mode;
   _directory  = directory;
 
-  if      (_systematic == noSyst)           _directory += "/analysis";
-  else if (_systematic == metUpSyst)        _directory += "/systematics/metUp";
-  else if (_systematic == metDownSyst)      _directory += "/systematics/metDown";
-  else if (_systematic == muonUpSyst)       _directory += "/systematics/muonUp";
-  else if (_systematic == muonDownSyst)     _directory += "/systematics/muonDown";
-  else if (_systematic == electronUpSyst)   _directory += "/systematics/electronUp";
-  else if (_systematic == electronDownSyst) _directory += "/systematics/electronDown";
-  else if (_systematic == pileupSyst)       _directory += "/systematics/pileup";
+  if      (_systematic == noSyst)              _directory += "/analysis";
+  else if (_systematic == metUpSyst)           _directory += "/systematics/metUp";
+  else if (_systematic == metDownSyst)         _directory += "/systematics/metDown";
+  else if (_systematic == muonUpSyst)          _directory += "/systematics/muonUp";
+  else if (_systematic == muonDownSyst)        _directory += "/systematics/muonDown";
+  else if (_systematic == electronUpSyst)      _directory += "/systematics/electronUp";
+  else if (_systematic == electronDownSyst)    _directory += "/systematics/electronDown";
+  else if (_systematic == pileupSyst)          _directory += "/systematics/pileup";
+  else if (_systematic == fakesSyst)           _directory += Form("/systematics/muonJet%d_elecJet%d", muonJetPt, elecJetPt);
 
   gSystem->mkdir(_directory, kTRUE);
 
@@ -430,8 +434,13 @@ void AnalysisWZ(TString sample,
   MuonPR = LoadHistogram("MuPR_Moriond13_2012",  "h2inverted", "MuonPR");
   ElecPR = LoadHistogram("ElePR_Moriond13_2012", "h2inverted", "ElecPR");
 
-  MuonFR = LoadHistogram("MuFR_Moriond13_jet15_EWKcorr",  "FR_pT_eta_EWKcorr", "MuonFR_Jet15");
-  ElecFR = LoadHistogram("EleFR_Moriond13_jet15_EWKcorr", "fakeElH2",          "ElecFR_Jet15");
+  MuonFR = LoadHistogram(Form("MuFR_Moriond13_jet%d_EWKcorr", muonJetPt),
+			 "FR_pT_eta_EWKcorr",
+			 Form("MuonFR_Jet%d", muonJetPt));
+
+  ElecFR = LoadHistogram(Form("EleFR_Moriond13_jet%d_EWKcorr", elecJetPt),
+			 "fakeElH2",
+			 Form("ElecFR_Jet%d", elecJetPt));
 
   DoubleElLead  = LoadHistogram("triggerEfficiencies", "DoubleElLead",  "DoubleElLead");
   DoubleMuLead  = LoadHistogram("triggerEfficiencies", "DoubleMuLead",  "DoubleMuLead");
@@ -582,7 +591,7 @@ void AnalysisWZ(TString sample,
 
 	  lep.sf    = GetFactor(ElecSF,        spt, eta[i]);
 	  lep.pr    = GetFactor(ElecPR,        spt, eta[i]);
-	  lep.fr    = GetFactor(ElecFR,        spt, eta[i], 35.);
+	  lep.fr    = GetFactor(ElecFR,        spt, eta[i]);
 	  lep.lead  = GetFactor(DoubleElLead,  spt, eta[i]);
 	  lep.trail = GetFactor(DoubleElTrail, spt, eta[i]);
 	}
@@ -597,7 +606,7 @@ void AnalysisWZ(TString sample,
 
 	  lep.sf    = GetFactor(MuonSF,        spt, eta[i]);
 	  lep.pr    = GetFactor(MuonPR,        spt, eta[i]);
-	  lep.fr    = GetFactor(MuonFR,        spt, eta[i], 35.);
+	  lep.fr    = GetFactor(MuonFR,        spt, eta[i], 34.);
 	  lep.lead  = GetFactor(DoubleMuLead,  spt, eta[i]);
 	  lep.trail = GetFactor(DoubleMuTrail, spt, eta[i]);
 	}

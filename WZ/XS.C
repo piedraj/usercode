@@ -238,7 +238,8 @@ void     SetParameters            (UInt_t        cut,
 				   UInt_t        mode,
 				   UInt_t        wcharge);
 
-Int_t    ReadInputFiles           ();
+Int_t    ReadInputFiles           (Int_t         muonJetPt,
+				   Int_t         elecJetPt);
 
 void     CrossSection             (Double_t&     xsVal,
 				   Double_t&     xsErr,
@@ -309,11 +310,11 @@ Double_t RatioError               (Double_t      a,
 void XS(UInt_t cut     = MET30,
 	UInt_t mode    = PPFmode,
 	UInt_t wcharge = WInclusive,
-	Bool_t draw    = false)
+	Bool_t draw    = true)
 {
   SetParameters(cut, mode, wcharge);
 
-  if (ReadInputFiles() < 0) return;
+  if (ReadInputFiles(20, 35) < 0) return;
 
   wzEffValue[nChannel] = 0.0;
   wzEffError[nChannel] = 0.0;
@@ -345,6 +346,11 @@ void XS(UInt_t cut     = MET30,
 		     syst); 
 
 	xsSystematic[channel][syst][cut] = fabs(xsVal - xsValue[channel]);
+
+	if (syst == fakesSyst && (channel == MME || channel == EEE))
+	  {
+	    xsSystematic[channel][syst][cut] /= 2.;
+	  }
       }
 
     xsErrorSyst[channel] = 0;
@@ -367,9 +373,10 @@ void XS(UInt_t cut     = MET30,
     //--------------------------------------------------------------------------
     PrintYields(channel);
 
+    DrawHistogram("hSumCharges", channel, cut, "q_{1} + q_{2} + q_{3}");
+
     if (draw)
       {
-	DrawHistogram("hSumCharges",   channel, cut, "q_{1} + q_{2} + q_{3}");
 	DrawHistogram("hMET",          channel, cut, "E_{T}^{miss}",                           5, 0, "GeV",  linY);
 	DrawHistogram("hInvMass2Lep",  channel, cut, "m_{#font[12]{ll}}",                     -1, 0, "GeV",  linY, 70, 112);
 	DrawHistogram("hInvMass3Lep",  channel, cut, "m_{#font[12]{3l}}",                      5, 0, "GeV",  linY, 60, 350);
@@ -466,7 +473,34 @@ void CrossSection(Double_t& xsVal,
       }
     else if (j == Fakes)
       {
-	if (syst == fakesSyst) process_yield *= (1. + 0.36);
+	if (syst == fakesSyst)
+	  {
+	    Int_t muonJetPtUp   = (channel == MMM || channel == EEM) ? 25 : 20;
+	    Int_t muonJetPtDown = (channel == MMM || channel == EEM) ? 15 : 20;
+
+	    Int_t elecJetPtUp   = (channel == MME || channel == EEE) ? 50 : 35;
+	    Int_t elecJetPtDown = (channel == MME || channel == EEE) ? 15 : 35;
+
+	    TString fUpName = Form("%s/systematics/muonJet%d_elecJet%d/%s.root",
+				   _datapath.Data(), muonJetPtUp, elecJetPtUp, sProcess[j].Data());
+
+	    TString fDownName = Form("%s/systematics/muonJet%d_elecJet%d/%s.root",
+				     _datapath.Data(), muonJetPtDown, elecJetPtDown, sProcess[j].Data());
+
+	    TFile* fUp   = new TFile(fUpName);
+	    TFile* fDown = new TFile(fDownName);
+	    
+	    Double_t yUp   = Yield((TH1D*)fUp  ->Get(prefix + suffix));
+	    Double_t yDown = Yield((TH1D*)fDown->Get(prefix + suffix));
+	    
+	    Double_t systUp   = RelativeDifference(process_yield, yUp);
+	    Double_t systDown = RelativeDifference(process_yield, yDown);
+	    
+	    process_yield = (systUp > systDown) ? yUp : yDown;
+	    
+	    fUp  ->Close();
+	    fDown->Close();
+	  }
 
 	nbkg += process_yield;
       }
@@ -1070,13 +1104,27 @@ void SetParameters(UInt_t cut,
 //------------------------------------------------------------------------------
 // ReadInputFiles
 //------------------------------------------------------------------------------
-Int_t ReadInputFiles()
+Int_t ReadInputFiles(Int_t muonJetPt,
+		     Int_t elecJetPt)
 {
   for (UInt_t i=0; i<vprocess.size(); i++) {
 
     UInt_t j = vprocess.at(i);
 
-    input[j] = new TFile(_datapath + "/analysis/" + sProcess[j] + ".root");
+    TString fname = _datapath;
+
+    if (j == Fakes)
+      {
+	fname += Form("/systematics/muonJet%d_elecJet%d/", muonJetPt, elecJetPt);
+      }
+    else
+      {
+	fname += "/analysis/";
+      }
+
+    fname += sProcess[j] + ".root";
+
+    input[j] = new TFile(fname);
 
     TH1D* dummy = (TH1D*)input[j]->Get("hCounter_MME_" + sCut[MET30] + "_" + sCharge[_wcharge] + "_TTT");
 

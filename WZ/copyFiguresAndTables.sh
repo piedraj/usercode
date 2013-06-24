@@ -25,8 +25,8 @@ cp $INPUT_DIR/pdf/scale_factors/DoubleElLead.pdf    $OUTPUT_DIR/figures/scale_fa
 cp $INPUT_DIR/pdf/scale_factors/DoubleElTrail.pdf   $OUTPUT_DIR/figures/scale_factors/.
 cp $INPUT_DIR/pdf/scale_factors/DoubleMuLead.pdf    $OUTPUT_DIR/figures/scale_factors/.
 cp $INPUT_DIR/pdf/scale_factors/DoubleMuTrail.pdf   $OUTPUT_DIR/figures/scale_factors/.
-cp $INPUT_DIR/pdf/scale_factors/ElecFR_Jet15.pdf    $OUTPUT_DIR/figures/scale_factors/.
-cp $INPUT_DIR/pdf/scale_factors/MuonFR_Jet15.pdf    $OUTPUT_DIR/figures/scale_factors/.
+cp $INPUT_DIR/pdf/scale_factors/ElecFR_Jet35.pdf    $OUTPUT_DIR/figures/scale_factors/.
+cp $INPUT_DIR/pdf/scale_factors/MuonFR_Jet20.pdf    $OUTPUT_DIR/figures/scale_factors/.
 cp $INPUT_DIR/pdf/scale_factors/ElecPR.pdf          $OUTPUT_DIR/figures/scale_factors/.
 cp $INPUT_DIR/pdf/scale_factors/MuonPR.pdf          $OUTPUT_DIR/figures/scale_factors/.
 cp $INPUT_DIR/pdf/scale_factors/hLeptonWeight.pdf   $OUTPUT_DIR/figures/scale_factors/.

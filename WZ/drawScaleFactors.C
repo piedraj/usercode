@@ -58,9 +58,8 @@ void drawScaleFactors()
   MuonPR = LoadHistogram("MuPR_Moriond13_2012",  "h2inverted", "MuonPR");
   ElecPR = LoadHistogram("ElePR_Moriond13_2012", "h2inverted", "ElecPR");
 
-  MuonFR = LoadHistogram("MuFR_Moriond13_jet15_EWKcorr",  "FR_pT_eta_EWKcorr", "MuonFR_Jet15");
-  ElecFR = LoadHistogram("EleFR_Moriond13_jet15_EWKcorr", "fakeElH2",          "ElecFR_Jet15");
-  //  ElecFR = LoadHistogram("EleFR_Moriond13_jet35_EWKcorr", "fakeElH2",          "ElecFR_Jet35");
+  MuonFR = LoadHistogram("MuFR_Moriond13_jet20_EWKcorr",  "FR_pT_eta_EWKcorr", "MuonFR_Jet20");
+  ElecFR = LoadHistogram("EleFR_Moriond13_jet35_EWKcorr", "fakeElH2",          "ElecFR_Jet35");
 
   DoubleElLead  = LoadHistogram("triggerEfficiencies", "DoubleElLead",  "DoubleElLead");
   DoubleMuLead  = LoadHistogram("triggerEfficiencies", "DoubleMuLead",  "DoubleMuLead");
