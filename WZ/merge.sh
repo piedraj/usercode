@@ -20,8 +20,6 @@ for FOLDER in $FOLDERS; do
     if [ "$FOLDER" = "results/analysis" ]; then
 
 	hadd -f -k Data.root *2012?.root 
-
-	hadd -f -k Data_PPF.root *2012?_PPF.root
     fi
 
     hadd -f -k ZZ.root        \
@@ -74,3 +72,26 @@ for FOLDER in $FOLDERS; do
 
 done
 
+
+FAKESFOLDERS="
+results/systematics/muonJet15_elecJet15 \
+results/systematics/muonJet15_elecJet35 \
+results/systematics/muonJet15_elecJet50 \
+results/systematics/muonJet20_elecJet15 \
+results/systematics/muonJet20_elecJet35 \
+results/systematics/muonJet20_elecJet50 \
+results/systematics/muonJet25_elecJet15 \
+results/systematics/muonJet25_elecJet35 \
+results/systematics/muonJet25_elecJet50 \
+"
+
+
+for FOLDER in $FAKESFOLDERS; do
+    
+    pushd $FOLDER
+    
+    hadd -f -k Data_PPF.root *2012?_PPF.root
+
+    popd
+
+done

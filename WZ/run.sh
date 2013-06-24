@@ -12,6 +12,7 @@ if [ $# -lt 1 ]; then
     echo "  5 = electronUpSyst"
     echo "  6 = electronDownSyst"
     echo "  7 = pileupSyst"
+    echo "  8 = fakesSyst"
     echo "  "
     exit -1
 fi
@@ -101,14 +102,32 @@ if [ ${SYSTEMATIC} == 0 ]; then
 
         root -l -b -q "runAnalysisWZ.C(\"${SAMPLE}\",${SYSTEMATIC},0)";
 
-        root -l -b -q "runAnalysisWZ.C(\"${SAMPLE}\",${SYSTEMATIC},1)";
+    done
+
+elif [ ${SYSTEMATIC} == 8 ]; then
+
+    for SAMPLE in ${DATA_SAMPLES}; do
+
+        root -l -b -q "runAnalysisWZ.C(\"${SAMPLE}\",${SYSTEMATIC},1,15,15)";
+        root -l -b -q "runAnalysisWZ.C(\"${SAMPLE}\",${SYSTEMATIC},1,15,35)";
+        root -l -b -q "runAnalysisWZ.C(\"${SAMPLE}\",${SYSTEMATIC},1,15,50)";
+
+        root -l -b -q "runAnalysisWZ.C(\"${SAMPLE}\",${SYSTEMATIC},1,20,15)";
+        root -l -b -q "runAnalysisWZ.C(\"${SAMPLE}\",${SYSTEMATIC},1,20,35)";  # Nominal one
+        root -l -b -q "runAnalysisWZ.C(\"${SAMPLE}\",${SYSTEMATIC},1,20,50)";
+
+        root -l -b -q "runAnalysisWZ.C(\"${SAMPLE}\",${SYSTEMATIC},1,25,15)";
+        root -l -b -q "runAnalysisWZ.C(\"${SAMPLE}\",${SYSTEMATIC},1,25,35)";
+        root -l -b -q "runAnalysisWZ.C(\"${SAMPLE}\",${SYSTEMATIC},1,25,50)";
 
     done
-fi
 
-for SAMPLE in ${MC_SAMPLES}; do
+else
+
+    for SAMPLE in ${MC_SAMPLES}; do
     
-    root -l -b -q "runAnalysisWZ.C(\"${SAMPLE}\",${SYSTEMATIC},0)";
-    
-done
+	root -l -b -q "runAnalysisWZ.C(\"${SAMPLE}\",${SYSTEMATIC},0)";
+	
+    done
+fi
 

@@ -6,8 +6,8 @@ const UInt_t nChannel = 4;
 TString sChannel[nChannel] = {"MMM", "EEE", "MME", "EEM"};
 
 
-Double_t dataMinusMc[nChannel] = {190.3, 55.9, 116.2,  87.5};  // From XS.C
-Double_t dataPPF    [nChannel] = {205.3, 22.1,  44.5, 124.0};  // From XS.C
+Double_t dataMinusMc[nChannel] = {106.7, 26.3, 66.6, 28.8};  // From XS.C
+Double_t dataPPF    [nChannel] = { 56.5, 13.9, 45.5, 27.7};  // From XS.C
 
 Double_t zjetsMc [nChannel];
 Double_t zjetsPPF[nChannel];
