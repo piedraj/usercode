@@ -74,6 +74,9 @@ done
 
 
 FAKESFOLDERS="
+results/systematics/muonJet10_elecJet15 \
+results/systematics/muonJet10_elecJet35 \
+results/systematics/muonJet10_elecJet50 \
 results/systematics/muonJet15_elecJet15 \
 results/systematics/muonJet15_elecJet35 \
 results/systematics/muonJet15_elecJet50 \
@@ -83,6 +86,9 @@ results/systematics/muonJet20_elecJet50 \
 results/systematics/muonJet25_elecJet15 \
 results/systematics/muonJet25_elecJet35 \
 results/systematics/muonJet25_elecJet50 \
+results/systematics/muonJet30_elecJet15 \
+results/systematics/muonJet30_elecJet35 \
+results/systematics/muonJet30_elecJet50 \
 "
 
 
@@ -95,3 +101,4 @@ for FOLDER in $FAKESFOLDERS; do
     popd
 
 done
+

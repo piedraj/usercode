@@ -10,7 +10,7 @@
 
 ./merge.sh
 
-./runXS.sh
+# ./runXS.sh
 
-./copyFiguresAndTables.sh
+# ./copyFiguresAndTables.sh
 

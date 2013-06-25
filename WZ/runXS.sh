@@ -6,7 +6,7 @@ rm -rf png
 rm -rf tex
 
 
-for ((level=0; level<4; level++))
+for ((level=0; level<9; level++))
   do
   for ((mode=0; mode<2; mode++))
     do

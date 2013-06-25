@@ -99,14 +99,18 @@ TString pdfChannel[nChannel+1] = {
 };
 
 
-const UInt_t nCut = 4;
+const UInt_t nCut = 9;
 
 enum {
-  Exactly3LeptonsM3L,
+  Exactly3Leptons,
+  InvMass3Lep100,
   HasZ,
-  //  PreMET30,
+  HasW,
   MET30,
-  ClosureTest
+  TighterCuts,
+  ZJetsRegion,
+  TopRegion,
+  SmallMET
 };
 
 TString sCut[nCut];
@@ -211,6 +215,7 @@ UInt_t          _mode;
 UInt_t          _wcharge;
 
 vector<UInt_t>   vprocess;
+vector<UInt_t>   vcut;
 
 
 // Save the cross section
@@ -255,6 +260,9 @@ void     CrossSectionRatio        (UInt_t        wchargeNum,
 				   UInt_t        cut);
 
 void     PrintYields              (UInt_t        channel);
+
+TString  PrintProcess             (TString       process_name,
+				   Double_t*     process_yield);
 
 void     PrintSystematics         (UInt_t        cut);
 
@@ -375,24 +383,25 @@ void XS(UInt_t cut     = MET30,
 
     DrawHistogram("hSumCharges", channel, cut, "q_{1} + q_{2} + q_{3}");
 
-    if (draw)
+    if (draw && wcharge == WInclusive)
       {
-	DrawHistogram("hMET",          channel, cut, "E_{T}^{miss}",                           5, 0, "GeV",  linY);
-	DrawHistogram("hInvMass2Lep",  channel, cut, "m_{#font[12]{ll}}",                     -1, 0, "GeV",  linY, 70, 112);
-	DrawHistogram("hInvMass3Lep",  channel, cut, "m_{#font[12]{3l}}",                      5, 0, "GeV",  linY, 60, 350);
-	DrawHistogram("hPtLepton1",    channel, cut, "p_{T}^{first lepton}",                   5, 0, "GeV",  linY);
-	DrawHistogram("hPtLepton2",    channel, cut, "p_{T}^{second lepton}",                  5, 0, "GeV",  linY);
-	DrawHistogram("hPtLepton3",    channel, cut, "p_{T}^{third lepton}",                   5, 0, "GeV",  linY);
-	DrawHistogram("hPtLeadingJet", channel, cut, "p_{T}^{leading jet}",                    5, 0, "GeV",  linY);
-	DrawHistogram("hDPhiZLeptons", channel, cut, "#Delta#phi_{#font[12]{ll}}",            10, 1, "^{o}", linY);
-	DrawHistogram("hPtZLepton1",   channel, cut, "p_{T}^{Z leading lepton}",               5, 0, "GeV",  linY);
-	DrawHistogram("hPtZLepton2",   channel, cut, "p_{T}^{Z trailing lepton}",              5, 0, "GeV",  linY);
-	DrawHistogram("hPtWLepton",    channel, cut, "p_{T}^{W lepton}",                       5, 0, "GeV",  linY);
-	DrawHistogram("hPtZ",          channel, cut, "p_{T}^{Z}",                             10, 0, "GeV",  linY);
-	DrawHistogram("hDRWZLepton1",  channel, cut, "#DeltaR(W lepton, Z leading lepton)",    5, 1, "NULL", linY);
-	DrawHistogram("hDRWZLepton2",  channel, cut, "#DeltaR(W lepton, Z trailing lepton)",   5, 1, "NULL", linY);
-	DrawHistogram("hMtW",          channel, cut, "m_{T}^{W}",                              5, 0, "GeV",  linY);
-	DrawHistogram("hNJet30",       channel, cut, "number of jets (p_{T}^{jet} > 30 GeV)", -1, 0, "NULL", linY, 0, 4);
+	DrawHistogram("hMET",            channel, cut, "E_{T}^{miss}",                           5, 0, "GeV",  linY);
+	DrawHistogram("hInvMass2Lep",    channel, cut, "m_{#font[12]{ll}}",                     -1, 0, "GeV",  linY, 70, 112);
+	DrawHistogram("hInvMass3Lep",    channel, cut, "m_{#font[12]{3l}}",                      5, 0, "GeV",  linY, 60, 350);
+	DrawHistogram("hPtLepton1",      channel, cut, "p_{T}^{first lepton}",                   5, 0, "GeV",  linY);
+	DrawHistogram("hPtLepton2",      channel, cut, "p_{T}^{second lepton}",                  5, 0, "GeV",  linY);
+	DrawHistogram("hPtLepton3",      channel, cut, "p_{T}^{third lepton}",                   5, 0, "GeV",  linY);
+	DrawHistogram("hPtLeadingJet",   channel, cut, "p_{T}^{leading jet}",                    5, 0, "GeV",  linY);
+	DrawHistogram("hDPhiZLeptons",   channel, cut, "#Delta#phi_{#font[12]{ll}}",            10, 1, "rad",  linY);
+	DrawHistogram("hDPhiWLeptonMET", channel, cut, "#Delta#phi(W lepton, E_{T}^{miss})",    10, 1, "rad",  linY);
+	DrawHistogram("hPtZLepton1",     channel, cut, "p_{T}^{Z leading lepton}",               5, 0, "GeV",  linY);
+	DrawHistogram("hPtZLepton2",     channel, cut, "p_{T}^{Z trailing lepton}",              5, 0, "GeV",  linY);
+	DrawHistogram("hPtWLepton",      channel, cut, "p_{T}^{W lepton}",                       5, 0, "GeV",  linY);
+	DrawHistogram("hPtZ",            channel, cut, "p_{T}^{Z}",                             10, 0, "GeV",  linY);
+	DrawHistogram("hDRWZLepton1",    channel, cut, "#DeltaR(W lepton, Z leading lepton)",    5, 1, "NULL", linY);
+	DrawHistogram("hDRWZLepton2",    channel, cut, "#DeltaR(W lepton, Z trailing lepton)",   5, 1, "NULL", linY);
+	DrawHistogram("hMtW",            channel, cut, "m_{T}^{W}",                              5, 0, "GeV",  linY);
+	DrawHistogram("hNJet30",         channel, cut, "number of jets (p_{T}^{jet} > 30 GeV)", -1, 0, "NULL", linY, 0, 4);
       }
   }
 
@@ -636,6 +645,7 @@ void PrintYields(UInt_t channel)
   Double_t nVVV  [nCut];
   Double_t nWV   [nCut];
   Double_t nBkg  [nCut];
+  Double_t nPred [nCut];
   
   for (UInt_t i=0; i<nCut; i++)
     {
@@ -685,28 +695,51 @@ void PrintYields(UInt_t channel)
 
 	  nBkg[i] += nFakes[i];
 	}
+
+      nPred[i] = nBkg[i] + nWZ[i];
     }
 
-  
+
   // Print
   //----------------------------------------------------------------------------
-  if (_mode == MCmode)  {outputfile << Form(" %-20s", "top");         for (UInt_t i=0; i<nCut; i++) outputfile << Form(" & %3.0f $\\pm$ %2.0f", nTop[i],   sqrt(nTop[i]));   outputfile << "\\\\\n";}
-  if (_mode == MCmode)  {outputfile << Form(" %-20s", "Z+jets");      for (UInt_t i=0; i<nCut; i++) outputfile << Form(" & %3.0f $\\pm$ %2.0f", nZJets[i], sqrt(nZJets[i])); outputfile << "\\\\\n";}
-  if (_mode == PPFmode) {outputfile << Form(" %-20s", "data-driven"); for (UInt_t i=0; i<nCut; i++) outputfile << Form(" & %3.0f $\\pm$ %2.0f", nFakes[i], sqrt(nFakes[i])); outputfile << "\\\\\n";}
+  if (_mode == MCmode)  outputfile << PrintProcess("top",         nTop);
+  if (_mode == MCmode)  outputfile << PrintProcess("Z+jets",      nZJets);
+  if (_mode == PPFmode) outputfile << PrintProcess("data-driven", nFakes);
 
-  outputfile << Form(" %-20s", "ZZ");          for (UInt_t i=0; i<nCut; i++) outputfile << Form(" & %3.0f $\\pm$ %2.0f", nZZ[i],  sqrt(nZZ[i]));  outputfile << "\\\\\n";
-  outputfile << Form(" %-20s", "Z$\\gamma$");  for (UInt_t i=0; i<nCut; i++) outputfile << Form(" & %3.0f $\\pm$ %2.0f", nZG[i],  sqrt(nZG[i]));  outputfile << "\\\\\n";
-  outputfile << Form(" %-20s", "WV");          for (UInt_t i=0; i<nCut; i++) outputfile << Form(" & %3.0f $\\pm$ %2.0f", nWV[i],  sqrt(nWV[i]));  outputfile << "\\\\\n";
-  outputfile << Form(" %-20s", "VVV");         for (UInt_t i=0; i<nCut; i++) outputfile << Form(" & %3.0f $\\pm$ %2.0f", nVVV[i], sqrt(nVVV[i])); outputfile << "\\\\\n";
-  outputfile << Form(" %-20s", "backgrounds"); for (UInt_t i=0; i<nCut; i++) outputfile << Form(" & %3.0f $\\pm$ %2.0f", nBkg[i], sqrt(nBkg[i])); outputfile << "\\\\\n";
-  outputfile << Form(" %-20s", "WZ");          for (UInt_t i=0; i<nCut; i++) outputfile << Form(" & %3.0f $\\pm$ %2.0f", nWZ[i],  sqrt(nWZ[i]));  outputfile << "\\\\\n";
+  outputfile << PrintProcess("ZZ",          nZZ);
+  outputfile << PrintProcess("Z$\\gamma$",  nZG);
+  outputfile << PrintProcess("WV",          nWV);
+  outputfile << PrintProcess("VVV",         nVVV);
+  outputfile << PrintProcess("backgrounds", nBkg);
+  outputfile << PrintProcess("WZ",          nWZ);
 
   outputfile << " \\hline\n";
 
-  outputfile << Form(" %-20s", "WZ + backgrounds"); for (UInt_t i=0; i<nCut; i++) outputfile << Form(" & %3.0f $\\pm$ %2.0f", nBkg[i]+nWZ[i], sqrt(nBkg[i]+nWZ[i])); outputfile << "\\\\\n";
-  outputfile << Form(" %-20s", "data");             for (UInt_t i=0; i<nCut; i++) outputfile << Form(" & %3.0f $\\pm$ %2.0f", nData[i],       sqrt(nData[i]));       outputfile << "\\\\\n";
+  outputfile << PrintProcess("WZ + backgrounds", nPred);
+  outputfile << PrintProcess("data",             nData);
 
   outputfile.close();
+}
+
+
+//------------------------------------------------------------------------------
+// PrintProcess
+//------------------------------------------------------------------------------
+TString PrintProcess(TString   process_name,
+		     Double_t* process_yield)
+{
+  TString ts = Form(" %-20s", process_name.Data());
+
+  for (UInt_t j=0; j<vcut.size(); j++)
+    {
+      UInt_t i = vcut.at(j);
+
+      ts += Form(" & %3.0f $\\pm$ %2.0f", process_yield[i], sqrt(process_yield[i]));
+    }
+
+  ts += "\\\\\n";
+
+  return ts;
 }
 
 
@@ -1029,11 +1062,21 @@ void SetParameters(UInt_t cut,
 {
   gROOT->SetBatch();
 
-  sCut[Exactly3LeptonsM3L] = "Exactly3LeptonsM3L";
-  sCut[HasZ]               = "HasZ";
-  //  sCut[PreMET30]           = "PreMET30";
-  sCut[MET30]              = "MET30";
-  sCut[ClosureTest]        = "ClosureTest";
+  sCut[Exactly3Leptons] = "Exactly3Leptons";
+  sCut[InvMass3Lep100]  = "InvMass3Lep100";
+  sCut[HasZ]            = "HasZ";
+  sCut[HasW]            = "HasW";
+  sCut[MET30]           = "MET30";
+  sCut[TighterCuts]     = "TighterCuts";
+  sCut[ZJetsRegion]     = "ZJetsRegion";
+  sCut[TopRegion]       = "TopRegion";
+  sCut[SmallMET]        = "SmallMET";
+
+  vcut.clear();
+
+  vcut.push_back(InvMass3Lep100);
+  vcut.push_back(HasZ);
+  vcut.push_back(MET30);
 
   sProcess[Data]  = "Data";
   sProcess[Fakes] = "Data_PPF";

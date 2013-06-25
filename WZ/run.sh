@@ -104,9 +104,19 @@ if [ ${SYSTEMATIC} == 0 ]; then
 
     done
 
+    for SAMPLE in ${MC_SAMPLES}; do
+    
+	root -l -b -q "runAnalysisWZ.C(\"${SAMPLE}\",${SYSTEMATIC},0)";
+	
+    done
+
 elif [ ${SYSTEMATIC} == 8 ]; then
 
     for SAMPLE in ${DATA_SAMPLES}; do
+
+        root -l -b -q "runAnalysisWZ.C(\"${SAMPLE}\",${SYSTEMATIC},1,10,15)";
+        root -l -b -q "runAnalysisWZ.C(\"${SAMPLE}\",${SYSTEMATIC},1,10,35)";
+        root -l -b -q "runAnalysisWZ.C(\"${SAMPLE}\",${SYSTEMATIC},1,10,50)";
 
         root -l -b -q "runAnalysisWZ.C(\"${SAMPLE}\",${SYSTEMATIC},1,15,15)";
         root -l -b -q "runAnalysisWZ.C(\"${SAMPLE}\",${SYSTEMATIC},1,15,35)";
@@ -119,6 +129,10 @@ elif [ ${SYSTEMATIC} == 8 ]; then
         root -l -b -q "runAnalysisWZ.C(\"${SAMPLE}\",${SYSTEMATIC},1,25,15)";
         root -l -b -q "runAnalysisWZ.C(\"${SAMPLE}\",${SYSTEMATIC},1,25,35)";
         root -l -b -q "runAnalysisWZ.C(\"${SAMPLE}\",${SYSTEMATIC},1,25,50)";
+
+        root -l -b -q "runAnalysisWZ.C(\"${SAMPLE}\",${SYSTEMATIC},1,30,15)";
+        root -l -b -q "runAnalysisWZ.C(\"${SAMPLE}\",${SYSTEMATIC},1,30,35)";
+        root -l -b -q "runAnalysisWZ.C(\"${SAMPLE}\",${SYSTEMATIC},1,30,50)";
 
     done
 

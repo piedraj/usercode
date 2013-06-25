@@ -70,8 +70,8 @@ void drawScaleFactors()
   DrawIt(ElecSF,        "2012 electron SF");
   DrawIt(MuonPR,        "2012 muon PR");
   DrawIt(ElecPR,        "2012 electron PR");
-  DrawIt(MuonFR,        "2012 muon FR jet15");
-  DrawIt(ElecFR,        "2012 electron FR jet15");
+  DrawIt(MuonFR,        "2012 muon FR jet20");
+  DrawIt(ElecFR,        "2012 electron FR jet35");
   DrawIt(DoubleElLead,  "2012 leading electron trigger efficiency");
   DrawIt(DoubleMuLead,  "2012 leading muon trigger efficiency");
   DrawIt(DoubleElTrail, "2012 trailing electron trigger efficiency");
