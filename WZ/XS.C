@@ -8,50 +8,8 @@
 #include "TMatrixD.h"
 
 
-//------------------------------------------------------------------------------
-//
-//  MCFM 6.6
-//
-//------------------------------------------------------------------------------
-//
-//  xs = 13.24 +  7.68 = 20.92 pb                 // Scale x1 ( 85.79 GeV) with 81 < mZ < 101 GeV
-//  xs = 12.72 +  7.37 = 20.09 pb (-0.8 = -4.0%)  // Scale x2 (171.58 GeV) with 81 < mZ < 101 GeV
-//  xs = 13.94 +  8.09 = 22.03 pb (+1.1 = +5.3%)  // Scale /2 ( 42.90 GeV) with 81 < mZ < 101 GeV
-//
-//------------------------------------------------------------------------------
-//
-//  MCFM 6.3
-//
-//------------------------------------------------------------------------------
-//
-// scale systematic
-//
-//  xs = 13.89 + 8.06 = 21.95 pb                 // Scale x1 ( 85.79 GeV) with 71 < mZ < 111 GeV
-//  xs = 13.33 + 7.72 = 21.05 pb (-0.9 = -4.1%)  // Scale x2 (171.58 GeV) with 71 < mZ < 111 GeV
-//  xs = 14.63 + 8.49.= 23.12 pb (+1.2 = +5.3%)  // Scale /2 ( 42.90 GeV) with 71 < mZ < 111 GeV
-//
-//
-// pdf systematic
-// 
-//  xs = 13.89 + 8.06 = 21.95 pb        // 'mstw8nlo' [pdlabel]
-//  xs = 13.68 + 7.61 = 21.29 pb (-3%)  // 'cteq66m'  [pdlabel]
-//
-//
-// test different mZ windows
-//
-//  xs = 20.67 + 12.42 = 33.09 pb  // Scale x1 (-1d0) with 12 < mZ       GeV
-//  xs = 13.89 +  8.06 = 21.95 pb  // Scale x1 (-1d0) with 71 < mZ < 111 GeV
-//  xs = 13.67 +  7.93 = 21.60 pb  // Scale x1 (-1d0) with 76 < mZ < 106 GeV
-//  xs = 13.28 +  7.69 = 20.97 pb  // Scale x1 (-1d0) with 81 < mZ < 101 GeV
-//
-//------------------------------------------------------------------------------
-
-
 // Input parameters for the WZ cross section
 //------------------------------------------------------------------------------
-const Double_t xsWPlusZ  = 13.89;  // pb (MCFM with 71 < mZ < 111 GeV)
-const Double_t xsWMinusZ =  8.06;  // pb (MCFM with 71 < mZ < 111 GeV)
-
 const Double_t ngenWPlusZ  = 906262;  // (71 < mZ < 111 GeV)
 const Double_t ngenWMinusZ = 542805;  // (71 < mZ < 111 GeV)
 
@@ -155,11 +113,9 @@ const Double_t ngenWZ[nCharge] = {
   ngenWMinusZ
 };  
 
-const Double_t xs_nlo[nCharge] = {
-  xsWPlusZ+xsWMinusZ,
-  xsWPlusZ,
-  xsWMinusZ
-};
+const Double_t xs_nlo      [nCharge] = {21.91, 13.86, 8.04};
+const Double_t xs_nlo_left [nCharge] = { 0.88,  0.55, 0.32};
+const Double_t xs_nlo_right[nCharge] = { 1.17,  0.73, 0.44};
 
 
 // Systematics
@@ -381,10 +337,9 @@ void XS(UInt_t cut     = MET30,
     //--------------------------------------------------------------------------
     PrintYields(channel);
 
-    DrawHistogram("hSumCharges", channel, cut, "q_{1} + q_{2} + q_{3}");
-
-    if (draw && wcharge == WInclusive)
+    if (draw)
       {
+	DrawHistogram("hSumCharges",     channel, cut, "q_{1} + q_{2} + q_{3}");
 	DrawHistogram("hMET",            channel, cut, "E_{T}^{miss}",                           5, 0, "GeV",  linY);
 	DrawHistogram("hInvMass2Lep",    channel, cut, "m_{#font[12]{ll}}",                     -1, 0, "GeV",  linY, 70, 112);
 	DrawHistogram("hInvMass3Lep",    channel, cut, "m_{#font[12]{3l}}",                      5, 0, "GeV",  linY, 60, 350);
@@ -1235,6 +1190,12 @@ void MakeOutputDirectory(TString format)
   gSystem->mkdir(format + "/" + _output, kTRUE);
 
   gSystem->Exec(Form("cp index.php %s/%s/.", format.Data(), _output.Data()));
+
+  _output += "/" + sCharge[_wcharge];
+
+  gSystem->mkdir(format + "/" + _output, kTRUE);
+
+  gSystem->Exec(Form("cp index.php %s/%s/.", format.Data(), _output.Data()));
 }
 
 
@@ -1305,12 +1266,21 @@ void DrawCrossSections(UInt_t cut)
   
   // NLO WZ cross-section
   //----------------------------------------------------------------------------
-  TLine* line = new TLine(xs_nlo[_wcharge], ymin, xs_nlo[_wcharge], ymax);
+  TBox* nlo = new TBox(xs_nlo[_wcharge] - xs_nlo_left [_wcharge], ymin,
+		       xs_nlo[_wcharge] + xs_nlo_right[_wcharge], ymax);
 
-  line->SetLineColor(kGray+2);
+  nlo->SetLineColor(0);
+  nlo->SetFillColor(kGray);
+  nlo->SetFillStyle(1001);
+
+  TLine* line = new TLine(xs_nlo[_wcharge], ymin,
+			  xs_nlo[_wcharge], ymax);
+
+  line->SetLineColor(kGray+3);
   line->SetLineStyle(3);
   line->SetLineWidth(3);
 
+  nlo ->Draw("e2,same");
   line->Draw("same");
 
 
