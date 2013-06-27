@@ -366,8 +366,9 @@ void AnalysisWZ(TString  sample,
 
   tgcTree = new TTree("tgcTree", "tgcTree");
 
-  tgcTree->Branch("channel", &theChannel);
-  tgcTree->Branch("ptz",     &ptz);
+  tgcTree->Branch("channel",   &theChannel);
+  tgcTree->Branch("ptz",       &ptz);
+  tgcTree->Branch("xs_weight", &xs_weight);
 
 
   // Histogram definition

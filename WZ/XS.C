@@ -25,35 +25,35 @@ const Double_t WZ23lnu = 3 * Z2ll * (W2e + W2m + W2tau);
 const UInt_t nChannel = 4;
 
 enum {
-  MMM,
   EEE,
-  MME,
   EEM,
+  MME,
+  MMM,
   LLL
 };
 
 TString sChannel[nChannel+1] = {
-  "MMM",
   "EEE",
-  "MME",
   "EEM",
+  "MME",
+  "MMM",
   "LLL"
 };
 
 TString lChannel[nChannel+1] = {
-  "#mu#mu#mu",
   "eee",
-  "#mu#mue",
   "ee#mu",
-  "inclusive"
+  "#mu#mue",
+  "#mu#mu#mu",
+  "combined"
 };
 
 TString pdfChannel[nChannel+1] = {
-  "$\\mu\\mu\\mu$",
   "eee",
-  "$\\mu\\mu$e",
   "ee$\\mu$",
-  "inclusive"
+  "$\\mu\\mu$e",
+  "$\\mu\\mu\\mu$",
+  "combined"
 };
 
 
@@ -250,6 +250,8 @@ void     RelativeSystematics      (UInt_t        channel,
 
 void     DrawCrossSections        (UInt_t        cut);
 
+void     DrawRelativeCrossSections(UInt_t        cut);
+
 void     PrintCrossSections       (UInt_t        cut);
 
 void     PrintRatios              (UInt_t        cut,
@@ -370,6 +372,7 @@ void XS(UInt_t cut     = MET30,
   PrintSystematics(cut);
 
   if (draw) DrawCrossSections(cut);
+  if (draw) DrawRelativeCrossSections(cut);
 
   PrintCrossSections(cut);
 
@@ -1222,9 +1225,9 @@ void DrawCrossSections(UInt_t cut)
 
       gLumi->SetPointError(i, sqrt(errorSquared), 0.0);
 
-      gStat->SetPoint(i, xsValue[i], i+1);
-      gSyst->SetPoint(i, xsValue[i], i+1);
-      gLumi->SetPoint(i, xsValue[i], i+1);
+      gStat->SetPoint(i, xsValue[i], nChannel-i+1);
+      gSyst->SetPoint(i, xsValue[i], nChannel-i+1);
+      gLumi->SetPoint(i, xsValue[i], nChannel-i+1);
     }
 
 
@@ -1340,6 +1343,154 @@ void DrawCrossSections(UInt_t cut)
   canvas->RedrawAxis();
 
   TString xs_name = "xs_" + sCut[cut] + "_" + sCharge[_wcharge];
+
+  canvas->SaveAs(Form("pdf/%s/%s.pdf", _output.Data(), xs_name.Data()));
+  canvas->SaveAs(Form("png/%s/%s.png", _output.Data(), xs_name.Data()));
+}
+
+
+//------------------------------------------------------------------------------
+// DrawRelativeCrossSections
+//------------------------------------------------------------------------------
+void DrawRelativeCrossSections(UInt_t cut)
+{
+  TGraphErrors* gStat = new TGraphErrors(nChannel+1);
+  TGraphErrors* gSyst = new TGraphErrors(nChannel+1);
+  TGraphErrors* gLumi = new TGraphErrors(nChannel+1);
+
+  for (UInt_t i=0; i<=nChannel+1; i++)
+    {
+      Double_t errorSquared = (xsErrorStat[i] * xsErrorStat[i]);
+      
+      gStat->SetPointError(i, sqrt(errorSquared) / xs_nlo[_wcharge], 0.0);
+      
+      errorSquared += (xsErrorSyst[i] * xsErrorSyst[i]);
+
+      gSyst->SetPointError(i, sqrt(errorSquared) / xs_nlo[_wcharge], 0.0);
+
+      errorSquared += (xsErrorLumi[i] * xsErrorLumi[i]);
+
+      gLumi->SetPointError(i, sqrt(errorSquared) / xs_nlo[_wcharge], 0.0);
+
+      gStat->SetPoint(i, xsValue[i] / xs_nlo[_wcharge], nChannel-i+1);
+      gSyst->SetPoint(i, xsValue[i] / xs_nlo[_wcharge], nChannel-i+1);
+      gLumi->SetPoint(i, xsValue[i] / xs_nlo[_wcharge], nChannel-i+1);
+    }
+
+
+  // Cosmetics
+  //----------------------------------------------------------------------------
+  gStat->SetLineWidth  (2);
+  gStat->SetMarkerSize (1.3);
+  gStat->SetMarkerStyle(kFullCircle);
+
+  gSyst->SetLineColor  (kRed);
+  gSyst->SetLineWidth  (2);
+  gSyst->SetMarkerSize (1.3);
+  gSyst->SetMarkerStyle(kFullCircle);
+
+  gLumi->SetLineColor  (kBlue);
+  gLumi->SetLineWidth  (2);
+  gLumi->SetMarkerSize (1.3);
+  gLumi->SetMarkerStyle(kFullCircle);
+
+
+  // Draw
+  //----------------------------------------------------------------------------
+  TCanvas* canvas = new TCanvas("ratioNLO_" + sCut[cut],
+				"ratioNLO_" + sCut[cut]);
+
+  canvas->SetLeftMargin(canvas->GetRightMargin());
+
+  Double_t xmin = 0.6;
+  Double_t xmax = 2.1;
+  Double_t ymin = 0.50;
+  Double_t ymax = nChannel+1 + ymin;
+  
+  TH2F* dummy = new TH2F("dummy_ratioNLO", "",
+			 100, xmin, xmax,
+			 100, ymin, ymax);
+
+  dummy->Draw();
+  
+  
+  // NLO WZ cross-section
+  //----------------------------------------------------------------------------
+  TBox* nlo = new TBox(1. - xs_nlo_left [_wcharge] / xs_nlo[_wcharge], ymin,
+		       1. + xs_nlo_right[_wcharge] / xs_nlo[_wcharge], ymax);
+
+  nlo->SetLineColor(0);
+  nlo->SetFillColor(kGray);
+  nlo->SetFillStyle(1001);
+
+  TLine* line = new TLine(1., ymin, 1., ymax);
+
+  line->SetLineColor(kGray+3);
+  line->SetLineStyle(3);
+  line->SetLineWidth(3);
+
+  nlo ->Draw("e2,same");
+  line->Draw("same");
+
+
+  // Cross sections
+  //----------------------------------------------------------------------------
+  gLumi->Draw("p,same");
+  gSyst->Draw("p,same");
+  gStat->Draw("p,same");
+
+
+  // Labels
+  //----------------------------------------------------------------------------
+  for (UInt_t i=0; i<nChannel+1; i++) {
+
+    Double_t x = gStat->GetX()[i];
+    Double_t y = gStat->GetY()[i];
+
+    DrawTLatex(xmin+0.06, y, 0.035, 12, Form("%s", lChannel[i].Data()), 0);
+
+    Double_t gStatError  = gStat->GetErrorX(i);
+    Double_t gSystError  = gSyst->GetErrorX(i);
+    Double_t gLumiError  = gLumi->GetErrorX(i);
+
+    gLumiError = sqrt(gLumiError*gLumiError - gSystError*gSystError);
+    gSystError = sqrt(gSystError*gSystError - gStatError*gStatError);
+
+    DrawTLatex(xmax-0.06, y, 0.035, 32, Form("%.2f #pm %.2f #pm %.2f #pm %.2f",
+					    x, gStatError, gSystError, gLumiError), 0);
+  }
+
+  DrawTLatex(0.940, 0.983, 0.05, 33,
+	     Form("#sqrt{s} = 8 TeV, L = %.1f fb^{-1}", _luminosity/1e3));
+
+  TString swz = "";
+
+  if      (_wcharge == WPlus)  swz = "W^{+}Z";
+  else if (_wcharge == WMinus) swz = "W^{-}Z";
+  else                         swz = "W^{#pm}Z";
+  
+  dummy->GetXaxis()->CenterTitle();
+  dummy->GetXaxis()->SetTitleOffset(1.4);
+  dummy->GetXaxis()->SetTitle(Form("#sigma_{%s}^{exp} / #sigma_{%s}^{theo}",
+				   swz.Data(),
+				   swz.Data()));
+  dummy->GetYaxis()->SetTitle("");
+
+
+  // Remove y-axis labels
+  //----------------------------------------------------------------------------
+  TAxis* yaxis = dummy->GetYaxis();
+  
+  for (Int_t j=1; j<yaxis->GetNbins(); j++) yaxis->SetBinLabel(j, "");
+
+
+  // Save
+  //----------------------------------------------------------------------------
+  canvas->Update();
+  canvas->GetFrame()->DrawClone();
+  canvas->RedrawAxis();
+
+  TString xs_name = "ratioNLO_" + sCut[cut] + "_" + sCharge[_wcharge];
 
   canvas->SaveAs(Form("pdf/%s/%s.pdf", _output.Data(), xs_name.Data()));
   canvas->SaveAs(Form("png/%s/%s.png", _output.Data(), xs_name.Data()));
