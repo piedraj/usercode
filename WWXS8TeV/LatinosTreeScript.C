@@ -1,6 +1,7 @@
 #include "TChain.h"
 #include "TFile.h"
 #include "TH1F.h"
+#include "TH2F.h"
 #include "TMath.h"
 #include "TSystem.h"
 #include "TTree.h"
@@ -49,10 +50,31 @@ const TString sLevel[nLevels] = {
 };
 
 
+// Declare functions and variables for computing fakes weight
+//------------------------------------------------------------------------------
+TH2F*          LoadHistogram        (TString filename,
+				     TString hname,
+				     TString cname);
+
+Float_t        GetFactor            (TH2F*   h2,
+				     Float_t leptonPt,
+				     Float_t leptonEta,
+				     Float_t leptonPtMax = -999.);
+
+enum {Muon, Electron};
+
+enum {Tight, Fail};
+
+UInt_t  lepton_flavor     [2];  // Muon, Electron
+UInt_t  lepton_type       [2];  // Tight, Fail
+Float_t lepton_fake_rate  [2];
+Float_t lepton_prompt_rate[2];
+
+
 // Member functions
 //------------------------------------------------------------------------------
-void    FillHistograms(UInt_t level,
-		       UInt_t check);
+void           FillHistograms       (UInt_t  level,
+				     UInt_t  check);
 
 
 // Data members
@@ -97,6 +119,13 @@ Float_t totalW;
 
 // Tree variables
 //------------------------------------------------------------------------------
+Float_t bdt1;
+Float_t bdt2;
+Float_t eta1;
+Float_t eta2;
+Float_t pass2012ICHEP1;
+Float_t pass2012ICHEP2;
+
 Float_t baseW;
 Float_t channel;
 Float_t chmet;
@@ -303,6 +332,13 @@ void LatinosTreeScript(Float_t luminosity,
 
   // Declaration of leaf types
   //----------------------------------------------------------------------------
+  tree->SetBranchAddress("bdt1",           &bdt1);
+  tree->SetBranchAddress("bdt2",           &bdt2);
+  tree->SetBranchAddress("eta1",           &eta1);
+  tree->SetBranchAddress("eta2",           &eta2);
+  tree->SetBranchAddress("pass2012ICHEP1", &pass2012ICHEP1);
+  tree->SetBranchAddress("pass2012ICHEP2", &pass2012ICHEP2);
+
   tree->SetBranchAddress("baseW",        &baseW);
   tree->SetBranchAddress("channel",      &channel);
   tree->SetBranchAddress("chmet",        &chmet);
@@ -369,6 +405,14 @@ void LatinosTreeScript(Float_t luminosity,
   else if (flavorChannel == "All" ) SelectedChannel = -1;
 
 
+  // Read fake rates and prompt rates
+  //----------------------------------------------------------------------------
+  TH2F* MuonPR = LoadHistogram("MuPR_Moriond13_2012",           "h2inverted",        "MuonPR");
+  TH2F* ElecPR = LoadHistogram("ElePR_Moriond13_2012",          "h2inverted",        "ElecPR");
+  TH2F* MuonFR = LoadHistogram("MuFR_Moriond13_jet50_EWKcorr",  "FR_pT_eta_EWKcorr", "MuonFR_Jet50");
+  TH2F* ElecFR = LoadHistogram("EleFR_Moriond13_jet50_EWKcorr", "fakeElH2",          "ElecFR_Jet50");
+
+
   //----------------------------------------------------------------------------
   // Loop
   //----------------------------------------------------------------------------
@@ -392,6 +436,84 @@ void LatinosTreeScript(Float_t luminosity,
 	efficiencyW = puW * effW * triggW;
 
 	totalW = (1 + 0.6 * (dataset >= 82 && dataset <= 84)) * baseW * efficiencyW * luminosity;
+      }
+
+
+    // Recompute fakes weight
+    //--------------------------------------------------------------------------
+    Float_t fakes_weight = -999.;
+
+    if (theSample.Contains("WJetsFakes"))
+      {
+	lepton_flavor[0] = (bdt1 < 100.) ? Electron : Muon;
+	lepton_flavor[1] = (bdt2 < 100.) ? Electron : Muon;
+    
+	lepton_type[0] = (pass2012ICHEP1) ? Tight : Fail;
+	lepton_type[1] = (pass2012ICHEP2) ? Tight : Fail;
+
+	if (lepton_flavor[0] == Electron)
+	  {
+	    lepton_fake_rate  [0] = GetFactor(ElecFR, pt1, eta1);
+	    lepton_prompt_rate[0] = GetFactor(ElecPR, pt1, eta1);
+	  }
+	else
+	  {
+	    lepton_fake_rate  [0] = GetFactor(MuonFR, pt1, eta1, 34.);
+	    lepton_prompt_rate[0] = GetFactor(MuonPR, pt1, eta1);
+	  }
+
+	if (lepton_flavor[1] == Electron)
+	  {
+	    lepton_fake_rate  [1] = GetFactor(ElecFR, pt2, eta2);
+	    lepton_prompt_rate[1] = GetFactor(ElecPR, pt2, eta2);
+	  }
+	else
+	  {
+	    lepton_fake_rate  [1] = GetFactor(MuonFR, pt2, eta2, 34.);
+	    lepton_prompt_rate[1] = GetFactor(MuonPR, pt2, eta2);
+	  }
+
+	Float_t promptProbability[2];
+	Float_t fakeProbability[2];
+
+	Int_t tightCounter = 0;
+
+	for (UInt_t i=0; i<2; i++) {
+    
+	  Float_t f = lepton_fake_rate[i];
+
+	  Float_t p = lepton_prompt_rate[i];
+
+	  if (lepton_type[i] == Tight)
+	    {
+	      tightCounter++;
+
+	      promptProbability[i] = p * (1 - f);
+	      fakeProbability[i]   = f * (1 - p);
+	    }
+	  else
+	    {
+	      promptProbability[i] = p * f;
+	      fakeProbability[i]   = p * f;
+	    }
+    
+	  promptProbability[i] /= (p - f);
+	  fakeProbability[i]   /= (p - f);
+	}
+
+	//	Float_t PP_weight = promptProbability[0] * promptProbability[1];
+	Float_t PF_weight = promptProbability[0] * fakeProbability[1] + fakeProbability[0] * promptProbability[1];
+	Float_t FF_weight = fakeProbability[0]   * fakeProbability[1];
+
+	//	Int_t PP_sign = (abs(tightCounter - 2) % 2) ? -1 : 1;
+	Int_t PF_sign = (abs(tightCounter - 1) % 2) ? -1 : 1;
+	Int_t FF_sign = (abs(tightCounter - 0) % 2) ? -1 : 1;
+
+	fakes_weight = 0;
+
+	//	fakes_weight += (PP_sign * PP_weight);
+	fakes_weight += (PF_sign * PF_weight);
+	fakes_weight += (FF_sign * FF_weight);
       }
 
 
@@ -638,4 +760,45 @@ void FillHistograms(UInt_t level, UInt_t check)
   hDeltaRLeptons  [level]->Fill(drll,      totalW);
   hDeltaPhiLeptons[level]->Fill(dphill,    totalW);
   hDPhiPtllJet    [level]->Fill(dphilljet, totalW);
+}
+
+
+//------------------------------------------------------------------------------
+// LoadHistogram
+//------------------------------------------------------------------------------
+TH2F* LoadHistogram(TString filename,
+		    TString hname,
+		    TString cname)
+{
+  TString path = "/nfs/fanae/user/piedra/work/WZ/AuxiliaryFilesWZXS8TeV/";
+
+  TFile* inputfile = TFile::Open(path + filename + ".root");
+
+  TH2F* hist = (TH2F*)inputfile->Get(hname)->Clone(cname);
+  
+  hist->SetDirectory(0);
+  
+  inputfile->Close();
+
+  return hist;
+}
+
+
+//------------------------------------------------------------------------------
+// GetFactor
+//------------------------------------------------------------------------------
+Float_t GetFactor(TH2F*   h2,
+		  Float_t leptonPt,
+		  Float_t leptonEta,
+		  Float_t leptonPtMax)
+{
+  Float_t aeta = fabs(leptonEta);
+
+  Int_t nbins = h2->GetNbinsX();
+
+  Float_t ptMax = (leptonPtMax > 0) ? leptonPtMax : h2->GetXaxis()->GetBinCenter(nbins);
+
+  Float_t factor = h2->GetBinContent(h2->FindBin(TMath::Min(leptonPt, ptMax), aeta));
+
+  return factor;
 }
