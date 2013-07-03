@@ -6,6 +6,9 @@
 #include "DrawFunctions.h"
 
 
+const Float_t _bigLabelSize = 0.04;
+
+
 // Member functions
 //------------------------------------------------------------------------------
 void      DrawIt             (TString title);
@@ -26,7 +29,7 @@ void drawWeights()
   MakeOutputDirectory("pdf");
   MakeOutputDirectory("png");
 
-  wzfile = new TFile("results/analysis/074_WZJetsMad.root");
+  wzfile = new TFile("results-for-approval/analysis/074_WZJetsMad.root");
 
   DrawIt("hLeptonWeight");
   DrawIt("hTriggerWeight");
@@ -96,11 +99,11 @@ void AxisFonts(TAxis* axis, TString title)
 {
   axis->SetLabelFont  (   42);
   axis->SetLabelOffset(0.015);
-  axis->SetLabelSize  (0.050);
   axis->SetNdivisions (  505);
   axis->SetTitleFont  (   42);
   axis->SetTitleOffset(  1.5);
-  axis->SetTitleSize  (0.050);
+  axis->SetLabelSize  (_bigLabelSize);
+  axis->SetTitleSize  (_bigLabelSize);
 
   axis->SetTitle(title);
 }

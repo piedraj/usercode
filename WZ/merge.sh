@@ -3,6 +3,7 @@
 
 FOLDERS="                        \
 results/analysis                 \
+results/atlas                    \
 results/systematics/metUp        \
 results/systematics/metDown      \
 results/systematics/muonUp       \
@@ -17,7 +18,7 @@ for FOLDER in $FOLDERS; do
     
     pushd $FOLDER
 
-    if [ "$FOLDER" = "results/analysis" ]; then
+    if [ "$FOLDER" = "results/analysis" ] || [ "$FOLDER" = "results/atlas" ] ; then
 
 	hadd -f -k Data.root *2012?.root 
     fi
@@ -41,9 +42,9 @@ for FOLDER in $FOLDERS; do
 	051_ZbbToLL.root
 
     hadd -f -k Top.root       \
-	010_TTJetsMad.root    \
 	011_TtWFullDR.root    \
-	012_TbartWFullDR.root
+	012_TbartWFullDR.root \
+	019_TTTo2L2Nu2B
 
     hadd -f -k WV.root            \
 	000_WWJets2LMad.root      \
@@ -51,11 +52,11 @@ for FOLDER in $FOLDERS; do
 	008_GamGamWW.root         \
 	078_WZTo2L2QMad.root      \
 	080_WJetsToLNuMad.root    \
+	081_WbbToLNu.root         \
 	082_WGstarToElNuMad.root  \
 	083_WGstarToMuNuMad.root  \
 	084_WGstarToTauNuMad.root \
-	085_WgammaToLNuG.root     \
-	091_WbbToLNu.root
+	085_WgammaToLNuG.root
 
     hadd -f -k VVV.root   \
 	088_WWGJets.root  \
@@ -74,9 +75,6 @@ done
 
 
 FAKESFOLDERS="
-results/systematics/muonJet10_elecJet15 \
-results/systematics/muonJet10_elecJet35 \
-results/systematics/muonJet10_elecJet50 \
 results/systematics/muonJet15_elecJet15 \
 results/systematics/muonJet15_elecJet35 \
 results/systematics/muonJet15_elecJet50 \
@@ -86,9 +84,6 @@ results/systematics/muonJet20_elecJet50 \
 results/systematics/muonJet25_elecJet15 \
 results/systematics/muonJet25_elecJet35 \
 results/systematics/muonJet25_elecJet50 \
-results/systematics/muonJet30_elecJet15 \
-results/systematics/muonJet30_elecJet35 \
-results/systematics/muonJet30_elecJet50 \
 "
 
 

@@ -61,6 +61,7 @@ MC_SAMPLES="             \
 010_TTJetsMad            \
 011_TtWFullDR            \
 012_TbartWFullDR         \
+019_TTTo2L2Nu2B          \
 036_DY10toLLMad          \
 037_DY50toLLMad          \
 051_ZbbToLL              \
@@ -77,6 +78,7 @@ MC_SAMPLES="             \
 078_WZTo2L2QMad          \
 079_ZZTo2L2QMad          \
 080_WJetsToLNuMad        \
+081_WbbToLNu             \
 082_WGstarToElNuMad      \
 083_WGstarToMuNuMad      \
 084_WGstarToTauNuMad     \
@@ -85,7 +87,6 @@ MC_SAMPLES="             \
 088_WWGJets              \
 089_WZZJets              \
 090_ZZZJets              \
-091_WbbToLNu             \
 091_WWZJets              \
 092_WWWJets              \
 093_TTWJets              \
@@ -100,13 +101,15 @@ if [ ${SYSTEMATIC} == 0 ]; then
 
     for SAMPLE in ${DATA_SAMPLES}; do
 
-        root -l -b -q "runAnalysisWZ.C(\"${SAMPLE}\",${SYSTEMATIC},0)";
+        root -l -b -q "runAnalysisWZ.C(\"${SAMPLE}\",${SYSTEMATIC},0)";  # Nominal selection
+        root -l -b -q "runAnalysisWZ.C(\"${SAMPLE}\",${SYSTEMATIC},2)";  # ATLAS data-driven
 
     done
 
     for SAMPLE in ${MC_SAMPLES}; do
     
-	root -l -b -q "runAnalysisWZ.C(\"${SAMPLE}\",${SYSTEMATIC},0)";
+	root -l -b -q "runAnalysisWZ.C(\"${SAMPLE}\",${SYSTEMATIC},0)";  # Nominal selection
+	root -l -b -q "runAnalysisWZ.C(\"${SAMPLE}\",${SYSTEMATIC},2)";  # ATLAS data-driven
 	
     done
 
@@ -114,9 +117,9 @@ elif [ ${SYSTEMATIC} == 8 ]; then
 
     for SAMPLE in ${DATA_SAMPLES}; do
 
-        root -l -b -q "runAnalysisWZ.C(\"${SAMPLE}\",${SYSTEMATIC},1,10,15)";
-        root -l -b -q "runAnalysisWZ.C(\"${SAMPLE}\",${SYSTEMATIC},1,10,35)";
-        root -l -b -q "runAnalysisWZ.C(\"${SAMPLE}\",${SYSTEMATIC},1,10,50)";
+#        root -l -b -q "runAnalysisWZ.C(\"${SAMPLE}\",${SYSTEMATIC},1,10,15)";
+#        root -l -b -q "runAnalysisWZ.C(\"${SAMPLE}\",${SYSTEMATIC},1,10,35)";
+#        root -l -b -q "runAnalysisWZ.C(\"${SAMPLE}\",${SYSTEMATIC},1,10,50)";
 
         root -l -b -q "runAnalysisWZ.C(\"${SAMPLE}\",${SYSTEMATIC},1,15,15)";
         root -l -b -q "runAnalysisWZ.C(\"${SAMPLE}\",${SYSTEMATIC},1,15,35)";
@@ -130,9 +133,9 @@ elif [ ${SYSTEMATIC} == 8 ]; then
         root -l -b -q "runAnalysisWZ.C(\"${SAMPLE}\",${SYSTEMATIC},1,25,35)";
         root -l -b -q "runAnalysisWZ.C(\"${SAMPLE}\",${SYSTEMATIC},1,25,50)";
 
-        root -l -b -q "runAnalysisWZ.C(\"${SAMPLE}\",${SYSTEMATIC},1,30,15)";
-        root -l -b -q "runAnalysisWZ.C(\"${SAMPLE}\",${SYSTEMATIC},1,30,35)";
-        root -l -b -q "runAnalysisWZ.C(\"${SAMPLE}\",${SYSTEMATIC},1,30,50)";
+#        root -l -b -q "runAnalysisWZ.C(\"${SAMPLE}\",${SYSTEMATIC},1,30,15)";
+#        root -l -b -q "runAnalysisWZ.C(\"${SAMPLE}\",${SYSTEMATIC},1,30,35)";
+#        root -l -b -q "runAnalysisWZ.C(\"${SAMPLE}\",${SYSTEMATIC},1,30,50)";
 
     done
 

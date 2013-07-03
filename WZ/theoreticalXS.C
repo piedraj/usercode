@@ -15,7 +15,7 @@ Double_t xsNegative [3];
 Double_t xsInclusive[3];
 
 
-void theoreticalXS(Bool_t mstw8nlo = false)
+void theoreticalXS(Bool_t mstw8nlo = true)
 {
   if (mstw8nlo)
     {
@@ -24,14 +24,20 @@ void theoreticalXS(Bool_t mstw8nlo = false)
       // -1d0
       xsPositive[0] = 13863.552;  // +/-    14.553 fb
       xsNegative[0] =  8041.464;  // +/-     8.051 fb
+      //      xsPositive[0] = 11248.059;  // +/-    11.817 fb
+      //      xsNegative[0] =  6143.850;  // +/-     6.126 fb
 
       // 171.58 GeV
       xsPositive[1] = 13308.880;  // +/-    14.289 fb
       xsNegative[1] =  7718.715;  // +/-     7.873 fb
+      //      xsPositive[1] = 10786.486;  // +/-    11.161 fb
+      //      xsNegative[1] =  5885.456;  // +/-     6.016 fb
 
       // 42.90 GeV
       xsPositive[2] = 14593.260;  // +/-    15.699 fb
       xsNegative[2] =  8478.544;  // +/-     8.445 fb
+      //      xsPositive[2] = 11846.389;  // +/-    12.557 fb
+      //      xsNegative[2] =  6478.050;  // +/-     6.398 fb
     }
   else
     {

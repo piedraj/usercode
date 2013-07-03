@@ -6,6 +6,9 @@
 #include "DrawFunctions.h"
 
 
+const Float_t _bigLabelSize = 0.04;
+
+
 // Member functions
 //------------------------------------------------------------------------------
 void      DrawIt             (TH2F*   h,
@@ -66,16 +69,16 @@ void drawScaleFactors()
   DoubleElTrail = LoadHistogram("triggerEfficiencies", "DoubleElTrail", "DoubleElTrail");
   DoubleMuTrail = LoadHistogram("triggerEfficiencies", "DoubleMuTrail", "DoubleMuTrail");
 
-  DrawIt(MuonSF,        "2012 muon SF");
-  DrawIt(ElecSF,        "2012 electron SF");
-  DrawIt(MuonPR,        "2012 muon PR");
-  DrawIt(ElecPR,        "2012 electron PR");
-  DrawIt(MuonFR,        "2012 muon FR jet20");
-  DrawIt(ElecFR,        "2012 electron FR jet35");
-  DrawIt(DoubleElLead,  "2012 leading electron trigger efficiency");
-  DrawIt(DoubleMuLead,  "2012 leading muon trigger efficiency");
-  DrawIt(DoubleElTrail, "2012 trailing electron trigger efficiency");
-  DrawIt(DoubleMuTrail, "2012 trailing muon trigger efficiency");
+  DrawIt(MuonSF,        "#sqrt{s} = 8 TeV muon SF");
+  DrawIt(ElecSF,        "#sqrt{s} = 8 TeV electron SF");
+  DrawIt(MuonPR,        "#sqrt{s} = 8 TeV muon PR");
+  DrawIt(ElecPR,        "#sqrt{s} = 8 TeV electron PR");
+  DrawIt(MuonFR,        "#sqrt{s} = 8 TeV muon FR jet20");
+  DrawIt(ElecFR,        "#sqrt{s} = 8 TeV electron FR jet35");
+  DrawIt(DoubleElLead,  "#sqrt{s} = 8 TeV leading electron trigger efficiency");
+  DrawIt(DoubleMuLead,  "#sqrt{s} = 8 TeV leading muon trigger efficiency");
+  DrawIt(DoubleElTrail, "#sqrt{s} = 8 TeV trailing electron trigger efficiency");
+  DrawIt(DoubleMuTrail, "#sqrt{s} = 8 TeV trailing muon trigger efficiency");
 }
 
 
@@ -102,7 +105,7 @@ void DrawIt(TH2F* h, TString title)
 
   h->SetTitle("");
 
-  DrawTLatex(0.940, 0.976, 0.05, 33, title);
+  DrawTLatex(0.940, 0.976, _bigLabelSize, 33, title);
 
   if (!title.Contains("trigger")) {
 
@@ -163,11 +166,11 @@ void AxisFonts(TAxis*  axis,
 {
   axis->SetLabelFont  (   42);
   axis->SetLabelOffset(0.015);
-  axis->SetLabelSize  (0.050);
   axis->SetNdivisions (  505);
   axis->SetTitleFont  (   42);
   axis->SetTitleOffset(  1.5);
-  axis->SetTitleSize  (0.050);
+  axis->SetLabelSize  (_bigLabelSize);
+  axis->SetTitleSize  (_bigLabelSize);
 
   axis->SetTitle(title);
 }

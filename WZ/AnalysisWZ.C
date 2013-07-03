@@ -38,20 +38,22 @@ const Float_t M_MASS =  0.106;     // [GeV]
 const Float_t Z_MASS = 91.1876;    // [GeV]
 
 
-const UInt_t nChannel = 4;
+const UInt_t nChannel = 5;
 
 enum {
-  MMM,
   EEE,
+  EEM,
   MME,
-  EEM
+  MMM,
+  combined
 };
 
 const TString sChannel[nChannel] = {
-  "MMM",
   "EEE",
+  "EEM",
   "MME",
-  "EEM"
+  "MMM",
+  "combined"
 };
 
 
@@ -119,7 +121,7 @@ enum {Muon, Electron};
 
 enum {Fail, Tight};
 
-enum {RAW, PPF};
+enum {RAW, PPF, ATLAS};
 
 
 struct Lepton
@@ -204,6 +206,8 @@ TH1F*                         hTotalWeight  [nChannel][nCut][nCharge];
 
 TH1F*                         hNPV           [nChannel][nCut][nCharge];
 TH1F*                         hMET           [nChannel][nCut][nCharge];
+TH1F*                         hDeltaMET      [nChannel][nCut][nCharge];
+TH1F*                         hDPhiMET       [nChannel][nCut][nCharge];
 TH1F*                         hSumCharges    [nChannel][nCut][nCharge];
 TH1F*                         hInvMass2Lep   [nChannel][nCut][nCharge];
 TH1F*                         hInvMass3Lep   [nChannel][nCut][nCharge];
@@ -246,7 +250,7 @@ Float_t                       WCharge;
 UInt_t                        nElectron;
 UInt_t                        nJet30;
 UInt_t                        nTight;
-UInt_t                        theChannel;
+UInt_t                        reco_channel;
 
 TFile*                        root_output;
 ofstream                      txt_output;
@@ -306,11 +310,15 @@ Float_t                       nextra;
 Float_t                       nvtx;
 Float_t                       pfmet;
 Float_t                       pfmetphi;
+Float_t                       pfmetTypeI;
+Float_t                       pfmetTypeIphi;
 Float_t                       puW;
 Float_t                       trigger;
 Float_t                       bdt          [nobjects];
 Float_t                       ch           [nobjects];
 Float_t                       eta          [nobjects];
+Float_t                       ip           [nobjects];
+Float_t                       isomva       [nobjects];
 Float_t                       jeteta       [nobjects];
 Float_t                       jetphi       [nobjects];
 Float_t                       jetpt        [nobjects];
@@ -319,14 +327,15 @@ Float_t                       phi          [nobjects];
 Float_t                       pt           [nobjects];
 
 
-// Create tree for aTGC
+// Create aTGC tree
 //------------------------------------------------------------------------------
 TTree*                        tgcTree;
 
-Float_t                       ptz;
-
-
-
+Float_t                       gen_channel;
+Float_t                       gen_mZ;
+Float_t                       gen_ptZ;
+Float_t                       reco_mZ;
+Float_t                       reco_ptZ;
 
 
 //==============================================================================
@@ -356,6 +365,8 @@ void AnalysisWZ(TString  sample,
   else if (_systematic == pileupSyst)          _directory += "/systematics/pileup";
   else if (_systematic == fakesSyst)           _directory += Form("/systematics/muonJet%d_elecJet%d", muonJetPt, elecJetPt);
 
+  if (_mode == ATLAS) _directory = directory + "/atlas";
+
   gSystem->mkdir(_directory, kTRUE);
 
   TString filename = _sample;
@@ -364,11 +375,20 @@ void AnalysisWZ(TString  sample,
 
   root_output = new TFile(_directory + "/" + filename + ".root", "recreate");
 
+
+  // Set aTGC tree branches
+  //----------------------------------------------------------------------------
   tgcTree = new TTree("tgcTree", "tgcTree");
 
-  tgcTree->Branch("channel",   &theChannel);
-  tgcTree->Branch("ptz",       &ptz);
-  tgcTree->Branch("xs_weight", &xs_weight);
+  tgcTree->Branch("gen_channel",       &gen_channel);
+  tgcTree->Branch("gen_mZ",            &gen_mZ);
+  tgcTree->Branch("gen_ptZ",           &gen_ptZ);
+  tgcTree->Branch("reco_channel",      &reco_channel);
+  tgcTree->Branch("reco_mZ",           &reco_mZ);
+  tgcTree->Branch("reco_ptZ",          &reco_ptZ);
+  tgcTree->Branch("efficiency_weight", &efficiency_weight);
+  tgcTree->Branch("pu_weight",         &pu_weight);
+  tgcTree->Branch("xs_weight",         &xs_weight);
 
 
   // Histogram definition
@@ -394,26 +414,28 @@ void AnalysisWZ(TString  sample,
 	hTriggerWeight[i][j][iCharge] = new TH1F("hTriggerWeight" + suffix, "", 90, 0.75, 1.05);
 	hTotalWeight  [i][j][iCharge] = new TH1F("hTotalWeight"   + suffix, "", 90, 0.75, 1.05);
 
-	hNPV           [i][j][iCharge] = new TH1F("hNPV"            + suffix, "",  50,  0,  50);
-	hMET           [i][j][iCharge] = new TH1F("hMET"            + suffix, "", 200,  0, 200);
-	hSumCharges    [i][j][iCharge] = new TH1F("hSumCharges"     + suffix, "",   9, -4,   5);
-	hInvMass2Lep   [i][j][iCharge] = new TH1F("hInvMass2Lep"    + suffix, "", 200,  0, 200);
-	hInvMass3Lep   [i][j][iCharge] = new TH1F("hInvMass3Lep"    + suffix, "", 400,  0, 400);
-	hPtLepton1     [i][j][iCharge] = new TH1F("hPtLepton1"      + suffix, "", 200,  0, 200);
-	hPtLepton2     [i][j][iCharge] = new TH1F("hPtLepton2"      + suffix, "", 200,  0, 200);
-	hPtLepton3     [i][j][iCharge] = new TH1F("hPtLepton3"      + suffix, "", 200,  0, 200);    
-	hPtLeadingJet  [i][j][iCharge] = new TH1F("hPtLeadingJet"   + suffix, "", 200,  0, 200);    
-	hDPhiZLeptons  [i][j][iCharge] = new TH1F("hDPhiZLeptons"   + suffix, "", 320,  0, 3.2);    
-	hDPhiWLeptonMET[i][j][iCharge] = new TH1F("hDPhiWLeptonMET" + suffix, "", 320,  0, 3.2);    
-	hPtZLepton1    [i][j][iCharge] = new TH1F("hPtZLepton1"     + suffix, "", 200,  0, 200);
-	hPtZLepton2    [i][j][iCharge] = new TH1F("hPtZLepton2"     + suffix, "", 200,  0, 200);
-	hPtZ           [i][j][iCharge] = new TH1F("hPtZ"            + suffix, "", 400,  0, 400);
-	hPtWLepton     [i][j][iCharge] = new TH1F("hPtWLepton"      + suffix, "", 200,  0, 200);    
-	hDRWZLepton1   [i][j][iCharge] = new TH1F("hDRWZLepton1"    + suffix, "", 200,  0,   6);    
-	hDRWZLepton2   [i][j][iCharge] = new TH1F("hDRWZLepton2"    + suffix, "", 200,  0,   6);    
-	hMtW           [i][j][iCharge] = new TH1F("hMtW"            + suffix, "", 200,  0, 200);    
-	hNJet30        [i][j][iCharge] = new TH1F("hNJet30"         + suffix, "",  10,  0,  10);    
-	hNBJet30       [i][j][iCharge] = new TH1F("hNBJet30"        + suffix, "",  10,  0,  10);    
+	hNPV           [i][j][iCharge] = new TH1F("hNPV"            + suffix, "",  50,   0,  50);
+	hMET           [i][j][iCharge] = new TH1F("hMET"            + suffix, "", 200,   0, 200);
+	hDeltaMET      [i][j][iCharge] = new TH1F("hDeltaMET"       + suffix, "", 300, -30,  30);
+	hDPhiMET       [i][j][iCharge] = new TH1F("hDPhiMET"        + suffix, "", 200,  -1,   1);
+	hSumCharges    [i][j][iCharge] = new TH1F("hSumCharges"     + suffix, "",   9,  -4,   5);
+	hInvMass2Lep   [i][j][iCharge] = new TH1F("hInvMass2Lep"    + suffix, "", 200,   0, 200);
+	hInvMass3Lep   [i][j][iCharge] = new TH1F("hInvMass3Lep"    + suffix, "", 400,   0, 400);
+	hPtLepton1     [i][j][iCharge] = new TH1F("hPtLepton1"      + suffix, "", 200,   0, 200);
+	hPtLepton2     [i][j][iCharge] = new TH1F("hPtLepton2"      + suffix, "", 200,   0, 200);
+	hPtLepton3     [i][j][iCharge] = new TH1F("hPtLepton3"      + suffix, "", 200,   0, 200);    
+	hPtLeadingJet  [i][j][iCharge] = new TH1F("hPtLeadingJet"   + suffix, "", 200,   0, 200);    
+	hDPhiZLeptons  [i][j][iCharge] = new TH1F("hDPhiZLeptons"   + suffix, "", 320,   0, 3.2);    
+	hDPhiWLeptonMET[i][j][iCharge] = new TH1F("hDPhiWLeptonMET" + suffix, "", 320,   0, 3.2);    
+	hPtZLepton1    [i][j][iCharge] = new TH1F("hPtZLepton1"     + suffix, "", 200,   0, 200);
+	hPtZLepton2    [i][j][iCharge] = new TH1F("hPtZLepton2"     + suffix, "", 200,   0, 200);
+	hPtZ           [i][j][iCharge] = new TH1F("hPtZ"            + suffix, "", 400,   0, 400);
+	hPtWLepton     [i][j][iCharge] = new TH1F("hPtWLepton"      + suffix, "", 200,   0, 200);    
+	hDRWZLepton1   [i][j][iCharge] = new TH1F("hDRWZLepton1"    + suffix, "", 200,   0,   6);    
+	hDRWZLepton2   [i][j][iCharge] = new TH1F("hDRWZLepton2"    + suffix, "", 200,   0,   6);    
+	hMtW           [i][j][iCharge] = new TH1F("hMtW"            + suffix, "", 200,   0, 200);    
+	hNJet30        [i][j][iCharge] = new TH1F("hNJet30"         + suffix, "",  10,   0,  10);    
+	hNBJet30       [i][j][iCharge] = new TH1F("hNBJet30"        + suffix, "",  10,   0,  10);    
       }
     }
   }
@@ -470,11 +492,12 @@ void AnalysisWZ(TString  sample,
 
   if (isData)
     {
-      path = "/pool/ciencias/LatinosSkims/ReducedTrees/R53X_S1_V08_S2_V09_S3_V13/Data_LooseLoose/4L";
+      path = "/pool/ciencias/LatinosSkims/ReducedTrees/R53X_S1_V09_S2_V10_S3_V17newJEC/Data_LooseLooseTypeI/";
+
     }
   else
     {
-      path = "/pool/ciencias/LatinosSkims/ReducedTrees/R53X_S1_V09_S2_V10_S3_V17/MC_LooseLoose";
+      path = "/pool/ciencias/LatinosSkims/ReducedTrees/R53X_S1_V09_S2_V10_S3_V17newJEC/MC_LooseLooseTypeI/";
     }
 
   tree->Add(path + "/latino_" + _sample + ".root");
@@ -482,32 +505,52 @@ void AnalysisWZ(TString  sample,
 
   // Tree leaves
   //----------------------------------------------------------------------------
-  tree->SetBranchAddress("run",      &run);
-  tree->SetBranchAddress("baseW",    &baseW);
-  tree->SetBranchAddress("channel",  &channel);
-  tree->SetBranchAddress("chmet",    &chmet);
-  tree->SetBranchAddress("dataset",  &dataset);
-  tree->SetBranchAddress("fakeW",    &fakeW);
-  tree->SetBranchAddress("nbjet",    &nbjet);
-  tree->SetBranchAddress("njet",     &njet);
-  tree->SetBranchAddress("nextra",   &nextra);
-  tree->SetBranchAddress("nvtx",     &nvtx);
-  tree->SetBranchAddress("pfmet",    &pfmet);
-  tree->SetBranchAddress("pfmetphi", &pfmetphi);
-  tree->SetBranchAddress("puW",      &puW);
-  tree->SetBranchAddress("trigger",  &trigger);
+  tree->SetBranchAddress("run",           &run);
+  tree->SetBranchAddress("baseW",         &baseW);
+  tree->SetBranchAddress("channel",       &channel);
+  tree->SetBranchAddress("chmet",         &chmet);
+  tree->SetBranchAddress("dataset",       &dataset);
+  tree->SetBranchAddress("fakeW",         &fakeW);
+  tree->SetBranchAddress("nbjet",         &nbjet);
+  tree->SetBranchAddress("njet",          &njet);
+  tree->SetBranchAddress("nextra",        &nextra);
+  tree->SetBranchAddress("nvtx",          &nvtx);
+  tree->SetBranchAddress("pfmet",         &pfmet);
+  tree->SetBranchAddress("pfmetphi",      &pfmetphi);
+  tree->SetBranchAddress("pfmetTypeI",    &pfmetTypeI);
+  tree->SetBranchAddress("pfmetTypeIphi", &pfmetTypeIphi);
+  tree->SetBranchAddress("puW",           &puW);
+  tree->SetBranchAddress("trigger",       &trigger);
 
   for (UInt_t i=0; i<nobjects; i++)
     {
       tree->SetBranchAddress(Form("bdt%d",           i+1), &bdt          [i]);
       tree->SetBranchAddress(Form("ch%d",            i+1), &ch           [i]);
       tree->SetBranchAddress(Form("eta%d",           i+1), &eta          [i]);
+      tree->SetBranchAddress(Form("ip%d",            i+1), &ip           [i]);
+      tree->SetBranchAddress(Form("isomva%d",        i+1), &isomva       [i]);
       tree->SetBranchAddress(Form("jeteta%d",        i+1), &jeteta       [i]);
       tree->SetBranchAddress(Form("jetphi%d",        i+1), &jetphi       [i]);
       tree->SetBranchAddress(Form("jetpt%d",         i+1), &jetpt        [i]);
       tree->SetBranchAddress(Form("pass2012ICHEP%d", i+1), &pass2012ICHEP[i]);
       tree->SetBranchAddress(Form("phi%d",           i+1), &phi          [i]);
       tree->SetBranchAddress(Form("pt%d",            i+1), &pt           [i]);
+    }
+
+
+  // Leaves for aTGC tree
+  //----------------------------------------------------------------------------
+  if (_sample.Contains("GenVars"))
+    {
+      tree->SetBranchAddress("WZchan", &gen_channel);
+      tree->SetBranchAddress("MZ",     &gen_mZ);
+      tree->SetBranchAddress("PtZ",    &gen_ptZ);
+    }
+  else
+    {
+      gen_channel = -999.;
+      gen_mZ      = -999.;
+      gen_ptZ     = -999.;
     }
 
 
@@ -530,12 +573,17 @@ void AnalysisWZ(TString  sample,
     invMass2Lep    = 999.;
     invMass3Lep    = 999.;
     transverseMass = 999.;
-    ptz            = 0.;
     sumCharges     = 0.;
     WCharge        = 0.;
     nElectron      = 0;
     nJet30         = 0;
     nTight         = 0;
+
+
+    // Reset some aTGC variables
+    //--------------------------------------------------------------------------
+    reco_mZ  = 0.;
+    reco_ptZ = 0.;
 
 
     // GetEntry
@@ -802,11 +850,31 @@ void AnalysisWZ(TString  sample,
 
 	  if (AnalysisLeptons.size() != 3) continue;
 
+	  if (_mode == ATLAS && AnalysisLeptons[i].type != Tight) continue;
+	  if (_mode == ATLAS && AnalysisLeptons[j].type != Tight) continue;
+
 	  for (UInt_t k=0; k<3; k++) {
 	
 	    if (k == i) continue;
 	    if (k == j) continue;
-	    
+
+
+	    // ATLAS data-driven
+	    //------------------------------------------------------------------
+	    if (_mode == ATLAS)
+	      {
+		if (AnalysisLeptons[k].type == Electron)
+		  {
+		    if (fabs(ip[k]) < 0.02) continue;
+		  }
+		if (AnalysisLeptons[k].type == Muon)
+		  {
+		    Float_t ipcut = (pt[k] < 20.) ? 0.01 : 0.02;
+
+		    if (fabs(ip[k]) < ipcut) continue;
+		  }
+	      }
+
 	    WLepton = AnalysisLeptons[k].v;
 
 	    WCharge = AnalysisLeptons[k].charge;
@@ -857,10 +925,10 @@ void AnalysisWZ(TString  sample,
 
     invMass3Lep = (AnalysisLeptons[0].v + AnalysisLeptons[1].v + AnalysisLeptons[2].v).M();
 
-    if      (nElectron == 0) theChannel = MMM;
-    else if (nElectron == 1) theChannel = MME;
-    else if (nElectron == 2) theChannel = EEM;
-    else if (nElectron == 3) theChannel = EEE;
+    if      (nElectron == 0) reco_channel = MMM;
+    else if (nElectron == 1) reco_channel = MME;
+    else if (nElectron == 2) reco_channel = EEM;
+    else if (nElectron == 3) reco_channel = EEE;
 
 
     // Apply lepton SF and trigger efficiencies
@@ -900,26 +968,31 @@ void AnalysisWZ(TString  sample,
 
     // Fill histograms
     //--------------------------------------------------------------------------
-    FillHistograms(theChannel, Exactly3Leptons);
+    FillHistograms(reco_channel, Exactly3Leptons);
+    FillHistograms(combined,     Exactly3Leptons);
 
     if (invMass3Lep <= 100.) continue;
 
-    FillHistograms(theChannel, InvMass3Lep100);
+    FillHistograms(reco_channel, InvMass3Lep100);
+    FillHistograms(combined,     InvMass3Lep100);
 
     if (ZLepton1.Pt() <= 20.) continue;
 
     if (fabs(invMass2Lep - Z_MASS) > 25. && nJet30 > 1 && nbjet > 0 && EventMET.Et() > 40)
       {
-	FillHistograms(theChannel, TopRegion);
+	FillHistograms(reco_channel, TopRegion);
+	FillHistograms(combined,     TopRegion);
       }
 
     if (fabs(invMass2Lep - Z_MASS) >= 20.) continue;
     
-    FillHistograms(theChannel, HasZ);
+    FillHistograms(reco_channel, HasZ);
+    FillHistograms(combined,     HasZ);
 
     if (EventMET.Et() < 35.)
       {
-	FillHistograms(theChannel, SmallMET);
+	FillHistograms(reco_channel, SmallMET);
+	FillHistograms(combined,     SmallMET);
       }
 
     if (WLepton.DeltaR(ZLepton1) <= 0.1) continue;
@@ -927,24 +1000,33 @@ void AnalysisWZ(TString  sample,
 
     if (fabs(invMass2Lep - Z_MASS) < 15. && EventMET.Et() < 20.)
       {
-	FillHistograms(theChannel, ZJetsRegion);
+	FillHistograms(reco_channel, ZJetsRegion);
+	FillHistograms(combined,     ZJetsRegion);
       }
 
     if (WLepton.Pt() <= 20.) continue;
 
-    FillHistograms(theChannel, HasW);
+    FillHistograms(reco_channel, HasW);
+    FillHistograms(combined,     HasW);
 
     if (EventMET.Et() <= 30.) continue;
 
-    FillHistograms(theChannel, MET30);
+    FillHistograms(reco_channel, MET30);
+    FillHistograms(combined,     MET30);
 
-    ptz = (ZLepton1 + ZLepton2).Pt();
 
+    // Fill aTGC tree
+    //--------------------------------------------------------------------------
+    reco_mZ  = invMass2Lep;
+    reco_ptZ = (ZLepton1 + ZLepton2).Pt();
+    
     tgcTree->Fill();
+    
 
     if (AnalysisLeptons[2].v.Pt() > 20. && WLepton.Pt() > 25. && EventMET.Et() > 40.)
       {
-	FillHistograms(theChannel, TighterCuts);
+	FillHistograms(reco_channel, TighterCuts);
+	FillHistograms(combined,    TighterCuts);
       }
   }
 
@@ -984,6 +1066,8 @@ void FillHistograms(UInt_t iChannel, UInt_t iCut)
   Float_t deltaPhiWLeptonMET = WLepton.DeltaPhi(EventMET);
   Float_t deltaR1            = WLepton.DeltaR(ZLepton1);
   Float_t deltaR2            = WLepton.DeltaR(ZLepton2);
+  Float_t deltaMET           = pfmet - pfmetTypeI;
+  Float_t deltaPhiMET        = pfmetphi - pfmetTypeIphi;
 
   for (UInt_t iCharge=0; iCharge<nCharge; iCharge++)
     {
@@ -1004,13 +1088,19 @@ void FillHistograms(UInt_t iChannel, UInt_t iCut)
 
       // MC weight histograms
       //------------------------------------------------------------------------
-      hLeptonWeight [theChannel][iCut][iCharge]->Fill(mc_lepton_weight,  pu_weight);
-      hTriggerWeight[theChannel][iCut][iCharge]->Fill(mc_trigger_weight, pu_weight);
-      hTotalWeight  [theChannel][iCut][iCharge]->Fill(mc_total_weight,   pu_weight);
+      hLeptonWeight [reco_channel][iCut][iCharge]->Fill(mc_lepton_weight,  pu_weight);
+      hTriggerWeight[reco_channel][iCut][iCharge]->Fill(mc_trigger_weight, pu_weight);
+      hTotalWeight  [reco_channel][iCut][iCharge]->Fill(mc_total_weight,   pu_weight);
 
 
       // Analysis histograms
       //------------------------------------------------------------------------
+      if (pfmet > 20 && pfmetTypeI > 20)
+	{
+	  hDeltaMET[iChannel][iCut][iCharge]->Fill(deltaMET,    hweight);
+	  hDPhiMET [iChannel][iCut][iCharge]->Fill(deltaPhiMET, hweight);
+	}
+
       hNPV           [iChannel][iCut][iCharge]->Fill(nvtx,                       hweight);
       hMET           [iChannel][iCut][iCharge]->Fill(EventMET.Et(),              hweight);
       hSumCharges    [iChannel][iCut][iCharge]->Fill(sumCharges,                 hweight);
@@ -1297,12 +1387,13 @@ void CounterSummary(TString title)
 {
   txt_output << Form("\n %30s [%s]\n", " ", title.Data());
 
-  txt_output << Form("\n %23s %10s %10s %10s %10s\n",
+  txt_output << Form("\n %23s %10s %10s %10s %10s %10s\n",
 		     " ",
 		     sChannel[0].Data(),
 		     sChannel[1].Data(),
 		     sChannel[2].Data(),
-		     sChannel[3].Data());
+		     sChannel[3].Data(),
+		     sChannel[4].Data());
 
   for (UInt_t i=0; i<nCut; i++) {
       

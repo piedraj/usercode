@@ -137,6 +137,9 @@ void SetAxis(TH1*    hist,
 	     Float_t size,
 	     Float_t offset)
 {
+  gPad->cd();
+  gPad->Update();
+
   TAxis* xaxis = (TAxis*)hist->GetXaxis();
   TAxis* yaxis = (TAxis*)hist->GetYaxis();
 

@@ -6,32 +6,19 @@
 #include "DrawFunctions.h"
 
 
+const Float_t _bigLabelSize = 0.04;
+
+
 // Member functions
 //------------------------------------------------------------------------------
-void     AxisFonts         (TAxis*        axis,
+void    AxisFonts          (TAxis*        axis,
 			    TString       title);
-
-//TLegend* DrawLegend        (Float_t       x1,
-//			    Float_t       y1,
-//			    TObject*      hist,
-//			    TString       label,
-//			    TString       option  = "p",
-//			    Float_t       tsize   = 0.04,
-//			    Float_t       xoffset = 0.20,
-//			    Float_t       yoffset = 0.07);
 
 void    MakeOutputDirectory(TString       format);
 
 void    SetGraph           (TGraphErrors* g,
 			    Color_t       color,
 			    Style_t       style);
-
-//void    DrawTLatex         (Double_t      x,
-//			    Double_t      y,
-//			    Double_t      tsize,
-//			    Short_t       align,
-//			    const char*   text,
-//			    Bool_t        setndc = true);
 
 
 void drawElectronScaleSystematic()
@@ -61,6 +48,8 @@ void drawElectronScaleSystematic()
   AxisFonts(xaxis, "electron p_{T} [GeV]");
   AxisFonts(yaxis, "#Deltam(data - simulation) / m");
 
+  yaxis->CenterTitle();
+
   gScaleInEB->SetMinimum(-0.023);
   gScaleInEB->SetMaximum( 0.010);
 
@@ -81,8 +70,8 @@ void drawElectronScaleSystematic()
 
   // CMS titles
   //----------------------------------------------------------------------------
-  //  DrawTLatex(0.185, 0.975, 0.05, 13, "CMS Preliminary");
-  DrawTLatex(0.940, 0.983, 0.05, 33, "#sqrt{s} = 8 TeV, L = 19.6 fb^{-1}");
+  DrawTLatex(0.185, 0.975, _bigLabelSize, 13, "CMS Preliminary");
+  DrawTLatex(0.940, 0.983, _bigLabelSize, 33, "#sqrt{s} = 8 TeV, L = 19.6 fb^{-1}");
 
 
   c1->SaveAs("pdf/scale_factors/electronScaleUncertainties.pdf");
@@ -97,45 +86,15 @@ void AxisFonts(TAxis* axis, TString title)
 {
   axis->SetLabelFont  (   42);
   axis->SetLabelOffset(0.015);
-  axis->SetLabelSize  (0.050);
   axis->SetNdivisions (  505);
   axis->SetTitleFont  (   42);
-  axis->SetTitleSize  (0.050);
+  axis->SetLabelSize  (_bigLabelSize);
+  axis->SetTitleSize  (_bigLabelSize);
 
   (title.Contains("[GeV]")) ? axis->SetTitleOffset(1.45) : axis->SetTitleOffset(1.8);
 
   axis->SetTitle(title);
 }
-
-
-//------------------------------------------------------------------------------
-// DrawLegend
-//------------------------------------------------------------------------------
-//TLegend* DrawLegend(Float_t  x1,
-//		    Float_t  y1,
-//		    TObject* hist,
-//		    TString  label,
-//		    TString  option,
-//		    Float_t  tsize,
-//		    Float_t  xoffset,
-//		    Float_t  yoffset)
-//{
-//  TLegend* legend = new TLegend(x1,
-//				y1,
-//				x1 + xoffset,
-//				y1 + yoffset);
-//  
-//  legend->SetBorderSize(    0);
-//  legend->SetFillColor (    0);
-//  legend->SetTextAlign (   12);
-//  legend->SetTextFont  (   42);
-//  legend->SetTextSize  (tsize);
-//
-//  legend->AddEntry(hist, label.Data(), option.Data());
-//  legend->Draw();
-//
-//  return legend;
-//}
 
 
 //------------------------------------------------------------------------------
@@ -165,23 +124,3 @@ void SetGraph(TGraphErrors* g,
   g->SetMarkerStyle(style);
 }
 
-
-//------------------------------------------------------------------------------
-// DrawTLatex
-//------------------------------------------------------------------------------
-//void DrawTLatex(Double_t    x,
-//		Double_t    y,
-//		Double_t    tsize,
-//		Short_t     align,
-//		const char* text,
-//		Bool_t      setndc)
-//{
-//  TLatex* tl = new TLatex(x, y, text);
-//
-//  tl->SetNDC      (setndc);
-//  tl->SetTextAlign( align);
-//  tl->SetTextFont (    42);
-//  tl->SetTextSize ( tsize);
-//
-//  tl->Draw("same");
-//}
