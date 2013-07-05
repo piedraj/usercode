@@ -546,7 +546,7 @@ void CrossSection(Double_t& xsVal,
 	    nWZ = process_yield;
 
 	    if (syst == qcdSyst) nWZ *= (1. + 0.016);
-	    if (syst == pdfSyst) nWZ *= (1. + 0.007);
+	    if (syst == pdfSyst) nWZ *= (1. + 0.014);
 	  }
 	else
 	  {
@@ -1720,7 +1720,7 @@ void RelativeSystematics(UInt_t channel, UInt_t cut)
 	}
 
       if (syst == qcdSyst) {systematicError[channel][WZ][syst] =  1.6; continue;}
-      if (syst == pdfSyst) {systematicError[channel][WZ][syst] =  0.7; continue;}
+      if (syst == pdfSyst) {systematicError[channel][WZ][syst] =  1.4; continue;}
       if (syst == zzSyst)  {systematicError[channel][ZZ][syst] = 15.0; continue;}
       if (syst == zgSyst)  {systematicError[channel][ZG][syst] = 15.0; continue;}
 
