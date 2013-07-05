@@ -221,6 +221,7 @@ TH1F*                         hPtZLepton1    [nChannel][nCut][nCharge];
 TH1F*                         hPtZLepton2    [nChannel][nCut][nCharge];
 TH1F*                         hPtZ           [nChannel][nCut][nCharge];
 TH1F*                         hPtWLepton     [nChannel][nCut][nCharge];
+TH1F*                         hPtW           [nChannel][nCut][nCharge];
 TH1F*                         hDRWZLepton1   [nChannel][nCut][nCharge];
 TH1F*                         hDRWZLepton2   [nChannel][nCut][nCharge];
 TH1F*                         hMtW           [nChannel][nCut][nCharge];
@@ -431,6 +432,7 @@ void AnalysisWZ(TString  sample,
 	hPtZLepton2    [i][j][iCharge] = new TH1F("hPtZLepton2"     + suffix, "", 200,   0, 200);
 	hPtZ           [i][j][iCharge] = new TH1F("hPtZ"            + suffix, "", 400,   0, 400);
 	hPtWLepton     [i][j][iCharge] = new TH1F("hPtWLepton"      + suffix, "", 200,   0, 200);    
+	hPtW           [i][j][iCharge] = new TH1F("hPtW"            + suffix, "", 400,   0, 400);
 	hDRWZLepton1   [i][j][iCharge] = new TH1F("hDRWZLepton1"    + suffix, "", 200,   0,   6);    
 	hDRWZLepton2   [i][j][iCharge] = new TH1F("hDRWZLepton2"    + suffix, "", 200,   0,   6);    
 	hMtW           [i][j][iCharge] = new TH1F("hMtW"            + suffix, "", 200,   0, 200);    
@@ -1116,6 +1118,7 @@ void FillHistograms(UInt_t iChannel, UInt_t iCut)
       hPtZLepton2    [iChannel][iCut][iCharge]->Fill(ZLepton2.Pt(),              hweight);
       hPtZ           [iChannel][iCut][iCharge]->Fill((ZLepton1 + ZLepton2).Pt(), hweight);
       hPtWLepton     [iChannel][iCut][iCharge]->Fill(WLepton.Pt(),               hweight);
+      hPtW           [iChannel][iCut][iCharge]->Fill((WLepton + EventMET).Pt(),  hweight);
       hDRWZLepton1   [iChannel][iCut][iCharge]->Fill(deltaR1,                    hweight);
       hDRWZLepton2   [iChannel][iCut][iCharge]->Fill(deltaR2,                    hweight);
       hMtW           [iChannel][iCut][iCharge]->Fill(transverseMass,             hweight);

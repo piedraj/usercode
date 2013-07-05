@@ -278,7 +278,7 @@ Double_t RatioError               (Double_t      a,
 // XS
 //------------------------------------------------------------------------------
 void XS(UInt_t cut     = MET30,
-	UInt_t mode    = MCmode,
+	UInt_t mode    = PPFmode,
 	UInt_t wcharge = WInclusive)
 {
   SetParameters(cut, mode, wcharge);
@@ -352,6 +352,7 @@ void XS(UInt_t cut     = MET30,
     DrawHistogram("hPtZLepton2",     channel, cut, "p_{T}^{Z trailing lepton}",              5, 0, "GeV",  linY);
     DrawHistogram("hPtWLepton",      channel, cut, "p_{T}^{W lepton}",                       5, 0, "GeV",  linY);
     DrawHistogram("hPtZ",            channel, cut, "p_{T}^{Z}",                             10, 0, "GeV",  linY);
+    DrawHistogram("hPtW",            channel, cut, "p_{T}^{W}",                             10, 0, "GeV",  linY);
     DrawHistogram("hDRWZLepton1",    channel, cut, "#DeltaR(W lepton, Z leading lepton)",    5, 1, "NULL", linY);
     DrawHistogram("hDRWZLepton2",    channel, cut, "#DeltaR(W lepton, Z trailing lepton)",   5, 1, "NULL", linY);
     DrawHistogram("hMtW",            channel, cut, "m_{T}^{W}",                              5, 0, "GeV",  linY);
@@ -431,6 +432,7 @@ void XS(UInt_t cut     = MET30,
   DrawHistogram("hPtZLepton2",     combined, cut, "p_{T}^{Z trailing lepton}",              5, 0, "GeV",  linY);
   DrawHistogram("hPtWLepton",      combined, cut, "p_{T}^{W lepton}",                       5, 0, "GeV",  linY);
   DrawHistogram("hPtZ",            combined, cut, "p_{T}^{Z}",                             10, 0, "GeV",  linY);
+  DrawHistogram("hPtW",            combined, cut, "p_{T}^{W}",                             10, 0, "GeV",  linY);
   DrawHistogram("hDRWZLepton1",    combined, cut, "#DeltaR(W lepton, Z leading lepton)",    5, 1, "NULL", linY);
   DrawHistogram("hDRWZLepton2",    combined, cut, "#DeltaR(W lepton, Z trailing lepton)",   5, 1, "NULL", linY);
   DrawHistogram("hMtW",            combined, cut, "m_{T}^{W}",                              5, 0, "GeV",  linY);
@@ -1106,7 +1108,7 @@ void SetParameters(UInt_t cut,
   _wcharge   = wcharge;
   _localpath = GuessLocalBasePath();
 
-  _datapath = Form("%s/piedra/work/WZ/results-for-approval",
+  _datapath = Form("%s/piedra/work/WZ/results",
 		   _localpath.Data());
 
   _analysis = "analysis";
