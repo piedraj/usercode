@@ -3,11 +3,11 @@
 
 const UInt_t nChannel = 4;
 
-TString sChannel[nChannel] = {"MMM", "EEE", "MME", "EEM"};
+TString sChannel[nChannel] = {"EEE", "EEM", "MME", "MMM"};
 
 
-Double_t dataMinusMc[nChannel] = {106.7, 26.3, 66.6, 28.8};  // From XS.C
-Double_t dataPPF    [nChannel] = { 56.5, 13.9, 45.5, 27.7};  // From XS.C
+Double_t dataMinusMc[nChannel] = {30.2, 30.7, 65.8, 107.6};  // From XS.C
+Double_t dataPPF    [nChannel] = {14.8, 27.1, 47.9,  59.0};  // From XS.C
 
 Double_t zjetsMc [nChannel];
 Double_t zjetsPPF[nChannel];
@@ -21,7 +21,7 @@ void upgrades()
 
   for (UInt_t channel=0; channel<nChannel; channel++) {
 
-    TString hname = "hCounter_" + sChannel[channel] + "_ClosureTest_WInclusive_LLL";
+    TString hname = "hCounter_" + sChannel[channel] + "_ZJetsRegion_WInclusive_LLL";
 
     zjetsMc[channel] = Yield((TH1D*)file->Get(hname));
 

@@ -1,13 +1,6 @@
 #include "DrawFunctions.h"
 
 
-const UInt_t nEcm = 2;
-
-enum {ecm7TeV, ecm8TeV};
-
-TString sEcm[nEcm] = {"7", "8"};
-
-
 const UInt_t nCharge = 3;
 
 enum {WInclusive, WPlus, WMinus};
@@ -24,9 +17,9 @@ TString sChannel[nChannel] = {"EEE", "EEM", "MME", "MMM", "combined"};
 TString lChannel[nChannel] = {"eee", "ee#mu", "#mu#mue", "#mu#mu#mu", "combined"};
 
 
-Double_t xs_nlo      [nEcm][nCharge] = {{17.8, 11.39, 6.40}, {21.91, 13.86, 8.04}};  // pb
-Double_t xs_nlo_left [nEcm][nCharge] = {{ 0.5,  0.49, 0.27}, { 0.88,  0.55, 0.32}};  // pb
-Double_t xs_nlo_right[nEcm][nCharge] = {{ 0.7,  0.60, 0.37}, { 1.17,  0.73, 0.44}};  // pb
+Double_t xs_nlo      [nCharge] = {17.8, 11.39, 6.40};  // pb
+Double_t xs_nlo_left [nCharge] = { 0.5,  0.49, 0.27};  // pb
+Double_t xs_nlo_right[nCharge] = { 0.7,  0.60, 0.37};  // pb
 
 
 Double_t xs_value[nCharge][nChannel];  // pb
@@ -35,7 +28,7 @@ Double_t xs_syst [nCharge][nChannel];  // pb
 Double_t xs_lumi [nCharge][nChannel];  // pb
 
 
-Double_t luminosity[nEcm] = {4920., 19602.0};  // pb-1
+Double_t luminosity = 4920.;  // pb-1
 
 
 const Float_t _bigLabelSize = 0.04;
@@ -46,176 +39,90 @@ const Float_t _bigLabelSize = 0.04;
 // drawXS
 //
 //------------------------------------------------------------------------------
-void drawXS(UInt_t theEcm    = ecm7TeV,
-	    UInt_t theCharge = WInclusive)
+void drawXS(UInt_t theCharge = WInclusive)
 {
   gStyle->SetEndErrorSize(5);
 
-  if (theEcm == ecm7TeV)
-    {
-      // 7 TeV inclusive
-      //------------------------------------------------------------------------
-      xs_value[WInclusive][EEE] = 23.00;
-      xs_value[WInclusive][EEM] = 19.67;
-      xs_value[WInclusive][MME] = 19.81;
-      xs_value[WInclusive][MMM] = 21.02;
-      xs_value[WInclusive][all] = 20.76;
-      
-      xs_stat[WInclusive][EEE] = 3.10;
-      xs_stat[WInclusive][EEM] = 2.73;
-      xs_stat[WInclusive][MME] = 2.60;
-      xs_stat[WInclusive][MMM] = 2.30;
-      xs_stat[WInclusive][all] = 1.32;
 
-      xs_syst[WInclusive][EEE] = 1.39;
-      xs_syst[WInclusive][EEM] = 1.50;
-      xs_syst[WInclusive][MME] = 1.55;
-      xs_syst[WInclusive][MMM] = 1.47;
-      xs_syst[WInclusive][all] = 1.13;
-      
-      xs_lumi[WInclusive][EEE] = 0.51;
-      xs_lumi[WInclusive][EEM] = 0.43;
-      xs_lumi[WInclusive][MME] = 0.44;
-      xs_lumi[WInclusive][MMM] = 0.46;
-      xs_lumi[WInclusive][all] = 0.46;
-
-
-      // 7 TeV W+
-      //------------------------------------------------------------------------
-      xs_value[WPlus][EEE] = 13.39;
-      xs_value[WPlus][EEM] = 13.18;
-      xs_value[WPlus][MME] = 14.14;
-      xs_value[WPlus][MMM] = 11.43;
-      xs_value[WPlus][all] = 12.73;
-
-      xs_stat[WPlus][EEE] = 2.39;
-      xs_stat[WPlus][EEM] = 2.24;
-      xs_stat[WPlus][MME] = 2.19;
-      xs_stat[WPlus][MMM] = 1.71;
-      xs_stat[WPlus][all] = 1.04;
-
-      xs_syst[WPlus][EEE] = 0.75;
-      xs_syst[WPlus][EEM] = 0.64;
-      xs_syst[WPlus][MME] = 0.74;
-      xs_syst[WPlus][MMM] = 0.53;
-      xs_syst[WPlus][all] = 0.59;
-
-      xs_lumi[WPlus][EEE] = 0.29;
-      xs_lumi[WPlus][EEM] = 0.29;
-      xs_lumi[WPlus][MME] = 0.31;
-      xs_lumi[WPlus][MMM] = 0.25;
-      xs_lumi[WPlus][all] = 0.28;
-
-
-      // 7 TeV W-
-      //------------------------------------------------------------------------
-      xs_value[WMinus][EEE] = 9.49;
-      xs_value[WMinus][EEM] = 6.51;
-      xs_value[WMinus][MME] = 5.73;
-      xs_value[WMinus][MMM] = 9.48;
-      xs_value[WMinus][all] = 7.46;
-
-      xs_stat[WMinus][EEE] = 1.95;
-      xs_stat[WMinus][EEM] = 1.58;
-      xs_stat[WMinus][MME] = 1.40;
-      xs_stat[WMinus][MMM] = 1.52;
-      xs_stat[WMinus][all] = 0.79;
-
-      xs_syst[WMinus][EEE] = 0.60;
-      xs_syst[WMinus][EEM] = 0.37;
-      xs_syst[WMinus][MME] = 0.37;
-      xs_syst[WMinus][MMM] = 0.50;
-      xs_syst[WMinus][all] = 0.40;
-
-      xs_lumi[WMinus][EEE] = 0.21;
-      xs_lumi[WMinus][EEM] = 0.14;
-      xs_lumi[WMinus][MME] = 0.13;
-      xs_lumi[WMinus][MMM] = 0.21;
-      xs_lumi[WMinus][all] = 0.16;
-
-    }
-  else if (theEcm == ecm8TeV)
-    {
-      // 8 TeV inclusive
-      //------------------------------------------------------------------------
-      xs_value[WInclusive][EEE] = 24.92;
-      xs_value[WInclusive][EEM] = 23.42;
-      xs_value[WInclusive][MME] = 24.40;
-      xs_value[WInclusive][MMM] = 25.71;
-      xs_value[WInclusive][all] = 24.68;
-
-      xs_stat[WInclusive][EEE] = 1.83;
-      xs_stat[WInclusive][EEM] = 1.59;
-      xs_stat[WInclusive][MME] = 1.46;
-      xs_stat[WInclusive][MMM] = 1.27;
-      xs_stat[WInclusive][all] = 0.76;
-
-      xs_syst[WInclusive][EEE] = 1.27;
-      xs_syst[WInclusive][EEM] = 1.12;
-      xs_syst[WInclusive][MME] = 1.33;
-      xs_syst[WInclusive][MMM] = 1.23;
-      xs_syst[WInclusive][all] = 1.18;
-      
-      xs_lumi[WInclusive][EEE] = 1.10;
-      xs_lumi[WInclusive][EEM] = 1.03;
-      xs_lumi[WInclusive][MME] = 1.07;
-      xs_lumi[WInclusive][MMM] = 1.13;
-      xs_lumi[WInclusive][all] = 1.09;
-
-
-      // 8 TeV W+
-      //------------------------------------------------------------------------
-      xs_value[WPlus][EEE] = 15.27;
-      xs_value[WPlus][EEM] = 15.35;
-      xs_value[WPlus][MME] = 16.46;
-      xs_value[WPlus][MMM] = 16.55;
-      xs_value[WPlus][all] = 15.98;
-
-      xs_stat[WPlus][EEE] = 1.43;
-      xs_stat[WPlus][EEM] = 1.28;
-      xs_stat[WPlus][MME] = 1.19;
-      xs_stat[WPlus][MMM] = 1.02;
-      xs_stat[WPlus][all] = 0.61;
-
-      xs_syst[WPlus][EEE] = 0.66;
-      xs_syst[WPlus][EEM] = 0.59;
-      xs_syst[WPlus][MME] = 0.75;
-      xs_syst[WPlus][MMM] = 0.73;
-      xs_syst[WPlus][all] = 0.65;
-
-      xs_lumi[WPlus][EEE] = 0.67;
-      xs_lumi[WPlus][EEM] = 0.68;
-      xs_lumi[WPlus][MME] = 0.72;
-      xs_lumi[WPlus][MMM] = 0.73;
-      xs_lumi[WPlus][all] = 0.70;
-
-
-      // 8 TeV W-
-      //------------------------------------------------------------------------
-      xs_value[WMinus][EEE] = 9.63;
-      xs_value[WMinus][EEM] = 8.11;
-      xs_value[WMinus][MME] = 8.01;
-      xs_value[WMinus][MMM] = 9.18;
-      xs_value[WMinus][all] = 8.68;
-
-      xs_stat[WMinus][EEE] = 1.13;
-      xs_stat[WMinus][EEM] = 0.95;
-      xs_stat[WMinus][MME] = 0.85;
-      xs_stat[WMinus][MMM] = 0.77;
-      xs_stat[WMinus][all] = 0.45;
-
-      xs_syst[WMinus][EEE] = 0.46;
-      xs_syst[WMinus][EEM] = 0.38;
-      xs_syst[WMinus][MME] = 0.43;
-      xs_syst[WMinus][MMM] = 0.41;
-      xs_syst[WMinus][all] = 0.39;
-
-      xs_lumi[WMinus][EEE] = 0.42;
-      xs_lumi[WMinus][EEM] = 0.36;
-      xs_lumi[WMinus][MME] = 0.35;
-      xs_lumi[WMinus][MMM] = 0.40;
-      xs_lumi[WMinus][all] = 0.38;
-    }
+  // 7 TeV inclusive
+  //----------------------------------------------------------------------------
+  xs_value[WInclusive][EEE] = 23.00;
+  xs_value[WInclusive][EEM] = 19.67;
+  xs_value[WInclusive][MME] = 19.81;
+  xs_value[WInclusive][MMM] = 21.02;
+  xs_value[WInclusive][all] = 20.76;
+  
+  xs_stat[WInclusive][EEE] = 3.10;
+  xs_stat[WInclusive][EEM] = 2.73;
+  xs_stat[WInclusive][MME] = 2.60;
+  xs_stat[WInclusive][MMM] = 2.30;
+  xs_stat[WInclusive][all] = 1.32;
+  
+  xs_syst[WInclusive][EEE] = 1.39;
+  xs_syst[WInclusive][EEM] = 1.50;
+  xs_syst[WInclusive][MME] = 1.55;
+  xs_syst[WInclusive][MMM] = 1.47;
+  xs_syst[WInclusive][all] = 1.13;
+  
+  xs_lumi[WInclusive][EEE] = 0.51;
+  xs_lumi[WInclusive][EEM] = 0.43;
+  xs_lumi[WInclusive][MME] = 0.44;
+  xs_lumi[WInclusive][MMM] = 0.46;
+  xs_lumi[WInclusive][all] = 0.46;
+  
+  
+  // 7 TeV W+
+  //----------------------------------------------------------------------------
+  xs_value[WPlus][EEE] = 13.39;
+  xs_value[WPlus][EEM] = 13.18;
+  xs_value[WPlus][MME] = 14.14;
+  xs_value[WPlus][MMM] = 11.43;
+  xs_value[WPlus][all] = 12.73;
+  
+  xs_stat[WPlus][EEE] = 2.39;
+  xs_stat[WPlus][EEM] = 2.24;
+  xs_stat[WPlus][MME] = 2.19;
+  xs_stat[WPlus][MMM] = 1.71;
+  xs_stat[WPlus][all] = 1.04;
+  
+  xs_syst[WPlus][EEE] = 0.75;
+  xs_syst[WPlus][EEM] = 0.64;
+  xs_syst[WPlus][MME] = 0.74;
+  xs_syst[WPlus][MMM] = 0.53;
+  xs_syst[WPlus][all] = 0.59;
+  
+  xs_lumi[WPlus][EEE] = 0.29;
+  xs_lumi[WPlus][EEM] = 0.29;
+  xs_lumi[WPlus][MME] = 0.31;
+  xs_lumi[WPlus][MMM] = 0.25;
+  xs_lumi[WPlus][all] = 0.28;
+  
+  
+  // 7 TeV W-
+  //----------------------------------------------------------------------------
+  xs_value[WMinus][EEE] = 9.49;
+  xs_value[WMinus][EEM] = 6.51;
+  xs_value[WMinus][MME] = 5.73;
+  xs_value[WMinus][MMM] = 9.48;
+  xs_value[WMinus][all] = 7.46;
+  
+  xs_stat[WMinus][EEE] = 1.95;
+  xs_stat[WMinus][EEM] = 1.58;
+  xs_stat[WMinus][MME] = 1.40;
+  xs_stat[WMinus][MMM] = 1.52;
+  xs_stat[WMinus][all] = 0.79;
+  
+  xs_syst[WMinus][EEE] = 0.60;
+  xs_syst[WMinus][EEM] = 0.37;
+  xs_syst[WMinus][MME] = 0.37;
+  xs_syst[WMinus][MMM] = 0.50;
+  xs_syst[WMinus][all] = 0.40;
+  
+  xs_lumi[WMinus][EEE] = 0.21;
+  xs_lumi[WMinus][EEM] = 0.14;
+  xs_lumi[WMinus][MME] = 0.13;
+  xs_lumi[WMinus][MMM] = 0.21;
+  xs_lumi[WMinus][all] = 0.16;
 
 
   // Do the work
@@ -228,19 +135,19 @@ void drawXS(UInt_t theEcm    = ecm7TeV,
     {
       Double_t errorSquared = (xs_stat[theCharge][i] * xs_stat[theCharge][i]);
 
-      gStat->SetPointError(i, sqrt(errorSquared) / xs_nlo[theEcm][theCharge], 0.0);
+      gStat->SetPointError(i, sqrt(errorSquared) / xs_nlo[theCharge], 0.0);
       
       errorSquared += (xs_syst[theCharge][i] * xs_syst[theCharge][i]);
 
-      gSyst->SetPointError(i, sqrt(errorSquared) / xs_nlo[theEcm][theCharge], 0.0);
+      gSyst->SetPointError(i, sqrt(errorSquared) / xs_nlo[theCharge], 0.0);
 
       errorSquared += (xs_lumi[theCharge][i] * xs_lumi[theCharge][i]);
 
-      gLumi->SetPointError(i, sqrt(errorSquared) / xs_nlo[theEcm][theCharge], 0.0);
+      gLumi->SetPointError(i, sqrt(errorSquared) / xs_nlo[theCharge], 0.0);
 
-      gStat->SetPoint(i, xs_value[theCharge][i] / xs_nlo[theEcm][theCharge], nChannel-i-1);
-      gSyst->SetPoint(i, xs_value[theCharge][i] / xs_nlo[theEcm][theCharge], nChannel-i-1);
-      gLumi->SetPoint(i, xs_value[theCharge][i] / xs_nlo[theEcm][theCharge], nChannel-i-1);
+      gStat->SetPoint(i, xs_value[theCharge][i] / xs_nlo[theCharge], nChannel-i-1);
+      gSyst->SetPoint(i, xs_value[theCharge][i] / xs_nlo[theCharge], nChannel-i-1);
+      gLumi->SetPoint(i, xs_value[theCharge][i] / xs_nlo[theCharge], nChannel-i-1);
     }
 
 
@@ -263,7 +170,7 @@ void drawXS(UInt_t theEcm    = ecm7TeV,
 
   // Draw
   //----------------------------------------------------------------------------
-  TString suffix = sEcm[theEcm] + "TeV_" + sCharge[theCharge];
+  TString suffix = "7TeV_" + sCharge[theCharge];
 
   TCanvas* canvas = new TCanvas("ratioNLO_" + suffix, "ratioNLO_" + suffix);
 
@@ -281,8 +188,8 @@ void drawXS(UInt_t theEcm    = ecm7TeV,
   
   // NLO WZ cross-section
   //----------------------------------------------------------------------------
-  TBox* nlo = new TBox(1. - xs_nlo_left [theEcm][theCharge] / xs_nlo[theEcm][theCharge], ymin,
-		       1. + xs_nlo_right[theEcm][theCharge] / xs_nlo[theEcm][theCharge], ymax);
+  TBox* nlo = new TBox(1. - xs_nlo_left [theCharge] / xs_nlo[theCharge], ymin,
+		       1. + xs_nlo_right[theCharge] / xs_nlo[theCharge], ymax);
 
   nlo->SetLineColor(0);
   nlo->SetFillColor(kGray);
@@ -331,8 +238,7 @@ void drawXS(UInt_t theEcm    = ecm7TeV,
   DrawTLatex(0.050, 0.975, _bigLabelSize, 13, "CMS Preliminary");
 
   DrawTLatex(0.940, 0.983, _bigLabelSize, 33, 
-	     Form("#sqrt{s} = %s TeV, L = %.1f fb^{-1}",
-		  sEcm[theEcm].Data(), luminosity[theEcm]/1e3));
+	     Form("#sqrt{s} = 7 TeV, L = %.1f fb^{-1}", luminosity/1e3));
 
   TString swz = "";
 

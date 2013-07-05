@@ -222,7 +222,8 @@ void     CrossSectionRatio        (UInt_t        wchargeNum,
 void     PrintYields              (UInt_t        channel);
 
 TString  PrintProcess             (TString       process_name,
-				   Double_t*     process_yield);
+				   Double_t*     process_yield,
+				   Double_t*     process_error);
 
 void     PrintSystematics         (UInt_t        cut);
 
@@ -466,7 +467,9 @@ void CrossSection(Double_t& xsVal,
 
     Double_t process_yield = Yield((TH1D*)input[j]->Get(prefix + suffix));
 
-    Double_t eStat = sqrt(process_yield);
+    Double_t eStat = ((TH1D*)input[j]->Get(prefix + suffix))->GetSumw2()->GetSum();
+
+    eStat = sqrt(eStat);
 
     if (j != Data && j != WZ) ebkg += (eStat * eStat);
 
@@ -640,6 +643,18 @@ void PrintYields(UInt_t channel)
   Double_t nWV   [nCut];
   Double_t nBkg  [nCut];
   Double_t nPred [nCut];
+
+  Double_t eData [nCut];
+  Double_t eFakes[nCut];
+  Double_t eWZ   [nCut];
+  Double_t eZZ   [nCut];
+  Double_t eZG   [nCut];
+  Double_t eTop  [nCut];
+  Double_t eZJets[nCut];
+  Double_t eVVV  [nCut];
+  Double_t eWV   [nCut];
+  Double_t eBkg  [nCut];
+  Double_t ePred [nCut];
   
   for (UInt_t i=0; i<nCut; i++)
     {
@@ -653,6 +668,19 @@ void PrintYields(UInt_t channel)
       nVVV  [i] = 0.;
       nWV   [i] = 0.;
       nBkg  [i] = 0.;
+      nPred [i] = 0.;
+
+      eData [i] = 0.;
+      eFakes[i] = 0.;
+      eWZ   [i] = 0.;
+      eZZ   [i] = 0.;
+      eZG   [i] = 0.;
+      eTop  [i] = 0.;
+      eZJets[i] = 0.;
+      eVVV  [i] = 0.;
+      eWV   [i] = 0.;
+      eBkg  [i] = 0.;
+      ePred [i] = 0.;
   
       TH1D* hist[nProcess];
 
@@ -676,41 +704,76 @@ void PrintYields(UInt_t channel)
 
       nBkg[i] = nZZ[i] + nZG[i] + nVVV[i] + nWV[i];
 
+      eData[i] = hist[Data]->GetSumw2()->GetSum();
+      eWZ  [i] = hist[WZ]  ->GetSumw2()->GetSum();
+      eZZ  [i] = hist[ZZ]  ->GetSumw2()->GetSum();
+      eZG  [i] = hist[ZG]  ->GetSumw2()->GetSum();
+      eVVV [i] = hist[VVV] ->GetSumw2()->GetSum();
+      eWV  [i] = hist[WV]  ->GetSumw2()->GetSum();
+
+      eBkg[i] = eZZ[i] + eZG[i] + eVVV[i] + eWV[i];
+
       if (_mode == MCmode)
 	{
 	  nTop  [i] = Yield(hist[Top]);
 	  nZJets[i] = Yield(hist[ZJets]);
 
 	  nBkg[i] += nTop[i] + nZJets[i];
+
+	  eTop  [i] = hist[Top]  ->GetSumw2()->GetSum();
+	  eZJets[i] = hist[ZJets]->GetSumw2()->GetSum();
+
+	  eBkg[i] += eTop[i] + eZJets[i];
 	}
       else if (_mode == PPFmode)
 	{
 	  nFakes[i] = Yield(hist[Fakes]);
 
 	  nBkg[i] += nFakes[i];
+
+	  eFakes[i] = hist[Fakes]->GetSumw2()->GetSum();
+
+	  eBkg[i] += eFakes[i];
 	}
 
       nPred[i] = nBkg[i] + nWZ[i];
+
+      ePred[i] = eBkg[i] + eWZ[i];
+
+
+      // Get the sqrt of the errors
+      //------------------------------------------------------------------------
+      eData [i] = sqrt(eData [i]);
+      eFakes[i] = sqrt(eFakes[i]);
+      eWZ   [i] = sqrt(eWZ   [i]);
+      eZZ   [i] = sqrt(eZZ   [i]);
+      eZG   [i] = sqrt(eZG   [i]);
+      eTop  [i] = sqrt(eTop  [i]);
+      eZJets[i] = sqrt(eZJets[i]);
+      eVVV  [i] = sqrt(eVVV  [i]);
+      eWV   [i] = sqrt(eWV   [i]);
+      eBkg  [i] = sqrt(eBkg  [i]);
+      ePred [i] = sqrt(ePred [i]);
     }
 
 
   // Print
   //----------------------------------------------------------------------------
-  if (_mode == MCmode)  outputfile << PrintProcess("top",         nTop);
-  if (_mode == MCmode)  outputfile << PrintProcess("Z+jets",      nZJets);
-  if (_mode == PPFmode) outputfile << PrintProcess("data-driven", nFakes);
+  if (_mode == MCmode)  outputfile << PrintProcess("top",         nTop,   eTop);
+  if (_mode == MCmode)  outputfile << PrintProcess("Z+jets",      nZJets, eZJets);
+  if (_mode == PPFmode) outputfile << PrintProcess("data-driven", nFakes, eFakes);
 
-  outputfile << PrintProcess("ZZ",          nZZ);
-  outputfile << PrintProcess("Z$\\gamma$",  nZG);
-  outputfile << PrintProcess("WV",          nWV);
-  outputfile << PrintProcess("VVV",         nVVV);
-  outputfile << PrintProcess("backgrounds", nBkg);
-  outputfile << PrintProcess("WZ",          nWZ);
+  outputfile << PrintProcess("ZZ",          nZZ,  eZZ);
+  outputfile << PrintProcess("Z$\\gamma$",  nZG,  eZG);
+  outputfile << PrintProcess("WV",          nWV,  eWV);
+  outputfile << PrintProcess("VVV",         nVVV, eVVV);
+  outputfile << PrintProcess("backgrounds", nBkg, eBkg);
+  outputfile << PrintProcess("WZ",          nWZ,  eWZ);
 
   outputfile << " \\hline\n";
 
-  outputfile << PrintProcess("WZ + backgrounds", nPred);
-  outputfile << PrintProcess("data",             nData);
+  outputfile << PrintProcess("WZ + backgrounds", nPred, ePred);
+  outputfile << PrintProcess("data",             nData, eData);
 
   outputfile.close();
 }
@@ -720,7 +783,8 @@ void PrintYields(UInt_t channel)
 // PrintProcess
 //------------------------------------------------------------------------------
 TString PrintProcess(TString   process_name,
-		     Double_t* process_yield)
+		     Double_t* process_yield,
+		     Double_t* process_error)
 {
   TString ts = Form(" %-20s", process_name.Data());
 
@@ -728,7 +792,7 @@ TString PrintProcess(TString   process_name,
     {
       UInt_t i = vcut.at(j);
 
-      ts += Form(" & %3.0f $\\pm$ %2.0f", process_yield[i], sqrt(process_yield[i]));
+      ts += Form(" & %3.0f $\\pm$ %2.0f", process_yield[i], process_error[i]);
     }
 
   ts += "\\\\\n";
@@ -1108,7 +1172,7 @@ void SetParameters(UInt_t cut,
   _wcharge   = wcharge;
   _localpath = GuessLocalBasePath();
 
-  _datapath = Form("%s/piedra/work/WZ/results",
+  _datapath = Form("%s/piedra/work/WZ/results-for-approval",
 		   _localpath.Data());
 
   _analysis = "analysis";

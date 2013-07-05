@@ -1,16 +1,19 @@
 #!/bin/bash
 
 
-FOLDERS="                        \
-results/analysis                 \
-results/atlas                    \
-results/systematics/metUp        \
-results/systematics/metDown      \
-results/systematics/muonUp       \
-results/systematics/muonDown     \
-results/systematics/electronUp   \
-results/systematics/electronDown \
-results/systematics/pileup       \
+BASE_FOLDER="results-for-approval"
+
+
+FOLDERS="                             \
+$BASE_FOLDER/analysis                 \
+$BASE_FOLDER/atlas                    \
+$BASE_FOLDER/systematics/metUp        \
+$BASE_FOLDER/systematics/metDown      \
+$BASE_FOLDER/systematics/muonUp       \
+$BASE_FOLDER/systematics/muonDown     \
+$BASE_FOLDER/systematics/electronUp   \
+$BASE_FOLDER/systematics/electronDown \
+$BASE_FOLDER/systematics/pileup       \
 "
 
 
@@ -18,7 +21,7 @@ for FOLDER in $FOLDERS; do
     
     pushd $FOLDER
 
-    if [ "$FOLDER" = "results/analysis" ] || [ "$FOLDER" = "results/atlas" ] ; then
+    if [ "$FOLDER" = "$BASE_FOLDER/analysis" ] || [ "$FOLDER" = "$BASE_FOLDER/atlas" ] ; then
 
 	hadd -f -k Data.root *2012?.root 
     fi
@@ -44,7 +47,7 @@ for FOLDER in $FOLDERS; do
     hadd -f -k Top.root       \
 	011_TtWFullDR.root    \
 	012_TbartWFullDR.root \
-	019_TTTo2L2Nu2B
+	019_TTTo2L2Nu2B.root
 
     hadd -f -k WV.root            \
 	000_WWJets2LMad.root      \
@@ -74,20 +77,20 @@ for FOLDER in $FOLDERS; do
 done
 
 
-FAKESFOLDERS="
-results/systematics/muonJet15_elecJet15 \
-results/systematics/muonJet15_elecJet35 \
-results/systematics/muonJet15_elecJet50 \
-results/systematics/muonJet20_elecJet15 \
-results/systematics/muonJet20_elecJet35 \
-results/systematics/muonJet20_elecJet50 \
-results/systematics/muonJet25_elecJet15 \
-results/systematics/muonJet25_elecJet35 \
-results/systematics/muonJet25_elecJet50 \
+DATADRIVEN_FOLDERS="
+$BASE_FOLDER/systematics/muonJet15_elecJet15 \
+$BASE_FOLDER/systematics/muonJet15_elecJet35 \
+$BASE_FOLDER/systematics/muonJet15_elecJet50 \
+$BASE_FOLDER/systematics/muonJet20_elecJet15 \
+$BASE_FOLDER/systematics/muonJet20_elecJet35 \
+$BASE_FOLDER/systematics/muonJet20_elecJet50 \
+$BASE_FOLDER/systematics/muonJet25_elecJet15 \
+$BASE_FOLDER/systematics/muonJet25_elecJet35 \
+$BASE_FOLDER/systematics/muonJet25_elecJet50 \
 "
 
 
-for FOLDER in $FAKESFOLDERS; do
+for FOLDER in $DATADRIVEN_FOLDERS; do
     
     pushd $FOLDER
     
