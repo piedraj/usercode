@@ -158,7 +158,7 @@ Double_t systematicError[nChannel+1][nProcess][nSystematic];
 
 enum {linY, logY};
 
-enum {MCmode, PPFmode};
+enum {PPFmode, MCmode};
 
 
 // Settings

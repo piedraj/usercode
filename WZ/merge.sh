@@ -78,6 +78,9 @@ done
 
 
 DATADRIVEN_FOLDERS="
+$BASE_FOLDER/systematics/muonJet10_elecJet15 \
+$BASE_FOLDER/systematics/muonJet10_elecJet35 \
+$BASE_FOLDER/systematics/muonJet10_elecJet50 \
 $BASE_FOLDER/systematics/muonJet15_elecJet15 \
 $BASE_FOLDER/systematics/muonJet15_elecJet35 \
 $BASE_FOLDER/systematics/muonJet15_elecJet50 \
@@ -87,6 +90,9 @@ $BASE_FOLDER/systematics/muonJet20_elecJet50 \
 $BASE_FOLDER/systematics/muonJet25_elecJet15 \
 $BASE_FOLDER/systematics/muonJet25_elecJet35 \
 $BASE_FOLDER/systematics/muonJet25_elecJet50 \
+$BASE_FOLDER/systematics/muonJet30_elecJet15 \
+$BASE_FOLDER/systematics/muonJet30_elecJet35 \
+$BASE_FOLDER/systematics/muonJet30_elecJet50 \
 "
 
 
