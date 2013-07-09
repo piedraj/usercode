@@ -1514,34 +1514,33 @@ void DrawRelativeCrossSections(UInt_t cut)
 
   canvas->SetLeftMargin(canvas->GetRightMargin());
 
-  Double_t xmin = 0.0;
-  Double_t xmax = 2.0;
-  Double_t ymin = 0.50;
-  Double_t ymax = nChannel+1 + ymin;
+  Double_t xmin    = 0.0;
+  Double_t xmax    = 2.0;
+  Double_t ylegend = 1.2;
+  Double_t ymin    = 0.4;
+  Double_t ymax    = nChannel+1 + ymin + ylegend;
   
-  TH2F* dummy = new TH2F("dummy_ratioNLO", "",
-			 100, xmin, xmax,
-			 100, ymin, ymax);
+  TH2F* h2 = new TH2F("h2_ratioNLO", "", 100, xmin, xmax, 100, ymin, ymax);
 
-  dummy->Draw();
+  h2->Draw();
   
   
   // NLO WZ cross-section
   //----------------------------------------------------------------------------
   TBox* nlo = new TBox(1. - xs_nlo_left [_wcharge] / xs_nlo[_wcharge], ymin,
-		       1. + xs_nlo_right[_wcharge] / xs_nlo[_wcharge], ymax);
+		       1. + xs_nlo_right[_wcharge] / xs_nlo[_wcharge], ymax - ylegend);
 
   nlo->SetLineColor(0);
   nlo->SetFillColor(kGray);
   nlo->SetFillStyle(1001);
 
-  TLine* line = new TLine(1., ymin, 1., ymax);
+  nlo->Draw("e2,same");
 
-  line->SetLineColor(kGray+3);
-  line->SetLineStyle(3);
-  line->SetLineWidth(3);
+  TLine* line = new TLine(1., ymin, 1., ymax - ylegend);
 
-  nlo ->Draw("e2,same");
+  line->SetLineColor(kGray+1);
+  line->SetLineWidth(2);
+
   line->Draw("same");
 
 
@@ -1559,9 +1558,9 @@ void DrawRelativeCrossSections(UInt_t cut)
     Double_t x = gStat->GetX()[i];
     Double_t y = gStat->GetY()[i];
 
-    Double_t gStatError  = gStat->GetErrorX(i);
-    Double_t gSystError  = gSyst->GetErrorX(i);
-    Double_t gLumiError  = gLumi->GetErrorX(i);
+    Double_t gStatError = gStat->GetErrorX(i);
+    Double_t gSystError = gSyst->GetErrorX(i);
+    Double_t gLumiError = gLumi->GetErrorX(i);
 
     DrawTLatex(xmin+0.06, y+0.15, 0.035, 12,
 	       Form("%s %.2f #pm %.2f",
@@ -1569,7 +1568,7 @@ void DrawRelativeCrossSections(UInt_t cut)
 
     gLumiError = sqrt(gLumiError*gLumiError - gSystError*gSystError);
     gSystError = sqrt(gSystError*gSystError - gStatError*gStatError);
-
+    
     DrawTLatex(xmin+0.06, y-0.15, 0.025, 12,
 	       Form("%.2f #pm %.2f #pm %.2f #pm %.2f",
 		    x, gStatError, gSystError, gLumiError), 0);
@@ -1586,19 +1585,27 @@ void DrawRelativeCrossSections(UInt_t cut)
   else if (_wcharge == WMinus) swz = "W^{-}Z";
   else                         swz = "W^{#pm}Z";
   
-  dummy->GetXaxis()->CenterTitle();
-  dummy->GetXaxis()->SetTitleOffset(1.4);
-  dummy->GetXaxis()->SetTitle(Form("#sigma_{%s}^{exp} / #sigma_{%s}^{NLO}",
+  h2->GetXaxis()->CenterTitle();
+  h2->GetXaxis()->SetTitleOffset(1.4);
+  h2->GetXaxis()->SetTitle(Form("#sigma_{%s}^{exp} / #sigma_{%s}^{NLO}",
 				   swz.Data(),
 				   swz.Data()));
-  dummy->GetYaxis()->SetTitle("");
+  h2->GetYaxis()->SetTitle("");
 
 
   // Remove y-axis labels
   //----------------------------------------------------------------------------
-  TAxis* yaxis = dummy->GetYaxis();
+  TAxis* yaxis = h2->GetYaxis();
   
   for (Int_t j=1; j<yaxis->GetNbins(); j++) yaxis->SetBinLabel(j, "");
+
+
+  // Additional legend
+  //----------------------------------------------------------------------------
+  DrawLegend(0.645, 0.840, gStat, " stat.",  "lp");
+  DrawLegend(0.645, 0.795, nlo,   " theory", "f");
+  DrawLegend(0.800, 0.840, gSyst, " syst.",  "l");
+  DrawLegend(0.800, 0.795, gLumi, " lumi.",  "l");
 
 
   // Save

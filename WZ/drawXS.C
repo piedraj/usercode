@@ -176,10 +176,11 @@ void drawXS(UInt_t theCharge = WInclusive)
 
   canvas->SetLeftMargin(canvas->GetRightMargin());
 
-  Double_t xmin =  0.0;
-  Double_t xmax =  2.0;
-  Double_t ymin = -0.5;
-  Double_t ymax = nChannel - 0.5;
+  Double_t xmin    =  0.0;
+  Double_t xmax    =  2.0;
+  Double_t ylegend =  1.2;
+  Double_t ymin    = -0.6;
+  Double_t ymax    = nChannel + ymin + ylegend;
   
   TH2F* h2 = new TH2F("h2_" + suffix, "", 100, xmin, xmax, 100, ymin, ymax);
 
@@ -189,19 +190,19 @@ void drawXS(UInt_t theCharge = WInclusive)
   // NLO WZ cross-section
   //----------------------------------------------------------------------------
   TBox* nlo = new TBox(1. - xs_nlo_left [theCharge] / xs_nlo[theCharge], ymin,
-		       1. + xs_nlo_right[theCharge] / xs_nlo[theCharge], ymax);
+		       1. + xs_nlo_right[theCharge] / xs_nlo[theCharge], ymax - ylegend);
 
   nlo->SetLineColor(0);
   nlo->SetFillColor(kGray);
   nlo->SetFillStyle(1001);
 
-  TLine* line = new TLine(1., ymin, 1., ymax);
+  nlo->Draw("e2,same");
 
-  line->SetLineColor(kGray+3);
-  line->SetLineStyle(3);
-  line->SetLineWidth(3);
+  TLine* line = new TLine(1., ymin, 1., ymax - ylegend);
 
-  nlo ->Draw("e2,same");
+  line->SetLineColor(kGray+1);
+  line->SetLineWidth(2);
+
   line->Draw("same");
 
 
@@ -219,9 +220,9 @@ void drawXS(UInt_t theCharge = WInclusive)
     Double_t x = gStat->GetX()[i];
     Double_t y = gStat->GetY()[i];
 
-    Double_t gStatError  = gStat->GetErrorX(i);
-    Double_t gSystError  = gSyst->GetErrorX(i);
-    Double_t gLumiError  = gLumi->GetErrorX(i);
+    Double_t gStatError = gStat->GetErrorX(i);
+    Double_t gSystError = gSyst->GetErrorX(i);
+    Double_t gLumiError = gLumi->GetErrorX(i);
 
     DrawTLatex(xmin+0.06, y+0.15, 0.035, 12,
 	       Form("%s %.2f #pm %.2f",
@@ -248,9 +249,10 @@ void drawXS(UInt_t theCharge = WInclusive)
   
   h2->GetXaxis()->CenterTitle();
   h2->GetXaxis()->SetTitleOffset(1.4);
-  h2->GetXaxis()->SetTitle(Form("#sigma_{%s}^{exp} / #sigma_{%s}^{theo}",
+  h2->GetXaxis()->SetTitle(Form("#sigma_{%s}^{exp} / #sigma_{%s}^{theory}",
 				   swz.Data(),
 				   swz.Data()));
+
   h2->GetYaxis()->SetTitle("");
 
 
@@ -259,6 +261,14 @@ void drawXS(UInt_t theCharge = WInclusive)
   TAxis* yaxis = h2->GetYaxis();
   
   for (Int_t j=1; j<yaxis->GetNbins(); j++) yaxis->SetBinLabel(j, "");
+
+
+  // Additional legend
+  //----------------------------------------------------------------------------
+  DrawLegend(0.645, 0.840, gStat, " stat.",  "lp");
+  DrawLegend(0.645, 0.795, nlo,   " theory", "f");
+  DrawLegend(0.800, 0.840, gSyst, " syst.",  "l");
+  DrawLegend(0.800, 0.795, gLumi, " lumi.",  "l");
 
 
   // Save
