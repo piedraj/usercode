@@ -1,7 +1,7 @@
 #!/bin/bash
 
 
-BASE_FOLDER="results-for-approval"
+BASE_FOLDER="results"
 
 
 FOLDERS="                             \
@@ -23,7 +23,7 @@ for FOLDER in $FOLDERS; do
 
     if [ "$FOLDER" = "$BASE_FOLDER/analysis" ] || [ "$FOLDER" = "$BASE_FOLDER/atlas" ] ; then
 
-	hadd -f -k Data.root *2012?.root 
+	hadd -f -k Data.root *2012*pbinv.root 
     fi
 
     hadd -f -k ZZ.root        \
@@ -100,7 +100,7 @@ for FOLDER in $DATADRIVEN_FOLDERS; do
     
     pushd $FOLDER
     
-    hadd -f -k Data_PPF.root *2012?_PPF.root
+    hadd -f -k Data_PPF.root *2012*PPF.root
 
     popd
 

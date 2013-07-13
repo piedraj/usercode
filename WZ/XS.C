@@ -279,7 +279,7 @@ Double_t RatioError               (Double_t      a,
 // XS
 //------------------------------------------------------------------------------
 void XS(UInt_t cut     = MET30,
-	UInt_t mode    = PPFmode,
+	UInt_t mode    = MCmode,
 	UInt_t wcharge = WInclusive)
 {
   SetParameters(cut, mode, wcharge);
@@ -293,7 +293,6 @@ void XS(UInt_t cut     = MET30,
   // Loop over the four channels
   //----------------------------------------------------------------------------
   for (UInt_t channel=0; channel<nChannel; channel++) {
-
 
     RelativeSystematics(channel, cut);
 
@@ -313,9 +312,9 @@ void XS(UInt_t cut     = MET30,
 
 	xsSystematic[channel][syst][cut] = fabs(xsVal - xsValue[channel]);
 
-	if (syst == fakesSyst && (channel == MME || channel == EEE))
+	if (syst == fakesSyst)
 	  {
-	    xsSystematic[channel][syst][cut] /= 2.;
+	    if (channel == EEE || channel == MME) xsSystematic[channel][syst][cut] *= 0.67;
 	  }
       }
 
@@ -334,30 +333,7 @@ void XS(UInt_t cut     = MET30,
 
     wzEffError[nChannel] += (wzEffError[channel] * wzEffError[channel]);
 
-
-    // Print table with yields and draw histograms
-    //--------------------------------------------------------------------------
     PrintYields(channel);
-
-    DrawHistogram("hSumCharges",     channel, cut, "q_{1} + q_{2} + q_{3}");
-    DrawHistogram("hMET",            channel, cut, "E_{T}^{miss}",                           5, 0, "GeV",  linY);
-    DrawHistogram("hInvMass2Lep",    channel, cut, "m_{#font[12]{ll}}",                     -1, 0, "GeV",  linY, 70, 112);
-    DrawHistogram("hInvMass3Lep",    channel, cut, "m_{#font[12]{3l}}",                      5, 0, "GeV",  linY, 60, 350);
-    DrawHistogram("hPtLepton1",      channel, cut, "p_{T}^{first lepton}",                   5, 0, "GeV",  linY);
-    DrawHistogram("hPtLepton2",      channel, cut, "p_{T}^{second lepton}",                  5, 0, "GeV",  linY);
-    DrawHistogram("hPtLepton3",      channel, cut, "p_{T}^{third lepton}",                   5, 0, "GeV",  linY);
-    DrawHistogram("hPtLeadingJet",   channel, cut, "p_{T}^{leading jet}",                    5, 0, "GeV",  linY);
-    DrawHistogram("hDPhiZLeptons",   channel, cut, "#Delta#phi_{#font[12]{ll}}",            10, 1, "rad",  linY);
-    DrawHistogram("hDPhiWLeptonMET", channel, cut, "#Delta#phi(W lepton, E_{T}^{miss})",    10, 1, "rad",  linY);
-    DrawHistogram("hPtZLepton1",     channel, cut, "p_{T}^{Z leading lepton}",               5, 0, "GeV",  linY);
-    DrawHistogram("hPtZLepton2",     channel, cut, "p_{T}^{Z trailing lepton}",              5, 0, "GeV",  linY);
-    DrawHistogram("hPtWLepton",      channel, cut, "p_{T}^{W lepton}",                       5, 0, "GeV",  linY);
-    DrawHistogram("hPtZ",            channel, cut, "p_{T}^{Z}",                             10, 0, "GeV",  linY);
-    DrawHistogram("hPtW",            channel, cut, "p_{T}^{W}",                             10, 0, "GeV",  linY);
-    DrawHistogram("hDRWZLepton1",    channel, cut, "#DeltaR(W lepton, Z leading lepton)",    5, 1, "NULL", linY);
-    DrawHistogram("hDRWZLepton2",    channel, cut, "#DeltaR(W lepton, Z trailing lepton)",   5, 1, "NULL", linY);
-    DrawHistogram("hMtW",            channel, cut, "m_{T}^{W}",                              5, 0, "GeV",  linY);
-    DrawHistogram("hNJet30",         channel, cut, "number of jets (p_{T}^{jet} > 30 GeV)", -1, 0, "NULL", linY, 0, 4);
   }
 
   wzEffError[nChannel] = sqrt(wzEffError[nChannel]);
@@ -403,7 +379,7 @@ void XS(UInt_t cut     = MET30,
 
 
   //----------------------------------------------------------------------------
-  // Combined plots
+  // Combined systematic uncertainties
   //----------------------------------------------------------------------------
   for (UInt_t i=0; i<vprocess.size(); i++)
     {
@@ -418,26 +394,33 @@ void XS(UInt_t cut     = MET30,
 	  
       totalSyst[nChannel][process] = sqrt(totalSyst[nChannel][process]);
     }
-      
-  DrawHistogram("hSumCharges",     combined, cut, "q_{1} + q_{2} + q_{3}");
-  DrawHistogram("hMET",            combined, cut, "E_{T}^{miss}",                           5, 0, "GeV",  linY);
-  DrawHistogram("hInvMass2Lep",    combined, cut, "m_{#font[12]{ll}}",                     -1, 0, "GeV",  linY, 70, 112);
-  DrawHistogram("hInvMass3Lep",    combined, cut, "m_{#font[12]{3l}}",                      5, 0, "GeV",  linY, 60, 350);
-  DrawHistogram("hPtLepton1",      combined, cut, "p_{T}^{first lepton}",                   5, 0, "GeV",  linY);
-  DrawHistogram("hPtLepton2",      combined, cut, "p_{T}^{second lepton}",                  5, 0, "GeV",  linY);
-  DrawHistogram("hPtLepton3",      combined, cut, "p_{T}^{third lepton}",                   5, 0, "GeV",  linY);
-  DrawHistogram("hPtLeadingJet",   combined, cut, "p_{T}^{leading jet}",                    5, 0, "GeV",  linY);
-  DrawHistogram("hDPhiZLeptons",   combined, cut, "#Delta#phi_{#font[12]{ll}}",            10, 1, "rad",  linY);
-  DrawHistogram("hDPhiWLeptonMET", combined, cut, "#Delta#phi(W lepton, E_{T}^{miss})",    10, 1, "rad",  linY);
-  DrawHistogram("hPtZLepton1",     combined, cut, "p_{T}^{Z leading lepton}",               5, 0, "GeV",  linY);
-  DrawHistogram("hPtZLepton2",     combined, cut, "p_{T}^{Z trailing lepton}",              5, 0, "GeV",  linY);
-  DrawHistogram("hPtWLepton",      combined, cut, "p_{T}^{W lepton}",                       5, 0, "GeV",  linY);
-  DrawHistogram("hPtZ",            combined, cut, "p_{T}^{Z}",                             10, 0, "GeV",  linY);
-  DrawHistogram("hPtW",            combined, cut, "p_{T}^{W}",                             10, 0, "GeV",  linY);
-  DrawHistogram("hDRWZLepton1",    combined, cut, "#DeltaR(W lepton, Z leading lepton)",    5, 1, "NULL", linY);
-  DrawHistogram("hDRWZLepton2",    combined, cut, "#DeltaR(W lepton, Z trailing lepton)",   5, 1, "NULL", linY);
-  DrawHistogram("hMtW",            combined, cut, "m_{T}^{W}",                              5, 0, "GeV",  linY);
-  DrawHistogram("hNJet30",         combined, cut, "number of jets (p_{T}^{jet} > 30 GeV)", -1, 0, "NULL", linY, 0, 4);
+
+
+  //----------------------------------------------------------------------------
+  // Draw histograms
+  //----------------------------------------------------------------------------
+  for (UInt_t channel=0; channel<=nChannel; channel++) {
+
+//    DrawHistogram("hSumCharges",     channel, cut, "q_{1} + q_{2} + q_{3}");
+//    DrawHistogram("hMET",            channel, cut, "E_{T}^{miss}",                           5, 0, "GeV",  linY);
+    DrawHistogram("hInvMass2Lep",    channel, cut, "m_{#font[12]{ll}}",                       2, 0, "GeV",  linY, 70, 112);
+//    DrawHistogram("hInvMass3Lep",    channel, cut, "m_{#font[12]{3l}}",                      5, 0, "GeV",  linY, 60, 350);
+//    DrawHistogram("hPtLepton1",      channel, cut, "p_{T}^{first lepton}",                   5, 0, "GeV",  linY);
+//    DrawHistogram("hPtLepton2",      channel, cut, "p_{T}^{second lepton}",                  5, 0, "GeV",  linY);
+//    DrawHistogram("hPtLepton3",      channel, cut, "p_{T}^{third lepton}",                   5, 0, "GeV",  linY);
+//    DrawHistogram("hPtLeadingJet",   channel, cut, "p_{T}^{leading jet}",                    5, 0, "GeV",  linY);
+//    DrawHistogram("hDPhiZLeptons",   channel, cut, "#Delta#phi_{#font[12]{ll}}",            10, 1, "rad",  linY);
+//    DrawHistogram("hDPhiWLeptonMET", channel, cut, "#Delta#phi(W lepton, E_{T}^{miss})",    10, 1, "rad",  linY);
+//    DrawHistogram("hPtZLepton1",     channel, cut, "p_{T}^{Z leading lepton}",               5, 0, "GeV",  linY);
+//    DrawHistogram("hPtZLepton2",     channel, cut, "p_{T}^{Z trailing lepton}",              5, 0, "GeV",  linY);
+//    DrawHistogram("hPtWLepton",      channel, cut, "p_{T}^{W lepton}",                       5, 0, "GeV",  linY);
+//    DrawHistogram("hPtZ",            channel, cut, "p_{T}^{#font[12]{ll}}",                 10, 0, "GeV",  linY);
+//    DrawHistogram("hPtW",            channel, cut, "W candidate p_{T}",                     10, 0, "GeV",  linY);
+//    DrawHistogram("hDRWZLepton1",    channel, cut, "#DeltaR(W lepton, Z leading lepton)",    5, 1, "NULL", linY);
+//    DrawHistogram("hDRWZLepton2",    channel, cut, "#DeltaR(W lepton, Z trailing lepton)",   5, 1, "NULL", linY);
+//    DrawHistogram("hMtW",            channel, cut, "m_{T}^{W}",                              5, 0, "GeV",  linY);
+//    DrawHistogram("hNJet30",         channel, cut, "number of jets (p_{T}^{jet} > 30 GeV)", -1, 0, "NULL", linY, 0, 4);
+  }
 }
 
 
@@ -481,8 +464,8 @@ void CrossSection(Double_t& xsVal,
       {
 	if (syst == fakesSyst)
 	  {
-	    Int_t muonJetPtUp   = (channel == MMM || channel == EEM) ? 25 : 20;
-	    Int_t muonJetPtDown = (channel == MMM || channel == EEM) ? 15 : 20;
+	    Int_t muonJetPtUp   = (channel == MMM || channel == EEM) ? 30 : 20;
+	    Int_t muonJetPtDown = (channel == MMM || channel == EEM) ? 10 : 20;
 
 	    Int_t elecJetPtUp   = (channel == MME || channel == EEE) ? 50 : 35;
 	    Int_t elecJetPtDown = (channel == MME || channel == EEE) ? 15 : 35;
@@ -808,7 +791,12 @@ void PrintSystematics(UInt_t cut)
 {
   ofstream outputfile;
 
-  TString filename = Form("tex/systematics_%s_%s.tex", sCut[cut].Data(), sCharge[_wcharge].Data());
+  TString suffix = (_mode == MCmode) ? "mc" : "ppf";
+
+  TString filename = Form("tex/systematics_%s_%s_%s.tex",
+			  sCut[cut].Data(),
+			  sCharge[_wcharge].Data(),
+			  suffix.Data());
 
   outputfile.open(filename);
 
@@ -949,16 +937,34 @@ void DrawHistogram(TString  hname,
   }
 
 
+  // Normalize MC to data
+  //----------------------------------------------------------------------------
+  if (0)
+    {
+      Double_t scaleFactor = Yield(hist[Data]) / Yield(allmc);
+
+      allmc->Scale(scaleFactor);
+
+      for (UInt_t i=0; i<vprocess.size(); i++) {
+
+	UInt_t j = vprocess.at(i);
+
+	if (j == Data) continue;
+
+	hist[j]->Scale(scaleFactor);
+      }
+    }
+
+
   // Axis labels
   //----------------------------------------------------------------------------
   TAxis* xaxis = hist[Data]->GetXaxis();
   TAxis* yaxis = hist[Data]->GetYaxis();
 
-  TString ytitle = Form("entries / %s.%df", "%", precision);
+  TString ytitle = Form("Events / %s.%df", "%", precision);
 
   xaxis->SetTitle(xtitle);
   yaxis->SetTitle(Form(ytitle.Data(), hist[Data]->GetBinWidth(0)));
-  yaxis->SetTitleOffset(1.6);
 
   if (!units.Contains("NULL")) {
     
@@ -1081,14 +1087,21 @@ void DrawHistogram(TString  hname,
     Double_t dtValue = ratio->GetBinContent(ibin);
     Double_t dtError = ratio->GetBinError  (ibin);
 
-    Double_t ratioVal         = (mcValue > 0) ? dtValue/mcValue : 0.0;
-    Double_t ratioErr         = (mcValue > 0) ? dtError/mcValue : 0.0;
-    Double_t uncertaintyError = (mcValue > 0) ? mcError/mcValue : 0.0;
+    Double_t ratioVal         = 0.0;
+    Double_t ratioErr         = 1e-9;
+    Double_t uncertaintyError = 1e-9;
+
+    if (mcValue > 0 && dtValue > 0)
+      {
+	ratioVal         = dtValue / mcValue - 1.0;
+	ratioErr         = dtError / mcValue;
+	uncertaintyError = ratioVal * mcError / mcValue;
+      }
 
     ratio->SetBinContent(ibin, ratioVal);
     ratio->SetBinError  (ibin, ratioErr);
 
-    uncertainty->SetBinContent(ibin, 1.0);
+    uncertainty->SetBinContent(ibin, 0.0);
     uncertainty->SetBinError  (ibin, uncertaintyError);
   }
 
@@ -1099,13 +1112,13 @@ void DrawHistogram(TString  hname,
   uncertainty->Draw("e2");
   ratio->Draw("ep,same");
 
-  uncertainty->GetYaxis()->SetRangeUser(0, 2.5);
+  uncertainty->GetYaxis()->SetRangeUser(-1.5, 1.5);
 
 
   // Save
   //----------------------------------------------------------------------------
-  pad2->cd(); SetAxis(uncertainty, hist[Data]->GetXaxis()->GetTitle(), "data / prediction", 0.10,          0.8);
-  pad1->cd(); SetAxis(hist[Data], "", hist[Data]->GetYaxis()->GetTitle(),                   _bigLabelSize, 1.6);
+  pad2->cd(); SetAxis(uncertainty, hist[Data]->GetXaxis()->GetTitle(), "data / prediction - 1", 0.08, 0.8);
+  pad1->cd(); SetAxis(hist[Data], "", hist[Data]->GetYaxis()->GetTitle(), _bigLabelSize, 1.7);
 
   canvas->cd();
 
@@ -1587,7 +1600,7 @@ void DrawRelativeCrossSections(UInt_t cut)
   
   h2->GetXaxis()->CenterTitle();
   h2->GetXaxis()->SetTitleOffset(1.4);
-  h2->GetXaxis()->SetTitle(Form("#sigma_{%s}^{exp} / #sigma_{%s}^{NLO}",
+  h2->GetXaxis()->SetTitle(Form("#sigma_{%s}^{exp} / #sigma_{%s}^{theory}",
 				   swz.Data(),
 				   swz.Data()));
   h2->GetYaxis()->SetTitle("");
@@ -1716,10 +1729,10 @@ void RelativeSystematics(UInt_t channel, UInt_t cut)
 	{
 	  Double_t fsv = 0.0;
 
-	  if (channel == EEE) fsv = 57.0 * 0.5;
-	  if (channel == EEM) fsv =  8.0;
-	  if (channel == MME) fsv = 27.0 * 0.5;
-	  if (channel == MMM) fsv = 10.0;
+	  if (channel == EEE) fsv = 57.12 * 0.67;
+	  if (channel == EEM) fsv = 17.34;
+	  if (channel == MME) fsv = 28.36 * 0.67;
+	  if (channel == MMM) fsv = 21.02;
 
 	  systematicError[channel][Fakes][syst] = fsv;
 

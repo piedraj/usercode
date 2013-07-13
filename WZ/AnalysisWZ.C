@@ -135,6 +135,7 @@ struct Lepton
   Float_t        fr;
   Float_t        lead;
   Float_t        trail;
+  Float_t        relative_isolation;
   TLorentzVector vraw;
   TLorentzVector v;
 
@@ -196,6 +197,8 @@ void           CounterSummary       (TString title);
 // Data members
 //
 //==============================================================================
+TH1F*                         h_Muon_ISO_loose;
+
 TH1F*                         hCounterRaw[nChannel][nCut][nCharge][nComposition];
 TH1F*                         hCounterEff[nChannel][nCut][nCharge][nComposition];
 TH1F*                         hCounter   [nChannel][nCut][nCharge][nComposition];
@@ -319,6 +322,7 @@ Float_t                       bdt          [nobjects];
 Float_t                       ch           [nobjects];
 Float_t                       eta          [nobjects];
 Float_t                       ip           [nobjects];
+Float_t                       iso          [nobjects];
 Float_t                       isomva       [nobjects];
 Float_t                       jeteta       [nobjects];
 Float_t                       jetphi       [nobjects];
@@ -344,12 +348,12 @@ Float_t                       reco_ptZ;
 // AnalysisWZ
 //
 //==============================================================================
-void AnalysisWZ(TString  sample,
-		Int_t    systematic,
-		Int_t    mode,
-		Int_t    muonJetPt,
-		Int_t    elecJetPt,
-		TString  directory)
+void AnalysisWZ(TString sample,
+		Int_t   systematic,
+		Int_t   mode,
+		TString muonJetPt,
+		TString elecJetPt,
+		TString directory)
 {
   _sample     = sample;
   _systematic = systematic;
@@ -364,7 +368,9 @@ void AnalysisWZ(TString  sample,
   else if (_systematic == electronUpSyst)      _directory += "/systematics/electronUp";
   else if (_systematic == electronDownSyst)    _directory += "/systematics/electronDown";
   else if (_systematic == pileupSyst)          _directory += "/systematics/pileup";
-  else if (_systematic == fakesSyst)           _directory += Form("/systematics/muonJet%d_elecJet%d", muonJetPt, elecJetPt);
+  else if (_systematic == fakesSyst)           _directory += Form("/systematics/muonJet%s_elecJet%s",
+								  muonJetPt.Data(),
+								  elecJetPt.Data());
 
   if (_mode == ATLAS) _directory = directory + "/atlas";
 
@@ -394,8 +400,13 @@ void AnalysisWZ(TString  sample,
 
   // Histogram definition
   //----------------------------------------------------------------------------
+  //  TH1::SetBinErrorOption(TH1::kPoisson);
   TH1::SetDefaultSumw2();
-  
+
+
+  h_Muon_ISO_loose = new TH1F("h_Muon_ISO_loose", "h_Muon_ISO_loose", 50, -0.1, 3.0);
+
+
   for (UInt_t i=0; i<nChannel; i++) {
 
     for (UInt_t j=0; j<nCut; j++) {
@@ -459,13 +470,13 @@ void AnalysisWZ(TString  sample,
   MuonPR = LoadHistogram("MuPR_Moriond13_2012",  "h2inverted", "MuonPR");
   ElecPR = LoadHistogram("ElePR_Moriond13_2012", "h2inverted", "ElecPR");
 
-  MuonFR = LoadHistogram(Form("MuFR_Moriond13_jet%d_EWKcorr", muonJetPt),
+  MuonFR = LoadHistogram(Form("MuFR_Moriond13_jet%s_EWKcorr", muonJetPt.Data()),
 			 "FR_pT_eta_EWKcorr",
-			 Form("MuonFR_Jet%d", muonJetPt));
+			 Form("MuonFR_Jet%s", muonJetPt.Data()));
 
-  ElecFR = LoadHistogram(Form("EleFR_Moriond13_jet%d_EWKcorr", elecJetPt),
+  ElecFR = LoadHistogram(Form("EleFR_Moriond13_jet%s_EWKcorr", elecJetPt.Data()),
 			 "fakeElH2",
-			 Form("ElecFR_Jet%d", elecJetPt));
+			 Form("ElecFR_Jet%s", elecJetPt.Data()));
 
   DoubleElLead  = LoadHistogram("triggerEfficiencies", "DoubleElLead",  "DoubleElLead");
   DoubleMuLead  = LoadHistogram("triggerEfficiencies", "DoubleMuLead",  "DoubleMuLead");
@@ -486,20 +497,19 @@ void AnalysisWZ(TString  sample,
 
   TString path;
 
-  isData = false;
-
-  if (_sample.Contains("DoubleElectron") ||
-      _sample.Contains("DoubleMuon") ||
-      _sample.Contains("MuEG")) isData = true;
+  isData = (_sample.Contains("Run2012")) ? true : false;
 
   if (isData)
     {
-      path = "/pool/ciencias/LatinosSkims/ReducedTrees/R53X_S1_V09_S2_V10_S3_V17newJEC/Data_LooseLooseTypeI/";
+      path = "/pool/ciencias/LatinosSkims/ReducedTrees/R53X_S1_V09_S2_V10_S3_V17newJEC/Data_LooseLooseTypeI";
 
+      if (_mode == ATLAS) path = "/pool/ciencias/LatinosSkims/ReducedTrees/R53X_S1_V09_S2_V10_S3_V17newJEC/Data_NoSelTypeI";
     }
   else
     {
-      path = "/pool/ciencias/LatinosSkims/ReducedTrees/R53X_S1_V09_S2_V10_S3_V17newJEC/MC_LooseLooseTypeI/";
+      path = "/pool/ciencias/LatinosSkims/ReducedTrees/R53X_S1_V09_S2_V10_S3_V17newJEC/MC_LooseLooseTypeI";
+
+      if (_mode == ATLAS) path = "/pool/ciencias/LatinosSkims/ReducedTrees/R53X_S1_V09_S2_V10_S3_V17newJEC/MC_NoSelTypeI";
     }
 
   tree->Add(path + "/latino_" + _sample + ".root");
@@ -530,6 +540,7 @@ void AnalysisWZ(TString  sample,
       tree->SetBranchAddress(Form("ch%d",            i+1), &ch           [i]);
       tree->SetBranchAddress(Form("eta%d",           i+1), &eta          [i]);
       tree->SetBranchAddress(Form("ip%d",            i+1), &ip           [i]);
+      tree->SetBranchAddress(Form("iso%d",           i+1), &iso          [i]);
       tree->SetBranchAddress(Form("isomva%d",        i+1), &isomva       [i]);
       tree->SetBranchAddress(Form("jeteta%d",        i+1), &jeteta       [i]);
       tree->SetBranchAddress(Form("jetphi%d",        i+1), &jetphi       [i]);
@@ -629,6 +640,8 @@ void AnalysisWZ(TString  sample,
     
       lep.charge = ch[i];
 
+      lep.relative_isolation = iso[i] / spt;  // Work in progress
+
       Float_t mass;
 
       //------------------------------------------------------------------------
@@ -671,6 +684,21 @@ void AnalysisWZ(TString  sample,
       lep.vraw = (pt[i] / spt) * tlv;
 
       AnalysisLeptons.push_back(lep);
+    }
+
+
+    //--------------------------------------------------------------------------
+    //
+    // Fill muons relative isolation histogram
+    //
+    //--------------------------------------------------------------------------
+    for (UInt_t i=0; i<AnalysisLeptons.size(); i++) {
+
+      if (AnalysisLeptons[i].flavor == Electron) continue;
+      
+      if (AnalysisLeptons[i].v.Pt() >= 30.) continue;
+
+      h_Muon_ISO_loose->Fill(AnalysisLeptons[i].relative_isolation, pu_weight * xs_weight);
     }
 
 
