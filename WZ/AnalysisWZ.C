@@ -135,7 +135,6 @@ struct Lepton
   Float_t        fr;
   Float_t        lead;
   Float_t        trail;
-  Float_t        relative_isolation;
   TLorentzVector vraw;
   TLorentzVector v;
 
@@ -197,8 +196,6 @@ void           CounterSummary       (TString title);
 // Data members
 //
 //==============================================================================
-TH1F*                         h_Muon_ISO_loose;
-
 TH1F*                         hCounterRaw[nChannel][nCut][nCharge][nComposition];
 TH1F*                         hCounterEff[nChannel][nCut][nCharge][nComposition];
 TH1F*                         hCounter   [nChannel][nCut][nCharge][nComposition];
@@ -360,17 +357,17 @@ void AnalysisWZ(TString sample,
   _mode       = mode;
   _directory  = directory;
 
-  if      (_systematic == noSyst)              _directory += "/analysis";
-  else if (_systematic == metUpSyst)           _directory += "/systematics/metUp";
-  else if (_systematic == metDownSyst)         _directory += "/systematics/metDown";
-  else if (_systematic == muonUpSyst)          _directory += "/systematics/muonUp";
-  else if (_systematic == muonDownSyst)        _directory += "/systematics/muonDown";
-  else if (_systematic == electronUpSyst)      _directory += "/systematics/electronUp";
-  else if (_systematic == electronDownSyst)    _directory += "/systematics/electronDown";
-  else if (_systematic == pileupSyst)          _directory += "/systematics/pileup";
-  else if (_systematic == fakesSyst)           _directory += Form("/systematics/muonJet%s_elecJet%s",
-								  muonJetPt.Data(),
-								  elecJetPt.Data());
+  if      (_systematic == noSyst)           _directory += "/analysis";
+  else if (_systematic == metUpSyst)        _directory += "/systematics/metUp";
+  else if (_systematic == metDownSyst)      _directory += "/systematics/metDown";
+  else if (_systematic == muonUpSyst)       _directory += "/systematics/muonUp";
+  else if (_systematic == muonDownSyst)     _directory += "/systematics/muonDown";
+  else if (_systematic == electronUpSyst)   _directory += "/systematics/electronUp";
+  else if (_systematic == electronDownSyst) _directory += "/systematics/electronDown";
+  else if (_systematic == pileupSyst)       _directory += "/systematics/pileup";
+  else if (_systematic == fakesSyst)        _directory += Form("/systematics/muonJet%s_elecJet%s",
+							       muonJetPt.Data(),
+							       elecJetPt.Data());
 
   if (_mode == ATLAS) _directory = directory + "/atlas";
 
@@ -400,11 +397,7 @@ void AnalysisWZ(TString sample,
 
   // Histogram definition
   //----------------------------------------------------------------------------
-  //  TH1::SetBinErrorOption(TH1::kPoisson);
   TH1::SetDefaultSumw2();
-
-
-  h_Muon_ISO_loose = new TH1F("h_Muon_ISO_loose", "h_Muon_ISO_loose", 50, -0.1, 3.0);
 
 
   for (UInt_t i=0; i<nChannel; i++) {
@@ -640,8 +633,6 @@ void AnalysisWZ(TString sample,
     
       lep.charge = ch[i];
 
-      lep.relative_isolation = iso[i] / spt;  // Work in progress
-
       Float_t mass;
 
       //------------------------------------------------------------------------
@@ -684,21 +675,6 @@ void AnalysisWZ(TString sample,
       lep.vraw = (pt[i] / spt) * tlv;
 
       AnalysisLeptons.push_back(lep);
-    }
-
-
-    //--------------------------------------------------------------------------
-    //
-    // Fill muons relative isolation histogram
-    //
-    //--------------------------------------------------------------------------
-    for (UInt_t i=0; i<AnalysisLeptons.size(); i++) {
-
-      if (AnalysisLeptons[i].flavor == Electron) continue;
-      
-      if (AnalysisLeptons[i].v.Pt() >= 30.) continue;
-
-      h_Muon_ISO_loose->Fill(AnalysisLeptons[i].relative_isolation, pu_weight * xs_weight);
     }
 
 
