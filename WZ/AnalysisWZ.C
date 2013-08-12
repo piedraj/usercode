@@ -83,10 +83,10 @@ enum {
   HasZ,
   HasW,
   MET30,
+  MtW40,
   TighterCuts,
   ZJetsRegion,
-  TopRegion,
-  SmallMET
+  TopRegion
 };
 
 const TString sCut[nCut] = {
@@ -95,10 +95,10 @@ const TString sCut[nCut] = {
   "HasZ",
   "HasW",
   "MET30",
+  "MtW40",
   "TighterCuts",
   "ZJetsRegion",
-  "TopRegion",
-  "SmallMET"
+  "TopRegion"
 };
 
 
@@ -248,8 +248,9 @@ Float_t                       sumCharges;
 Float_t                       transverseMass;
 Float_t                       WCharge;
 
+Int_t                         nJet30;
+
 UInt_t                        nElectron;
-UInt_t                        nJet30;
 UInt_t                        nTight;
 UInt_t                        reco_channel;
 
@@ -262,6 +263,7 @@ ofstream                      txt_output;
 TString                       _sample;
 Int_t                         _systematic;
 Int_t                         _mode;
+Int_t                         _jetChannel;
 TString                       _directory;
 
 
@@ -348,6 +350,7 @@ Float_t                       reco_ptZ;
 void AnalysisWZ(TString sample,
 		Int_t   systematic,
 		Int_t   mode,
+		Int_t   jetChannel,
 		TString muonJetPt,
 		TString elecJetPt,
 		TString directory)
@@ -355,7 +358,10 @@ void AnalysisWZ(TString sample,
   _sample     = sample;
   _systematic = systematic;
   _mode       = mode;
+  _jetChannel = jetChannel;
   _directory  = directory;
+
+  if (_jetChannel >= 0) _directory = Form("%s/%djet", _directory.Data(), _jetChannel);
 
   if      (_systematic == noSyst)           _directory += "/analysis";
   else if (_systematic == metUpSyst)        _directory += "/systematics/metUp";
@@ -369,7 +375,14 @@ void AnalysisWZ(TString sample,
 							       muonJetPt.Data(),
 							       elecJetPt.Data());
 
-  if (_mode == ATLAS) _directory = directory + "/atlas";
+  if (_mode == ATLAS)
+    {
+      _directory = directory;
+
+      if (_jetChannel >= 0) _directory += Form("/%djet", _jetChannel);
+
+      _directory += "/atlas";
+    }
 
   gSystem->mkdir(_directory, kTRUE);
 
@@ -424,7 +437,7 @@ void AnalysisWZ(TString sample,
 	hDeltaMET      [i][j][iCharge] = new TH1F("hDeltaMET"       + suffix, "", 300, -30,  30);
 	hDPhiMET       [i][j][iCharge] = new TH1F("hDPhiMET"        + suffix, "", 200,  -1,   1);
 	hSumCharges    [i][j][iCharge] = new TH1F("hSumCharges"     + suffix, "",   9,  -4,   5);
-	hInvMass2Lep   [i][j][iCharge] = new TH1F("hInvMass2Lep"    + suffix, "", 200,   0, 200);
+	hInvMass2Lep   [i][j][iCharge] = new TH1F("hInvMass2Lep"    + suffix, "", 400,   0, 200);
 	hInvMass3Lep   [i][j][iCharge] = new TH1F("hInvMass3Lep"    + suffix, "", 400,   0, 400);
 	hPtLepton1     [i][j][iCharge] = new TH1F("hPtLepton1"      + suffix, "", 200,   0, 200);
 	hPtLepton2     [i][j][iCharge] = new TH1F("hPtLepton2"      + suffix, "", 200,   0, 200);
@@ -722,6 +735,11 @@ void AnalysisWZ(TString sample,
     }
 
 
+    // Inclusive, 0-jet and 1-jet cross section
+    //--------------------------------------------------------------------------
+    if (_jetChannel >= 0 && nJet30 != _jetChannel) continue;
+
+
     // Set the MET of the event
     //--------------------------------------------------------------------------
     EventMET = GetMET();
@@ -990,16 +1008,12 @@ void AnalysisWZ(TString sample,
 	FillHistograms(combined,     TopRegion);
       }
 
-    if (fabs(invMass2Lep - Z_MASS) >= 20.) continue;
+    if (fabs(invMass2Lep - Z_MASS) >= 20. && _mode != ATLAS) continue;
+
+    if ((invMass2Lep < 50. || invMass2Lep > 120.) && _mode == ATLAS) continue;
     
     FillHistograms(reco_channel, HasZ);
     FillHistograms(combined,     HasZ);
-
-    if (EventMET.Et() < 35.)
-      {
-	FillHistograms(reco_channel, SmallMET);
-	FillHistograms(combined,     SmallMET);
-      }
 
     if (WLepton.DeltaR(ZLepton1) <= 0.1) continue;
     if (WLepton.DeltaR(ZLepton2) <= 0.1) continue;
@@ -1027,12 +1041,19 @@ void AnalysisWZ(TString sample,
     reco_ptZ = (ZLepton1 + ZLepton2).Pt();
     
     tgcTree->Fill();
-    
+
+
+    // Additional cuts
+    //--------------------------------------------------------------------------
+    if (transverseMass <= 40.) continue;
+
+    FillHistograms(reco_channel, MtW40);
+    FillHistograms(combined,     MtW40);
 
     if (AnalysisLeptons[2].v.Pt() > 20. && WLepton.Pt() > 25. && EventMET.Et() > 40.)
       {
 	FillHistograms(reco_channel, TighterCuts);
-	FillHistograms(combined,    TighterCuts);
+	FillHistograms(combined,     TighterCuts);
       }
   }
 

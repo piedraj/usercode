@@ -68,10 +68,10 @@ enum {
   HasZ,
   HasW,
   MET30,
+  MtW40,
   TighterCuts,
   ZJetsRegion,
   TopRegion,
-  SmallMET
 };
 
 TString sCut[nCut];
@@ -165,6 +165,7 @@ enum {PPFmode, MCmode};
 //------------------------------------------------------------------------------
 Double_t        _luminosity;
 Double_t        _luminosityUncertainty;
+Int_t           _njet;
 Int_t           _verbosity;
 TString         _analysis;
 TString         _datapath;
@@ -201,7 +202,8 @@ Double_t         ratioSystematic[nChannel][nSystematic+1][nCut];
 //------------------------------------------------------------------------------
 void     SetParameters            (UInt_t        cut,
 				   UInt_t        mode,
-				   UInt_t        wcharge);
+				   UInt_t        wcharge,
+				   Int_t         njet);
 
 Int_t    ReadInputFiles           (Int_t         muonJetPt,
 				   Int_t         elecJetPt);
@@ -280,9 +282,10 @@ Double_t RatioError               (Double_t      a,
 //------------------------------------------------------------------------------
 void XS(UInt_t cut     = MET30,
 	UInt_t mode    = PPFmode,
-	UInt_t wcharge = WInclusive)
+	UInt_t wcharge = WInclusive,
+	Int_t  njet    = 0)
 {
-  SetParameters(cut, mode, wcharge);
+  SetParameters(cut, mode, wcharge, njet);
 
   if (ReadInputFiles(20, 35) < 0) return;
 
@@ -341,59 +344,62 @@ void XS(UInt_t cut     = MET30,
 
   // Final numbers
   //----------------------------------------------------------------------------
-  BlueMethod(cut);
+  if (!_analysis.Contains("atlas")) {
+
+    BlueMethod(cut);
   
-  PrintSystematics(cut);
+    PrintSystematics(cut);
 
-  DrawCrossSections(cut);
-  DrawRelativeCrossSections(cut);
+    DrawCrossSections(cut);
+    DrawRelativeCrossSections(cut);
 
-  PrintCrossSections(cut);
+    PrintCrossSections(cut);
 
 
-  //----------------------------------------------------------------------------
-  // Cross section ratio
-  //----------------------------------------------------------------------------
-  if (wcharge == WInclusive) {
+    //--------------------------------------------------------------------------
+    // Cross section ratio
+    //--------------------------------------------------------------------------
+    if (wcharge == WInclusive) {
     
 
-    // W- / W+
-    //--------------------------------------------------------------------------
-    for (UInt_t channel=0; channel<nChannel; channel++)
-      CrossSectionRatio(WMinus, WPlus, channel, cut);
+      // W- / W+
+      //------------------------------------------------------------------------
+      for (UInt_t channel=0; channel<nChannel; channel++)
+	CrossSectionRatio(WMinus, WPlus, channel, cut);
 
-    BlueMethod(cut, true);
+      BlueMethod(cut, true);
 
-    PrintRatios(cut, WMinus, WPlus);
-
-
-    // W+ / W-
-    //--------------------------------------------------------------------------
-    for (UInt_t channel=0; channel<nChannel; channel++)
-      CrossSectionRatio(WPlus, WMinus, channel, cut);
-
-    BlueMethod(cut, true);
-
-    PrintRatios(cut, WPlus, WMinus);
-  }
+      PrintRatios(cut, WMinus, WPlus);
 
 
-  //----------------------------------------------------------------------------
-  // Combined systematic uncertainties
-  //----------------------------------------------------------------------------
-  for (UInt_t i=0; i<vprocess.size(); i++)
-    {
-      UInt_t process = vprocess.at(i);
-      
-      totalSyst[nChannel][process] = 0.0;
-	  
-      for (UInt_t j=0; j<nChannel; j++)
-	{
-	  totalSyst[nChannel][process] += (totalSyst[j][process] * totalSyst[j][process]);
-	}
-	  
-      totalSyst[nChannel][process] = sqrt(totalSyst[nChannel][process]);
+      // W+ / W-
+      //------------------------------------------------------------------------
+      for (UInt_t channel=0; channel<nChannel; channel++)
+	CrossSectionRatio(WPlus, WMinus, channel, cut);
+
+      BlueMethod(cut, true);
+
+      PrintRatios(cut, WPlus, WMinus);
     }
+
+
+    //--------------------------------------------------------------------------
+    // Combined systematic uncertainties
+    //--------------------------------------------------------------------------
+    for (UInt_t i=0; i<vprocess.size(); i++)
+      {
+	UInt_t process = vprocess.at(i);
+      
+	totalSyst[nChannel][process] = 0.0;
+	  
+	for (UInt_t j=0; j<nChannel; j++)
+	  {
+	    totalSyst[nChannel][process] += (totalSyst[j][process] * totalSyst[j][process]);
+	  }
+	  
+	totalSyst[nChannel][process] = sqrt(totalSyst[nChannel][process]);
+      }
+  }
 
 
   //----------------------------------------------------------------------------
@@ -401,9 +407,22 @@ void XS(UInt_t cut     = MET30,
   //----------------------------------------------------------------------------
   for (UInt_t channel=0; channel<=nChannel; channel++) {
 
+    if (_analysis.Contains("atlas"))
+      {
+	if (channel == MMM || channel == EEM)
+	  {
+	    DrawHistogram("hInvMass2Lep", channel, cut, "m_{#font[12]{ll}}", 5, 1, "GeV", linY, 50, 120, 0, 125, false);
+	  }
+      }
+    else
+      {
+	DrawHistogram("hInvMass2Lep", channel, cut, "m_{#font[12]{ll}}", 2, 0, "GeV", linY, 70, 112);
+      }
+
+    if (_analysis.Contains("atlas")) continue;
+
     DrawHistogram("hSumCharges",     channel, cut, "q_{1} + q_{2} + q_{3}");
     DrawHistogram("hMET",            channel, cut, "E_{T}^{miss}",                           5, 0, "GeV",  linY);
-    DrawHistogram("hInvMass2Lep",    channel, cut, "m_{#font[12]{ll}}",                     -1, 0, "GeV",  linY, 70, 112);
     DrawHistogram("hInvMass3Lep",    channel, cut, "m_{#font[12]{3l}}",                      5, 0, "GeV",  linY, 60, 350);
     DrawHistogram("hPtLepton1",      channel, cut, "p_{T}^{first lepton}",                   5, 0, "GeV",  linY);
     DrawHistogram("hPtLepton2",      channel, cut, "p_{T}^{second lepton}",                  5, 0, "GeV",  linY);
@@ -740,8 +759,17 @@ void PrintYields(UInt_t channel)
     }
 
 
-
-
+  //----------------------------------------------------------------------------
+  //
+  // Para Javier Cuevas
+  //
+  //----------------------------------------------------------------------------
+  if (0)
+    {
+      printf(" [%s] %.1f +- %.1f\n", sChannel[channel].Data(), nFakes[MET30], eFakes[MET30]);
+    }
+  
+  
   // Print
   //----------------------------------------------------------------------------
   if (_mode == MCmode)  outputfile << PrintProcess("top",         nTop,   eTop);
@@ -886,7 +914,7 @@ void DrawHistogram(TString  hname,
     hist[j]->SetName(hname + "_" + sProcess[j]);
 
     if (moveOverflow) MoveOverflowBins(hist[j], xmin, xmax);
-    
+
     if (ngroup > 0) hist[j]->Rebin(ngroup);
 
     if (j == Data)
@@ -917,6 +945,25 @@ void DrawHistogram(TString  hname,
   allmc->SetMarkerColor(kGray+1);
   allmc->SetMarkerSize (      0);
 
+
+  //----------------------------------------------------------------------------
+  //
+  // For Senka
+  //
+  //----------------------------------------------------------------------------
+  if (0 && hname.Contains("hInvMass2Lep") && channel != combined)
+    {
+      for (UInt_t i=0; i<vprocess.size(); i++) {
+	
+	UInt_t j = vprocess.at(i);
+	
+	if (j == Data) continue;
+	
+	printf(" [%s][%16s][%4.1f%s]\n", sChannel[channel].Data(), sProcess[j].Data(), totalSyst[channel][j], "%");
+      }
+    }
+
+
   for (Int_t ibin=1; ibin<=allmc->GetNbinsX(); ibin++) {
 
     Double_t binValue = 0.;
@@ -938,8 +985,6 @@ void DrawHistogram(TString  hname,
     }
     
     binError = sqrt(binError);
-
-    if (_analysis.Contains("atlas")) binError = 1e-10;
 
     allmc->SetBinContent(ibin, binValue);
     allmc->SetBinError  (ibin, binError);
@@ -1003,15 +1048,81 @@ void DrawHistogram(TString  hname,
   }
 
 
-
   // Draw
   //----------------------------------------------------------------------------
   xaxis->SetRangeUser(xmin, xmax);
 
-  hdata ->Draw("ep");
+  hdata->Draw("ep");
+
   hstack->Draw("hist,same");
-  allmc ->Draw("e2,same");
+
+  if (!_analysis.Contains("atlas") && _njet < 0) allmc ->Draw("e2,same");
+
   hdata ->Draw("ep,same");
+
+
+  // Fit
+  //----------------------------------------------------------------------------
+  if (_analysis.Contains("atlas"))
+    {
+      TF1* fit       = new TF1("fit",       "pol2(0) + gaus(3)", xmin, xmax);
+      TF1* fit_top   = new TF1("fit_top",   "pol2",              xmin, xmax);
+      TF1* fit_zjets = new TF1("fit_zjets", "gaus",              xmin, xmax);
+
+      fit      ->SetNpx(1000);
+      fit_top  ->SetNpx(1000);
+      fit_zjets->SetNpx(1000);
+
+      fit_top  ->SetLineStyle(3);
+      fit_zjets->SetLineStyle(2);
+
+      fit->SetParameter(4, 91.2);
+      fit->SetParameter(5,  5.0);
+
+      hdata->Fit(fit, "nqr");
+
+      fit_top->SetParameter(0, fit->GetParameter(0));
+      fit_top->SetParameter(1, fit->GetParameter(1));
+      fit_top->SetParameter(2, fit->GetParameter(2));
+
+      fit_zjets->SetParameter(0, fit->GetParameter(3));
+      fit_zjets->SetParameter(1, fit->GetParameter(4));
+      fit_zjets->SetParameter(2, fit->GetParameter(5));
+
+      Double_t n_top   = fit_top  ->Integral(xmin, xmax) / hist[Data]->GetBinWidth(0);
+      Double_t n_zjets = fit_zjets->Integral(xmin, xmax) / hist[Data]->GetBinWidth(0);
+  
+      if (_verbosity > 0)
+	{
+	  printf(" [%s, data] top: %.1f, zjets: %.1f, sum: %.1f\n",
+		 sChannel[channel].Data(),
+		 n_top,
+		 n_zjets,
+		 n_top + n_zjets);
+	}
+
+      fit      ->Draw("same");
+      fit_top  ->Draw("same");
+      fit_zjets->Draw("same");
+    }
+
+  if (hname.Contains("hInvMass2Lep") && _mode == MCmode)
+    {
+      Int_t binx1 = hist[Top]->FindBin(xmin);
+      Int_t binx2 = hist[Top]->FindBin(xmax);
+      
+      Double_t n_top_mc   = hist[Top]  ->Integral(binx1, binx2);
+      Double_t n_zjets_mc = hist[ZJets]->Integral(binx1, binx2);
+      
+      if (_verbosity > 0)
+	{
+	  printf(" [%s,   MC] top: %.1f, zjets: %.1f, sum: %.1f\n",
+		 sChannel[channel].Data(),
+		 n_top_mc,
+		 n_zjets_mc,
+		 n_top_mc + n_zjets_mc);
+	}
+    }
 
 
   // Adjust scale
@@ -1019,7 +1130,10 @@ void DrawHistogram(TString  hname,
   Double_t theMax   = GetMaximumIncludingErrors(hdata, xmin, xmax);
   Double_t theMaxMC = GetMaximumIncludingErrors(allmc, xmin, xmax);
 
-  if (theMaxMC > theMax) theMax = theMaxMC;
+  if (theMaxMC > theMax && !_analysis.Contains("atlas") && _njet < 0)
+    {
+      theMax = theMaxMC;
+    }
 
   if (pad1->GetLogy())
     theMax = TMath::Power(10, TMath::Log10(theMax) + 2);
@@ -1039,31 +1153,36 @@ void DrawHistogram(TString  hname,
   Double_t y0     = 0.834;
   Double_t delta  = 0.048 + 0.001;
   Double_t ndelta = 0;
-  
+  Double_t xdelta = 0.490;
+
   TString sData = Form(" data (%.0f)", Yield(hdata));
 
   if (channel != combined) sData = Form(" %s%s", lChannel[channel].Data(), sData.Data());
 
-  DrawLegend(x0 - 0.49, y0 - ndelta, (TObject*)hdata,    sData,                                "lp"); ndelta += delta;
-  DrawLegend(x0 - 0.49, y0 - ndelta, (TObject*)allmc,    Form(" all (%.0f)", Yield(allmc)),    "f");  ndelta += delta;
-  DrawLegend(x0 - 0.49, y0 - ndelta, (TObject*)hist[WZ], Form(" WZ (%.0f)",  Yield(hist[WZ])), "f");  ndelta += delta;
+  DrawLegend(x0 - xdelta, y0 - ndelta, (TObject*)hdata,    sData,                                "lp"); ndelta += delta;
+  DrawLegend(x0 - xdelta, y0 - ndelta, (TObject*)allmc,    Form(" all (%.0f)", Yield(allmc)),    "f");  ndelta += delta;
+  DrawLegend(x0 - xdelta, y0 - ndelta, (TObject*)hist[WZ], Form(" WZ (%.0f)",  Yield(hist[WZ])), "f");  ndelta += delta;
 
   if (_mode == MCmode)
     {
-      DrawLegend(x0 - 0.49, y0 - ndelta, (TObject*)hist[Top],   Form(" top (%.0f)",    Yield(hist[Top])),   "f"); ndelta += delta;
-      DrawLegend(x0 - 0.49, y0 - ndelta, (TObject*)hist[ZJets], Form(" Z+jets (%.0f)", Yield(hist[ZJets])), "f"); ndelta += delta;
+      DrawLegend(x0 - xdelta, y0 - ndelta, (TObject*)hist[Top],   Form(" top (%.0f)",    Yield(hist[Top])),   "f"); ndelta += delta;
+      DrawLegend(x0 - xdelta, y0 - ndelta, (TObject*)hist[ZJets], Form(" Z+jets (%.0f)", Yield(hist[ZJets])), "f"); ndelta += delta;
     }
   else if (_mode == PPFmode)
     {
-      DrawLegend(x0 - 0.49, y0 - ndelta, (TObject*)hist[Fakes], Form(" data-driven (%.0f)", Yield(hist[Fakes])), "f"); ndelta += delta;
+      DrawLegend(x0 - xdelta, y0 - ndelta, (TObject*)hist[Fakes], Form(" data-driven (%.0f)", Yield(hist[Fakes])), "f"); ndelta += delta;
     }
 
-  ndelta = 0;
-  
-  DrawLegend(x0 - 0.22, y0 - ndelta, (TObject*)hist[ZZ],  Form(" ZZ (%.0f)",      Yield(hist[ZZ])),  "f"); ndelta += delta;
-  DrawLegend(x0 - 0.22, y0 - ndelta, (TObject*)hist[ZG],  Form(" Z#gamma (%.0f)", Yield(hist[ZG])),  "f"); ndelta += delta;
-  DrawLegend(x0 - 0.22, y0 - ndelta, (TObject*)hist[VVV], Form(" VVV (%.0f)",     Yield(hist[VVV])), "f"); ndelta += delta;
-  DrawLegend(x0 - 0.22, y0 - ndelta, (TObject*)hist[WV],  Form(" WV (%.0f)",      Yield(hist[WV])),  "f"); ndelta += delta;
+  if (!_analysis.Contains("atlas"))
+    {
+      ndelta = 0;
+      xdelta = 0.22;
+    }
+
+  DrawLegend(x0 - xdelta, y0 - ndelta, (TObject*)hist[ZZ],  Form(" ZZ (%.0f)",      Yield(hist[ZZ])),  "f"); ndelta += delta;
+  DrawLegend(x0 - xdelta, y0 - ndelta, (TObject*)hist[ZG],  Form(" Z#gamma (%.0f)", Yield(hist[ZG])),  "f"); ndelta += delta;
+  DrawLegend(x0 - xdelta, y0 - ndelta, (TObject*)hist[VVV], Form(" VVV (%.0f)",     Yield(hist[VVV])), "f"); ndelta += delta;
+  DrawLegend(x0 - xdelta, y0 - ndelta, (TObject*)hist[WV],  Form(" WV (%.0f)",      Yield(hist[WV])),  "f"); ndelta += delta;
 
 
   // CMS titles
@@ -1136,19 +1255,36 @@ void DrawHistogram(TString  hname,
     uncertainty->SetBinError  (ibin, uncertaintyError);
   }
 
-  TAxis* uaxis = (TAxis*)uncertainty->GetXaxis();
+  TAxis* uaxis = (TAxis*)ratio->GetXaxis();
     
   uaxis->SetRangeUser(xmin, xmax);
      
-  uncertainty->Draw("e2");
-  ratio->Draw("ep,same");
+  ratio->Draw("ep");
 
-  uncertainty->GetYaxis()->SetRangeUser(-1.5, 1.5);
+  pad2->Update();
+
+  if (_analysis.Contains("atlas"))
+    {
+      TLine* zeroline = new TLine(pad2->GetUxmin(), 0.0, pad2->GetUxmax(), 0.0);
+
+      zeroline->SetLineStyle(3);
+      zeroline->SetLineWidth(3);
+
+      zeroline->Draw("same");
+    }
+  else
+    {
+      uncertainty->Draw("e2,same");
+
+      ratio->Draw("ep,same");
+    }
+
+  ratio->GetYaxis()->SetRangeUser(-1.5, 1.5);
 
 
   // Save
   //----------------------------------------------------------------------------
-  pad2->cd(); SetAxis(uncertainty, hdata->GetXaxis()->GetTitle(), "data / prediction - 1", 0.08, 0.8);
+  pad2->cd(); SetAxis(ratio, hdata->GetXaxis()->GetTitle(), "data / prediction - 1", 0.08, 0.8);
   pad1->cd(); SetAxis(hdata, "", hdata->GetYaxis()->GetTitle(), _bigLabelSize, 1.7);
 
   canvas->cd();
@@ -1167,7 +1303,8 @@ void DrawHistogram(TString  hname,
 //------------------------------------------------------------------------------
 void SetParameters(UInt_t cut,
 		   UInt_t mode,
-		   UInt_t wcharge)
+		   UInt_t wcharge,
+		   Int_t  njet)
 {
   gROOT->SetBatch();
 
@@ -1176,10 +1313,10 @@ void SetParameters(UInt_t cut,
   sCut[HasZ]            = "HasZ";
   sCut[HasW]            = "HasW";
   sCut[MET30]           = "MET30";
+  sCut[MtW40]           = "MtW40";
   sCut[TighterCuts]     = "TighterCuts";
   sCut[ZJetsRegion]     = "ZJetsRegion";
   sCut[TopRegion]       = "TopRegion";
-  sCut[SmallMET]        = "SmallMET";
 
   vcut.clear();
 
@@ -1214,10 +1351,13 @@ void SetParameters(UInt_t cut,
   _cut       = cut;
   _mode      = mode;
   _wcharge   = wcharge;
+  _njet      = njet;
   _localpath = GuessLocalBasePath();
 
-  _datapath = Form("%s/piedra/work/WZ/results-for-approval",
+  _datapath = Form("%s/piedra/work/WZ/results",
 		   _localpath.Data());
+
+  if (_njet >= 0) _datapath = Form("%s/%djet", _datapath.Data(), _njet);
 
   _analysis = "analysis";
   //  _analysis = "atlas";
@@ -1326,7 +1466,18 @@ void MakeOutputDirectory(TString format)
 
   gSystem->Exec(Form("cp index.php %s/.", format.Data()));
 
-  _output = _analysis;
+  if (_njet >= 0)
+    {
+      gSystem->mkdir(Form("%s/%djet", format.Data(), _njet));
+
+      gSystem->Exec(Form("cp index.php %s/%djet/.", format.Data(), _njet));
+
+      _output = Form("%djet/%s", _njet, _analysis.Data());
+    }
+  else
+    {
+      _output = _analysis;
+    }
 
   gSystem->mkdir(format + "/" + _output, kTRUE);
 

@@ -18,9 +18,9 @@ root -l -b -q "XS.C+(4,0,1)"  # MET30, PPFmode, WPlus
 root -l -b -q "XS.C+(4,0,2)"  # MET30, PPFmode, WMinus
 
 
-root -l -b -q drawScaleFactors.C+
-root -l -b -q drawWeights.C+
-root -l -b -q drawElectronScaleSystematic.C+
+# root -l -b -q drawScaleFactors.C+
+# root -l -b -q drawWeights.C+
+# root -l -b -q drawElectronScaleSystematic.C+
 
 
 # Cleanup

@@ -1,7 +1,7 @@
 #!/bin/bash
 
 
-BASE_FOLDER="results"
+BASE_FOLDER="results/0jet"
 
 
 FOLDERS="                             \
@@ -41,8 +41,7 @@ for FOLDER in $FOLDERS; do
 
     hadd -f -k ZJets.root    \
 	036_DY10toLLMad.root \
-	037_DY50toLLMad.root \
-	051_ZbbToLL.root
+	037_DY50toLLMad.root
 
     hadd -f -k Top.root       \
 	011_TtWFullDR.root    \

@@ -1,9 +1,9 @@
 #!/bin/bash
 
-if [ $# -lt 1 ]; then
+if [ $# -lt 2 ]; then
 
     echo "  "
-    echo "  ./run.sh SYSTEMATIC"
+    echo "  ./run.sh SYSTEMATIC NJET"
     echo "  "
     echo "  0 = noSyst"
     echo "  1 = metUpSyst"
@@ -20,6 +20,7 @@ if [ $# -lt 1 ]; then
 fi
 
 SYSTEMATIC=$1
+NJET=$2
 
 
 DATA_SAMPLES="      \
@@ -34,7 +35,6 @@ MC_SAMPLES="         \
 000_WWJets2LMad      \
 001_GluGluToWWTo4L   \
 008_GamGamWW         \
-010_TTJetsMad        \
 011_TtWFullDR        \
 012_TbartWFullDR     \
 019_TTTo2L2Nu2B      \
@@ -77,15 +77,15 @@ if [ ${SYSTEMATIC} == 0 ]; then
 
     for SAMPLE in ${DATA_SAMPLES}; do
 
-        root -l -b -q "runAnalysisWZ.C(\"${SAMPLE}\",${SYSTEMATIC},0)";  # Nominal selection
-        root -l -b -q "runAnalysisWZ.C(\"${SAMPLE}\",${SYSTEMATIC},2)";  # ATLAS data-driven
+        root -l -b -q "runAnalysisWZ.C(\"${SAMPLE}\",${SYSTEMATIC},0,${NJET})";  # Nominal selection
+        root -l -b -q "runAnalysisWZ.C(\"${SAMPLE}\",${SYSTEMATIC},2,${NJET})";  # ATLAS data-driven
 
     done
 
     for SAMPLE in ${MC_SAMPLES}; do
     
-	root -l -b -q "runAnalysisWZ.C(\"${SAMPLE}\",${SYSTEMATIC},0)";  # Nominal selection
-	root -l -b -q "runAnalysisWZ.C(\"${SAMPLE}\",${SYSTEMATIC},2)";  # ATLAS data-driven
+	root -l -b -q "runAnalysisWZ.C(\"${SAMPLE}\",${SYSTEMATIC},0,${NJET})";  # Nominal selection
+	root -l -b -q "runAnalysisWZ.C(\"${SAMPLE}\",${SYSTEMATIC},2,${NJET})";  # ATLAS data-driven
 	
     done
 
@@ -97,7 +97,7 @@ elif [ ${SYSTEMATIC} == 8 ]; then
 
 	    for ELEC_JET_PT in 15 35 50; do
 		
-		root -l -b -q "runAnalysisWZ.C(\"${SAMPLE}\",${SYSTEMATIC},1,\"${MUON_JET_PT}\",\"${ELEC_JET_PT}\")";
+		root -l -b -q "runAnalysisWZ.C(\"${SAMPLE}\",${SYSTEMATIC},1,${NJET},\"${MUON_JET_PT}\",\"${ELEC_JET_PT}\")";
 
 	    done
 
@@ -109,7 +109,7 @@ else
 
     for SAMPLE in ${MC_SAMPLES}; do
     
-	root -l -b -q "runAnalysisWZ.C(\"${SAMPLE}\",${SYSTEMATIC},0)";
+	root -l -b -q "runAnalysisWZ.C(\"${SAMPLE}\",${SYSTEMATIC},0,${NJET})";
 	
     done
 fi
