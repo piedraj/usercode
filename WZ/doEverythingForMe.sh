@@ -1,23 +1,19 @@
 #!/bin/bash
 
-if [ $# -lt 1 ]; then
+################################################################################
+#
+# ./Submit.sh SYSTEMATIC MODE NJET
+#
+################################################################################
 
-    echo "  "
-    echo "  ./doEverythingForMe.sh NJET"
-    echo "  "
+./Submit.sh 0 0 -1
+./Submit.sh 0 0  0
+./Submit.sh 0 0  1
 
-    exit -1
-fi
+./Submit.sh 8 1 -1
+./Submit.sh 8 1  0
+./Submit.sh 8 1  1
 
-./run.sh 0 $1
-./run.sh 1 $1
-./run.sh 2 $1
-./run.sh 3 $1
-./run.sh 4 $1
-./run.sh 5 $1
-./run.sh 6 $1
-./run.sh 7 $1
-./run.sh 8 $1
 
 # ./merge.sh
 

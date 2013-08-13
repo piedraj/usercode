@@ -8,7 +8,8 @@
 #include "TMatrixD.h"
 
 
-const Float_t _bigLabelSize = 0.04;
+const Float_t _bigLabelSize  = 0.04;
+const Bool_t  _doSystematics = false;
 
 
 // Input parameters for the WZ cross section
@@ -71,7 +72,7 @@ enum {
   MtW40,
   TighterCuts,
   ZJetsRegion,
-  TopRegion,
+  TopRegion
 };
 
 TString sCut[nCut];
@@ -280,10 +281,10 @@ Double_t RatioError               (Double_t      a,
 //------------------------------------------------------------------------------
 // XS
 //------------------------------------------------------------------------------
-void XS(UInt_t cut     = MET30,
+void XS(UInt_t cut     = MtW40,
 	UInt_t mode    = PPFmode,
 	UInt_t wcharge = WInclusive,
-	Int_t  njet    = 0)
+	Int_t  njet    = -1)
 {
   SetParameters(cut, mode, wcharge, njet);
 
@@ -309,22 +310,29 @@ void XS(UInt_t cut     = MET30,
     //--------------------------------------------------------------------------
     for (UInt_t syst=0; syst<nSystematic; syst++)
       {
-	Double_t xsVal, xsErr, wzEff;
+	xsSystematic[channel][syst][cut] = 0.0;
 
-	CrossSection(xsVal, xsErr, wzEff, _wcharge, channel, cut, syst); 
-
-	xsSystematic[channel][syst][cut] = fabs(xsVal - xsValue[channel]);
-
-	if (syst == fakesSyst)
+	if (_doSystematics)
 	  {
-	    if (channel == EEE || channel == MME) xsSystematic[channel][syst][cut] *= 0.67;
-	  }
+	    Double_t xsVal, xsErr, wzEff;
+
+	    CrossSection(xsVal, xsErr, wzEff, _wcharge, channel, cut, syst); 
+
+	    xsSystematic[channel][syst][cut] = fabs(xsVal - xsValue[channel]);
+
+	    if (syst == fakesSyst)
+	      {
+		if (channel == EEE || channel == MME) xsSystematic[channel][syst][cut] *= 0.67;
+	      }
+	  }  // _doSystematics
       }
 
-    xsErrorSyst[channel] = 0;
+    xsErrorSyst[channel] = 0.0;
 
     for (UInt_t k=0; k<=nSystematic; k++)
-      xsErrorSyst[channel] += (xsSystematic[channel][k][cut] * xsSystematic[channel][k][cut]);
+      {
+	xsErrorSyst[channel] += (xsSystematic[channel][k][cut] * xsSystematic[channel][k][cut]);
+      }
 
     xsErrorSyst[channel] = sqrt(xsErrorSyst[channel]);
 
@@ -351,6 +359,7 @@ void XS(UInt_t cut     = MET30,
     PrintSystematics(cut);
 
     DrawCrossSections(cut);
+
     DrawRelativeCrossSections(cut);
 
     PrintCrossSections(cut);
@@ -481,7 +490,7 @@ void CrossSection(Double_t& xsVal,
       }
     else if (j == Fakes)
       {
-	if (syst == fakesSyst)
+    	if (syst == fakesSyst && _doSystematics)
 	  {
 	    Int_t muonJetPtUp   = (channel == MMM || channel == EEM) ? 30 : 20;
 	    Int_t muonJetPtDown = (channel == MMM || channel == EEM) ? 10 : 20;
@@ -514,7 +523,7 @@ void CrossSection(Double_t& xsVal,
       }
     else
       {
-	if (syst == muonSyst || syst == electronSyst || syst == metSyst)
+	if (_doSystematics && (syst == muonSyst || syst == electronSyst || syst == metSyst))
 	  {
 	    TFile* fUp   = new TFile(_datapath + "/systematics/" + sSystematic[syst] + "Up/"   + sProcess[j] + ".root");
 	    TFile* fDown = new TFile(_datapath + "/systematics/" + sSystematic[syst] + "Down/" + sProcess[j] + ".root");
@@ -530,7 +539,7 @@ void CrossSection(Double_t& xsVal,
 	    fUp  ->Close();
 	    fDown->Close();
 	  }
-	else if (syst == pileupSyst)
+	else if (_doSystematics && syst == pileupSyst)
 	  {
 	    TFile* f1 = new TFile(_datapath + "/systematics/" + sSystematic[syst] + "/" + sProcess[j] + ".root");
 	    
@@ -538,7 +547,7 @@ void CrossSection(Double_t& xsVal,
 	    
 	    f1->Close();
 	  }
-	else if (syst == triggerSyst)
+	else if (_doSystematics && syst == triggerSyst)
 	  {
 	    process_yield *= (1. + sqrt(3.) / 1e2);
 	  }
@@ -546,14 +555,14 @@ void CrossSection(Double_t& xsVal,
 	if (j == WZ)
 	  {
 	    nWZ = process_yield;
-
+	    
 	    if (syst == qcdSyst) nWZ *= (1. + 0.016);
 	    if (syst == pdfSyst) nWZ *= (1. + 0.014);
 	  }
 	else
 	  {
-	    if (syst == zzSyst && j == ZZ) process_yield *= (1. + 0.15);
-	    if (syst == zgSyst && j == ZG) process_yield *= (1. + 0.15);
+	    if (_doSystematics && syst == zzSyst && j == ZZ) process_yield *= (1. + 0.15);
+	    if (_doSystematics && syst == zgSyst && j == ZG) process_yield *= (1. + 0.15);
 	    
 	    nbkg += process_yield;
 	  }
@@ -563,11 +572,11 @@ void CrossSection(Double_t& xsVal,
   wzEff = nWZ / ngenWZ[wcharge];
 
   xsVal = (ndata - nbkg) / (_luminosity * wzEff * WZ23lnu);
-
+  
   xsErr = sqrt(ndata) / (_luminosity * wzEff * WZ23lnu);
 
 
-  if (wcharge == WInclusive)
+  if (_doSystematics && wcharge == WInclusive)
     {
       ebkg = sqrt(ebkg);
       
@@ -1056,7 +1065,7 @@ void DrawHistogram(TString  hname,
 
   hstack->Draw("hist,same");
 
-  if (!_analysis.Contains("atlas") && _njet < 0) allmc ->Draw("e2,same");
+  if (!_analysis.Contains("atlas")) allmc->Draw("e2,same");
 
   hdata ->Draw("ep,same");
 
@@ -1903,7 +1912,18 @@ void RelativeSystematics(UInt_t channel, UInt_t cut)
 	  
 	  systematicError[channel][process][syst] = 0.0;
 	}
+    }
 
+  
+  //////////////////////////////////////////////////////////////////////////////
+  //
+  if (!_doSystematics) return;
+  //
+  //////////////////////////////////////////////////////////////////////////////
+
+
+  for (UInt_t syst=0; syst<nSystematic; syst++)
+    {
       if (syst == fakesSyst)
 	{
 	  Double_t fsv = 0.0;
