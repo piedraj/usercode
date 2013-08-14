@@ -2,6 +2,16 @@
 
 
 if [ $# -lt 1 ] ; then
+
+    echo "  "
+    echo "  ./merge.sh BASE_FOLDER"
+    echo "  "
+    echo "  BASE_FOLDER"
+    echo "     results"
+    echo "     results/0jet"
+    echo "     results/1jet"
+    echo "  "
+
     exit -1
 fi
 
