@@ -352,7 +352,12 @@ void XS(UInt_t cut     = MtW40,
 
   // Final numbers
   //----------------------------------------------------------------------------
-  if (!_analysis.Contains("atlas")) {
+  if (!_analysis.Contains("atlas") &&
+      (
+       _cut == MET30 ||
+       _cut == MtW40 ||
+       _cut == TighterCuts
+       )) {
 
     BlueMethod(cut);
   
@@ -1300,6 +1305,8 @@ void DrawHistogram(TString  hname,
 
   TString cname = _output + "/" + hname;
 
+  if (_njet > -1) cname = Form("%s_%djet", cname.Data(), _njet);
+
   if (setLogy) cname += "_log";
 
   canvas->SaveAs(Form("pdf/%s.pdf", cname.Data()));
@@ -1657,6 +1664,8 @@ void DrawCrossSections(UInt_t cut)
 
   TString xs_name = "xs_" + sCut[cut] + "_" + sCharge[_wcharge];
 
+  if (_njet > -1) xs_name = Form("%s_%djet", xs_name.Data(), _njet);
+
   canvas->SaveAs(Form("pdf/%s/%s.pdf", _output.Data(), xs_name.Data()));
   canvas->SaveAs(Form("png/%s/%s.png", _output.Data(), xs_name.Data()));
 }
@@ -1816,6 +1825,8 @@ void DrawRelativeCrossSections(UInt_t cut)
   canvas->RedrawAxis();
 
   TString xs_name = "ratioNLO_" + sCut[cut] + "_" + sCharge[_wcharge];
+
+  if (_njet > -1) xs_name = Form("%s_%djet", xs_name.Data(), _njet);
 
   canvas->SaveAs(Form("pdf/%s/%s.pdf", _output.Data(), xs_name.Data()));
   canvas->SaveAs(Form("png/%s/%s.png", _output.Data(), xs_name.Data()));
