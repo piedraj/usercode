@@ -4,7 +4,7 @@
 if [ $# -lt 5 ]; then
 
     echo "  "
-    echo "  ./submit.sh SYSTEMATIC MODE JET_CHANNEL MUON_JET_ET ELEC_JET_ET"
+    echo "  ./submit.sh  SYSTEMATIC  MODE  JET_CHANNEL  MUON_JET_ET  ELEC_JET_ET"
     echo "  "
     echo "  SYSTEMATIC"
     echo "     0 = noSyst"

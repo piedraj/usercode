@@ -9,7 +9,7 @@
 
 
 const Float_t _bigLabelSize  = 0.04;
-const Bool_t  _doSystematics = false;
+const Bool_t  _doSystematics = true;
 
 
 // Input parameters for the WZ cross section
