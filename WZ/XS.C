@@ -61,7 +61,7 @@ TString pdfChannel[nChannel+1] = {
 };
 
 
-const UInt_t nCut = 9;
+const UInt_t nCut = 10;
 
 enum {
   Exactly3Leptons,
@@ -72,7 +72,8 @@ enum {
   MtW40,
   TighterCuts,
   ZJetsRegion,
-  TopRegion
+  TopRegion,
+  VBFSelection
 };
 
 TString sCut[nCut];
@@ -281,7 +282,7 @@ Double_t RatioError               (Double_t      a,
 //------------------------------------------------------------------------------
 // XS
 //------------------------------------------------------------------------------
-void XS(UInt_t cut     = MtW40,
+void XS(UInt_t cut     = VBFSelection,
 	UInt_t mode    = PPFmode,
 	UInt_t wcharge = WInclusive,
 	Int_t  njet    = -1)
@@ -425,7 +426,7 @@ void XS(UInt_t cut     = MtW40,
       {
 	if (channel == MMM || channel == EEM)
 	  {
-	    DrawHistogram("hInvMass2Lep", channel, cut, "m_{#font[12]{ll}}", 5, 1, "GeV", linY, 50, 120, 0, 125, false);
+	    DrawHistogram("hInvMass2Lep", channel, cut, "m_{#font[12]{ll}}", 4, 0, "GeV", linY, 60, 120, 0, 112, false);
 	  }
       }
     else
@@ -442,6 +443,9 @@ void XS(UInt_t cut     = MtW40,
     DrawHistogram("hPtLepton2",      channel, cut, "p_{T}^{second lepton}",                  5, 0, "GeV",  linY);
     DrawHistogram("hPtLepton3",      channel, cut, "p_{T}^{third lepton}",                   5, 0, "GeV",  linY);
     DrawHistogram("hPtLeadingJet",   channel, cut, "p_{T}^{leading jet}",                    5, 0, "GeV",  linY);
+    DrawHistogram("hPtSecondJet",    channel, cut, "p_{T}^{second jet}",                     5, 0, "GeV",  linY);
+    DrawHistogram("hEtaLeadingJet",  channel, cut, "#eta^{leading jet}",                     5, 1, "NULL", linY);
+    DrawHistogram("hEtaSecondJet",   channel, cut, "#eta^{second jet}",                      5, 1, "NULL", linY);
     DrawHistogram("hDPhiZLeptons",   channel, cut, "#Delta#phi_{#font[12]{ll}}",            10, 1, "rad",  linY);
     DrawHistogram("hDPhiWLeptonMET", channel, cut, "#Delta#phi(W lepton, E_{T}^{miss})",    10, 1, "rad",  linY);
     DrawHistogram("hPtZLepton1",     channel, cut, "p_{T}^{Z leading lepton}",               5, 0, "GeV",  linY);
@@ -1293,7 +1297,7 @@ void DrawHistogram(TString  hname,
       ratio->Draw("ep,same");
     }
 
-  ratio->GetYaxis()->SetRangeUser(-1.5, 1.5);
+  ratio->GetYaxis()->SetRangeUser(-2, 2);
 
 
   // Save
@@ -1333,6 +1337,7 @@ void SetParameters(UInt_t cut,
   sCut[TighterCuts]     = "TighterCuts";
   sCut[ZJetsRegion]     = "ZJetsRegion";
   sCut[TopRegion]       = "TopRegion";
+  sCut[VBFSelection]    = "VBFSelection";
 
   vcut.clear();
 
@@ -1363,7 +1368,7 @@ void SetParameters(UInt_t cut,
   _luminosity            = 19602.0;  // pb
   _luminosityUncertainty =     4.4;  // %
 
-  _verbosity = 0;
+  _verbosity = 10;
   _cut       = cut;
   _mode      = mode;
   _wcharge   = wcharge;

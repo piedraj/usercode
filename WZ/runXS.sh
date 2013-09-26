@@ -1,7 +1,7 @@
 #!/bin/bash
 
 
-for ((level=0; level<9; level++))
+for ((level=0; level<10; level++))
   do
   for ((mode=0; mode<2; mode++))
     do

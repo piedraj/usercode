@@ -75,7 +75,7 @@ const TString sComposition[nComposition] = {
 };
 
 
-const UInt_t nCut = 9;
+const UInt_t nCut = 10;
 
 enum {
   Exactly3Leptons,
@@ -86,7 +86,8 @@ enum {
   MtW40,
   TighterCuts,
   ZJetsRegion,
-  TopRegion
+  TopRegion,
+  VBFSelection
 };
 
 const TString sCut[nCut] = {
@@ -98,7 +99,8 @@ const TString sCut[nCut] = {
   "MtW40",
   "TighterCuts",
   "ZJetsRegion",
-  "TopRegion"
+  "TopRegion",
+  "VBFSelection"
 };
 
 
@@ -215,6 +217,9 @@ TH1F*                         hPtLepton1     [nChannel][nCut][nCharge];
 TH1F*                         hPtLepton2     [nChannel][nCut][nCharge];
 TH1F*                         hPtLepton3     [nChannel][nCut][nCharge];
 TH1F*                         hPtLeadingJet  [nChannel][nCut][nCharge];
+TH1F*                         hPtSecondJet   [nChannel][nCut][nCharge];
+TH1F*                         hEtaLeadingJet [nChannel][nCut][nCharge];
+TH1F*                         hEtaSecondJet  [nChannel][nCut][nCharge];
 TH1F*                         hDPhiZLeptons  [nChannel][nCut][nCharge];
 TH1F*                         hDPhiWLeptonMET[nChannel][nCut][nCharge];
 TH1F*                         hPtZLepton1    [nChannel][nCut][nCharge];
@@ -443,6 +448,9 @@ void AnalysisWZ(TString sample,
 	hPtLepton2     [i][j][iCharge] = new TH1F("hPtLepton2"      + suffix, "", 200,   0, 200);
 	hPtLepton3     [i][j][iCharge] = new TH1F("hPtLepton3"      + suffix, "", 200,   0, 200);    
 	hPtLeadingJet  [i][j][iCharge] = new TH1F("hPtLeadingJet"   + suffix, "", 200,   0, 200);    
+	hPtSecondJet   [i][j][iCharge] = new TH1F("hPtSecondJet"    + suffix, "", 200,   0, 200);    
+	hEtaLeadingJet [i][j][iCharge] = new TH1F("hEtaLeadingJet"  + suffix, "", 200,  -6,   6);    
+	hEtaSecondJet  [i][j][iCharge] = new TH1F("hEtaSecondJet"   + suffix, "", 200,  -6,   6);    
 	hDPhiZLeptons  [i][j][iCharge] = new TH1F("hDPhiZLeptons"   + suffix, "", 320,   0, 3.2);    
 	hDPhiWLeptonMET[i][j][iCharge] = new TH1F("hDPhiWLeptonMET" + suffix, "", 320,   0, 3.2);    
 	hPtZLepton1    [i][j][iCharge] = new TH1F("hPtZLepton1"     + suffix, "", 200,   0, 200);
@@ -721,7 +729,7 @@ void AnalysisWZ(TString sample,
 
       for (UInt_t j=0; j<AnalysisLeptons.size(); j++)
 	{
-	  if (fabs(Jet.DeltaR(AnalysisLeptons[j].v)) < 0.3)
+	  if (Jet.DeltaR(AnalysisLeptons[j].v) <= 0.3)
 	    {
 	      thisJetIsLepton = true;
 	      
@@ -776,7 +784,7 @@ void AnalysisWZ(TString sample,
 
 	    for (UInt_t j=0; j<AnalysisLeptons.size(); j++)
 	      {
-		if (fabs(Jet.DeltaR(AnalysisLeptons[j].v)) <= 0.3)
+		if (Jet.DeltaR(AnalysisLeptons[j].v) <= 0.3)
 		  {
 		    thisJetIsLepton = true;
 		    
@@ -990,6 +998,59 @@ void AnalysisWZ(TString sample,
     transverseMass = sqrt(transverseMass);
 
 
+    //--------------------------------------------------------------------------
+    //
+    //  VBF selection
+    //
+    //  The following is a standard selection for either vector boson fusion or
+    //  the related vector boson scattering. You'll find that almost all pheno
+    //  studies and cross section predictions follow a similar selection. Note
+    //  the expectation for 8 TeV would be only a few events from EWK VV
+    //  scattering or backgrounds pass this selection. What we would be
+    //  interested in is a similar selection, initially without the last three
+    //  cuts that focus on scattering.
+    //
+    //                                             Matt Herndon
+    //
+    //  Lepton  pT > 20.0 GeV
+    //  Lepton |eta| < 2.5
+    //  Jet pT > 30, 2 jets
+    //  Jet |eta| < 4.7
+    //  (the jet eta range is important to have any sensitivity)
+    //  deltaR (l,l) > 0.4, all lepton pairs
+    //  (this cut has to be removed to have sensitivity to aQGC which can
+    //  involve TeV momentum vector bosons)
+    //  deltaR (l,j) > 0.4 ---> 0.3
+    //  deltaEta(j,j') > 4.0
+    //  etaj1*etaj2 > 0.0
+    //  m_jj > 600 GeV
+    //
+    //--------------------------------------------------------------------------
+    if (nJet30 == 2 &&
+	AnalysisLeptons[2].v.Pt() > 20.)
+      {
+	Bool_t deltaR_lepton_lepton = true;
+
+	for (UInt_t i=0; i<AnalysisLeptons.size(); i++)
+	  {
+	    TLorentzVector iLep = AnalysisLeptons[i].v;
+	    
+	    for (UInt_t j=i+1; j<AnalysisLeptons.size(); j++)
+	      {
+		TLorentzVector jLep = AnalysisLeptons[j].v;
+		
+		if (iLep.DeltaR(jLep) <= 0.4) deltaR_lepton_lepton = false;
+	      }
+	  }
+
+	if (deltaR_lepton_lepton)
+	  {
+	    FillHistograms(reco_channel, VBFSelection);
+	    FillHistograms(combined,     VBFSelection);
+	  }
+      }
+    
+    
     // Fill histograms
     //--------------------------------------------------------------------------
     FillHistograms(reco_channel, Exactly3Leptons);
@@ -1137,6 +1198,9 @@ void FillHistograms(UInt_t iChannel, UInt_t iCut)
       hPtLepton2     [iChannel][iCut][iCharge]->Fill(AnalysisLeptons[1].v.Pt(),  hweight);
       hPtLepton3     [iChannel][iCut][iCharge]->Fill(AnalysisLeptons[2].v.Pt(),  hweight);
       hPtLeadingJet  [iChannel][iCut][iCharge]->Fill(jetpt[0],                   hweight);
+      hPtSecondJet   [iChannel][iCut][iCharge]->Fill(jetpt[1],                   hweight);
+      hEtaLeadingJet [iChannel][iCut][iCharge]->Fill(jeteta[0],                  hweight);
+      hEtaSecondJet  [iChannel][iCut][iCharge]->Fill(jeteta[1],                  hweight);
       hDPhiZLeptons  [iChannel][iCut][iCharge]->Fill(fabs(deltaPhiZLeptons),     hweight);
       hDPhiWLeptonMET[iChannel][iCut][iCharge]->Fill(fabs(deltaPhiWLeptonMET),   hweight);
       hPtZLepton1    [iChannel][iCut][iCharge]->Fill(ZLepton1.Pt(),              hweight);
