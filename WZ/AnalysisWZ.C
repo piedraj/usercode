@@ -216,10 +216,6 @@ TH1F*                         hInvMass3Lep   [nChannel][nCut][nCharge];
 TH1F*                         hPtLepton1     [nChannel][nCut][nCharge];
 TH1F*                         hPtLepton2     [nChannel][nCut][nCharge];
 TH1F*                         hPtLepton3     [nChannel][nCut][nCharge];
-TH1F*                         hPtLeadingJet  [nChannel][nCut][nCharge];
-TH1F*                         hPtSecondJet   [nChannel][nCut][nCharge];
-TH1F*                         hEtaLeadingJet [nChannel][nCut][nCharge];
-TH1F*                         hEtaSecondJet  [nChannel][nCut][nCharge];
 TH1F*                         hDPhiZLeptons  [nChannel][nCut][nCharge];
 TH1F*                         hDPhiWLeptonMET[nChannel][nCut][nCharge];
 TH1F*                         hPtZLepton1    [nChannel][nCut][nCharge];
@@ -232,6 +228,13 @@ TH1F*                         hDRWZLepton2   [nChannel][nCut][nCharge];
 TH1F*                         hMtW           [nChannel][nCut][nCharge];
 TH1F*                         hNJet30        [nChannel][nCut][nCharge];
 TH1F*                         hNBJet30       [nChannel][nCut][nCharge];
+
+TH1F*                         hPtLeadingJet [nChannel][nCut][nCharge];
+TH1F*                         hPtSecondJet  [nChannel][nCut][nCharge];
+TH1F*                         hEtaLeadingJet[nChannel][nCut][nCharge];
+TH1F*                         hEtaSecondJet [nChannel][nCut][nCharge];
+TH1F*                         hDEtaJets     [nChannel][nCut][nCharge];
+TH1F*                         hInvMass2Jet  [nChannel][nCut][nCharge];
 
 TH1F*                         hInvMass2LepBB[2];
 TH1F*                         hInvMass2LepBE[2];
@@ -447,10 +450,6 @@ void AnalysisWZ(TString sample,
 	hPtLepton1     [i][j][iCharge] = new TH1F("hPtLepton1"      + suffix, "", 200,   0, 200);
 	hPtLepton2     [i][j][iCharge] = new TH1F("hPtLepton2"      + suffix, "", 200,   0, 200);
 	hPtLepton3     [i][j][iCharge] = new TH1F("hPtLepton3"      + suffix, "", 200,   0, 200);    
-	hPtLeadingJet  [i][j][iCharge] = new TH1F("hPtLeadingJet"   + suffix, "", 200,   0, 200);    
-	hPtSecondJet   [i][j][iCharge] = new TH1F("hPtSecondJet"    + suffix, "", 200,   0, 200);    
-	hEtaLeadingJet [i][j][iCharge] = new TH1F("hEtaLeadingJet"  + suffix, "", 200,  -6,   6);    
-	hEtaSecondJet  [i][j][iCharge] = new TH1F("hEtaSecondJet"   + suffix, "", 200,  -6,   6);    
 	hDPhiZLeptons  [i][j][iCharge] = new TH1F("hDPhiZLeptons"   + suffix, "", 320,   0, 3.2);    
 	hDPhiWLeptonMET[i][j][iCharge] = new TH1F("hDPhiWLeptonMET" + suffix, "", 320,   0, 3.2);    
 	hPtZLepton1    [i][j][iCharge] = new TH1F("hPtZLepton1"     + suffix, "", 200,   0, 200);
@@ -462,7 +461,16 @@ void AnalysisWZ(TString sample,
 	hDRWZLepton2   [i][j][iCharge] = new TH1F("hDRWZLepton2"    + suffix, "", 200,   0,   6);    
 	hMtW           [i][j][iCharge] = new TH1F("hMtW"            + suffix, "", 200,   0, 200);    
 	hNJet30        [i][j][iCharge] = new TH1F("hNJet30"         + suffix, "",  10,   0,  10);    
-	hNBJet30       [i][j][iCharge] = new TH1F("hNBJet30"        + suffix, "",  10,   0,  10);    
+	hNBJet30       [i][j][iCharge] = new TH1F("hNBJet30"        + suffix, "",  10,   0,  10);
+
+	// Jet histograms
+	//----------------------------------------------------------------------
+	hPtLeadingJet [i][j][iCharge] = new TH1F("hPtLeadingJet"  + suffix, "", 200,   0,  200);
+	hPtSecondJet  [i][j][iCharge] = new TH1F("hPtSecondJet"   + suffix, "", 200,   0,  200);
+	hEtaLeadingJet[i][j][iCharge] = new TH1F("hEtaLeadingJet" + suffix, "", 240,  -6,    6);
+	hEtaSecondJet [i][j][iCharge] = new TH1F("hEtaSecondJet"  + suffix, "", 240,  -6,    6);
+	hDEtaJets     [i][j][iCharge] = new TH1F("hDEtaJets"      + suffix, "", 240,  -6,    6);
+	hInvMass2Jet  [i][j][iCharge] = new TH1F("hInvMass2Jet"   + suffix, "", 400,   0, 4000);
       }
     }
   }
@@ -1043,7 +1051,9 @@ void AnalysisWZ(TString sample,
 	      }
 	  }
 
-	if (deltaR_lepton_lepton)
+	if (deltaR_lepton_lepton &&
+	    fabs(invMass2Lep - Z_MASS) < 20. &&
+	    EventMET.Et() > 30.)
 	  {
 	    FillHistograms(reco_channel, VBFSelection);
 	    FillHistograms(combined,     VBFSelection);
@@ -1156,6 +1166,8 @@ void FillHistograms(UInt_t iChannel, UInt_t iCut)
   Float_t deltaR2            = WLepton.DeltaR(ZLepton2);
   Float_t deltaMET           = pfmet - pfmetTypeI;
   Float_t deltaPhiMET        = pfmetphi - pfmetTypeIphi;
+  Float_t deltaEtaJets       = SelectedJets[0].Eta() - SelectedJets[1].Eta();
+  Float_t invMass2Jet        = (SelectedJets[0] + SelectedJets[1]).M();
 
   for (UInt_t iCharge=0; iCharge<nCharge; iCharge++)
     {
@@ -1197,10 +1209,6 @@ void FillHistograms(UInt_t iChannel, UInt_t iCut)
       hPtLepton1     [iChannel][iCut][iCharge]->Fill(AnalysisLeptons[0].v.Pt(),  hweight);
       hPtLepton2     [iChannel][iCut][iCharge]->Fill(AnalysisLeptons[1].v.Pt(),  hweight);
       hPtLepton3     [iChannel][iCut][iCharge]->Fill(AnalysisLeptons[2].v.Pt(),  hweight);
-      hPtLeadingJet  [iChannel][iCut][iCharge]->Fill(jetpt[0],                   hweight);
-      hPtSecondJet   [iChannel][iCut][iCharge]->Fill(jetpt[1],                   hweight);
-      hEtaLeadingJet [iChannel][iCut][iCharge]->Fill(jeteta[0],                  hweight);
-      hEtaSecondJet  [iChannel][iCut][iCharge]->Fill(jeteta[1],                  hweight);
       hDPhiZLeptons  [iChannel][iCut][iCharge]->Fill(fabs(deltaPhiZLeptons),     hweight);
       hDPhiWLeptonMET[iChannel][iCut][iCharge]->Fill(fabs(deltaPhiWLeptonMET),   hweight);
       hPtZLepton1    [iChannel][iCut][iCharge]->Fill(ZLepton1.Pt(),              hweight);
@@ -1213,6 +1221,16 @@ void FillHistograms(UInt_t iChannel, UInt_t iCut)
       hMtW           [iChannel][iCut][iCharge]->Fill(transverseMass,             hweight);
       hNJet30        [iChannel][iCut][iCharge]->Fill(nJet30,                     hweight);
       hNBJet30       [iChannel][iCut][iCharge]->Fill(nbjet,                      hweight);
+
+
+      // Jet histograms
+      //------------------------------------------------------------------------
+      hPtLeadingJet [iChannel][iCut][iCharge]->Fill(SelectedJets[0].Pt(),  hweight);
+      hPtSecondJet  [iChannel][iCut][iCharge]->Fill(SelectedJets[0].Pt(),  hweight);
+      hEtaLeadingJet[iChannel][iCut][iCharge]->Fill(SelectedJets[0].Eta(), hweight);
+      hEtaSecondJet [iChannel][iCut][iCharge]->Fill(SelectedJets[0].Eta(), hweight);
+      hDEtaJets     [iChannel][iCut][iCharge]->Fill(deltaEtaJets,          hweight);
+      hInvMass2Jet  [iChannel][iCut][iCharge]->Fill(invMass2Jet,           hweight);
     }
 }
 
