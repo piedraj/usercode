@@ -94,6 +94,9 @@ done
 
 
 DATADRIVEN_FOLDERS="
+$BASE_FOLDER/systematics/muonJet05_elecJet15 \
+$BASE_FOLDER/systematics/muonJet05_elecJet35 \
+$BASE_FOLDER/systematics/muonJet05_elecJet50 \
 $BASE_FOLDER/systematics/muonJet10_elecJet15 \
 $BASE_FOLDER/systematics/muonJet10_elecJet35 \
 $BASE_FOLDER/systematics/muonJet10_elecJet50 \
@@ -109,6 +112,18 @@ $BASE_FOLDER/systematics/muonJet25_elecJet50 \
 $BASE_FOLDER/systematics/muonJet30_elecJet15 \
 $BASE_FOLDER/systematics/muonJet30_elecJet35 \
 $BASE_FOLDER/systematics/muonJet30_elecJet50 \
+$BASE_FOLDER/systematics/muonJet35_elecJet15 \
+$BASE_FOLDER/systematics/muonJet35_elecJet35 \
+$BASE_FOLDER/systematics/muonJet35_elecJet50 \
+$BASE_FOLDER/systematics/muonJet40_elecJet15 \
+$BASE_FOLDER/systematics/muonJet40_elecJet35 \
+$BASE_FOLDER/systematics/muonJet40_elecJet50 \
+$BASE_FOLDER/systematics/muonJet45_elecJet15 \
+$BASE_FOLDER/systematics/muonJet45_elecJet35 \
+$BASE_FOLDER/systematics/muonJet45_elecJet50 \
+$BASE_FOLDER/systematics/muonJet50_elecJet15 \
+$BASE_FOLDER/systematics/muonJet50_elecJet35 \
+$BASE_FOLDER/systematics/muonJet50_elecJet50 \
 "
 
 

@@ -52,6 +52,14 @@ TString lChannel[nChannel+1] = {
   "combined"
 };
 
+Color_t cChannel[nChannel+1] = {
+  kRed,
+  kBlue,
+  kGreen+2,
+  kOrange-2,
+  kBlack
+};
+
 TString pdfChannel[nChannel+1] = {
   "eee",
   "ee$\\mu$",
@@ -121,6 +129,17 @@ const Double_t ngenWZ[nCharge] = {
 const Double_t xs_nlo      [nCharge] = {21.91, 13.86, 8.04};
 const Double_t xs_nlo_left [nCharge] = { 0.88,  0.55, 0.32};
 const Double_t xs_nlo_right[nCharge] = { 1.17,  0.73, 0.44};
+
+
+// Scan fakes
+//------------------------------------------------------------------------------
+const TString muonJet[] = {"05", "10", "15", "20", "25", "30", "35", "40", "45", "50"};
+
+const TString elecJet[] = {"15", "35", "50"};
+
+const UInt_t muonSize = sizeof(muonJet) / sizeof(muonJet[0]);
+
+const UInt_t elecSize = sizeof(elecJet) / sizeof(elecJet[0]);
 
 
 // Systematics
@@ -207,8 +226,8 @@ void     SetParameters            (UInt_t        cut,
 				   UInt_t        wcharge,
 				   Int_t         njet);
 
-Int_t    ReadInputFiles           (Int_t         muonJetPt,
-				   Int_t         elecJetPt);
+Int_t    ReadInputFiles           (TString       muonJetPt,
+				   TString       elecJetPt);
 
 void     CrossSection             (Double_t&     xsVal,
 				   Double_t&     xsErr,
@@ -278,21 +297,30 @@ Double_t RatioError               (Double_t      a,
 				   Double_t      aErr,
 				   Double_t      bErr);
 
+void     ScanFakes                ();
+
 
 //------------------------------------------------------------------------------
 // XS
 //------------------------------------------------------------------------------
-void XS(UInt_t cut     = VBFSelection,
+void XS(UInt_t cut     = TopRegion,
 	UInt_t mode    = PPFmode,
 	UInt_t wcharge = WInclusive,
 	Int_t  njet    = -1)
 {
   SetParameters(cut, mode, wcharge, njet);
 
-  if (ReadInputFiles(20, 35) < 0) return;
+  if (ReadInputFiles("20", "35") < 0) return;
 
   wzEffValue[nChannel] = 0.0;
   wzEffError[nChannel] = 0.0;
+
+
+  //////////////////////////////////////////////////////////////////////////////
+  ScanFakes();
+
+  //  return;
+  //////////////////////////////////////////////////////////////////////////////
 
 
   // Loop over the four channels
@@ -431,7 +459,7 @@ void XS(UInt_t cut     = VBFSelection,
       }
     else
       {
-	//	DrawHistogram("hInvMass2Lep", channel, cut, "m_{#font[12]{ll}}", 2, 0, "GeV", linY, 70, 112);
+	DrawHistogram("hInvMass2Lep", channel, cut, "m_{#font[12]{ll}}", 2, 0, "GeV", linY, 70, 112);
       }
 
     if (_analysis.Contains("atlas")) continue;
@@ -504,17 +532,23 @@ void CrossSection(Double_t& xsVal,
       {
     	if (syst == fakesSyst && _doSystematics)
 	  {
-	    Int_t muonJetPtUp   = (channel == MMM || channel == EEM) ? 30 : 20;
-	    Int_t muonJetPtDown = (channel == MMM || channel == EEM) ? 10 : 20;
+	    TString muonJetPtUp   = (channel == MMM || channel == EEM) ? "30" : "20";
+	    TString muonJetPtDown = (channel == MMM || channel == EEM) ? "10" : "20";
 
-	    Int_t elecJetPtUp   = (channel == MME || channel == EEE) ? 50 : 35;
-	    Int_t elecJetPtDown = (channel == MME || channel == EEE) ? 15 : 35;
+	    TString elecJetPtUp   = (channel == MME || channel == EEE) ? "50" : "35";
+	    TString elecJetPtDown = (channel == MME || channel == EEE) ? "15" : "35";
 
-	    TString fUpName = Form("%s/systematics/muonJet%d_elecJet%d/%s.root",
-				   _datapath.Data(), muonJetPtUp, elecJetPtUp, sProcess[j].Data());
+	    TString fUpName = Form("%s/systematics/muonJet%s_elecJet%s/%s.root",
+				   _datapath.Data(),
+				   muonJetPtUp.Data(),
+				   elecJetPtUp.Data(),
+				   sProcess[j].Data());
 
-	    TString fDownName = Form("%s/systematics/muonJet%d_elecJet%d/%s.root",
-				     _datapath.Data(), muonJetPtDown, elecJetPtDown, sProcess[j].Data());
+	    TString fDownName = Form("%s/systematics/muonJet%s_elecJet%s/%s.root",
+				     _datapath.Data(),
+				     muonJetPtDown.Data(),
+				     elecJetPtDown.Data(),
+				     sProcess[j].Data());
 
 	    TFile* fUp   = new TFile(fUpName);
 	    TFile* fDown = new TFile(fDownName);
@@ -1420,8 +1454,8 @@ void SetParameters(UInt_t cut,
 //------------------------------------------------------------------------------
 // ReadInputFiles
 //------------------------------------------------------------------------------
-Int_t ReadInputFiles(Int_t muonJetPt,
-		     Int_t elecJetPt)
+Int_t ReadInputFiles(TString muonJetPt,
+		     TString elecJetPt)
 {
   for (UInt_t i=0; i<vprocess.size(); i++) {
 
@@ -1431,7 +1465,7 @@ Int_t ReadInputFiles(Int_t muonJetPt,
 
     if (j == Fakes)
       {
-	fname += Form("/systematics/muonJet%d_elecJet%d/", muonJetPt, elecJetPt);
+	fname += Form("/systematics/muonJet%s_elecJet%s/", muonJetPt.Data(), elecJetPt.Data());
       }
     else
       {
@@ -2240,3 +2274,144 @@ Double_t RatioError(Double_t a,
 
   return Ratio(a,b) * sqrt((aErr/a)*(aErr/a) + (bErr/b)*(bErr/b));
 }
+
+
+//------------------------------------------------------------------------------
+// ScanFakes
+//------------------------------------------------------------------------------
+void ScanFakes()
+{
+  TGraphErrors* yieldGraph[nChannel+1];
+
+  for (UInt_t channel=0; channel<=nChannel; channel++)
+    {
+      TString hname = "hCounter_" + sChannel[channel] + "_" + sCut[_cut] + "_" + sCharge[_wcharge] + "_LLL";
+      
+      yieldGraph[channel] = new TGraphErrors(muonSize * elecSize);
+
+      TH1D* hist[nProcess];
+
+      for (UInt_t j=0; j<vprocess.size(); j++)
+	{
+	  UInt_t k = vprocess.at(j);
+
+	  if (k == Fakes) continue;
+
+	  hist[k] = (TH1D*)input[k]->Get(hname);
+
+	  hist[k]->SetName(hname + "_" + sProcess[k]);
+	}
+
+      Double_t differenceValue = Yield(hist[Data])
+	- Yield(hist[WZ])
+	- Yield(hist[ZZ])
+	- Yield(hist[ZG])
+	- Yield(hist[VVV])
+	- Yield(hist[WV]);
+      
+      Double_t differenceError = hist[Data]->GetSumw2()->GetSum()
+	+ hist[WZ] ->GetSumw2()->GetSum()
+	+ hist[ZZ] ->GetSumw2()->GetSum()
+	+ hist[ZG] ->GetSumw2()->GetSum()
+	+ hist[VVV]->GetSumw2()->GetSum();
+
+      for (UInt_t imuon=0; imuon<muonSize; imuon++)
+	{
+	  for (UInt_t ielec=0; ielec<elecSize; ielec++)
+	    {
+	      TString fname = Form("%s/systematics/muonJet%s_elecJet%s/Data_PPF.root",
+				   _datapath.Data(),
+				   muonJet[imuon].Data(),
+				   elecJet[ielec].Data());
+
+	      TFile* file = new TFile(fname);
+
+	      TH1D* hFakes = (TH1D*)file->Get(hname);
+
+	      yieldGraph[channel]->SetPoint(imuon*elecSize + ielec,
+					    imuon*elecSize + ielec,
+					    differenceValue - Yield(hFakes));
+	      
+	      yieldGraph[channel]->SetPointError(imuon*elecSize + ielec,
+						 0.1,
+						 sqrt(differenceError + hFakes->GetSumw2()->GetSum()));
+	    }
+	}
+    }
+
+
+  // Draw
+  //----------------------------------------------------------------------------
+  TMultiGraph* mg = new TMultiGraph();
+
+  for (UInt_t i=0; i<=nChannel; i++)
+    {
+      yieldGraph[i]->SetMarkerStyle(20+i);
+
+      yieldGraph[i]->SetLineColor(cChannel[i]);
+
+      yieldGraph[i]->SetMarkerColor(cChannel[i]);
+
+      mg->Add(yieldGraph[i]);
+    }
+
+  TCanvas* c1 = new TCanvas("c1", "c1", 10, 10, 800, 600);
+
+  c1->SetLeftMargin(0.7 * c1->GetLeftMargin());
+
+  mg->Draw("apz");
+
+
+  // Axis labels
+  //----------------------------------------------------------------------------
+  TAxis* xaxis = mg->GetXaxis();
+  TAxis* yaxis = mg->GetYaxis();
+
+  yaxis->SetTitle("data - prediction");
+
+  yaxis->SetTitleOffset(1.4);
+
+  xaxis->SetLabelSize(0.04);
+
+  for (UInt_t imuon=0; imuon<muonSize; imuon++)
+    {
+      for (UInt_t ielec=0; ielec<elecSize; ielec++)
+	{
+	  UInt_t thechannel = imuon*elecSize + ielec;
+
+	  xaxis->SetBinLabel(xaxis->FindBin(thechannel),
+			     Form("#mu%s  e%s", muonJet[imuon].Data(), elecJet[ielec].Data()));
+	}
+    }
+
+  xaxis->CenterLabels();
+  xaxis->LabelsOption("v");
+
+  DrawLegend(0.120, 0.935, yieldGraph[0], Form(" %s", lChannel[0].Data()), "p", 0.03, 0.12);
+  DrawLegend(0.295, 0.935, yieldGraph[1], Form(" %s", lChannel[1].Data()), "p", 0.03, 0.12);
+  DrawLegend(0.470, 0.935, yieldGraph[2], Form(" %s", lChannel[2].Data()), "p", 0.03, 0.12);
+  DrawLegend(0.645, 0.935, yieldGraph[3], Form(" %s", lChannel[3].Data()), "p", 0.03, 0.12);
+  DrawLegend(0.820, 0.935, yieldGraph[4], Form(" %s", lChannel[4].Data()), "p", 0.03, 0.12);
+
+  TLine* lineH = new TLine(gPad->GetUxmin(), 0, gPad->GetUxmax(), 0);
+  TLine* lineV = new TLine(10, gPad->GetUymin(), 10, gPad->GetUymax());
+
+  lineV->SetLineStyle(3);
+  lineV->SetLineWidth(3);
+
+  lineH->Draw("same");
+  lineV->Draw("same");
+
+  mg->Draw("pz,same");
+
+
+  // Save
+  //----------------------------------------------------------------------------
+  TString cname = "scanFakes";
+  
+  if (_njet > -1) cname = Form("%s_%djet", cname.Data(), _njet);
+
+  c1->SaveAs(Form("png/%s/%s.png", _output.Data(), cname.Data()));
+  c1->SaveAs(Form("png/%s/%s.png", _output.Data(), cname.Data()));
+}
+
