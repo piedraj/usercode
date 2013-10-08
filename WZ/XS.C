@@ -2407,7 +2407,7 @@ void ScanFakes()
 
   // Save
   //----------------------------------------------------------------------------
-  TString cname = "scanFakes";
+  TString cname = Form("scanFakes_%s_%s", sCut[_cut].Data(), sCharge[_wcharge].Data());
   
   if (_njet > -1) cname = Form("%s_%djet", cname.Data(), _njet);
 
