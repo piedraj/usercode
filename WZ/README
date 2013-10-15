@@ -53,6 +53,11 @@ cd WZ
 
 ./submitEverythingForMe.sh
 
+qstat
+
+# If jobs fail
+#qdel all
+
 ./merge.sh results
 ./merge.sh results/0jet
 ./merge.sh results/1jet
