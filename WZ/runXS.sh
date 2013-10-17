@@ -1,20 +1,19 @@
 #!/bin/bash
 
 
-for ((level=0; level<10; level++))
+for ((cut=0; cut<10; cut++))
   do
   for ((mode=0; mode<2; mode++))
     do
-    for ((njet=-1; njet<2; njet++))
+    for ((wcharge=0; wcharge<3; wcharge++))
       do
-      root -l -b -q "XS.C+($level,$mode,0,$njet)"  # WInclusive
+      for ((njet=-1; njet<2; njet++))
+	do
+	root -l -b -q "XS.C+($cut,$mode,$wcharge,$njet)"
+      done
     done
   done
 done
-
-
-### root -l -b -q "XS.C+(4,0,1)"  # MET30, PPFmode, WPlus
-### root -l -b -q "XS.C+(4,0,2)"  # MET30, PPFmode, WMinus
 
 
 # Cleanup
