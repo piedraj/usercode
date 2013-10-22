@@ -1,9 +1,6 @@
 #!/bin/bash
 
 
-rm -rf *.d
-rm -rf *.so
-rm -rf job_*.sh
 rm -rf results
 
 
@@ -57,3 +54,10 @@ for NJET in -1 0 1; do
 
 done
 
+
+# Cleanup
+#-------------------------------------------------------------------------------
+rm -rf *d
+rm -rf *log
+rm -rf *so
+rm -rf *~

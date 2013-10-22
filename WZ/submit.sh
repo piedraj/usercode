@@ -99,24 +99,6 @@ MC_SAMPLES="         \
 "
 
 
-create_job() {
-    local sample=$1
-    local syst=$2
-    local datamode=$3
-    local njet=$4
-    local muonjet=$5
-    local elecjet=$6
-    local filename=job_${sample}_${syst}_${datamode}_${njet}_${muonjet}_${elecjet}.sh
-    cat > $filename <<EOF
-#!/bin/bash
-source /nfs/fanae/root_releases/root.5.34.09/bin/thisroot.sh
-cd $WORKINGDIR
-root -l -b -q "runAnalysisWZ.C(\"${sample}\",${syst},${datamode},${njet},\"${muonjet}\",\"${elecjet}\")";
-EOF
-    chmod u+x $filename
-}
-
-
 submit_job() {
     local sample=$1
     local syst=$2
@@ -124,35 +106,38 @@ submit_job() {
     local njet=$4
     local muonjet=$5
     local elecjet=$6
-    local filename=job_${sample}_${syst}_${datamode}_${njet}_${muonjet}_${elecjet}.sh
-    qsub $filename
+    local filename=job_AnalysisWZ_${sample}_${syst}_${datamode}_${njet}_${muonjet}_${elecjet}.sh
+    cat > $filename <<EOF
+#!/bin/bash
+source /nfs/fanae/root_releases/root.5.34.09/bin/thisroot.sh
+cd $WORKINGDIR
+root -l -b -q "runAnalysisWZ.C(\"${sample}\",${syst},${datamode},${njet},\"${muonjet}\",\"${elecjet}\")";
+EOF
+    chmod u+x $filename
+    qsub      $filename
 }
 
 
 if [ ${SYSTEMATIC} == 0 ]; then
     
     for SAMPLE in ${DATA_SAMPLES}; do
-	create_job $SAMPLE $SYSTEMATIC $MODE ${JET_CHANNEL} ${MUON_JET_ET} ${ELEC_JET_ET}
 	submit_job $SAMPLE $SYSTEMATIC $MODE ${JET_CHANNEL} ${MUON_JET_ET} ${ELEC_JET_ET}
     done
 
     for SAMPLE in ${MC_SAMPLES}; do
-	create_job $SAMPLE $SYSTEMATIC $MODE ${JET_CHANNEL} ${MUON_JET_ET} ${ELEC_JET_ET}
 	submit_job $SAMPLE $SYSTEMATIC $MODE ${JET_CHANNEL} ${MUON_JET_ET} ${ELEC_JET_ET}
     done
 
 elif [ $SYSTEMATIC == 8 ]; then
 
     for SAMPLE in ${DATA_SAMPLES}; do
-	create_job $SAMPLE $SYSTEMATIC $MODE ${JET_CHANNEL} ${MUON_JET_ET} ${ELEC_JET_ET}
 	submit_job $SAMPLE $SYSTEMATIC $MODE ${JET_CHANNEL} ${MUON_JET_ET} ${ELEC_JET_ET}
     done
 
 else
 
     for SAMPLE in ${MC_SAMPLES}; do
-	create_job $SAMPLE $SYSTEMATIC $MODE ${JET_CHANNEL} ${MUON_JET_ET} ${ELEC_JET_ET}
-	submit_job $SAMPLE $SYSTEMATIC $MODE ${JET_CHANNEL} ${MUON_JET_ET} ${ELEC_JET_ET}
+	create_and_submit_job $SAMPLE $SYSTEMATIC $MODE ${JET_CHANNEL} ${MUON_JET_ET} ${ELEC_JET_ET}
     done
 
 fi

@@ -1,6 +1,13 @@
 #!/bin/bash
 
 
+rm -rf pdf
+rm -rf png
+
+
+root -l -b -q loadXS.C
+
+
 for ((cut=0; cut<10; cut++))
   do
   for ((mode=0; mode<2; mode++))
@@ -9,7 +16,8 @@ for ((cut=0; cut<10; cut++))
       do
       for ((njet=-1; njet<2; njet++))
 	do
-	root -l -b -q "XS.C+($cut,$mode,$wcharge,$njet)"
+#	root -l -b -q "XS.C+($cut,$mode,$wcharge,$njet)"
+	./submitXS.sh $cut $mode $wcharge $njet
       done
     done
   done
