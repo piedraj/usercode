@@ -67,3 +67,17 @@ qstat
 ################################################################################
 ./runXS.sh
 
+
+################################################################################
+#
+#  4. GitHub
+#
+################################################################################
+mkdir GitHub
+git clone https://github.com/piedraj/usercode.git
+cd usercode/WZ
+cp ~piedra/work/forGitHub/WZ/* .
+git add *
+git commit -m 'My changes'
+git push origin master
+
