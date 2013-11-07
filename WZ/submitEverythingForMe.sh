@@ -1,7 +1,14 @@
 #!/bin/bash
 
 
-rm -rf results
+rm -rf *d
+rm -rf *log
+rm -rf *so
+rm -rf *~
+rm -rf *_C.*
+rm -rf *_C_*
+rm -rf  job_AnalysisWZ_*.sh
+rm -rf  results
 
 
 root -l -b -q loadAnalysisWZ.C
@@ -54,10 +61,3 @@ for NJET in -1 0 1; do
 
 done
 
-
-# Cleanup
-#-------------------------------------------------------------------------------
-rm -rf *d
-rm -rf *log
-rm -rf *so
-rm -rf *~

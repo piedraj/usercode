@@ -69,7 +69,7 @@ TString pdfChannel[nChannel+1] = {
 };
 
 
-const UInt_t nCut = 10;
+const UInt_t nCut = 15;
 
 enum {
   Exactly3Leptons,
@@ -78,7 +78,12 @@ enum {
   HasW,
   MET30,
   MtW40,
+  Pt20,
+  Pt25,
+  Pt30,
+  Pt35,
   TighterCuts,
+  SantiagoCuts,
   ZJetsRegion,
   TopRegion,
   VBFSelection
@@ -303,10 +308,10 @@ void     ScanFakes                ();
 //------------------------------------------------------------------------------
 // XS
 //------------------------------------------------------------------------------
-void XS(UInt_t cut     = MtW40,
+void XS(UInt_t cut     = MET30,
 	UInt_t mode    = PPFmode,
-	UInt_t wcharge = WInclusive,
-	Int_t  njet    = -1)
+	UInt_t wcharge = WPlus,
+	Int_t  njet    = 0)
 {
   SetParameters(cut, mode, wcharge, njet);
 
@@ -381,7 +386,12 @@ void XS(UInt_t cut     = MtW40,
       (
        _cut == MET30 ||
        _cut == MtW40 ||
-       _cut == TighterCuts
+       _cut == Pt20  ||
+       _cut == Pt25  ||
+       _cut == Pt30  ||
+       _cut == Pt35  ||
+       _cut == TighterCuts ||
+       _cut == SantiagoCuts
        )) {
 
     BlueMethod(cut);
@@ -464,19 +474,19 @@ void XS(UInt_t cut     = MtW40,
     DrawHistogram("hMET",             channel, cut, "E_{T}^{miss}",                              5, 0, "GeV",  linY);
     DrawHistogram("h_chmet",          channel, cut, "track E_{T}^{miss}",                        5, 0, "GeV",  linY);
     DrawHistogram("h_mpmet",          channel, cut, "minimum projected E_{T}^{miss}",            5, 0, "GeV",  linY);
-    DrawHistogram("hInvMass3Lep",     channel, cut, "m_{#font[12]{3l}}",                         5, 0, "GeV",  linY, 60, 350);
+    DrawHistogram("hInvMass3Lep",     channel, cut, "m_{#font[12]{3l}}",                        10, 0, "GeV",  linY, 60, 350);
     DrawHistogram("hPtLepton1",       channel, cut, "p_{T}^{first lepton}",                      5, 0, "GeV",  linY);
     DrawHistogram("hPtLepton2",       channel, cut, "p_{T}^{second lepton}",                     5, 0, "GeV",  linY);
     DrawHistogram("hPtLepton3",       channel, cut, "p_{T}^{third lepton}",                      5, 0, "GeV",  linY);
-    DrawHistogram("hDPhiZLeptons",    channel, cut, "#Delta#phi_{#font[12]{ll}}",               10, 1, "rad",  linY);
-    DrawHistogram("hDPhiWLeptonMET",  channel, cut, "#Delta#phi(W lepton, E_{T}^{miss})",       10, 1, "rad",  linY);
+    DrawHistogram("hDPhiZLeptons",    channel, cut, "#Delta#phi_{#font[12]{ll}}",               16, 1, "rad",  linY);
+    DrawHistogram("hDPhiWLeptonMET",  channel, cut, "#Delta#phi(W lepton, E_{T}^{miss})",       16, 1, "rad",  linY);
     DrawHistogram("hPtZLepton1",      channel, cut, "p_{T}^{Z leading lepton}",                  5, 0, "GeV",  linY);
     DrawHistogram("hPtZLepton2",      channel, cut, "p_{T}^{Z trailing lepton}",                 5, 0, "GeV",  linY);
     DrawHistogram("hPtWLepton",       channel, cut, "p_{T}^{W lepton}",                          5, 0, "GeV",  linY);
     DrawHistogram("hPtZ",             channel, cut, "p_{T}^{#font[12]{ll}}",                    10, 0, "GeV",  linY);
     DrawHistogram("hPtW",             channel, cut, "W candidate p_{T}",                        10, 0, "GeV",  linY);
-    DrawHistogram("hDRWZLepton1",     channel, cut, "#DeltaR(W lepton, Z leading lepton)",       5, 1, "NULL", linY, 0, 5);
-    DrawHistogram("hDRWZLepton2",     channel, cut, "#DeltaR(W lepton, Z trailing lepton)",      5, 1, "NULL", linY, 0, 5);
+    DrawHistogram("hDRWZLepton1",     channel, cut, "#DeltaR(W lepton, Z leading lepton)",      10, 1, "NULL", linY, 0, 5);
+    DrawHistogram("hDRWZLepton2",     channel, cut, "#DeltaR(W lepton, Z trailing lepton)",     10, 1, "NULL", linY, 0, 5);
     DrawHistogram("hMtW",             channel, cut, "m_{T}^{W}",                                 5, 0, "GeV",  linY);
     DrawHistogram("hNJetAbove30",     channel, cut, "number of jets (p_{T}^{jet} > 30 GeV)",    -1, 0, "NULL", linY, 0, 4);
     DrawHistogram("hNJetBelow30",     channel, cut, "number of jets (p_{T}^{jet} #leq 30 GeV)", -1, 0, "NULL", linY, 0, 4);
@@ -484,12 +494,12 @@ void XS(UInt_t cut     = MtW40,
     DrawHistogram("hPtLeadingJet",    channel, cut, "p_{T}^{leading jet}",                       5, 0, "GeV",  linY);
     DrawHistogram("hEtaLeadingJet",   channel, cut, "#eta^{leading jet}",                       10, 1, "NULL", linY);
     DrawHistogram("hPhiLeadingJet",   channel, cut, "#phi^{leading jet}",                       16, 1, "rad",  linY);
-    DrawHistogram("hDRLeadingJetLep", channel, cut, "#DeltaR(leading jet, closest lepton)",      5, 1, "NULL", linY, 0, 5);
+    DrawHistogram("hDRLeadingJetLep", channel, cut, "#DeltaR(leading jet, closest lepton)",     10, 1, "NULL", linY, 0, 5);
   
     if (channel == EEE || channel == MMM)
       {
-	DrawHistogram("hMinDeltaR2Lep",  channel, cut, "minimum #DeltaR_{#font[12]{ll}}", 5, 1, "NULL", linY, 0, 5);
-	DrawHistogram("hMinInvMass2Lep", channel, cut, "minimum m_{#font[12]{ll}}",       4, 0, "GeV",  linY, 0, 112);
+	DrawHistogram("hMinDeltaR2Lep",  channel, cut, "minimum #DeltaR_{#font[12]{ll}}", 10, 1, "NULL", linY, 0, 5);
+	DrawHistogram("hMinInvMass2Lep", channel, cut, "minimum m_{#font[12]{ll}}",       10, 0, "GeV",  linY, 0, 112);
       }
     
     if (_njet == -1)
@@ -527,6 +537,7 @@ void CrossSection(Double_t& xsVal,
     UInt_t j = vprocess.at(i);
 
     TString prefix = (j == WZ) ? "hCounterEff" : "hCounter";
+    //    TString prefix = (j == WZ) ? "hCounterRaw" : "hCounter";  // For Jordi
 
     Double_t process_yield = Yield((TH1D*)input[j]->Get(prefix + suffix));
 
@@ -695,6 +706,8 @@ void PrintYields(UInt_t channel)
   ofstream outputfile;
 
   TString suffix = (_mode == MCmode) ? "mc" : "ppf";
+
+  if (_njet > -1) suffix = Form("%s_%djet", suffix.Data(), _njet);
 
   outputfile.open(Form("tex/%s_%s_%s.tex",
 		       sChannel[channel].Data(),
@@ -896,6 +909,8 @@ void PrintSystematics(UInt_t cut)
   ofstream outputfile;
 
   TString suffix = (_mode == MCmode) ? "mc" : "ppf";
+
+  if (_njet > -1) suffix = Form("%s_%djet", suffix.Data(), _njet);
 
   TString filename = Form("tex/systematics_%s_%s_%s.tex",
 			  sCut[cut].Data(),
@@ -1383,7 +1398,12 @@ void SetParameters(UInt_t cut,
   sCut[HasW]            = "HasW";
   sCut[MET30]           = "MET30";
   sCut[MtW40]           = "MtW40";
+  sCut[Pt20]            = "Pt20";
+  sCut[Pt25]            = "Pt25";
+  sCut[Pt30]            = "Pt30";
+  sCut[Pt35]            = "Pt35";
   sCut[TighterCuts]     = "TighterCuts";
+  sCut[SantiagoCuts]    = "SantiagoCuts";
   sCut[ZJetsRegion]     = "ZJetsRegion";
   sCut[TopRegion]       = "TopRegion";
   sCut[VBFSelection]    = "VBFSelection";
@@ -1417,7 +1437,7 @@ void SetParameters(UInt_t cut,
   _luminosity            = 19602.0;  // pb
   _luminosityUncertainty =     4.4;  // %
 
-  _verbosity = 0;
+  _verbosity = -1;
   _cut       = cut;
   _mode      = mode;
   _wcharge   = wcharge;
@@ -1896,6 +1916,8 @@ void PrintCrossSections(UInt_t cut)
 
   TString suffix = (_mode == MCmode) ? "mc" : "ppf";
 
+  if (_njet > -1) suffix = Form("%s_%djet", suffix.Data(), _njet);
+
   outputfile.open(Form("tex/xs_%s_%s_%s.tex",
 		       sCut[cut].Data(),
 		       sCharge[_wcharge].Data(),
@@ -1932,6 +1954,8 @@ void PrintRatios(UInt_t cut,
   ofstream outputfile;
 
   TString suffix = (_mode == MCmode) ? "mc" : "ppf";
+
+  if (_njet > -1) suffix = Form("%s_%djet", suffix.Data(), _njet);
 
   outputfile.open(Form("tex/ratio%s%s_%s_%s.tex",
 		       sCharge[wchargeNum].Data(),
@@ -2136,6 +2160,10 @@ void BlueMethod(UInt_t cut,
 
   Double_t elm[nMatrixElements];
 
+
+  if (_verbosity > 5) printf("\n       error matrix\n");
+
+
   for (UInt_t i=0; i<nChannel; i++) {
     for (UInt_t j=i; j<nChannel; j++) {
 
@@ -2153,6 +2181,29 @@ void BlueMethod(UInt_t cut,
       else
 	{
 	  elm[4*i+j] = elm[4*j+i] = commonSystMatrix[i][j];
+	}
+
+
+      if (_verbosity > 5)
+	{
+	  if (i > 0 && j == i)
+	    {
+	      printf("                        ");
+	      
+	      if (i > 1 && j == i)
+		{
+		  printf("                        ");
+		  
+		  if (i > 2 && j == i)
+		    {
+		      printf("                        ");
+		    }
+		}
+	    }
+	  
+	  printf("       (%s,%s) = %.3f", sChannel[i].Data(), sChannel[j].Data(), elm[4*i+j]); 
+
+	  if (j == nChannel-1) printf("\n");
 	}
     }
   }

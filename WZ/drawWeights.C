@@ -29,7 +29,7 @@ void drawWeights()
   MakeOutputDirectory("pdf");
   MakeOutputDirectory("png");
 
-  wzfile = new TFile("results-for-approval/analysis/074_WZJetsMad.root");
+  wzfile = new TFile("results/analysis/074_WZJetsMad.root");
 
   DrawIt("hLeptonWeight");
   DrawIt("hTriggerWeight");

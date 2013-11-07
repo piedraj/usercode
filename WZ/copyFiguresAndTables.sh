@@ -86,11 +86,11 @@ cp $INPUT_DIR/pdf/analysis/PPF/InvMass3Lep100/WInclusive/hMtW_EEM_InvMass3Lep100
 cp $INPUT_DIR/pdf/analysis/PPF/InvMass3Lep100/WInclusive/hMtW_MME_InvMass3Lep100_WInclusive.pdf                  $OUTPUT_DIR/figures/analysis/PPF/InvMass3Lep100/WInclusive/.
 cp $INPUT_DIR/pdf/analysis/PPF/InvMass3Lep100/WInclusive/hMtW_MMM_InvMass3Lep100_WInclusive.pdf                  $OUTPUT_DIR/figures/analysis/PPF/InvMass3Lep100/WInclusive/.
 cp $INPUT_DIR/pdf/analysis/PPF/InvMass3Lep100/WInclusive/hMtW_combined_InvMass3Lep100_WInclusive.pdf             $OUTPUT_DIR/figures/analysis/PPF/InvMass3Lep100/WInclusive/.
-cp $INPUT_DIR/pdf/analysis/PPF/InvMass3Lep100/WInclusive/hNJet30_EEE_InvMass3Lep100_WInclusive.pdf               $OUTPUT_DIR/figures/analysis/PPF/InvMass3Lep100/WInclusive/.
-cp $INPUT_DIR/pdf/analysis/PPF/InvMass3Lep100/WInclusive/hNJet30_EEM_InvMass3Lep100_WInclusive.pdf               $OUTPUT_DIR/figures/analysis/PPF/InvMass3Lep100/WInclusive/.
-cp $INPUT_DIR/pdf/analysis/PPF/InvMass3Lep100/WInclusive/hNJet30_MME_InvMass3Lep100_WInclusive.pdf               $OUTPUT_DIR/figures/analysis/PPF/InvMass3Lep100/WInclusive/.
-cp $INPUT_DIR/pdf/analysis/PPF/InvMass3Lep100/WInclusive/hNJet30_MMM_InvMass3Lep100_WInclusive.pdf               $OUTPUT_DIR/figures/analysis/PPF/InvMass3Lep100/WInclusive/.
-cp $INPUT_DIR/pdf/analysis/PPF/InvMass3Lep100/WInclusive/hNJet30_combined_InvMass3Lep100_WInclusive.pdf          $OUTPUT_DIR/figures/analysis/PPF/InvMass3Lep100/WInclusive/.
+cp $INPUT_DIR/pdf/analysis/PPF/InvMass3Lep100/WInclusive/hNJetAbove30_EEE_InvMass3Lep100_WInclusive.pdf          $OUTPUT_DIR/figures/analysis/PPF/InvMass3Lep100/WInclusive/.
+cp $INPUT_DIR/pdf/analysis/PPF/InvMass3Lep100/WInclusive/hNJetAbove30_EEM_InvMass3Lep100_WInclusive.pdf          $OUTPUT_DIR/figures/analysis/PPF/InvMass3Lep100/WInclusive/.
+cp $INPUT_DIR/pdf/analysis/PPF/InvMass3Lep100/WInclusive/hNJetAbove30_MME_InvMass3Lep100_WInclusive.pdf          $OUTPUT_DIR/figures/analysis/PPF/InvMass3Lep100/WInclusive/.
+cp $INPUT_DIR/pdf/analysis/PPF/InvMass3Lep100/WInclusive/hNJetAbove30_MMM_InvMass3Lep100_WInclusive.pdf          $OUTPUT_DIR/figures/analysis/PPF/InvMass3Lep100/WInclusive/.
+cp $INPUT_DIR/pdf/analysis/PPF/InvMass3Lep100/WInclusive/hNJetAbove30_combined_InvMass3Lep100_WInclusive.pdf     $OUTPUT_DIR/figures/analysis/PPF/InvMass3Lep100/WInclusive/.
 cp $INPUT_DIR/pdf/analysis/PPF/InvMass3Lep100/WInclusive/hDPhiWLeptonMET_EEE_InvMass3Lep100_WInclusive.pdf       $OUTPUT_DIR/figures/analysis/PPF/InvMass3Lep100/WInclusive/.
 cp $INPUT_DIR/pdf/analysis/PPF/InvMass3Lep100/WInclusive/hDPhiWLeptonMET_EEM_InvMass3Lep100_WInclusive.pdf       $OUTPUT_DIR/figures/analysis/PPF/InvMass3Lep100/WInclusive/.
 cp $INPUT_DIR/pdf/analysis/PPF/InvMass3Lep100/WInclusive/hDPhiWLeptonMET_MME_InvMass3Lep100_WInclusive.pdf       $OUTPUT_DIR/figures/analysis/PPF/InvMass3Lep100/WInclusive/.
@@ -135,11 +135,11 @@ cp $INPUT_DIR/pdf/analysis/PPF/HasZ/WInclusive/hMtW_EEM_HasZ_WInclusive.pdf     
 cp $INPUT_DIR/pdf/analysis/PPF/HasZ/WInclusive/hMtW_MME_HasZ_WInclusive.pdf                  $OUTPUT_DIR/figures/analysis/PPF/HasZ/WInclusive/.
 cp $INPUT_DIR/pdf/analysis/PPF/HasZ/WInclusive/hMtW_MMM_HasZ_WInclusive.pdf                  $OUTPUT_DIR/figures/analysis/PPF/HasZ/WInclusive/.
 cp $INPUT_DIR/pdf/analysis/PPF/HasZ/WInclusive/hMtW_combined_HasZ_WInclusive.pdf             $OUTPUT_DIR/figures/analysis/PPF/HasZ/WInclusive/.
-cp $INPUT_DIR/pdf/analysis/PPF/HasZ/WInclusive/hNJet30_EEE_HasZ_WInclusive.pdf               $OUTPUT_DIR/figures/analysis/PPF/HasZ/WInclusive/.
-cp $INPUT_DIR/pdf/analysis/PPF/HasZ/WInclusive/hNJet30_EEM_HasZ_WInclusive.pdf               $OUTPUT_DIR/figures/analysis/PPF/HasZ/WInclusive/.
-cp $INPUT_DIR/pdf/analysis/PPF/HasZ/WInclusive/hNJet30_MME_HasZ_WInclusive.pdf               $OUTPUT_DIR/figures/analysis/PPF/HasZ/WInclusive/.
-cp $INPUT_DIR/pdf/analysis/PPF/HasZ/WInclusive/hNJet30_MMM_HasZ_WInclusive.pdf               $OUTPUT_DIR/figures/analysis/PPF/HasZ/WInclusive/.
-cp $INPUT_DIR/pdf/analysis/PPF/HasZ/WInclusive/hNJet30_combined_HasZ_WInclusive.pdf          $OUTPUT_DIR/figures/analysis/PPF/HasZ/WInclusive/.
+cp $INPUT_DIR/pdf/analysis/PPF/HasZ/WInclusive/hNJetAbove30_EEE_HasZ_WInclusive.pdf          $OUTPUT_DIR/figures/analysis/PPF/HasZ/WInclusive/.
+cp $INPUT_DIR/pdf/analysis/PPF/HasZ/WInclusive/hNJetAbove30_EEM_HasZ_WInclusive.pdf          $OUTPUT_DIR/figures/analysis/PPF/HasZ/WInclusive/.
+cp $INPUT_DIR/pdf/analysis/PPF/HasZ/WInclusive/hNJetAbove30_MME_HasZ_WInclusive.pdf          $OUTPUT_DIR/figures/analysis/PPF/HasZ/WInclusive/.
+cp $INPUT_DIR/pdf/analysis/PPF/HasZ/WInclusive/hNJetAbove30_MMM_HasZ_WInclusive.pdf          $OUTPUT_DIR/figures/analysis/PPF/HasZ/WInclusive/.
+cp $INPUT_DIR/pdf/analysis/PPF/HasZ/WInclusive/hNJetAbove30_combined_HasZ_WInclusive.pdf     $OUTPUT_DIR/figures/analysis/PPF/HasZ/WInclusive/.
 cp $INPUT_DIR/pdf/analysis/PPF/HasZ/WInclusive/hDPhiWLeptonMET_EEE_HasZ_WInclusive.pdf       $OUTPUT_DIR/figures/analysis/PPF/HasZ/WInclusive/.
 cp $INPUT_DIR/pdf/analysis/PPF/HasZ/WInclusive/hDPhiWLeptonMET_EEM_HasZ_WInclusive.pdf       $OUTPUT_DIR/figures/analysis/PPF/HasZ/WInclusive/.
 cp $INPUT_DIR/pdf/analysis/PPF/HasZ/WInclusive/hDPhiWLeptonMET_MME_HasZ_WInclusive.pdf       $OUTPUT_DIR/figures/analysis/PPF/HasZ/WInclusive/.
@@ -184,11 +184,11 @@ cp $INPUT_DIR/pdf/analysis/PPF/MET30/WInclusive/hMtW_EEM_MET30_WInclusive.pdf   
 cp $INPUT_DIR/pdf/analysis/PPF/MET30/WInclusive/hMtW_MME_MET30_WInclusive.pdf                  $OUTPUT_DIR/figures/analysis/PPF/MET30/WInclusive/.
 cp $INPUT_DIR/pdf/analysis/PPF/MET30/WInclusive/hMtW_MMM_MET30_WInclusive.pdf                  $OUTPUT_DIR/figures/analysis/PPF/MET30/WInclusive/.
 cp $INPUT_DIR/pdf/analysis/PPF/MET30/WInclusive/hMtW_combined_MET30_WInclusive.pdf             $OUTPUT_DIR/figures/analysis/PPF/MET30/WInclusive/.
-cp $INPUT_DIR/pdf/analysis/PPF/MET30/WInclusive/hNJet30_EEE_MET30_WInclusive.pdf               $OUTPUT_DIR/figures/analysis/PPF/MET30/WInclusive/.
-cp $INPUT_DIR/pdf/analysis/PPF/MET30/WInclusive/hNJet30_EEM_MET30_WInclusive.pdf               $OUTPUT_DIR/figures/analysis/PPF/MET30/WInclusive/.
-cp $INPUT_DIR/pdf/analysis/PPF/MET30/WInclusive/hNJet30_MME_MET30_WInclusive.pdf               $OUTPUT_DIR/figures/analysis/PPF/MET30/WInclusive/.
-cp $INPUT_DIR/pdf/analysis/PPF/MET30/WInclusive/hNJet30_MMM_MET30_WInclusive.pdf               $OUTPUT_DIR/figures/analysis/PPF/MET30/WInclusive/.
-cp $INPUT_DIR/pdf/analysis/PPF/MET30/WInclusive/hNJet30_combined_MET30_WInclusive.pdf          $OUTPUT_DIR/figures/analysis/PPF/MET30/WInclusive/.
+cp $INPUT_DIR/pdf/analysis/PPF/MET30/WInclusive/hNJetAbove30_EEE_MET30_WInclusive.pdf          $OUTPUT_DIR/figures/analysis/PPF/MET30/WInclusive/.
+cp $INPUT_DIR/pdf/analysis/PPF/MET30/WInclusive/hNJetAbove30_EEM_MET30_WInclusive.pdf          $OUTPUT_DIR/figures/analysis/PPF/MET30/WInclusive/.
+cp $INPUT_DIR/pdf/analysis/PPF/MET30/WInclusive/hNJetAbove30_MME_MET30_WInclusive.pdf          $OUTPUT_DIR/figures/analysis/PPF/MET30/WInclusive/.
+cp $INPUT_DIR/pdf/analysis/PPF/MET30/WInclusive/hNJetAbove30_MMM_MET30_WInclusive.pdf          $OUTPUT_DIR/figures/analysis/PPF/MET30/WInclusive/.
+cp $INPUT_DIR/pdf/analysis/PPF/MET30/WInclusive/hNJetAbove30_combined_MET30_WInclusive.pdf     $OUTPUT_DIR/figures/analysis/PPF/MET30/WInclusive/.
 cp $INPUT_DIR/pdf/analysis/PPF/MET30/WInclusive/hDPhiWLeptonMET_EEE_MET30_WInclusive.pdf       $OUTPUT_DIR/figures/analysis/PPF/MET30/WInclusive/.
 cp $INPUT_DIR/pdf/analysis/PPF/MET30/WInclusive/hDPhiWLeptonMET_EEM_MET30_WInclusive.pdf       $OUTPUT_DIR/figures/analysis/PPF/MET30/WInclusive/.
 cp $INPUT_DIR/pdf/analysis/PPF/MET30/WInclusive/hDPhiWLeptonMET_MME_MET30_WInclusive.pdf       $OUTPUT_DIR/figures/analysis/PPF/MET30/WInclusive/.
@@ -233,11 +233,11 @@ cp $INPUT_DIR/pdf/analysis/PPF/TighterCuts/WInclusive/hMtW_EEM_TighterCuts_WIncl
 cp $INPUT_DIR/pdf/analysis/PPF/TighterCuts/WInclusive/hMtW_MME_TighterCuts_WInclusive.pdf                  $OUTPUT_DIR/figures/analysis/PPF/TighterCuts/WInclusive/.
 cp $INPUT_DIR/pdf/analysis/PPF/TighterCuts/WInclusive/hMtW_MMM_TighterCuts_WInclusive.pdf                  $OUTPUT_DIR/figures/analysis/PPF/TighterCuts/WInclusive/.
 cp $INPUT_DIR/pdf/analysis/PPF/TighterCuts/WInclusive/hMtW_combined_TighterCuts_WInclusive.pdf             $OUTPUT_DIR/figures/analysis/PPF/TighterCuts/WInclusive/.
-cp $INPUT_DIR/pdf/analysis/PPF/TighterCuts/WInclusive/hNJet30_EEE_TighterCuts_WInclusive.pdf               $OUTPUT_DIR/figures/analysis/PPF/TighterCuts/WInclusive/.
-cp $INPUT_DIR/pdf/analysis/PPF/TighterCuts/WInclusive/hNJet30_EEM_TighterCuts_WInclusive.pdf               $OUTPUT_DIR/figures/analysis/PPF/TighterCuts/WInclusive/.
-cp $INPUT_DIR/pdf/analysis/PPF/TighterCuts/WInclusive/hNJet30_MME_TighterCuts_WInclusive.pdf               $OUTPUT_DIR/figures/analysis/PPF/TighterCuts/WInclusive/.
-cp $INPUT_DIR/pdf/analysis/PPF/TighterCuts/WInclusive/hNJet30_MMM_TighterCuts_WInclusive.pdf               $OUTPUT_DIR/figures/analysis/PPF/TighterCuts/WInclusive/.
-cp $INPUT_DIR/pdf/analysis/PPF/TighterCuts/WInclusive/hNJet30_combined_TighterCuts_WInclusive.pdf          $OUTPUT_DIR/figures/analysis/PPF/TighterCuts/WInclusive/.
+cp $INPUT_DIR/pdf/analysis/PPF/TighterCuts/WInclusive/hNJetAbove30_EEE_TighterCuts_WInclusive.pdf          $OUTPUT_DIR/figures/analysis/PPF/TighterCuts/WInclusive/.
+cp $INPUT_DIR/pdf/analysis/PPF/TighterCuts/WInclusive/hNJetAbove30_EEM_TighterCuts_WInclusive.pdf          $OUTPUT_DIR/figures/analysis/PPF/TighterCuts/WInclusive/.
+cp $INPUT_DIR/pdf/analysis/PPF/TighterCuts/WInclusive/hNJetAbove30_MME_TighterCuts_WInclusive.pdf          $OUTPUT_DIR/figures/analysis/PPF/TighterCuts/WInclusive/.
+cp $INPUT_DIR/pdf/analysis/PPF/TighterCuts/WInclusive/hNJetAbove30_MMM_TighterCuts_WInclusive.pdf          $OUTPUT_DIR/figures/analysis/PPF/TighterCuts/WInclusive/.
+cp $INPUT_DIR/pdf/analysis/PPF/TighterCuts/WInclusive/hNJetAbove30_combined_TighterCuts_WInclusive.pdf     $OUTPUT_DIR/figures/analysis/PPF/TighterCuts/WInclusive/.
 cp $INPUT_DIR/pdf/analysis/PPF/TighterCuts/WInclusive/hDPhiWLeptonMET_EEE_TighterCuts_WInclusive.pdf       $OUTPUT_DIR/figures/analysis/PPF/TighterCuts/WInclusive/.
 cp $INPUT_DIR/pdf/analysis/PPF/TighterCuts/WInclusive/hDPhiWLeptonMET_EEM_TighterCuts_WInclusive.pdf       $OUTPUT_DIR/figures/analysis/PPF/TighterCuts/WInclusive/.
 cp $INPUT_DIR/pdf/analysis/PPF/TighterCuts/WInclusive/hDPhiWLeptonMET_MME_TighterCuts_WInclusive.pdf       $OUTPUT_DIR/figures/analysis/PPF/TighterCuts/WInclusive/.
@@ -251,6 +251,16 @@ cp $INPUT_DIR/tex/EEE_WInclusive_ppf.tex  $OUTPUT_DIR/tables/.
 cp $INPUT_DIR/tex/EEM_WInclusive_ppf.tex  $OUTPUT_DIR/tables/.
 cp $INPUT_DIR/tex/MME_WInclusive_ppf.tex  $OUTPUT_DIR/tables/.
 cp $INPUT_DIR/tex/MMM_WInclusive_ppf.tex  $OUTPUT_DIR/tables/.
+
+cp $INPUT_DIR/tex/EEE_WPlus_ppf.tex  $OUTPUT_DIR/tables/.
+cp $INPUT_DIR/tex/EEM_WPlus_ppf.tex  $OUTPUT_DIR/tables/.
+cp $INPUT_DIR/tex/MME_WPlus_ppf.tex  $OUTPUT_DIR/tables/.
+cp $INPUT_DIR/tex/MMM_WPlus_ppf.tex  $OUTPUT_DIR/tables/.
+
+cp $INPUT_DIR/tex/EEE_WMinus_ppf.tex  $OUTPUT_DIR/tables/.
+cp $INPUT_DIR/tex/EEM_WMinus_ppf.tex  $OUTPUT_DIR/tables/.
+cp $INPUT_DIR/tex/MME_WMinus_ppf.tex  $OUTPUT_DIR/tables/.
+cp $INPUT_DIR/tex/MMM_WMinus_ppf.tex  $OUTPUT_DIR/tables/.
 
 cp $INPUT_DIR/tex/EEE_WInclusive_mc.tex  $OUTPUT_DIR/tables/.
 cp $INPUT_DIR/tex/EEM_WInclusive_mc.tex  $OUTPUT_DIR/tables/.
