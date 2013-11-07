@@ -11,37 +11,11 @@ source /nfs/fanae/root_releases/root.5.34.09/bin/thisroot.sh
 #  1. Get the code and auxiliary files
 #
 ################################################################################
-cvs co -d WZ UserCode/piedra/WZ
+git clone git://github.com/piedraj/usercode.git  # read only
 
-cd WZ
+cd usercode/WZ
 
-mkdir AuxiliaryFilesWZXS8TeV
-
-pushd AuxiliaryFilesWZXS8TeV
-
-wget www.hep.uniovi.es/piedra/AuxiliaryFilesWZXS8TeV/EleFR_Moriond13_jet15_EWKcorr.root
-wget www.hep.uniovi.es/piedra/AuxiliaryFilesWZXS8TeV/EleFR_Moriond13_jet35_EWKcorr.root
-wget www.hep.uniovi.es/piedra/AuxiliaryFilesWZXS8TeV/EleFR_Moriond13_jet50_EWKcorr.root
-wget www.hep.uniovi.es/piedra/AuxiliaryFilesWZXS8TeV/ElePR_Moriond13_2012.root
-wget www.hep.uniovi.es/piedra/AuxiliaryFilesWZXS8TeV/EleSF_2012.root
-
-wget www.hep.uniovi.es/piedra/AuxiliaryFilesWZXS8TeV/MuFR_Moriond13_jet05_EWKcorr.root
-wget www.hep.uniovi.es/piedra/AuxiliaryFilesWZXS8TeV/MuFR_Moriond13_jet10_EWKcorr.root
-wget www.hep.uniovi.es/piedra/AuxiliaryFilesWZXS8TeV/MuFR_Moriond13_jet15_EWKcorr.root
-wget www.hep.uniovi.es/piedra/AuxiliaryFilesWZXS8TeV/MuFR_Moriond13_jet20_EWKcorr.root
-wget www.hep.uniovi.es/piedra/AuxiliaryFilesWZXS8TeV/MuFR_Moriond13_jet25_EWKcorr.root
-wget www.hep.uniovi.es/piedra/AuxiliaryFilesWZXS8TeV/MuFR_Moriond13_jet30_EWKcorr.root
-wget www.hep.uniovi.es/piedra/AuxiliaryFilesWZXS8TeV/MuFR_Moriond13_jet35_EWKcorr.root
-wget www.hep.uniovi.es/piedra/AuxiliaryFilesWZXS8TeV/MuFR_Moriond13_jet40_EWKcorr.root
-wget www.hep.uniovi.es/piedra/AuxiliaryFilesWZXS8TeV/MuFR_Moriond13_jet45_EWKcorr.root
-wget www.hep.uniovi.es/piedra/AuxiliaryFilesWZXS8TeV/MuFR_Moriond13_jet50_EWKcorr.root
-wget www.hep.uniovi.es/piedra/AuxiliaryFilesWZXS8TeV/MuPR_Moriond13_2012.root
-wget www.hep.uniovi.es/piedra/AuxiliaryFilesWZXS8TeV/MuSF_2012.root
-
-wget www.hep.uniovi.es/piedra/AuxiliaryFilesWZXS8TeV/gScaleSyst-8TeV.root
-wget www.hep.uniovi.es/piedra/AuxiliaryFilesWZXS8TeV/triggerEfficiencies.root
-
-popd
+ln -s ../AuxiliaryFilesWZXS8TeV
 
 
 ################################################################################
@@ -74,7 +48,7 @@ qstat
 #
 ################################################################################
 mkdir GitHub
-git clone https://github.com/piedraj/usercode.git
+git clone https://github.com/piedraj/usercode.git  # read and write
 cd usercode/WZ
 cp ~piedra/work/forGitHub/WZ/* .
 git add *
