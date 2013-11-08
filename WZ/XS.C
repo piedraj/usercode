@@ -310,8 +310,8 @@ void     ScanFakes                ();
 //------------------------------------------------------------------------------
 void XS(UInt_t cut     = MET30,
 	UInt_t mode    = PPFmode,
-	UInt_t wcharge = WPlus,
-	Int_t  njet    = 0)
+	UInt_t wcharge = WInclusive,
+	Int_t  njet    = -1)
 {
   SetParameters(cut, mode, wcharge, njet);
 
@@ -394,6 +394,9 @@ void XS(UInt_t cut     = MET30,
        _cut == SantiagoCuts
        )) {
 
+    if (_verbosity > 5)
+      printf("\n BLUE method %s cross section\n", sCharge[_wcharge].Data());
+
     BlueMethod(cut);
   
     PrintSystematics(cut);
@@ -416,6 +419,8 @@ void XS(UInt_t cut     = MET30,
       for (UInt_t channel=0; channel<nChannel; channel++)
 	CrossSectionRatio(WMinus, WPlus, channel, cut);
 
+      if (_verbosity > 5) printf("\n BLUE method W- / W+ cross section ratio\n");
+
       BlueMethod(cut, true);
 
       PrintRatios(cut, WMinus, WPlus);
@@ -425,6 +430,8 @@ void XS(UInt_t cut     = MET30,
       //------------------------------------------------------------------------
       for (UInt_t channel=0; channel<nChannel; channel++)
 	CrossSectionRatio(WPlus, WMinus, channel, cut);
+
+      if (_verbosity > 5) printf("\n BLUE method W+ / W- cross section ratio\n");
 
       BlueMethod(cut, true);
 
@@ -525,6 +532,16 @@ void CrossSection(Double_t& xsVal,
 		  UInt_t    cut,
 		  Int_t     syst)
 {
+  if (_verbosity > 999)
+    {
+      printf(" [CrossSection][%s][%s] %s %s\n",
+	     sChannel[channel].Data(),
+	     sCharge[wcharge].Data(),
+	     sCut[cut].Data(),
+	     sSystematic[syst].Data());
+	     
+    }
+
   Double_t ndata = 0;
   Double_t nbkg  = 0;
   Double_t ebkg  = 0;
@@ -540,6 +557,14 @@ void CrossSection(Double_t& xsVal,
     //    TString prefix = (j == WZ) ? "hCounterRaw" : "hCounter";  // For Jordi
 
     Double_t process_yield = Yield((TH1D*)input[j]->Get(prefix + suffix));
+
+    if (_verbosity > 999 && j == WZ && cut == MET30 && syst == -1)
+      {
+	printf(" [CrossSection][%s][%s] WZ yield = %f\n",
+	       sChannel[channel].Data(),
+	       sCharge[wcharge].Data(),
+	       process_yield);
+      }
 
     Double_t eStat = ((TH1D*)input[j]->Get(prefix + suffix))->GetSumw2()->GetSum();
 

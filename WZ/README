@@ -11,7 +11,12 @@ source /nfs/fanae/root_releases/root.5.34.09/bin/thisroot.sh
 #  1. Get the code and auxiliary files
 #
 ################################################################################
-git clone git://github.com/piedraj/usercode.git  # read only
+git clone git://github.com/piedraj/usercode.git    # read only
+
+# or
+
+git clone https://github.com/piedraj/usercode.git  # read and write
+
 
 cd usercode/WZ
 
