@@ -76,7 +76,7 @@ const TString sComposition[nComposition] = {
 };
 
 
-const UInt_t nCut = 15;
+const UInt_t nCut = 11;
 
 enum {
   Exactly3Leptons,
@@ -85,11 +85,7 @@ enum {
   HasW,
   MET30,
   MtW40,
-  Pt20,
-  Pt25,
-  Pt30,
-  Pt35,
-  TighterCuts,
+  Rejected,
   SantiagoCuts,
   ZJetsRegion,
   TopRegion,
@@ -103,11 +99,7 @@ const TString sCut[nCut] = {
   "HasW",
   "MET30",
   "MtW40",
-  "Pt20",
-  "Pt25",
-  "Pt30",
-  "Pt35",
-  "TighterCuts",
+  "Rejected",
   "SantiagoCuts",
   "ZJetsRegion",
   "TopRegion",
@@ -210,9 +202,13 @@ void           CounterSummary       (TString title);
 // Data members
 //
 //==============================================================================
-TH1F*                         hCounterRaw[nChannel][nCut][nCharge][nComposition];
-TH1F*                         hCounterEff[nChannel][nCut][nCharge][nComposition];
-TH1F*                         hCounter   [nChannel][nCut][nCharge][nComposition];
+TH1F*                         h_gen_mZ_denominator;
+TH1F*                         h_gen_mZ_numerator;
+
+TH1F*                         hCounterRaw   [nChannel][nCut][nCharge][nComposition];
+TH1F*                         hCounterEff   [nChannel][nCut][nCharge][nComposition];
+TH1F*                         hCounter      [nChannel][nCut][nCharge][nComposition];
+TH1F*                         hPromptCounter[nChannel][nCut][nCharge][nComposition];
 
 TH1F*                         hLeptonWeight [nChannel][nCut][nCharge];
 TH1F*                         hTriggerWeight[nChannel][nCut][nCharge];
@@ -449,6 +445,13 @@ void AnalysisWZ(TString sample,
   TH1::SetDefaultSumw2();
 
 
+  if (_sample.Contains("GenVars"))
+    {
+      h_gen_mZ_denominator = new TH1F("h_gen_mZ_denominator", "", 200, 0, 200);
+      h_gen_mZ_numerator   = new TH1F("h_gen_mZ_numerator",   "", 200, 0, 200);
+    }
+
+
   for (UInt_t i=0; i<nChannel; i++) {
 
     for (UInt_t j=0; j<nCut; j++) {
@@ -462,6 +465,8 @@ void AnalysisWZ(TString sample,
 	  hCounterRaw[i][j][iCharge][k] = new TH1F("hCounterRaw" + suffix + "_" + sComposition[k], "", 3, 0, 3);
 	  hCounterEff[i][j][iCharge][k] = new TH1F("hCounterEff" + suffix + "_" + sComposition[k], "", 3, 0, 3);
 	  hCounter   [i][j][iCharge][k] = new TH1F("hCounter"    + suffix + "_" + sComposition[k], "", 3, 0, 3);
+
+	  hPromptCounter[i][j][iCharge][k] = new TH1F(Form("hPromptCounter%s_%dprompt", suffix.Data(), k), "", 3, 0, 3);
 	}
 
 	hLeptonWeight [i][j][iCharge] = new TH1F("hLeptonWeight"  + suffix, "", 90, 0.75, 1.05);
@@ -686,6 +691,15 @@ void AnalysisWZ(TString sample,
     Bool_t accept_WGstar = (chmet < (0.75*pt[0]+100) && chmet < (0.75*jetpt[0]+100));
 
     if (dataset == 82 && !accept_WGstar) continue;
+
+
+
+    // Selection efficiency (denominator) as a function of the generated Z mass
+    //--------------------------------------------------------------------------
+    if (_sample.Contains("GenVars"))
+      {
+	h_gen_mZ_denominator->Fill(gen_mZ);
+      }
 
 
     // Set the MET of the event
@@ -1152,7 +1166,7 @@ void AnalysisWZ(TString sample,
 	FillHistograms(reco_channel, TopRegion);
 	FillHistograms(combined,     TopRegion);
       }
-
+    
     if (fabs(invMass2Lep - Z_MASS) >= 20. && _mode != ATLAS) continue;
 
     if ((invMass2Lep < 50. || invMass2Lep > 120.) && _mode == ATLAS) continue;
@@ -1180,6 +1194,14 @@ void AnalysisWZ(TString sample,
     FillHistograms(combined,     MET30);
 
 
+    // Selection efficiency (numerator) as a function of the generated Z mass
+    //--------------------------------------------------------------------------
+    if (_sample.Contains("GenVars"))
+      {
+	h_gen_mZ_numerator->Fill(gen_mZ);
+      }
+
+
     // Fill aTGC tree
     //--------------------------------------------------------------------------
     reco_mZ  = invMass2Lep;
@@ -1187,55 +1209,36 @@ void AnalysisWZ(TString sample,
     
     tgcTree->Fill();
 
-
+    
     //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     //
     // Additional cuts
     //
     //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-
-    if (transverseMass <= 40.) continue;
-
-    FillHistograms(reco_channel, MtW40);
-    FillHistograms(combined,     MtW40);
-
-    if (AnalysisLeptons[2].v.Pt() > 20.)
+    
+    if (transverseMass > 40.)
       {
-	FillHistograms(reco_channel, Pt20);
-	FillHistograms(combined,     Pt20);
+	FillHistograms(reco_channel, MtW40);
+	FillHistograms(combined,     MtW40);
       }
 
-    if (AnalysisLeptons[2].v.Pt() > 25.)
-      {
-	FillHistograms(reco_channel, Pt25);
-	FillHistograms(combined,     Pt25);
-      }
-
-    if (AnalysisLeptons[2].v.Pt() > 30.)
-      {
-	FillHistograms(reco_channel, Pt30);
-	FillHistograms(combined,     Pt30);
-      }
-
-    if (AnalysisLeptons[2].v.Pt() > 35.)
-      {
-	FillHistograms(reco_channel, Pt35);
-	FillHistograms(combined,     Pt35);
-      }
-
-    if (AnalysisLeptons[2].v.Pt() > 20. && WLepton.Pt() > 25. && EventMET.Et() > 40.)
-      {
-	FillHistograms(reco_channel, TighterCuts);
-	FillHistograms(combined,     TighterCuts);
-      }
-
-    if (AnalysisLeptons[2].v.Pt() > 20. && nbjet == 0 && EventMET.Et() > 40. && fabs(invMass2Lep - Z_MASS) < 15.)
+    if (transverseMass > 40. &&
+	AnalysisLeptons[2].v.Pt() > 20. &&
+	nbjet == 0 &&
+	EventMET.Et() > 40. &&
+	fabs(invMass2Lep - Z_MASS) < 15.)
       {
 	FillHistograms(reco_channel, SantiagoCuts);
 	FillHistograms(combined,     SantiagoCuts);
       }
+    else
+      {
+	FillHistograms(reco_channel, Rejected);
+	FillHistograms(combined,     Rejected);
+      }
   }
+
 
   //============================================================================
   //
@@ -1250,7 +1253,6 @@ void AnalysisWZ(TString sample,
   CounterSummary("All weights");
 
   txt_output.close();
-
 
   root_output->cd();
 
@@ -1350,6 +1352,22 @@ void FillHistograms(UInt_t iChannel, UInt_t iCut)
       hCounterRaw[iChannel][iCut][iCharge][LLL]->Fill(1);
       hCounterEff[iChannel][iCut][iCharge][LLL]->Fill(1, pu_weight * efficiency_weight             * dd_weight);
       hCounter   [iChannel][iCut][iCharge][LLL]->Fill(1, pu_weight * efficiency_weight * xs_weight * dd_weight);
+
+      
+      //////////////////////////////////////////////////////////////////////////
+      //////////////////////////////////////////////////////////////////////////
+      for (UInt_t iPrompt=0; iPrompt<=3; iPrompt++)
+	{
+	  hPromptCounter[iChannel][iCut][iCharge][iPrompt]->Fill(1, GetDataDrivenWeight(iPrompt));
+	}
+
+      hPromptCounter[iChannel][iCut][iCharge][4]->Fill(1,
+						       GetDataDrivenWeight(0) +
+						       GetDataDrivenWeight(1) +
+						       GetDataDrivenWeight(2) +
+						       GetDataDrivenWeight(3));
+      //////////////////////////////////////////////////////////////////////////
+      //////////////////////////////////////////////////////////////////////////
 
 
       // MC weight histograms

@@ -69,7 +69,7 @@ TString pdfChannel[nChannel+1] = {
 };
 
 
-const UInt_t nCut = 15;
+const UInt_t nCut = 11;
 
 enum {
   Exactly3Leptons,
@@ -78,11 +78,7 @@ enum {
   HasW,
   MET30,
   MtW40,
-  Pt20,
-  Pt25,
-  Pt30,
-  Pt35,
-  TighterCuts,
+  Rejected,
   SantiagoCuts,
   ZJetsRegion,
   TopRegion,
@@ -384,13 +380,9 @@ void XS(UInt_t cut     = MET30,
   //----------------------------------------------------------------------------
   if (!_analysis.Contains("atlas") &&
       (
-       _cut == MET30 ||
-       _cut == MtW40 ||
-       _cut == Pt20  ||
-       _cut == Pt25  ||
-       _cut == Pt30  ||
-       _cut == Pt35  ||
-       _cut == TighterCuts ||
+       _cut == MET30    ||
+       _cut == MtW40    ||
+       _cut == Rejected ||
        _cut == SantiagoCuts
        )) {
 
@@ -1423,11 +1415,7 @@ void SetParameters(UInt_t cut,
   sCut[HasW]            = "HasW";
   sCut[MET30]           = "MET30";
   sCut[MtW40]           = "MtW40";
-  sCut[Pt20]            = "Pt20";
-  sCut[Pt25]            = "Pt25";
-  sCut[Pt30]            = "Pt30";
-  sCut[Pt35]            = "Pt35";
-  sCut[TighterCuts]     = "TighterCuts";
+  sCut[Rejected]        = "Rejected";
   sCut[SantiagoCuts]    = "SantiagoCuts";
   sCut[ZJetsRegion]     = "ZJetsRegion";
   sCut[TopRegion]       = "TopRegion";
