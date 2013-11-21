@@ -18,17 +18,12 @@ git clone git://github.com/piedraj/usercode.git    # read only
 git clone https://github.com/piedraj/usercode.git  # read and write
 
 
-cd usercode/WZ
-
-ln -s ../AuxiliaryFilesWZXS8TeV
-
-
 ################################################################################
 #
 #  2. Produce histograms
 #
 ################################################################################
-cd WZ
+cd usercode/WZ
 
 ./submitEverythingForMe.sh
 

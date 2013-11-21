@@ -2,7 +2,7 @@
 // scp lxplus.cern.ch:/afs/cern.ch/user/d/dmeister/public/LatinoTrees/triggW/triggerEffCombiner.py www/AuxiliaryFilesWZXS8TeV/.
 
 
-const TString path = "/nfs/fanae/user/piedra/www/AuxiliaryFilesWZXS8TeV/";
+const TString path = "../AuxiliaryFilesWZXS8TeV/";
 
 
 void getTriggerEff()

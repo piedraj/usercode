@@ -26,7 +26,7 @@ void drawElectronScaleSystematic()
   MakeOutputDirectory("pdf");
   MakeOutputDirectory("png");
 
-  TFile* file = TFile::Open("../WZ/AuxiliaryFilesWZXS8TeV/gScaleSyst-8TeV.root");
+  TFile* file = TFile::Open("../AuxiliaryFilesWZXS8TeV/gScaleSyst-8TeV.root");
 
   TGraphErrors* gScaleInEB  = (TGraphErrors*)file->Get("gScaleInEB");
   TGraphErrors* gScaleOutEB = (TGraphErrors*)file->Get("gScaleOutEB");

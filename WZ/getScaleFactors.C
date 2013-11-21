@@ -22,7 +22,7 @@
 //------------------------------------------------------------------------------
 
 
-const TString path = "/nfs/fanae/user/piedra/www/AuxiliaryFilesWZXS8TeV/";
+const TString path = "../AuxiliaryFilesWZXS8TeV/";
 
 
 const Int_t ptBinsSizeElFake = 5;

@@ -25,15 +25,11 @@ TH2F*     LoadHistogram      (TString filename,
 			      TString hname,
 			      TString cname);
 
-TString   GuessLocalBasePath ();
-
 void      MakeOutputDirectory(TString format);
 
 
 // Data members
 //------------------------------------------------------------------------------
-TString localpath;
-
 TH2F*   MuonSF;
 TH2F*   ElecSF;
 TH2F*   MuonPR;
@@ -50,8 +46,6 @@ void drawScaleFactors()
 {
   MakeOutputDirectory("pdf");
   MakeOutputDirectory("png");
-
-  localpath = GuessLocalBasePath();
 
 
   // SF, FR and PR histograms
@@ -199,7 +193,7 @@ TH2F* LoadHistogram(TString filename,
 		    TString hname,
 		    TString cname)
 {
-  TFile* inputfile = TFile::Open(localpath + "/piedra/work/WZ/AuxiliaryFilesWZXS8TeV/" + filename + ".root");
+  TFile* inputfile = TFile::Open("../AuxiliaryFilesWZXS8TeV/" + filename + ".root");
 
   TH2F* hist = (TH2F*)inputfile->Get(hname)->Clone(cname);
 
@@ -208,30 +202,6 @@ TH2F* LoadHistogram(TString filename,
   inputfile->Close();
 
   return hist;
-}
-
-
-//------------------------------------------------------------------------------
-// GuessLocalBasePath
-//------------------------------------------------------------------------------
-TString GuessLocalBasePath()
-{
-  TString host = gSystem->HostName();
-
-  if (host.Contains("uniovi.es"))
-    {
-      return TString("/nfs/fanae/user");
-    }
-  else if (host.Contains("ifca.es"))
-    {
-      return TString("/gpfs/csic_users");
-    }
-  else
-    {
-      printf(" ERROR: Could not guess base path from host name %s.", host.Data());
-
-      return TString("");
-    }
 }
 
 
