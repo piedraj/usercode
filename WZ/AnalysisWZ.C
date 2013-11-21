@@ -332,6 +332,8 @@ TH1F*                         hScaleEE;
 // Tree leaves
 //------------------------------------------------------------------------------
 Int_t                         run;
+Int_t                         event;
+Int_t                         lumi;
 Float_t                       baseW;
 Float_t                       channel;
 Float_t                       chmet;
@@ -582,6 +584,8 @@ void AnalysisWZ(TString sample,
   // Tree leaves
   //----------------------------------------------------------------------------
   tree->SetBranchAddress("run",           &run);
+  tree->SetBranchAddress("event",         &event);
+  tree->SetBranchAddress("lumi",          &lumi);
   tree->SetBranchAddress("baseW",         &baseW);
   tree->SetBranchAddress("channel",       &channel);
   tree->SetBranchAddress("chmet",         &chmet);
@@ -1192,6 +1196,20 @@ void AnalysisWZ(TString sample,
 
     FillHistograms(reco_channel, MET30);
     FillHistograms(combined,     MET30);
+
+
+    // Synchronization with Lucija
+    //--------------------------------------------------------------------------
+    if (0)
+      {
+	printf(" [%s] run:%d  event:%10d  lumi:%4d  met:%5.1f  mll:%5.1f  zl1pt:%6.2f  zl1eta:%5.2f  zl2pt:%6.2f  zl2eta:%5.2f  wlpt:%6.2f  wleta:%5.2f\n",
+	       sChannel[reco_channel].Data(),
+	       run, event, lumi,
+	       EventMET.Et(), invMass2Lep,
+	       ZLepton1.Pt(), ZLepton1.Eta(),
+	       ZLepton2.Pt(), ZLepton2.Eta(),
+	       WLepton.Pt(), WLepton.Eta());
+      }
 
 
     // Selection efficiency (numerator) as a function of the generated Z mass
