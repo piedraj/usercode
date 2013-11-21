@@ -66,16 +66,16 @@ for FOLDER in $FOLDERS; do
 	    019_TTTo2L2Nu2B.root
 	
 	hadd -f -k WV.root            \
-	    000_WWJets2LMad.root      \
-	    001_GluGluToWWTo4L.root   \
-	    008_GamGamWW.root         \
-	    078_WZTo2L2QMad.root      \
-	    080_WJetsToLNuMad.root    \
-	    081_WbbToLNu.root         \
 	    082_WGstarToElNuMad.root  \
 	    083_WGstarToMuNuMad.root  \
 	    084_WGstarToTauNuMad.root \
 	    085_WgammaToLNuG.root
+###	    000_WWJets2LMad.root      \
+###	    001_GluGluToWWTo4L.root   \
+###	    008_GamGamWW.root         \
+###	    078_WZTo2L2QMad.root      \
+###	    080_WJetsToLNuMad.root    \
+###	    081_WbbToLNu.root         \
 	
 	hadd -f -k VVV.root   \
 	    088_WWGJets.root  \
