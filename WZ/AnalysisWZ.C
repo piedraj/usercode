@@ -389,6 +389,8 @@ void AnalysisWZ(TString sample,
 		TString elecJetPt,
 		TString directory)
 {
+  TH1::SetDefaultSumw2();
+
   _sample     = sample;
   _systematic = systematic;
   _mode       = mode;
@@ -427,33 +429,35 @@ void AnalysisWZ(TString sample,
   root_output = new TFile(_directory + "/" + filename + ".root", "recreate");
 
 
-  // Set aTGC tree branches
+  // Set aTGC tree branches and generation histograms
   //----------------------------------------------------------------------------
-  tgcTree = new TTree("tgcTree", "tgcTree");
+  if (_sample.Contains("GenVars"))
+    {
+      tgcTree = new TTree("tgcTree", "tgcTree");
 
-  tgcTree->Branch("gen_channel",       &gen_channel);
-  tgcTree->Branch("gen_mZ",            &gen_mZ);
-  tgcTree->Branch("gen_ptZ",           &gen_ptZ);
-  tgcTree->Branch("reco_channel",      &reco_channel);
-  tgcTree->Branch("reco_mZ",           &reco_mZ);
-  tgcTree->Branch("reco_ptZ",          &reco_ptZ);
-  tgcTree->Branch("efficiency_weight", &efficiency_weight);
-  tgcTree->Branch("pu_weight",         &pu_weight);
-  tgcTree->Branch("xs_weight",         &xs_weight);
+      tgcTree->Branch("gen_channel",       &gen_channel);
+      tgcTree->Branch("gen_mZ",            &gen_mZ);
+      tgcTree->Branch("gen_ptZ",           &gen_ptZ);
+      tgcTree->Branch("reco_channel",      &reco_channel);
+      tgcTree->Branch("reco_mZ",           &reco_mZ);
+      tgcTree->Branch("reco_ptZ",          &reco_ptZ);
+      tgcTree->Branch("efficiency_weight", &efficiency_weight);
+      tgcTree->Branch("pu_weight",         &pu_weight);
+      tgcTree->Branch("xs_weight",         &xs_weight);
+
+      h_gen_mZ_denominator = new TH1F("h_gen_mZ_denominator", "", 200, 0, 200);
+      h_gen_mZ_numerator   = new TH1F("h_gen_mZ_numerator",   "", 200, 0, 200);
+    }
+  else
+    {
+      tgcTree              = NULL;
+      h_gen_mZ_denominator = NULL;
+      h_gen_mZ_numerator   = NULL;
+    }
 
 
   // Histogram definition
   //----------------------------------------------------------------------------
-  TH1::SetDefaultSumw2();
-
-
-  if (_sample.Contains("GenVars"))
-    {
-      h_gen_mZ_denominator = new TH1F("h_gen_mZ_denominator", "", 200, 0, 200);
-      h_gen_mZ_numerator   = new TH1F("h_gen_mZ_numerator",   "", 200, 0, 200);
-    }
-
-
   for (UInt_t i=0; i<nChannel; i++) {
 
     for (UInt_t j=0; j<nCut; j++) {
@@ -695,7 +699,6 @@ void AnalysisWZ(TString sample,
     Bool_t accept_WGstar = (chmet < (0.75*pt[0]+100) && chmet < (0.75*jetpt[0]+100));
 
     if (dataset == 82 && !accept_WGstar) continue;
-
 
 
     // Selection efficiency (denominator) as a function of the generated Z mass
@@ -1212,20 +1215,17 @@ void AnalysisWZ(TString sample,
       }
 
 
-    // Selection efficiency (numerator) as a function of the generated Z mass
+    // Fill aTGC tree and selection efficiency numerator
     //--------------------------------------------------------------------------
     if (_sample.Contains("GenVars"))
       {
+	reco_mZ  = invMass2Lep;
+	reco_ptZ = (ZLepton1 + ZLepton2).Pt();
+    
+	tgcTree->Fill();
+
 	h_gen_mZ_numerator->Fill(gen_mZ);
       }
-
-
-    // Fill aTGC tree
-    //--------------------------------------------------------------------------
-    reco_mZ  = invMass2Lep;
-    reco_ptZ = (ZLepton1 + ZLepton2).Pt();
-    
-    tgcTree->Fill();
 
     
     //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1274,7 +1274,7 @@ void AnalysisWZ(TString sample,
 
   root_output->cd();
 
-  tgcTree->Write();
+  if (_sample.Contains("GenVars")) tgcTree->Write();
 
   root_output->Write("", TObject::kOverwrite);
 

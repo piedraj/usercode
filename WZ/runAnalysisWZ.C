@@ -1,4 +1,5 @@
-void runAnalysisWZ(TString sample     = "Run2012A_889.4pbinv",
+//void runAnalysisWZ(TString sample     = "Run2012A_889.4pbinv",
+void runAnalysisWZ(TString sample     = "074_WZJetsMad_GenVars",
 		   Int_t   systematic = 0,
 		   Int_t   mode       = 0,
 		   Int_t   jetChannel = -1,
