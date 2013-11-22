@@ -216,8 +216,6 @@ TH1F*                         hNPV           [nChannel][nCut][nCharge];
 TH1F*                         hMET           [nChannel][nCut][nCharge];
 TH1F*                         h_chmet        [nChannel][nCut][nCharge];
 TH1F*                         h_mpmet        [nChannel][nCut][nCharge];
-TH1F*                         hDeltaMET      [nChannel][nCut][nCharge];
-TH1F*                         hDPhiMET       [nChannel][nCut][nCharge];
 TH1F*                         hSumCharges    [nChannel][nCut][nCharge];
 TH1F*                         hInvMass2Lep   [nChannel][nCut][nCharge];
 TH1F*                         hInvMass3Lep   [nChannel][nCut][nCharge];
@@ -345,8 +343,6 @@ Float_t                       nextra;
 Float_t                       nvtx;
 Float_t                       pfmet;
 Float_t                       pfmetphi;
-Float_t                       pfmetTypeI;
-Float_t                       pfmetTypeIphi;
 Float_t                       puW;
 Float_t                       trigger;
 Float_t                       bdt          [number_of_leptons];
@@ -481,8 +477,6 @@ void AnalysisWZ(TString sample,
 	hMET           [i][j][iCharge] = new TH1F("hMET"            + suffix, "", 200,   0, 200);
 	h_chmet        [i][j][iCharge] = new TH1F("h_chmet"         + suffix, "", 200,   0, 200);
 	h_mpmet        [i][j][iCharge] = new TH1F("h_mpmet"         + suffix, "", 200,   0, 200);
-	hDeltaMET      [i][j][iCharge] = new TH1F("hDeltaMET"       + suffix, "", 300, -30,  30);
-	hDPhiMET       [i][j][iCharge] = new TH1F("hDPhiMET"        + suffix, "", 200,  -1,   1);
 	hSumCharges    [i][j][iCharge] = new TH1F("hSumCharges"     + suffix, "",   9,  -4,   5);
 	hInvMass2Lep   [i][j][iCharge] = new TH1F("hInvMass2Lep"    + suffix, "", 400,   0, 200);
 	hInvMass3Lep   [i][j][iCharge] = new TH1F("hInvMass3Lep"    + suffix, "", 400,   0, 400);
@@ -601,8 +595,6 @@ void AnalysisWZ(TString sample,
   tree->SetBranchAddress("nvtx",          &nvtx);
   tree->SetBranchAddress("pfmet",         &pfmet);
   tree->SetBranchAddress("pfmetphi",      &pfmetphi);
-  tree->SetBranchAddress("pfmetTypeI",    &pfmetTypeI);
-  tree->SetBranchAddress("pfmetTypeIphi", &pfmetTypeIphi);
   tree->SetBranchAddress("puW",           &puW);
   tree->SetBranchAddress("trigger",       &trigger);
 
@@ -709,7 +701,7 @@ void AnalysisWZ(TString sample,
 
     // Set the MET of the event
     //--------------------------------------------------------------------------
-    EventMET = GetMET(pfmetTypeI, pfmetTypeIphi);
+    EventMET = GetMET(pfmet, pfmetphi);
     
     TrackMET = GetMET(chmet, chmetphi);
 
@@ -1282,8 +1274,6 @@ void FillHistograms(UInt_t iChannel, UInt_t iCut)
   Float_t deltaPhiWLeptonMET = WLepton.DeltaPhi(EventMET);
   Float_t deltaR1            = WLepton.DeltaR(ZLepton1);
   Float_t deltaR2            = WLepton.DeltaR(ZLepton2);
-  Float_t deltaMET           = pfmet - pfmetTypeI;
-  Float_t deltaPhiMET        = pfmetphi - pfmetTypeIphi;
 
   Float_t deltaEtaJets = -999;
   Float_t invMass2Jet  = -999;
@@ -1387,12 +1377,6 @@ void FillHistograms(UInt_t iChannel, UInt_t iCut)
 
       // Analysis histograms
       //------------------------------------------------------------------------
-      if (pfmet > 20 && pfmetTypeI > 20)
-	{
-	  hDeltaMET[iChannel][iCut][iCharge]->Fill(deltaMET,    hweight);
-	  hDPhiMET [iChannel][iCut][iCharge]->Fill(deltaPhiMET, hweight);
-	}
-
       hNPV           [iChannel][iCut][iCharge]->Fill(nvtx,                       hweight);
       hMET           [iChannel][iCut][iCharge]->Fill(EventMET.Et(),              hweight);
       h_chmet        [iChannel][iCut][iCharge]->Fill(chmet,                      hweight);
