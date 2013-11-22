@@ -69,7 +69,7 @@ TString pdfChannel[nChannel+1] = {
 };
 
 
-const UInt_t nCut = 11;
+const UInt_t nCut = 10;
 
 enum {
   Exactly3Leptons,
@@ -77,7 +77,6 @@ enum {
   HasZ,
   HasW,
   MET30,
-  MtW40,
   Rejected,
   SantiagoCuts,
   ZJetsRegion,
@@ -191,7 +190,6 @@ Int_t           _njet;
 Int_t           _verbosity;
 TString         _analysis;
 TString         _datapath;
-TString         _localpath;
 TString         _output;
 UInt_t          _cut;
 UInt_t          _mode;
@@ -266,8 +264,6 @@ void     DrawHistogram            (TString       hname,
 				   Bool_t        moveOverflow = true);
 
 Double_t Yield                    (TH1*          h);
-
-TString  GuessLocalBasePath       ();
 
 void     MakeOutputDirectory      (TString       format);
 
@@ -381,7 +377,6 @@ void XS(UInt_t cut     = MET30,
   if (!_analysis.Contains("atlas") &&
       (
        _cut == MET30    ||
-       _cut == MtW40    ||
        _cut == Rejected ||
        _cut == SantiagoCuts
        )) {
@@ -875,7 +870,7 @@ void PrintYields(UInt_t channel)
 
   outputfile << PrintProcess("ZZ",          nZZ,  eZZ);
   outputfile << PrintProcess("Z$\\gamma$",  nZG,  eZG);
-  outputfile << PrintProcess("WV",          nWV,  eWV);
+  outputfile << PrintProcess("W$\\gamma$",  nWV,  eWV);
   outputfile << PrintProcess("VVV",         nVVV, eVVV);
   outputfile << PrintProcess("backgrounds", nBkg, eBkg);
   outputfile << PrintProcess("WZ",          nWZ,  eWZ);
@@ -1281,7 +1276,7 @@ void DrawHistogram(TString  hname,
   DrawLegend(x0 - xdelta, y0 - ndelta, (TObject*)hist[ZZ],  Form(" ZZ (%.0f)",      Yield(hist[ZZ])),  "f"); ndelta += delta;
   DrawLegend(x0 - xdelta, y0 - ndelta, (TObject*)hist[ZG],  Form(" Z#gamma (%.0f)", Yield(hist[ZG])),  "f"); ndelta += delta;
   DrawLegend(x0 - xdelta, y0 - ndelta, (TObject*)hist[VVV], Form(" VVV (%.0f)",     Yield(hist[VVV])), "f"); ndelta += delta;
-  DrawLegend(x0 - xdelta, y0 - ndelta, (TObject*)hist[WV],  Form(" WV (%.0f)",      Yield(hist[WV])),  "f"); ndelta += delta;
+  DrawLegend(x0 - xdelta, y0 - ndelta, (TObject*)hist[WV],  Form(" W#gamma (%.0f)", Yield(hist[WV])),  "f"); ndelta += delta;
 
 
   // CMS titles
@@ -1414,7 +1409,6 @@ void SetParameters(UInt_t cut,
   sCut[HasZ]            = "HasZ";
   sCut[HasW]            = "HasW";
   sCut[MET30]           = "MET30";
-  sCut[MtW40]           = "MtW40";
   sCut[Rejected]        = "Rejected";
   sCut[SantiagoCuts]    = "SantiagoCuts";
   sCut[ZJetsRegion]     = "ZJetsRegion";
@@ -1455,15 +1449,11 @@ void SetParameters(UInt_t cut,
   _mode      = mode;
   _wcharge   = wcharge;
   _njet      = njet;
-  _localpath = GuessLocalBasePath();
-
-  _datapath = Form("%s/piedra/work/WZ/results",
-		   _localpath.Data());
+  _datapath  = "results";
+  _analysis  = "analysis";
+  //  _analysis  = "atlas";
 
   if (_njet >= 0) _datapath = Form("%s/%djet", _datapath.Data(), _njet);
-
-  _analysis = "analysis";
-  //  _analysis = "atlas";
 
   MakeOutputDirectory("pdf");
   MakeOutputDirectory("png");
@@ -1533,30 +1523,6 @@ Int_t ReadInputFiles(TString muonJetPt,
   }
 
   return 0;
-}
-
-
-//------------------------------------------------------------------------------
-// GuessLocalBasePath
-//------------------------------------------------------------------------------
-TString GuessLocalBasePath()
-{
-  TString host = gSystem->HostName();
-
-  if (host.Contains("uniovi.es"))
-    {
-      return TString("/nfs/fanae/user");
-    }
-  else if (host.Contains("ifca.es"))
-    {
-      return TString("/gpfs/csic_users");
-    }
-  else
-    {
-      printf(" ERROR: Could not guess base path from host name %s.", host.Data());
-
-      return TString("");
-    }
 }
 
 

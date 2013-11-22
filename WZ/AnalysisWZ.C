@@ -76,7 +76,7 @@ const TString sComposition[nComposition] = {
 };
 
 
-const UInt_t nCut = 11;
+const UInt_t nCut = 10;
 
 enum {
   Exactly3Leptons,
@@ -84,7 +84,6 @@ enum {
   HasZ,
   HasW,
   MET30,
-  MtW40,
   Rejected,
   SantiagoCuts,
   ZJetsRegion,
@@ -98,7 +97,6 @@ const TString sCut[nCut] = {
   "HasZ",
   "HasW",
   "MET30",
-  "MtW40",
   "Rejected",
   "SantiagoCuts",
   "ZJetsRegion",
@@ -711,7 +709,7 @@ void AnalysisWZ(TString sample,
 
     // Set the MET of the event
     //--------------------------------------------------------------------------
-    EventMET = GetMET(pfmet, pfmetphi);
+    EventMET = GetMET(pfmetTypeI, pfmetTypeIphi);
     
     TrackMET = GetMET(chmet, chmetphi);
 
@@ -1168,7 +1166,7 @@ void AnalysisWZ(TString sample,
 
     if (ZLepton1.Pt() <= 20.) continue;
 
-    if (fabs(invMass2Lep - Z_MASS) > 25. && nJetAbove30 > 1 && nbjet > 0 && EventMET.Et() > 40)
+    if (fabs(invMass2Lep - Z_MASS) > 25. && nJetAbove30 > 1 && nbjet > 0 && EventMET.Et() > 40.)
       {
 	FillHistograms(reco_channel, TopRegion);
 	FillHistograms(combined,     TopRegion);
@@ -1233,14 +1231,6 @@ void AnalysisWZ(TString sample,
     // Additional cuts
     //
     //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-    
-    if (transverseMass > 40.)
-      {
-	FillHistograms(reco_channel, MtW40);
-	FillHistograms(combined,     MtW40);
-      }
-
     if (transverseMass > 40. &&
 	AnalysisLeptons[2].v.Pt() > 20. &&
 	nbjet == 0 &&

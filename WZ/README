@@ -50,7 +50,6 @@ qstat
 mkdir GitHub
 git clone https://github.com/piedraj/usercode.git  # read and write
 cd usercode/WZ
-cp ~piedra/work/forGitHub/WZ/* .
 git add *
 git commit -m 'My changes'
 git push origin master
