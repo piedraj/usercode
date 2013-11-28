@@ -603,12 +603,13 @@ void AnalysisWZ(TString sample,
       tree->SetBranchAddress(Form("bdt%d",           i+1), &bdt          [i]);
       tree->SetBranchAddress(Form("ch%d",            i+1), &ch           [i]);
       tree->SetBranchAddress(Form("eta%d",           i+1), &eta          [i]);
-      tree->SetBranchAddress(Form("ip%d",            i+1), &ip           [i]);
       tree->SetBranchAddress(Form("iso%d",           i+1), &iso          [i]);
       tree->SetBranchAddress(Form("isomva%d",        i+1), &isomva       [i]);
       tree->SetBranchAddress(Form("pass2012ICHEP%d", i+1), &pass2012ICHEP[i]);
       tree->SetBranchAddress(Form("phi%d",           i+1), &phi          [i]);
       tree->SetBranchAddress(Form("pt%d",            i+1), &pt           [i]);
+
+      if (_mode == ATLAS) tree->SetBranchAddress(Form("ip%d", i+1), &ip[i]);
     }
 
   for (UInt_t i=0; i<number_of_jets; i++)
@@ -1195,10 +1196,12 @@ void AnalysisWZ(TString sample,
     //--------------------------------------------------------------------------
     if (0)
       {
-	printf(" [%s] run:%d  event:%10d  lumi:%4d  met:%5.1f  mll:%5.1f  zl1pt:%6.2f  zl1eta:%5.2f  zl2pt:%6.2f  zl2eta:%5.2f  wlpt:%6.2f  wleta:%5.2f\n",
+	printf(" [%s] run:%d  event:%10d  lumi:%4d  met:%5.1f  mll:%5.1f",
 	       sChannel[reco_channel].Data(),
 	       run, event, lumi,
-	       EventMET.Et(), invMass2Lep,
+	       EventMET.Et(), invMass2Lep);
+
+	printf("  zl1pt:%6.2f  zl1eta:%5.2f  zl2pt:%6.2f  zl2eta:%5.2f  wlpt:%6.2f  wleta:%5.2f\n",
 	       ZLepton1.Pt(), ZLepton1.Eta(),
 	       ZLepton2.Pt(), ZLepton2.Eta(),
 	       WLepton.Pt(), WLepton.Eta());
@@ -1351,9 +1354,6 @@ void FillHistograms(UInt_t iChannel, UInt_t iCut)
       hCounterEff[iChannel][iCut][iCharge][LLL]->Fill(1, pu_weight * efficiency_weight             * dd_weight);
       hCounter   [iChannel][iCut][iCharge][LLL]->Fill(1, pu_weight * efficiency_weight * xs_weight * dd_weight);
 
-      
-      //////////////////////////////////////////////////////////////////////////
-      //////////////////////////////////////////////////////////////////////////
       for (UInt_t iPrompt=0; iPrompt<=3; iPrompt++)
 	{
 	  hPromptCounter[iChannel][iCut][iCharge][iPrompt]->Fill(1, GetDataDrivenWeight(iPrompt));
@@ -1364,8 +1364,6 @@ void FillHistograms(UInt_t iChannel, UInt_t iCut)
 						       GetDataDrivenWeight(1) +
 						       GetDataDrivenWeight(2) +
 						       GetDataDrivenWeight(3));
-      //////////////////////////////////////////////////////////////////////////
-      //////////////////////////////////////////////////////////////////////////
 
 
       // MC weight histograms
