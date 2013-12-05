@@ -200,6 +200,8 @@ void           CounterSummary       (TString title);
 // Data members
 //
 //==============================================================================
+TH1F*                         hMETNoCuts;
+
 TH1F*                         h_gen_mZ_denominator;
 TH1F*                         h_gen_mZ_numerator;
 
@@ -452,6 +454,8 @@ void AnalysisWZ(TString sample,
 
   // Histogram definition
   //----------------------------------------------------------------------------
+  hMETNoCuts = new TH1F("hMETNoCuts", "", 200, 0, 200);
+
   for (UInt_t i=0; i<nChannel; i++) {
 
     for (UInt_t j=0; j<nCut; j++) {
@@ -705,6 +709,8 @@ void AnalysisWZ(TString sample,
     EventMET = GetMET(pfmet, pfmetphi);
     
     TrackMET = GetMET(chmet, chmetphi);
+
+    if (pt[2] > 10.) hMETNoCuts->Fill(pfmet);  // Comparison with Lucija
 
 
     // Loop over leptons
