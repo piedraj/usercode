@@ -26,6 +26,7 @@ if [ $# -lt 5 ]; then
     echo "    -1 = inclusive"
     echo "     0 = 0-jet bin"
     echo "     1 = 1-jet bin"
+    echo "     2 = 2-jet bin"
     echo "  "
     echo "  MUON_JET_ET"
     echo "     05, 10, 15, 20, 25, 30, 35, 40, 45, 50"

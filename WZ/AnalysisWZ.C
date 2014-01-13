@@ -827,7 +827,7 @@ void AnalysisWZ(TString sample,
     }
 
 
-    // Inclusive, 0-jet and 1-jet cross section
+    // Inclusive and {0,1,2}-jet cross sections
     //--------------------------------------------------------------------------
     if (_jetChannel >= 0 && nJetAbove30 != _jetChannel) continue;
 
@@ -1202,10 +1202,10 @@ void AnalysisWZ(TString sample,
     //--------------------------------------------------------------------------
     if (0)
       {
-	printf(" [%s] run:%d  event:%10d  lumi:%4d  met:%5.1f  mll:%5.1f",
+	printf(" [%s] run:%d  event:%10d  lumi:%4d  met:%5.1f  metphi:%6.2f  mll:%5.1f",
 	       sChannel[reco_channel].Data(),
 	       run, event, lumi,
-	       EventMET.Et(), invMass2Lep);
+	       EventMET.Et(), EventMET.Phi(), invMass2Lep);
 
 	printf("  zl1pt:%6.2f  zl1eta:%5.2f  zl2pt:%6.2f  zl2eta:%5.2f  wlpt:%6.2f  wleta:%5.2f\n",
 	       ZLepton1.Pt(), ZLepton1.Eta(),

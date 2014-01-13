@@ -10,6 +10,7 @@ if [ $# -lt 1 ] ; then
     echo "     results"
     echo "     results/0jet"
     echo "     results/1jet"
+    echo "     results/2jet"
     echo "  "
 
     exit -1

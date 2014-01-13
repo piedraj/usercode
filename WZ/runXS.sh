@@ -22,7 +22,7 @@ for ((cut=0; cut<10; cut++))
     do
     for ((wcharge=0; wcharge<3; wcharge++))
       do
-      for ((njet=-1; njet<2; njet++))
+      for ((njet=-1; njet<3; njet++))
 	do
 	./submitXS.sh $cut $mode $wcharge $njet
       done
