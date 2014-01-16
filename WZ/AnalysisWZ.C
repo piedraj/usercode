@@ -284,6 +284,7 @@ UInt_t                        reco_channel;
 
 TFile*                        root_output;
 ofstream                      txt_output;
+ofstream                      txt_data_events;
 
 
 // Input parameters
@@ -557,13 +558,20 @@ void AnalysisWZ(TString sample,
   hScaleEE    = GetHistogramFromGraph("hScaleEE",    "gScaleEE");
 
 
-  // Input files
+  // Input and output files
   //----------------------------------------------------------------------------
+  isData = (_sample.Contains("Run2012")) ? true : false;
+
+
+  if (isData)
+    {
+      txt_data_events.open(Form("%s/%s_data_events.txt", _directory.Data(), filename.Data()));
+    }
+
+
   TChain* tree = new TChain("latino", "latino");
 
   TString path;
-
-  isData = (_sample.Contains("Run2012")) ? true : false;
 
   if (isData)
     {
@@ -1198,20 +1206,23 @@ void AnalysisWZ(TString sample,
     FillHistograms(combined,     MET30);
 
 
-    // Synchronization with Lucija
-    //--------------------------------------------------------------------------
-    if (0)
-      {
-	printf(" [%s] run:%d  event:%10d  lumi:%4d  met:%5.1f  metphi:%6.2f  mll:%5.1f",
-	       sChannel[reco_channel].Data(),
-	       run, event, lumi,
-	       EventMET.Et(), EventMET.Phi(), invMass2Lep);
 
-	printf("  zl1pt:%6.2f  zl1eta:%5.2f  zl2pt:%6.2f  zl2eta:%5.2f  wlpt:%6.2f  wleta:%5.2f\n",
-	       ZLepton1.Pt(), ZLepton1.Eta(),
-	       ZLepton2.Pt(), ZLepton2.Eta(),
-	       WLepton.Pt(), WLepton.Eta());
-      }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
     // Fill aTGC tree and selection efficiency numerator
@@ -1246,8 +1257,24 @@ void AnalysisWZ(TString sample,
 	FillHistograms(reco_channel, Rejected);
 	FillHistograms(combined,     Rejected);
       }
-  }
 
+
+    // Save data events in a txt file
+    //--------------------------------------------------------------------------
+    if (isData)
+      {
+	txt_data_events << Form(" [%s] run:%d  event:%10d  lumi:%4d  met:%7.3f  metphi:%7.3f  mll:%7.3f",
+				sChannel[reco_channel].Data(),
+				run, event, lumi,
+				EventMET.Et(), EventMET.Phi(), invMass2Lep);
+
+	txt_data_events << Form("  zl1pt:%7.3f  zl1eta:%7.3f  zl2pt:%7.3f  zl2eta:%7.3f  wlpt:%7.3f  wleta:%7.3f\n",
+				ZLepton1.Pt(), ZLepton1.Eta(),
+				ZLepton2.Pt(), ZLepton2.Eta(),
+				WLepton.Pt(), WLepton.Eta());
+      }
+  }
+  
 
   //============================================================================
   //
@@ -1262,6 +1289,10 @@ void AnalysisWZ(TString sample,
   CounterSummary("All weights");
 
   txt_output.close();
+
+
+  if (isData) txt_data_events.close();
+
 
   root_output->cd();
 
