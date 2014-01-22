@@ -69,7 +69,7 @@ TString pdfChannel[nChannel+1] = {
 };
 
 
-const UInt_t nCut = 10;
+const UInt_t nCut = 12;
 
 enum {
   Exactly3Leptons,
@@ -77,11 +77,13 @@ enum {
   HasZ,
   HasW,
   MET30,
+  MET40,
   Rejected,
   SantiagoCuts,
   ZJetsRegion,
   TopRegion,
-  VBFSelection
+  VBFSelection,
+  EXO_12_025
 };
 
 TString sCut[nCut];
@@ -376,9 +378,11 @@ void XS(UInt_t cut     = MET30,
   //----------------------------------------------------------------------------
   if (!_analysis.Contains("atlas") &&
       (
-       _cut == MET30    ||
-       _cut == Rejected ||
-       _cut == SantiagoCuts
+       _cut == MET30        ||
+       _cut == MET40        ||
+       _cut == Rejected     ||
+       _cut == SantiagoCuts ||
+       _cut == EXO_12_025
        )) {
 
     if (_verbosity > 5)
@@ -459,7 +463,8 @@ void XS(UInt_t cut     = MET30,
       }
     else
       {
-	DrawHistogram("hInvMass2Lep", channel, cut, "m_{#font[12]{ll}}", 2, 0, "GeV", linY, 70, 112);
+	//	DrawHistogram("hInvMass2Lep", channel, cut, "m_{#font[12]{ll}}", 2, 0, "GeV", linY, 70, 112);
+	DrawHistogram("hInvMass2Lep", channel, cut, "m_{#font[12]{ll}}", 4, 0, "GeV", linY, 0, 112);
       }
 
     if (_analysis.Contains("atlas")) continue;
@@ -467,7 +472,6 @@ void XS(UInt_t cut     = MET30,
     DrawHistogram("hSumCharges",      channel, cut, "q_{1} + q_{2} + q_{3}");
     DrawHistogram("hMET",             channel, cut, "E_{T}^{miss}",                              5, 0, "GeV",  linY);
     DrawHistogram("h_chmet",          channel, cut, "track E_{T}^{miss}",                        5, 0, "GeV",  linY);
-    DrawHistogram("h_mpmet",          channel, cut, "minimum projected E_{T}^{miss}",            5, 0, "GeV",  linY);
     DrawHistogram("hInvMass3Lep",     channel, cut, "m_{#font[12]{3l}}",                        10, 0, "GeV",  linY, 60, 350);
     DrawHistogram("hPtLepton1",       channel, cut, "p_{T}^{first lepton}",                      5, 0, "GeV",  linY);
     DrawHistogram("hPtLepton2",       channel, cut, "p_{T}^{second lepton}",                     5, 0, "GeV",  linY);
@@ -851,17 +855,6 @@ void PrintYields(UInt_t channel)
     }
 
 
-  //----------------------------------------------------------------------------
-  //
-  // Para Javier Cuevas
-  //
-  //----------------------------------------------------------------------------
-  if (0)
-    {
-      printf(" [%s] %.1f +- %.1f\n", sChannel[channel].Data(), nFakes[MET30], eFakes[MET30]);
-    }
-  
-  
   // Print
   //----------------------------------------------------------------------------
   if (_mode == MCmode)  outputfile << PrintProcess("top",         nTop,   eTop);
@@ -1409,11 +1402,13 @@ void SetParameters(UInt_t cut,
   sCut[HasZ]            = "HasZ";
   sCut[HasW]            = "HasW";
   sCut[MET30]           = "MET30";
+  sCut[MET40]           = "MET40";
   sCut[Rejected]        = "Rejected";
   sCut[SantiagoCuts]    = "SantiagoCuts";
   sCut[ZJetsRegion]     = "ZJetsRegion";
   sCut[TopRegion]       = "TopRegion";
   sCut[VBFSelection]    = "VBFSelection";
+  sCut[EXO_12_025]      = "EXO_12_025";
 
   vcut.clear();
 

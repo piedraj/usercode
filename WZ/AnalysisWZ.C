@@ -76,7 +76,7 @@ const TString sComposition[nComposition] = {
 };
 
 
-const UInt_t nCut = 10;
+const UInt_t nCut = 12;
 
 enum {
   Exactly3Leptons,
@@ -84,11 +84,13 @@ enum {
   HasZ,
   HasW,
   MET30,
+  MET40,
   Rejected,
   SantiagoCuts,
   ZJetsRegion,
   TopRegion,
-  VBFSelection
+  VBFSelection,
+  EXO_12_025
 };
 
 const TString sCut[nCut] = {
@@ -97,11 +99,13 @@ const TString sCut[nCut] = {
   "HasZ",
   "HasW",
   "MET30",
+  "MET40",
   "Rejected",
   "SantiagoCuts",
   "ZJetsRegion",
   "TopRegion",
-  "VBFSelection"
+  "VBFSelection",
+  "EXO_12_025"
 };
 
 
@@ -217,7 +221,6 @@ TH1F*                         hTotalWeight  [nChannel][nCut][nCharge];
 TH1F*                         hNPV           [nChannel][nCut][nCharge];
 TH1F*                         hMET           [nChannel][nCut][nCharge];
 TH1F*                         h_chmet        [nChannel][nCut][nCharge];
-TH1F*                         h_mpmet        [nChannel][nCut][nCharge];
 TH1F*                         hSumCharges    [nChannel][nCut][nCharge];
 TH1F*                         hInvMass2Lep   [nChannel][nCut][nCharge];
 TH1F*                         hInvMass3Lep   [nChannel][nCut][nCharge];
@@ -258,11 +261,12 @@ std::vector<Lepton>           AnalysisLeptons;
 std::vector<TLorentzVector>   SelectedJets;
 std::vector<TLorentzVector>   LowPtJets;
 
+Lepton                        WLepton;
+Lepton                        ZLepton1;
+Lepton                        ZLepton2;
+
 TLorentzVector                EventMET;
 TLorentzVector                TrackMET;
-TLorentzVector                WLepton;
-TLorentzVector                ZLepton1;
-TLorentzVector                ZLepton2;
 
 Bool_t                        isData;
 
@@ -270,10 +274,6 @@ Float_t                       invMass2Lep;
 Float_t                       invMass3Lep;
 Float_t                       sumCharges;
 Float_t                       transverseMass;
-Float_t                       WCharge;
-Float_t                       projectedEventMET;
-Float_t                       projectedTrackMET;
-Float_t                       minProjectedMET;
 
 Int_t                         nJetAbove30;
 Int_t                         nJetBelow30;
@@ -339,7 +339,6 @@ Float_t                       chmet;
 Float_t                       chmetphi;
 Float_t                       dataset;
 Float_t                       fakeW;
-Float_t                       mpmet;
 Float_t                       nbjet;
 Float_t                       njet;
 Float_t                       nextra;
@@ -481,7 +480,6 @@ void AnalysisWZ(TString sample,
 	hNPV           [i][j][iCharge] = new TH1F("hNPV"            + suffix, "",  50,   0,  50);
 	hMET           [i][j][iCharge] = new TH1F("hMET"            + suffix, "", 200,   0, 200);
 	h_chmet        [i][j][iCharge] = new TH1F("h_chmet"         + suffix, "", 200,   0, 200);
-	h_mpmet        [i][j][iCharge] = new TH1F("h_mpmet"         + suffix, "", 200,   0, 200);
 	hSumCharges    [i][j][iCharge] = new TH1F("hSumCharges"     + suffix, "",   9,  -4,   5);
 	hInvMass2Lep   [i][j][iCharge] = new TH1F("hInvMass2Lep"    + suffix, "", 400,   0, 200);
 	hInvMass3Lep   [i][j][iCharge] = new TH1F("hInvMass3Lep"    + suffix, "", 400,   0, 400);
@@ -600,7 +598,6 @@ void AnalysisWZ(TString sample,
   tree->SetBranchAddress("chmetphi",      &chmetphi);
   tree->SetBranchAddress("dataset",       &dataset);
   tree->SetBranchAddress("fakeW",         &fakeW);
-  tree->SetBranchAddress("mpmet",         &mpmet);
   tree->SetBranchAddress("nbjet",         &nbjet);
   tree->SetBranchAddress("njet",          &njet);
   tree->SetBranchAddress("nextra",        &nextra);
@@ -664,15 +661,11 @@ void AnalysisWZ(TString sample,
     mc_trigger_weight = 1.;
     mc_total_weight   = 1.;
 
-    invMass2Lep       = 999.;
-    invMass3Lep       = 999.;
-    transverseMass    = 999.;
-    projectedEventMET = 999.;
-    projectedTrackMET = 999.;
-    minProjectedMET   = 999.;
+    invMass2Lep    = 999.;
+    invMass3Lep    = 999.;
+    transverseMass = 999.;
 
     sumCharges  = 0.;
-    WCharge     = 0.;
     nElectron   = 0;
     nJetAbove30 = 0;
     nJetBelow30 = 0;
@@ -965,8 +958,8 @@ void AnalysisWZ(TString sample,
 
 	  invMass2Lep = inv_mass;
 
-	  ZLepton1 = AnalysisLeptons[i].v;
-	  ZLepton2 = AnalysisLeptons[j].v;
+	  ZLepton1 = AnalysisLeptons[i];
+	  ZLepton2 = AnalysisLeptons[j];
 	  
 	  isZee = (AnalysisLeptons[i].flavor == Electron) ? true : false;
 	  isZmm = (AnalysisLeptons[i].flavor == Muon)     ? true : false;
@@ -998,9 +991,7 @@ void AnalysisWZ(TString sample,
 		  }
 	      }
 
-	    WLepton = AnalysisLeptons[k].v;
-
-	    WCharge = AnalysisLeptons[k].charge;
+	    WLepton = AnalysisLeptons[k];
 	  }
 	}
       }
@@ -1008,18 +999,18 @@ void AnalysisWZ(TString sample,
 
     if (!isZee && !isZmm) continue;
 
-    if (fabs(WCharge) < 1.) continue;
+    if (fabs(WLepton.charge) < 1.) continue;
 
 
     // Fill Z invariant mass at two-lepton level
     //--------------------------------------------------------------------------
     UInt_t index = (isZee) ? Electron : Muon;
 
-    if (fabs(ZLepton1.Eta()) < 1.479 && fabs(ZLepton2.Eta()) < 1.479)
+    if (fabs(ZLepton1.v.Eta()) < 1.479 && fabs(ZLepton2.v.Eta()) < 1.479)
       {
 	hInvMass2LepBB[index]->Fill(invMass2Lep, pu_weight * xs_weight);
       }
-    else if (fabs(ZLepton1.Eta()) < 1.479 || fabs(ZLepton2.Eta()) < 1.479)
+    else if (fabs(ZLepton1.v.Eta()) < 1.479 || fabs(ZLepton2.v.Eta()) < 1.479)
       {
 	hInvMass2LepBE[index]->Fill(invMass2Lep, pu_weight * xs_weight);
       }
@@ -1032,23 +1023,6 @@ void AnalysisWZ(TString sample,
     // Require exactly three leptons
     //--------------------------------------------------------------------------
     if (AnalysisLeptons.size() != 3) continue;
-
-
-    // Compute the projected METs
-    //--------------------------------------------------------------------------
-    Float_t pfdphi = fabs(EventMET.DeltaPhi(ZLepton1));
-    Float_t chdphi = fabs(TrackMET.DeltaPhi(ZLepton1));
-
-    if (fabs(EventMET.DeltaPhi(ZLepton2)) < pfdphi) pfdphi = fabs(EventMET.DeltaPhi(ZLepton2));
-    if (fabs(TrackMET.DeltaPhi(ZLepton2)) < chdphi) chdphi = fabs(TrackMET.DeltaPhi(ZLepton2));
-
-    projectedEventMET = EventMET.Et();
-    projectedTrackMET = TrackMET.Et();
-    
-    if (pfdphi < TMath::PiOver2()) projectedEventMET *= sin(pfdphi);
-    if (chdphi < TMath::PiOver2()) projectedTrackMET *= sin(chdphi);
-
-    minProjectedMET = min(projectedEventMET, projectedTrackMET);
 
 
     // Classify the channels
@@ -1099,9 +1073,9 @@ void AnalysisWZ(TString sample,
     // Compute the transverse mass
     //--------------------------------------------------------------------------
     const Float_t met  = EventMET.Et();
-    const Float_t lWEt = WLepton.Et();
+    const Float_t lWEt = WLepton.v.Et();
 
-    transverseMass = lWEt*lWEt + met*met - 2.*lWEt*met*cos(WLepton.Angle(EventMET.Vect()));
+    transverseMass = lWEt*lWEt + met*met - 2.*lWEt*met*cos(WLepton.v.Angle(EventMET.Vect()));
 
     transverseMass = sqrt(transverseMass);
 
@@ -1171,7 +1145,7 @@ void AnalysisWZ(TString sample,
     FillHistograms(reco_channel, InvMass3Lep100);
     FillHistograms(combined,     InvMass3Lep100);
 
-    if (ZLepton1.Pt() <= 20.) continue;
+    if (ZLepton1.v.Pt() <= 20.) continue;
 
     if (fabs(invMass2Lep - Z_MASS) > 25. && nJetAbove30 > 1 && nbjet > 0 && EventMET.Et() > 40.)
       {
@@ -1186,8 +1160,8 @@ void AnalysisWZ(TString sample,
     FillHistograms(reco_channel, HasZ);
     FillHistograms(combined,     HasZ);
 
-    if (WLepton.DeltaR(ZLepton1) <= 0.1) continue;
-    if (WLepton.DeltaR(ZLepton2) <= 0.1) continue;
+    if (WLepton.v.DeltaR(ZLepton1.v) <= 0.1) continue;
+    if (WLepton.v.DeltaR(ZLepton2.v) <= 0.1) continue;
 
     if (fabs(invMass2Lep - Z_MASS) < 15. && EventMET.Et() < 20.)
       {
@@ -1195,7 +1169,7 @@ void AnalysisWZ(TString sample,
 	FillHistograms(combined,     ZJetsRegion);
       }
 
-    if (WLepton.Pt() <= 20.) continue;
+    if (WLepton.v.Pt() <= 20.) continue;
 
     FillHistograms(reco_channel, HasW);
     FillHistograms(combined,     HasW);
@@ -1205,24 +1179,33 @@ void AnalysisWZ(TString sample,
     FillHistograms(reco_channel, MET30);
     FillHistograms(combined,     MET30);
 
+    if (EventMET.Et() > 40.)
+      {
+	FillHistograms(reco_channel, MET40);
+	FillHistograms(combined,     MET40);
+      }
 
 
+    // EXO-12-025
+    //--------------------------------------------------------------------------
+    Bool_t etaElec1 = true;
+    Bool_t etaElec2 = true;
+    Bool_t etaElec3 = true;
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    if (ZLepton1.flavor == Electron && fabs(ZLepton1.v.Eta()) >= 1.4442 && fabs(ZLepton1.v.Eta()) <= 1.566) etaElec1 = false;
+    if (ZLepton2.flavor == Electron && fabs(ZLepton2.v.Eta()) >= 1.4442 && fabs(ZLepton2.v.Eta()) <= 1.566) etaElec2 = false;
+    if (WLepton.flavor  == Electron && fabs(WLepton.v.Eta())  >= 1.4442 && fabs(WLepton.v.Eta())  <= 1.566) etaElec3 = false;
+    
+    if (((ZLepton1.flavor == Electron && ZLepton1.v.Pt() > 35) || (ZLepton1.flavor == Muon && ZLepton1.v.Pt() > 25)) &&
+	((ZLepton2.flavor == Electron && ZLepton2.v.Pt() > 35) || ZLepton2.flavor == Muon) &&
+	invMass3Lep > 120 &&
+	WLepton.v.DeltaR(ZLepton1.v) > 0.3 &&
+	WLepton.v.DeltaR(ZLepton2.v) > 0.3 &&
+	etaElec1 && etaElec2 && etaElec3)
+      {
+	FillHistograms(reco_channel, EXO_12_025);
+	FillHistograms(combined,     EXO_12_025);
+      }
 
 
     // Fill aTGC tree and selection efficiency numerator
@@ -1230,7 +1213,7 @@ void AnalysisWZ(TString sample,
     if (_sample.Contains("GenVars"))
       {
 	reco_mZ  = invMass2Lep;
-	reco_ptZ = (ZLepton1 + ZLepton2).Pt();
+	reco_ptZ = (ZLepton1.v + ZLepton2.v).Pt();
     
 	tgcTree->Fill();
 
@@ -1269,9 +1252,9 @@ void AnalysisWZ(TString sample,
 				EventMET.Et(), EventMET.Phi(), invMass2Lep);
 
 	txt_data_events << Form("  zl1pt:%7.3f  zl1eta:%7.3f  zl2pt:%7.3f  zl2eta:%7.3f  wlpt:%7.3f  wleta:%7.3f\n",
-				ZLepton1.Pt(), ZLepton1.Eta(),
-				ZLepton2.Pt(), ZLepton2.Eta(),
-				WLepton.Pt(), WLepton.Eta());
+				ZLepton1.v.Pt(), ZLepton1.v.Eta(),
+				ZLepton2.v.Pt(), ZLepton2.v.Eta(),
+				WLepton.v.Pt(),  WLepton.v.Eta());
       }
   }
   
@@ -1310,10 +1293,10 @@ void AnalysisWZ(TString sample,
 void FillHistograms(UInt_t iChannel, UInt_t iCut)
 {
   Float_t hweight            = pu_weight * efficiency_weight * xs_weight * dd_weight;
-  Float_t deltaPhiZLeptons   = ZLepton1.DeltaPhi(ZLepton2);
-  Float_t deltaPhiWLeptonMET = WLepton.DeltaPhi(EventMET);
-  Float_t deltaR1            = WLepton.DeltaR(ZLepton1);
-  Float_t deltaR2            = WLepton.DeltaR(ZLepton2);
+  Float_t deltaPhiZLeptons   = ZLepton1.v.DeltaPhi(ZLepton2.v);
+  Float_t deltaPhiWLeptonMET = WLepton.v.DeltaPhi(EventMET);
+  Float_t deltaR1            = WLepton.v.DeltaR(ZLepton1.v);
+  Float_t deltaR2            = WLepton.v.DeltaR(ZLepton2.v);
 
   Float_t deltaEtaJets = -999;
   Float_t invMass2Jet  = -999;
@@ -1377,8 +1360,8 @@ void FillHistograms(UInt_t iChannel, UInt_t iCut)
 
   for (UInt_t iCharge=0; iCharge<nCharge; iCharge++)
     {
-      if (iCharge == WPlus  && WCharge < 0.) continue;
-      if (iCharge == WMinus && WCharge > 0.) continue;
+      if (iCharge == WPlus  && WLepton.charge < 0.) continue;
+      if (iCharge == WMinus && WLepton.charge > 0.) continue;
 
 
       // Counters
@@ -1412,31 +1395,30 @@ void FillHistograms(UInt_t iChannel, UInt_t iCut)
 
       // Analysis histograms
       //------------------------------------------------------------------------
-      hNPV           [iChannel][iCut][iCharge]->Fill(nvtx,                       hweight);
-      hMET           [iChannel][iCut][iCharge]->Fill(EventMET.Et(),              hweight);
-      h_chmet        [iChannel][iCut][iCharge]->Fill(chmet,                      hweight);
-      h_mpmet        [iChannel][iCut][iCharge]->Fill(minProjectedMET,            hweight);
-      hSumCharges    [iChannel][iCut][iCharge]->Fill(sumCharges,                 hweight);
-      hInvMass2Lep   [iChannel][iCut][iCharge]->Fill(invMass2Lep,                hweight);
-      hInvMass3Lep   [iChannel][iCut][iCharge]->Fill(invMass3Lep,                hweight);
-      hPtLepton1     [iChannel][iCut][iCharge]->Fill(AnalysisLeptons[0].v.Pt(),  hweight);
-      hPtLepton2     [iChannel][iCut][iCharge]->Fill(AnalysisLeptons[1].v.Pt(),  hweight);
-      hPtLepton3     [iChannel][iCut][iCharge]->Fill(AnalysisLeptons[2].v.Pt(),  hweight);
-      hDPhiZLeptons  [iChannel][iCut][iCharge]->Fill(fabs(deltaPhiZLeptons),     hweight);
-      hDPhiWLeptonMET[iChannel][iCut][iCharge]->Fill(fabs(deltaPhiWLeptonMET),   hweight);
-      hPtZLepton1    [iChannel][iCut][iCharge]->Fill(ZLepton1.Pt(),              hweight);
-      hPtZLepton2    [iChannel][iCut][iCharge]->Fill(ZLepton2.Pt(),              hweight);
-      hPtZ           [iChannel][iCut][iCharge]->Fill((ZLepton1 + ZLepton2).Pt(), hweight);
-      hPtWLepton     [iChannel][iCut][iCharge]->Fill(WLepton.Pt(),               hweight);
-      hPtW           [iChannel][iCut][iCharge]->Fill((WLepton + EventMET).Pt(),  hweight);
-      hDRWZLepton1   [iChannel][iCut][iCharge]->Fill(deltaR1,                    hweight);
-      hDRWZLepton2   [iChannel][iCut][iCharge]->Fill(deltaR2,                    hweight);
-      hMtW           [iChannel][iCut][iCharge]->Fill(transverseMass,             hweight);
-      hMinDeltaR2Lep [iChannel][iCut][iCharge]->Fill(minDeltaR2Lep,              hweight);
-      hMinInvMass2Lep[iChannel][iCut][iCharge]->Fill(minInvMass2Lep,             hweight);
-      hNJetAbove30   [iChannel][iCut][iCharge]->Fill(nJetAbove30,                hweight);
-      hNJetBelow30   [iChannel][iCut][iCharge]->Fill(nJetBelow30,                hweight);
-      hNBJet30       [iChannel][iCut][iCharge]->Fill(nbjet,                      hweight);
+      hNPV           [iChannel][iCut][iCharge]->Fill(nvtx,                           hweight);
+      hMET           [iChannel][iCut][iCharge]->Fill(EventMET.Et(),                  hweight);
+      h_chmet        [iChannel][iCut][iCharge]->Fill(chmet,                          hweight);
+      hSumCharges    [iChannel][iCut][iCharge]->Fill(sumCharges,                     hweight);
+      hInvMass2Lep   [iChannel][iCut][iCharge]->Fill(invMass2Lep,                    hweight);
+      hInvMass3Lep   [iChannel][iCut][iCharge]->Fill(invMass3Lep,                    hweight);
+      hPtLepton1     [iChannel][iCut][iCharge]->Fill(AnalysisLeptons[0].v.Pt(),      hweight);
+      hPtLepton2     [iChannel][iCut][iCharge]->Fill(AnalysisLeptons[1].v.Pt(),      hweight);
+      hPtLepton3     [iChannel][iCut][iCharge]->Fill(AnalysisLeptons[2].v.Pt(),      hweight);
+      hDPhiZLeptons  [iChannel][iCut][iCharge]->Fill(fabs(deltaPhiZLeptons),         hweight);
+      hDPhiWLeptonMET[iChannel][iCut][iCharge]->Fill(fabs(deltaPhiWLeptonMET),       hweight);
+      hPtZLepton1    [iChannel][iCut][iCharge]->Fill(ZLepton1.v.Pt(),                hweight);
+      hPtZLepton2    [iChannel][iCut][iCharge]->Fill(ZLepton2.v.Pt(),                hweight);
+      hPtZ           [iChannel][iCut][iCharge]->Fill((ZLepton1.v + ZLepton2.v).Pt(), hweight);
+      hPtWLepton     [iChannel][iCut][iCharge]->Fill(WLepton.v.Pt(),                 hweight);
+      hPtW           [iChannel][iCut][iCharge]->Fill((WLepton.v + EventMET).Pt(),    hweight);
+      hDRWZLepton1   [iChannel][iCut][iCharge]->Fill(deltaR1,                        hweight);
+      hDRWZLepton2   [iChannel][iCut][iCharge]->Fill(deltaR2,                        hweight);
+      hMtW           [iChannel][iCut][iCharge]->Fill(transverseMass,                 hweight);
+      hMinDeltaR2Lep [iChannel][iCut][iCharge]->Fill(minDeltaR2Lep,                  hweight);
+      hMinInvMass2Lep[iChannel][iCut][iCharge]->Fill(minInvMass2Lep,                 hweight);
+      hNJetAbove30   [iChannel][iCut][iCharge]->Fill(nJetAbove30,                    hweight);
+      hNJetBelow30   [iChannel][iCut][iCharge]->Fill(nJetBelow30,                    hweight);
+      hNBJet30       [iChannel][iCut][iCharge]->Fill(nbjet,                          hweight);
 
 
       // Jet histograms

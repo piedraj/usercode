@@ -16,7 +16,7 @@ rm -rf  tex
 root -l -b -q loadXS.C
 
 
-for ((cut=0; cut<10; cut++))
+for ((cut=0; cut<12; cut++))
   do
   for ((mode=0; mode<2; mode++))
     do
