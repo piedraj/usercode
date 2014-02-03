@@ -77,6 +77,7 @@ MC_SAMPLES="         \
 072_GluGluZZ2L2L     \
 073_GluGluZZ4L       \
 074_WZJetsMad        \
+076_WZJetsMad_TuneZ2star \
 075_ZZJetsMad        \
 078_WZTo2L2QMad      \
 079_ZZTo2L2QMad      \

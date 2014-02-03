@@ -473,14 +473,14 @@ void XS(UInt_t cut     = MET30,
     DrawHistogram("hMET",             channel, cut, "E_{T}^{miss}",                              5, 0, "GeV",  linY);
     DrawHistogram("h_chmet",          channel, cut, "track E_{T}^{miss}",                        5, 0, "GeV",  linY);
     DrawHistogram("hInvMass3Lep",     channel, cut, "m_{#font[12]{3l}}",                        10, 0, "GeV",  linY, 60, 350);
-    DrawHistogram("hPtLepton1",       channel, cut, "p_{T}^{first lepton}",                      5, 0, "GeV",  linY);
-    DrawHistogram("hPtLepton2",       channel, cut, "p_{T}^{second lepton}",                     5, 0, "GeV",  linY);
-    DrawHistogram("hPtLepton3",       channel, cut, "p_{T}^{third lepton}",                      5, 0, "GeV",  linY);
+    DrawHistogram("hPtLepton1",       channel, cut, "p_{T}^{first lepton}",                      5, 0, "GeV",  linY,  0, 120);
+    DrawHistogram("hPtLepton2",       channel, cut, "p_{T}^{second lepton}",                     5, 0, "GeV",  linY,  0, 120);
+    DrawHistogram("hPtLepton3",       channel, cut, "p_{T}^{third lepton}",                      5, 0, "GeV",  linY,  0, 120);
+    DrawHistogram("hPtZLepton1",      channel, cut, "p_{T}^{Z leading lepton}",                  5, 0, "GeV",  linY,  0, 120);
+    DrawHistogram("hPtZLepton2",      channel, cut, "p_{T}^{Z trailing lepton}",                 5, 0, "GeV",  linY,  0, 120);
+    DrawHistogram("hPtWLepton",       channel, cut, "p_{T}^{W lepton}",                          5, 0, "GeV",  linY,  0, 120);
     DrawHistogram("hDPhiZLeptons",    channel, cut, "#Delta#phi_{#font[12]{ll}}",               16, 1, "rad",  linY);
     DrawHistogram("hDPhiWLeptonMET",  channel, cut, "#Delta#phi(W lepton, E_{T}^{miss})",       16, 1, "rad",  linY);
-    DrawHistogram("hPtZLepton1",      channel, cut, "p_{T}^{Z leading lepton}",                  5, 0, "GeV",  linY);
-    DrawHistogram("hPtZLepton2",      channel, cut, "p_{T}^{Z trailing lepton}",                 5, 0, "GeV",  linY);
-    DrawHistogram("hPtWLepton",       channel, cut, "p_{T}^{W lepton}",                          5, 0, "GeV",  linY);
     DrawHistogram("hPtZ",             channel, cut, "p_{T}^{#font[12]{ll}}",                    10, 0, "GeV",  linY);
     DrawHistogram("hPtW",             channel, cut, "W candidate p_{T}",                        10, 0, "GeV",  linY);
     DrawHistogram("hDRWZLepton1",     channel, cut, "#DeltaR(W lepton, Z leading lepton)",      10, 1, "NULL", linY, 0, 5);
@@ -1419,6 +1419,7 @@ void SetParameters(UInt_t cut,
   sProcess[Data]  = "Data";
   sProcess[Fakes] = "Data_PPF";
   sProcess[WZ]    = "074_WZJetsMad";
+  //  sProcess[WZ]    = "076_WZJetsMad_TuneZ2star";
   sProcess[ZZ]    = "ZZ";
   sProcess[ZG]    = "086_ZgammaToLLuG";
   sProcess[Top]   = "Top";
@@ -2451,4 +2452,3 @@ void ScanFakes()
   c1->SaveAs(Form("png/%s/%s.png", _output.Data(), cname.Data()));
   c1->SaveAs(Form("png/%s/%s.png", _output.Data(), cname.Data()));
 }
-

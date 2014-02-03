@@ -574,14 +574,14 @@ void AnalysisWZ(TString sample,
   if (isData)
     {
       path = "/pool/ciencias/LatinosSkims/ReducedTrees/R53X_S1_V09_S2_V10_S3_V17newJEC/Data_LooseLooseTypeI";
-
+      
       if (_mode == ATLAS) path = "/pool/ciencias/LatinosSkims/ReducedTrees/R53X_S1_V09_S2_V10_S3_V17newJEC/Data_NoSelTypeI";
     }
   else
     {
       path = "/pool/ciencias/LatinosSkims/ReducedTrees/R53X_S1_V09_S2_V10_S3_V17newJEC/MC_LooseLooseTypeI";
 
-      if (_mode == ATLAS) path = "/pool/ciencias/LatinosSkims/ReducedTrees/R53X_S1_V09_S2_V10_S3_V17newJEC/MC_NoSelTypeI";
+      if (_mode == ATLAS) path = "/pool/ciencias/LatinosSkims/ReducedTrees/R53X_S1_V09_S2_V10_S3_V17newJEC/MC_NoSelTypeI";  // Falta 076_WZJetsMad_TuneZ2star
     }
 
   tree->Add(path + "/latino_" + _sample + ".root");
