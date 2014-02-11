@@ -16,7 +16,7 @@ rm -rf  tex
 root -l -b -q loadXS.C
 
 
-for ((cut=0; cut<12; cut++))
+for ((cut=0; cut<13; cut++))
   do
   for ((mode=0; mode<2; mode++))
     do
@@ -34,4 +34,3 @@ done
 root -l -b -q drawScaleFactors.C+
 root -l -b -q drawWeights.C+
 root -l -b -q drawElectronScaleSystematic.C+
-

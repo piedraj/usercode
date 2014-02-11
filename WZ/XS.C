@@ -14,8 +14,9 @@ const Bool_t  _doSystematics = true;
 
 // Input parameters for the WZ cross section
 //------------------------------------------------------------------------------
-const Double_t ngenWPlusZ  = 906262;  // (71 < mZ < 111 GeV)
-const Double_t ngenWMinusZ = 542805;  // (71 < mZ < 111 GeV)
+const Double_t ngenWZInput = 2017979;  // 12 < mZ       GeV
+const Double_t ngenWPlusZ  =  906262;  // 71 < mZ < 111 GeV
+const Double_t ngenWMinusZ =  542805;  // 71 < mZ < 111 GeV
 
 const Double_t W2e     = 0.1075;
 const Double_t W2m     = 0.1057;
@@ -69,7 +70,7 @@ TString pdfChannel[nChannel+1] = {
 };
 
 
-const UInt_t nCut = 12;
+const UInt_t nCut = 13;
 
 enum {
   Exactly3Leptons,
@@ -77,6 +78,7 @@ enum {
   HasZ,
   HasW,
   MET30,
+  Lepton3Pt20,
   MET40,
   Rejected,
   SantiagoCuts,
@@ -124,11 +126,13 @@ const TString sCharge[nCharge] = {
 
 const Double_t ngenWZ[nCharge] = {
   ngenWPlusZ+ngenWMinusZ,
+  //  ngenWZInput,  // Request by Javier Cuevas
   ngenWPlusZ,
   ngenWMinusZ
 };  
 
 const Double_t xs_nlo      [nCharge] = {21.91, 13.86, 8.04};
+//const Double_t xs_nlo      [nCharge] = {32.16, 13.86, 8.04};  // Request by Javier Cuevas
 const Double_t xs_nlo_left [nCharge] = { 0.88,  0.55, 0.32};
 const Double_t xs_nlo_right[nCharge] = { 1.17,  0.73, 0.44};
 
@@ -379,6 +383,7 @@ void XS(UInt_t cut     = MET30,
   if (!_analysis.Contains("atlas") &&
       (
        _cut == MET30        ||
+       _cut == Lepton3Pt20  ||
        _cut == MET40        ||
        _cut == Rejected     ||
        _cut == SantiagoCuts ||
@@ -463,8 +468,7 @@ void XS(UInt_t cut     = MET30,
       }
     else
       {
-	//	DrawHistogram("hInvMass2Lep", channel, cut, "m_{#font[12]{ll}}", 2, 0, "GeV", linY, 70, 112);
-	DrawHistogram("hInvMass2Lep", channel, cut, "m_{#font[12]{ll}}", 4, 0, "GeV", linY, 0, 112);
+	DrawHistogram("hInvMass2Lep", channel, cut, "m_{#font[12]{ll}}", 2, 0, "GeV", linY, 70, 112);
       }
 
     if (_analysis.Contains("atlas")) continue;
@@ -473,12 +477,12 @@ void XS(UInt_t cut     = MET30,
     DrawHistogram("hMET",             channel, cut, "E_{T}^{miss}",                              5, 0, "GeV",  linY);
     DrawHistogram("h_chmet",          channel, cut, "track E_{T}^{miss}",                        5, 0, "GeV",  linY);
     DrawHistogram("hInvMass3Lep",     channel, cut, "m_{#font[12]{3l}}",                        10, 0, "GeV",  linY, 60, 350);
-    DrawHistogram("hPtLepton1",       channel, cut, "p_{T}^{first lepton}",                      5, 0, "GeV",  linY,  0, 120);
-    DrawHistogram("hPtLepton2",       channel, cut, "p_{T}^{second lepton}",                     5, 0, "GeV",  linY,  0, 120);
-    DrawHistogram("hPtLepton3",       channel, cut, "p_{T}^{third lepton}",                      5, 0, "GeV",  linY,  0, 120);
-    DrawHistogram("hPtZLepton1",      channel, cut, "p_{T}^{Z leading lepton}",                  5, 0, "GeV",  linY,  0, 120);
-    DrawHistogram("hPtZLepton2",      channel, cut, "p_{T}^{Z trailing lepton}",                 5, 0, "GeV",  linY,  0, 120);
-    DrawHistogram("hPtWLepton",       channel, cut, "p_{T}^{W lepton}",                          5, 0, "GeV",  linY,  0, 120);
+    DrawHistogram("hPtLepton1",       channel, cut, "p_{T}^{first lepton}",                      5, 0, "GeV",  linY,  0, 150);
+    DrawHistogram("hPtLepton2",       channel, cut, "p_{T}^{second lepton}",                     5, 0, "GeV",  linY,  0, 150);
+    DrawHistogram("hPtLepton3",       channel, cut, "p_{T}^{third lepton}",                      5, 0, "GeV",  linY,  0, 150);
+    DrawHistogram("hPtZLepton1",      channel, cut, "p_{T}^{Z leading lepton}",                  5, 0, "GeV",  linY,  0, 150);
+    DrawHistogram("hPtZLepton2",      channel, cut, "p_{T}^{Z trailing lepton}",                 5, 0, "GeV",  linY,  0, 150);
+    DrawHistogram("hPtWLepton",       channel, cut, "p_{T}^{W lepton}",                          5, 0, "GeV",  linY,  0, 150);
     DrawHistogram("hDPhiZLeptons",    channel, cut, "#Delta#phi_{#font[12]{ll}}",               16, 1, "rad",  linY);
     DrawHistogram("hDPhiWLeptonMET",  channel, cut, "#Delta#phi(W lepton, E_{T}^{miss})",       16, 1, "rad",  linY);
     DrawHistogram("hPtZ",             channel, cut, "p_{T}^{#font[12]{ll}}",                    10, 0, "GeV",  linY);
@@ -1402,6 +1406,7 @@ void SetParameters(UInt_t cut,
   sCut[HasZ]            = "HasZ";
   sCut[HasW]            = "HasW";
   sCut[MET30]           = "MET30";
+  sCut[Lepton3Pt20]     = "Lepton3Pt20";
   sCut[MET40]           = "MET40";
   sCut[Rejected]        = "Rejected";
   sCut[SantiagoCuts]    = "SantiagoCuts";

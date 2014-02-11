@@ -76,7 +76,7 @@ const TString sComposition[nComposition] = {
 };
 
 
-const UInt_t nCut = 12;
+const UInt_t nCut = 13;
 
 enum {
   Exactly3Leptons,
@@ -84,6 +84,7 @@ enum {
   HasZ,
   HasW,
   MET30,
+  Lepton3Pt20,
   MET40,
   Rejected,
   SantiagoCuts,
@@ -99,6 +100,7 @@ const TString sCut[nCut] = {
   "HasZ",
   "HasW",
   "MET30",
+  "Lepton3Pt20",
   "MET40",
   "Rejected",
   "SantiagoCuts",
@@ -198,14 +200,14 @@ Float_t        ScaleLepton          (UInt_t  flavor,
 
 void           CounterSummary       (TString title);
 
+Bool_t         CheckRun             (TString level);
+
 
 //==============================================================================
 //
 // Data members
 //
 //==============================================================================
-TH1F*                         hMETNoCuts;
-
 TH1F*                         h_gen_mZ_denominator;
 TH1F*                         h_gen_mZ_numerator;
 
@@ -454,8 +456,6 @@ void AnalysisWZ(TString sample,
 
   // Histogram definition
   //----------------------------------------------------------------------------
-  hMETNoCuts = new TH1F("hMETNoCuts", "", 200, 0, 200);
-
   for (UInt_t i=0; i<nChannel; i++) {
 
     for (UInt_t j=0; j<nCut; j++) {
@@ -710,8 +710,6 @@ void AnalysisWZ(TString sample,
     EventMET = GetMET(pfmet, pfmetphi);
     
     TrackMET = GetMET(chmet, chmetphi);
-
-    if (pt[2] > 10.) hMETNoCuts->Fill(pfmet);  // Comparison with Lucija
 
 
     // Loop over leptons
@@ -1175,14 +1173,20 @@ void AnalysisWZ(TString sample,
     FillHistograms(combined,     HasW);
 
     if (EventMET.Et() <= 30.) continue;
-
+    
     FillHistograms(reco_channel, MET30);
     FillHistograms(combined,     MET30);
 
-    if (EventMET.Et() > 40.)
+    if (AnalysisLeptons[2].v.Pt() > 20.)
       {
-	FillHistograms(reco_channel, MET40);
-	FillHistograms(combined,     MET40);
+	FillHistograms(reco_channel, Lepton3Pt20);
+	FillHistograms(combined,     Lepton3Pt20);
+
+	if (EventMET.Et() > 40.)
+	  {
+	    FillHistograms(reco_channel, MET40);
+	    FillHistograms(combined,     MET40);
+	  }
       }
 
 
@@ -1220,7 +1224,7 @@ void AnalysisWZ(TString sample,
 	h_gen_mZ_numerator->Fill(gen_mZ);
       }
 
-    
+
     //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     //
     // Additional cuts
@@ -1744,4 +1748,37 @@ void CounterSummary(TString title)
 
     txt_output << "\n";
   }
+}
+
+
+//------------------------------------------------------------------------------
+// CheckRun
+//------------------------------------------------------------------------------
+Bool_t CheckRun(TString level)
+{
+  Bool_t runFound = false;
+  
+  if (
+      //      // 3e
+      //      (run == 191856 && lumi ==  122 && event ==  103073501)
+      //      (run == 190702 && lumi ==   95 && event ==   74954290)
+      //      (run == 191090 && lumi ==   29 && event ==   27821291)
+      //      (run == 191202 && lumi ==   61 && event ==  100013083)
+      //      // 2e1m
+      //      (run == 191226 && lumi == 1520 && event == 1820521419)
+      //      (run == 190895 && lumi ==  664 && event ==  686688440)
+      //      // 1e2m
+      //      (run == 193621 && lumi == 1072 && event ==  887924486)
+      //      (run == 191247 && lumi ==  243 && event ==  358704257)
+      //      (run == 190782 && lumi ==  294 && event ==  366041301)
+      //      // 3m
+      (run == 193575 && lumi ==   63 && event ==   25022540)
+      )
+    {
+      printf(" [%-20s] run:%d  lumi:%4d  event:%10d\n", level.Data(), run, lumi, event);
+
+      runFound = true;
+    }
+
+  return runFound;
 }
