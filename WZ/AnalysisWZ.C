@@ -332,9 +332,9 @@ TH1F*                         hScaleEE;
 
 // Tree leaves
 //------------------------------------------------------------------------------
-Int_t                         run;
-Int_t                         event;
-Int_t                         lumi;
+Long64_t                      run;
+Long64_t                      event;
+Long64_t                      lumi;
 Float_t                       baseW;
 Float_t                       channel;
 Float_t                       chmet;
@@ -1250,7 +1250,7 @@ void AnalysisWZ(TString sample,
     //--------------------------------------------------------------------------
     if (isData)
       {
-	txt_data_events << Form(" [%s] run:%d  event:%10d  lumi:%4d  met:%7.3f  metphi:%7.3f  mll:%7.3f",
+	txt_data_events << Form(" [%s] run:%lld  event:%10lld  lumi:%4lld  met:%7.3f  metphi:%7.3f  mll:%7.3f",
 				sChannel[reco_channel].Data(),
 				run, event, lumi,
 				EventMET.Et(), EventMET.Phi(), invMass2Lep);
@@ -1775,7 +1775,7 @@ Bool_t CheckRun(TString level)
       (run == 193575 && lumi ==   63 && event ==   25022540)
       )
     {
-      printf(" [%-20s] run:%d  lumi:%4d  event:%10d\n", level.Data(), run, lumi, event);
+      printf(" [%-20s] run:%lld  lumi:%4lld  event:%10lld\n", level.Data(), run, lumi, event);
 
       runFound = true;
     }

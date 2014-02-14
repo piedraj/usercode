@@ -1,3 +1,11 @@
+//------------------------------------------------------------------------------
+//
+// The WZ signal sample has been generated with MadGraph. The used (LO) cross
+// section is 0.8674. The PDF used is been cteq6l1, as can be found in
+//
+// lxplus410:/tmp/jfernan2/WZJetsTo3LNu_8TeV-madgraph_166134028.lhe
+//
+//------------------------------------------------------------------------------
 #include "DrawFunctions.h"
 
 #include <fstream>
@@ -126,13 +134,13 @@ const TString sCharge[nCharge] = {
 
 const Double_t ngenWZ[nCharge] = {
   ngenWPlusZ+ngenWMinusZ,
-  //  ngenWZInput,  // Request by Javier Cuevas
+  //  ngenWZInput,  // To measure the total cross section
   ngenWPlusZ,
   ngenWMinusZ
 };  
 
 const Double_t xs_nlo      [nCharge] = {21.91, 13.86, 8.04};
-//const Double_t xs_nlo      [nCharge] = {32.16, 13.86, 8.04};  // Request by Javier Cuevas
+//const Double_t xs_nlo      [nCharge] = {32.16, 13.86, 8.04};  // To measure the total cross section
 const Double_t xs_nlo_left [nCharge] = { 0.88,  0.55, 0.32};
 const Double_t xs_nlo_right[nCharge] = { 1.17,  0.73, 0.44};
 
