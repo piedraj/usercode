@@ -76,7 +76,7 @@ const TString sComposition[nComposition] = {
 };
 
 
-const UInt_t nCut = 13;
+const UInt_t nCut = 14;
 
 enum {
   Exactly3Leptons,
@@ -84,9 +84,10 @@ enum {
   HasZ,
   HasW,
   MET30,
-  Lepton3Pt20,
+  MET30Pt20,
+  MET30Btag,
+  MET30Pt20Btag,
   MET40,
-  Rejected,
   SantiagoCuts,
   ZJetsRegion,
   TopRegion,
@@ -100,9 +101,10 @@ const TString sCut[nCut] = {
   "HasZ",
   "HasW",
   "MET30",
-  "Lepton3Pt20",
+  "MET30Pt20",
+  "MET30Btag",
+  "MET30Pt20Btag",
   "MET40",
-  "Rejected",
   "SantiagoCuts",
   "ZJetsRegion",
   "TopRegion",
@@ -690,6 +692,13 @@ void AnalysisWZ(TString sample,
 
     xs_weight = (1.0 + 0.6 * (dataset >= 82 && dataset <= 84)) * baseW * luminosity;
 
+    if (_sample.Contains("WZZJets")) xs_weight *= (0.01968  / 0.0192);
+    if (_sample.Contains("ZZZJets")) xs_weight *= (0.005527 / 0.00459);
+    if (_sample.Contains("WWZJets")) xs_weight *= (0.05795  / 0.0633);
+    if (_sample.Contains("WWWJets")) xs_weight *= (0.08058  / 0.0822);
+    if (_sample.Contains("TTWJets")) xs_weight *= (0.232    / 0.232);
+    if (_sample.Contains("TTZJets")) xs_weight *= (0.2057   / 0.174);
+	
     if (isData) xs_weight = 1.0;
 
     Bool_t accept_WGstar = (chmet < (0.75*pt[0]+100) && chmet < (0.75*jetpt[0]+100));
@@ -1179,17 +1188,29 @@ void AnalysisWZ(TString sample,
 
     if (AnalysisLeptons[2].v.Pt() > 20.)
       {
-	FillHistograms(reco_channel, Lepton3Pt20);
-	FillHistograms(combined,     Lepton3Pt20);
+	FillHistograms(reco_channel, MET30Pt20);
+	FillHistograms(combined,     MET30Pt20);
 
-	if (EventMET.Et() > 40.)
+	if (nbjet == 0)
 	  {
-	    FillHistograms(reco_channel, MET40);
-	    FillHistograms(combined,     MET40);
+	    FillHistograms(reco_channel, MET30Pt20Btag);
+	    FillHistograms(combined,     MET30Pt20Btag);
 	  }
       }
 
-
+    if (nbjet == 0)
+      {
+	FillHistograms(reco_channel, MET30Btag);
+	FillHistograms(combined,     MET30Btag);
+      }
+    
+    if (EventMET.Et() > 40.)
+      {
+	FillHistograms(reco_channel, MET40);
+	FillHistograms(combined,     MET40);
+      }
+    
+    
     // EXO-12-025
     //--------------------------------------------------------------------------
     Bool_t etaElec1 = true;
@@ -1238,11 +1259,6 @@ void AnalysisWZ(TString sample,
       {
 	FillHistograms(reco_channel, SantiagoCuts);
 	FillHistograms(combined,     SantiagoCuts);
-      }
-    else
-      {
-	FillHistograms(reco_channel, Rejected);
-	FillHistograms(combined,     Rejected);
       }
 
 

@@ -5,6 +5,8 @@
 //
 // lxplus410:/tmp/jfernan2/WZJetsTo3LNu_8TeV-madgraph_166134028.lhe
 //
+// The WZ signal sample has been weighted with a NLO cross section of 1.05742.
+//
 //------------------------------------------------------------------------------
 #include "DrawFunctions.h"
 
@@ -78,7 +80,7 @@ TString pdfChannel[nChannel+1] = {
 };
 
 
-const UInt_t nCut = 13;
+const UInt_t nCut = 14;
 
 enum {
   Exactly3Leptons,
@@ -86,9 +88,10 @@ enum {
   HasZ,
   HasW,
   MET30,
-  Lepton3Pt20,
+  MET30Pt20,
+  MET30Btag,
+  MET30Pt20Btag,
   MET40,
-  Rejected,
   SantiagoCuts,
   ZJetsRegion,
   TopRegion,
@@ -315,7 +318,7 @@ void     ScanFakes                ();
 // XS
 //------------------------------------------------------------------------------
 void XS(UInt_t cut     = MET30,
-	UInt_t mode    = PPFmode,
+	UInt_t mode    = MCmode,
 	UInt_t wcharge = WInclusive,
 	Int_t  njet    = -1)
 {
@@ -340,6 +343,8 @@ void XS(UInt_t cut     = MET30,
     // Measure the cross section
     //--------------------------------------------------------------------------
     CrossSection(xsValue[channel], xsErrorStat[channel], wzEffValue[channel], _wcharge, channel, cut);
+
+    //    continue;  // DEBUG cross section
 
 
     // Get the systematic uncertainties
@@ -383,6 +388,9 @@ void XS(UInt_t cut     = MET30,
     PrintYields(channel);
   }
 
+  //  return;  // DEBUG cross section
+
+
   wzEffError[nChannel] = sqrt(wzEffError[nChannel]);
 
 
@@ -390,11 +398,12 @@ void XS(UInt_t cut     = MET30,
   //----------------------------------------------------------------------------
   if (!_analysis.Contains("atlas") &&
       (
-       _cut == MET30        ||
-       _cut == Lepton3Pt20  ||
-       _cut == MET40        ||
-       _cut == Rejected     ||
-       _cut == SantiagoCuts ||
+       _cut == MET30         ||
+       _cut == MET30Pt20     ||
+       _cut == MET30Btag     ||
+       _cut == MET30Pt20Btag ||
+       _cut == MET40         ||
+       _cut == SantiagoCuts  ||
        _cut == EXO_12_025
        )) {
 
@@ -535,16 +544,6 @@ void CrossSection(Double_t& xsVal,
 		  UInt_t    cut,
 		  Int_t     syst)
 {
-  if (_verbosity > 999)
-    {
-      printf(" [CrossSection][%s][%s] %s %s\n",
-	     sChannel[channel].Data(),
-	     sCharge[wcharge].Data(),
-	     sCut[cut].Data(),
-	     sSystematic[syst].Data());
-	     
-    }
-
   Double_t ndata = 0;
   Double_t nbkg  = 0;
   Double_t ebkg  = 0;
@@ -560,14 +559,6 @@ void CrossSection(Double_t& xsVal,
     //    TString prefix = (j == WZ) ? "hCounterRaw" : "hCounter";  // For Jordi
 
     Double_t process_yield = Yield((TH1D*)input[j]->Get(prefix + suffix));
-
-    if (_verbosity > 999 && j == WZ && cut == MET30 && syst == -1)
-      {
-	printf(" [CrossSection][%s][%s] WZ yield = %f\n",
-	       sChannel[channel].Data(),
-	       sCharge[wcharge].Data(),
-	       process_yield);
-      }
 
     Double_t eStat = ((TH1D*)input[j]->Get(prefix + suffix))->GetSumw2()->GetSum();
 
@@ -669,6 +660,20 @@ void CrossSection(Double_t& xsVal,
   wzEff = nWZ / ngenWZ[wcharge];
 
   xsVal = (ndata - nbkg) / (_luminosity * wzEff * WZ23lnu);
+
+  if (_verbosity > 999)
+    {
+      printf(" [%s] eff = nWZ:%.0f / ngen:%.0f; xs = (ndata:%.0f - nbkg:%.0f) / (lumi:%.0f * eff:%f * WZ23lnu:%f) = %.2f pb\n",
+	     sChannel[channel].Data(),
+	     nWZ,
+	     ngenWZ[wcharge],
+	     ndata,
+	     nbkg,
+	     _luminosity,
+	     wzEff,
+	     WZ23lnu,
+	     xsVal);
+    }
   
   xsErr = sqrt(ndata) / (_luminosity * wzEff * WZ23lnu);
 
@@ -1414,9 +1419,10 @@ void SetParameters(UInt_t cut,
   sCut[HasZ]            = "HasZ";
   sCut[HasW]            = "HasW";
   sCut[MET30]           = "MET30";
-  sCut[Lepton3Pt20]     = "Lepton3Pt20";
+  sCut[MET30Pt20]       = "MET30Pt20";
+  sCut[MET30Btag]       = "MET30Btag";
+  sCut[MET30Pt20Btag]   = "MET30Pt20Btag";
   sCut[MET40]           = "MET40";
-  sCut[Rejected]        = "Rejected";
   sCut[SantiagoCuts]    = "SantiagoCuts";
   sCut[ZJetsRegion]     = "ZJetsRegion";
   sCut[TopRegion]       = "TopRegion";
