@@ -245,7 +245,7 @@ TH1F*                         hMinDeltaR2Lep [nChannel][nCut][nCharge];
 TH1F*                         hMinInvMass2Lep[nChannel][nCut][nCharge];
 TH1F*                         hNJetAbove30   [nChannel][nCut][nCharge];
 TH1F*                         hNJetBelow30   [nChannel][nCut][nCharge];
-TH1F*                         hNBJet30       [nChannel][nCut][nCharge];
+TH1F*                         hNBJetAbove30  [nChannel][nCut][nCharge];
 
 TH1F*                         hPtLeadingJet   [nChannel][nCut][nCharge];
 TH1F*                         hPtSecondJet    [nChannel][nCut][nCharge];
@@ -281,6 +281,7 @@ Float_t                       transverseMass;
 
 Int_t                         nJetAbove30;
 Int_t                         nJetBelow30;
+Int_t                         nBJetAbove30;
 
 UInt_t                        nElectron;
 UInt_t                        nTight;
@@ -343,7 +344,6 @@ Float_t                       chmet;
 Float_t                       chmetphi;
 Float_t                       dataset;
 Float_t                       fakeW;
-Float_t                       nbjet;
 Float_t                       njet;
 Float_t                       nextra;
 Float_t                       nvtx;
@@ -363,6 +363,8 @@ Float_t                       pt           [number_of_leptons];
 Float_t                       jeteta       [number_of_jets];
 Float_t                       jetphi       [number_of_jets];
 Float_t                       jetpt        [number_of_jets];
+Float_t                       jettche      [number_of_jets];
+Float_t                       jetid        [number_of_jets];
 
 
 // Create aTGC tree
@@ -502,7 +504,7 @@ void AnalysisWZ(TString sample,
 	hMinInvMass2Lep[i][j][iCharge] = new TH1F("hMinInvMass2Lep" + suffix, "", 400,   0, 200);    
 	hNJetAbove30   [i][j][iCharge] = new TH1F("hNJetAbove30"    + suffix, "",  10,   0,  10);    
 	hNJetBelow30   [i][j][iCharge] = new TH1F("hNJetBelow30"    + suffix, "",  10,   0,  10);    
-	hNBJet30       [i][j][iCharge] = new TH1F("hNBJet30"        + suffix, "",  10,   0,  10);
+	hNBJetAbove30  [i][j][iCharge] = new TH1F("hNBJetAbove30"   + suffix, "",  10,   0,  10);
 
 
 	// Jet histograms
@@ -600,7 +602,6 @@ void AnalysisWZ(TString sample,
   tree->SetBranchAddress("chmetphi",      &chmetphi);
   tree->SetBranchAddress("dataset",       &dataset);
   tree->SetBranchAddress("fakeW",         &fakeW);
-  tree->SetBranchAddress("nbjet",         &nbjet);
   tree->SetBranchAddress("njet",          &njet);
   tree->SetBranchAddress("nextra",        &nextra);
   tree->SetBranchAddress("nvtx",          &nvtx);
@@ -625,9 +626,11 @@ void AnalysisWZ(TString sample,
 
   for (UInt_t i=0; i<number_of_jets; i++)
     {
-      tree->SetBranchAddress(Form("jeteta%d", i+1), &jeteta[i]);
-      tree->SetBranchAddress(Form("jetphi%d", i+1), &jetphi[i]);
-      tree->SetBranchAddress(Form("jetpt%d",  i+1), &jetpt [i]);
+      tree->SetBranchAddress(Form("jeteta%d",  i+1), &jeteta [i]);
+      tree->SetBranchAddress(Form("jetphi%d",  i+1), &jetphi [i]);
+      tree->SetBranchAddress(Form("jetpt%d",   i+1), &jetpt  [i]);
+      tree->SetBranchAddress(Form("jettche%d", i+1), &jettche[i]);
+      tree->SetBranchAddress(Form("jetid%d",   i+1), &jetid  [i]);
     }
 
 
@@ -667,11 +670,12 @@ void AnalysisWZ(TString sample,
     invMass3Lep    = 999.;
     transverseMass = 999.;
 
-    sumCharges  = 0.;
-    nElectron   = 0;
-    nJetAbove30 = 0;
-    nJetBelow30 = 0;
-    nTight      = 0;
+    sumCharges   = 0.;
+    nElectron    = 0;
+    nJetAbove30  = 0;
+    nJetBelow30  = 0;
+    nBJetAbove30 = 0;
+    nTight       = 0;
 
 
     // Reset some aTGC variables
@@ -831,6 +835,8 @@ void AnalysisWZ(TString sample,
 	  SelectedJets.push_back(Jet);
 	  
 	  nJetAbove30++;
+	  
+	  if (jettche[i] > 2.1 && jetid[i] >= 4) nBJetAbove30++;  // jetid 4 = MVA LOOSE
 	}
     }
 
@@ -1154,7 +1160,7 @@ void AnalysisWZ(TString sample,
 
     if (ZLepton1.v.Pt() <= 20.) continue;
 
-    if (fabs(invMass2Lep - Z_MASS) > 25. && nJetAbove30 > 1 && nbjet > 0 && EventMET.Et() > 40.)
+    if (fabs(invMass2Lep - Z_MASS) > 25. && nJetAbove30 > 1 && nBJetAbove30 > 0 && EventMET.Et() > 40.)
       {
 	FillHistograms(reco_channel, TopRegion);
 	FillHistograms(combined,     TopRegion);
@@ -1191,14 +1197,14 @@ void AnalysisWZ(TString sample,
 	FillHistograms(reco_channel, MET30Pt20);
 	FillHistograms(combined,     MET30Pt20);
 
-	if (nbjet == 0)
+	if (nBJetAbove30 == 0)
 	  {
 	    FillHistograms(reco_channel, MET30Pt20Btag);
 	    FillHistograms(combined,     MET30Pt20Btag);
 	  }
       }
 
-    if (nbjet == 0)
+    if (nBJetAbove30 == 0)
       {
 	FillHistograms(reco_channel, MET30Btag);
 	FillHistograms(combined,     MET30Btag);
@@ -1253,7 +1259,7 @@ void AnalysisWZ(TString sample,
     //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     if (transverseMass > 40. &&
 	AnalysisLeptons[2].v.Pt() > 20. &&
-	nbjet == 0 &&
+	nBJetAbove30 == 0 &&
 	EventMET.Et() > 40. &&
 	fabs(invMass2Lep - Z_MASS) < 15.)
       {
@@ -1438,7 +1444,7 @@ void FillHistograms(UInt_t iChannel, UInt_t iCut)
       hMinInvMass2Lep[iChannel][iCut][iCharge]->Fill(minInvMass2Lep,                 hweight);
       hNJetAbove30   [iChannel][iCut][iCharge]->Fill(nJetAbove30,                    hweight);
       hNJetBelow30   [iChannel][iCut][iCharge]->Fill(nJetBelow30,                    hweight);
-      hNBJet30       [iChannel][iCut][iCharge]->Fill(nbjet,                          hweight);
+      hNBJetAbove30  [iChannel][iCut][iCharge]->Fill(nBJetAbove30,                   hweight);
 
 
       // Jet histograms

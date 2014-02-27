@@ -509,7 +509,7 @@ void XS(UInt_t cut     = MET30,
     DrawHistogram("hMtW",             channel, cut, "m_{T}^{W}",                                 5, 0, "GeV",  linY);
     DrawHistogram("hNJetAbove30",     channel, cut, "number of jets (p_{T}^{jet} > 30 GeV)",    -1, 0, "NULL", linY, 0, 4);
     DrawHistogram("hNJetBelow30",     channel, cut, "number of jets (p_{T}^{jet} #leq 30 GeV)", -1, 0, "NULL", linY, 0, 4);
-    DrawHistogram("hNBJet30",         channel, cut, "number of b-jets (p_{T}^{jet} > 30 GeV)",  -1, 0, "NULL", linY, 0, 4);
+    DrawHistogram("hNBJetAbove30",    channel, cut, "number of b-jets (p_{T}^{jet} > 30 GeV)",  -1, 0, "NULL", linY, 0, 4);
     DrawHistogram("hPtLeadingJet",    channel, cut, "p_{T}^{leading jet}",                       5, 0, "GeV",  linY);
     DrawHistogram("hEtaLeadingJet",   channel, cut, "#eta^{leading jet}",                       10, 1, "NULL", linY);
     DrawHistogram("hPhiLeadingJet",   channel, cut, "#phi^{leading jet}",                       16, 1, "rad",  linY);
