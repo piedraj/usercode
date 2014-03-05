@@ -344,8 +344,6 @@ void XS(UInt_t cut     = MET30,
     //--------------------------------------------------------------------------
     CrossSection(xsValue[channel], xsErrorStat[channel], wzEffValue[channel], _wcharge, channel, cut);
 
-    //    continue;  // DEBUG cross section
-
 
     // Get the systematic uncertainties
     //--------------------------------------------------------------------------
@@ -387,9 +385,6 @@ void XS(UInt_t cut     = MET30,
 
     PrintYields(channel);
   }
-
-  //  return;  // DEBUG cross section
-
 
   wzEffError[nChannel] = sqrt(wzEffError[nChannel]);
 
@@ -476,17 +471,7 @@ void XS(UInt_t cut     = MET30,
   //----------------------------------------------------------------------------
   for (UInt_t channel=0; channel<=nChannel; channel++) {
 
-    if (_analysis.Contains("atlas"))
-      {
-	if (channel == MMM || channel == EEM)
-	  {
-	    DrawHistogram("hInvMass2Lep", channel, cut, "m_{#font[12]{ll}}", 4, 0, "GeV", linY, 60, 120, 0, 112, false);
-	  }
-      }
-    else
-      {
-	DrawHistogram("hInvMass2Lep", channel, cut, "m_{#font[12]{ll}}", 2, 0, "GeV", linY, 70, 112);
-      }
+    DrawHistogram("hInvMass2Lep", channel, cut, "m_{#font[12]{ll}}", 4, 0, "GeV", linY, 60, 120, -999, -999, false);
 
     if (_analysis.Contains("atlas")) continue;
 
@@ -494,12 +479,14 @@ void XS(UInt_t cut     = MET30,
     DrawHistogram("hMET",             channel, cut, "E_{T}^{miss}",                              5, 0, "GeV",  linY);
     DrawHistogram("h_chmet",          channel, cut, "track E_{T}^{miss}",                        5, 0, "GeV",  linY);
     DrawHistogram("hInvMass3Lep",     channel, cut, "m_{#font[12]{3l}}",                        10, 0, "GeV",  linY, 60, 350);
-    DrawHistogram("hPtLepton1",       channel, cut, "p_{T}^{first lepton}",                      5, 0, "GeV",  linY,  0, 150);
-    DrawHistogram("hPtLepton2",       channel, cut, "p_{T}^{second lepton}",                     5, 0, "GeV",  linY,  0, 150);
-    DrawHistogram("hPtLepton3",       channel, cut, "p_{T}^{third lepton}",                      5, 0, "GeV",  linY,  0, 150);
-    DrawHistogram("hPtZLepton1",      channel, cut, "p_{T}^{Z leading lepton}",                  5, 0, "GeV",  linY,  0, 150);
-    DrawHistogram("hPtZLepton2",      channel, cut, "p_{T}^{Z trailing lepton}",                 5, 0, "GeV",  linY,  0, 150);
-    DrawHistogram("hPtWLepton",       channel, cut, "p_{T}^{W lepton}",                          5, 0, "GeV",  linY,  0, 150);
+    DrawHistogram("hPtLepton1",       channel, cut, "p_{T}^{first lepton}",                      5, 0, "GeV",  linY, 0, 150);
+    DrawHistogram("hPtLepton2",       channel, cut, "p_{T}^{second lepton}",                     5, 0, "GeV",  linY, 0, 150);
+    DrawHistogram("hPtLepton3",       channel, cut, "p_{T}^{third lepton}",                      5, 0, "GeV",  linY, 0, 150);
+    DrawHistogram("hPtZLepton1",      channel, cut, "p_{T}^{Z leading lepton}",                  5, 0, "GeV",  linY, 0, 150);
+    DrawHistogram("hPtZLepton2",      channel, cut, "p_{T}^{Z trailing lepton}",                 5, 0, "GeV",  linY, 0, 150);
+    DrawHistogram("hPtWLepton",       channel, cut, "p_{T}^{W lepton}",                          5, 0, "GeV",  linY, 0, 150);
+    DrawHistogram("hEtaWLeptonPt35",  channel, cut, "#eta^{W lepton} (35 < p_{T} < 45 GeV)",     5, 1, "NULL", linY, -3, 3);
+    DrawHistogram("hPhiWLeptonPt35",  channel, cut, "#phi^{W lepton} (35 < p_{T} < 45 GeV)",     8, 1, "rad",  linY, -3.2, 3.2);
     DrawHistogram("hDPhiZLeptons",    channel, cut, "#Delta#phi_{#font[12]{ll}}",               16, 1, "rad",  linY);
     DrawHistogram("hDPhiWLeptonMET",  channel, cut, "#Delta#phi(W lepton, E_{T}^{miss})",       16, 1, "rad",  linY);
     DrawHistogram("hPtZ",             channel, cut, "p_{T}^{#font[12]{ll}}",                    10, 0, "GeV",  linY);
@@ -525,7 +512,7 @@ void XS(UInt_t cut     = MET30,
       {
 	DrawHistogram("hPtSecondJet",  channel, cut, "p_{T}^{second jet}",  5, 0, "GeV",  linY);
 	DrawHistogram("hEtaSecondJet", channel, cut, "#eta^{second jet}",  10, 1, "NULL", linY);
-	DrawHistogram("hPhiSecondJet", channel, cut, "#phi^{second jet}",  16, 1, "NULL", linY);
+	DrawHistogram("hPhiSecondJet", channel, cut, "#phi^{second jet}",  16, 1, "rad",  linY);
 	DrawHistogram("hDEtaJets",     channel, cut, "#Delta#eta_{jj}",    10, 1, "NULL", linY);
 	DrawHistogram("hInvMass2Jet",  channel, cut, "m_{jj}",             10, 0, "GeV",  linY, 0, 1000);
       }

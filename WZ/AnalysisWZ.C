@@ -237,6 +237,8 @@ TH1F*                         hPtZLepton1    [nChannel][nCut][nCharge];
 TH1F*                         hPtZLepton2    [nChannel][nCut][nCharge];
 TH1F*                         hPtZ           [nChannel][nCut][nCharge];
 TH1F*                         hPtWLepton     [nChannel][nCut][nCharge];
+TH1F*                         hEtaWLeptonPt35[nChannel][nCut][nCharge];
+TH1F*                         hPhiWLeptonPt35[nChannel][nCut][nCharge];
 TH1F*                         hPtW           [nChannel][nCut][nCharge];
 TH1F*                         hDRWZLepton1   [nChannel][nCut][nCharge];
 TH1F*                         hDRWZLepton2   [nChannel][nCut][nCharge];
@@ -481,30 +483,32 @@ void AnalysisWZ(TString sample,
 	hTriggerWeight[i][j][iCharge] = new TH1F("hTriggerWeight" + suffix, "", 90, 0.75, 1.05);
 	hTotalWeight  [i][j][iCharge] = new TH1F("hTotalWeight"   + suffix, "", 90, 0.75, 1.05);
 
-	hNPV           [i][j][iCharge] = new TH1F("hNPV"            + suffix, "",  50,   0,  50);
-	hMET           [i][j][iCharge] = new TH1F("hMET"            + suffix, "", 200,   0, 200);
-	h_chmet        [i][j][iCharge] = new TH1F("h_chmet"         + suffix, "", 200,   0, 200);
-	hSumCharges    [i][j][iCharge] = new TH1F("hSumCharges"     + suffix, "",   9,  -4,   5);
-	hInvMass2Lep   [i][j][iCharge] = new TH1F("hInvMass2Lep"    + suffix, "", 400,   0, 200);
-	hInvMass3Lep   [i][j][iCharge] = new TH1F("hInvMass3Lep"    + suffix, "", 400,   0, 400);
-	hPtLepton1     [i][j][iCharge] = new TH1F("hPtLepton1"      + suffix, "", 200,   0, 200);
-	hPtLepton2     [i][j][iCharge] = new TH1F("hPtLepton2"      + suffix, "", 200,   0, 200);
-	hPtLepton3     [i][j][iCharge] = new TH1F("hPtLepton3"      + suffix, "", 200,   0, 200);    
-	hDPhiZLeptons  [i][j][iCharge] = new TH1F("hDPhiZLeptons"   + suffix, "", 320,   0, 3.2);    
-	hDPhiWLeptonMET[i][j][iCharge] = new TH1F("hDPhiWLeptonMET" + suffix, "", 320,   0, 3.2);    
-	hPtZLepton1    [i][j][iCharge] = new TH1F("hPtZLepton1"     + suffix, "", 200,   0, 200);
-	hPtZLepton2    [i][j][iCharge] = new TH1F("hPtZLepton2"     + suffix, "", 200,   0, 200);
-	hPtZ           [i][j][iCharge] = new TH1F("hPtZ"            + suffix, "", 400,   0, 400);
-	hPtWLepton     [i][j][iCharge] = new TH1F("hPtWLepton"      + suffix, "", 200,   0, 200);    
-	hPtW           [i][j][iCharge] = new TH1F("hPtW"            + suffix, "", 400,   0, 400);
-	hDRWZLepton1   [i][j][iCharge] = new TH1F("hDRWZLepton1"    + suffix, "", 300,   0,   6);    
-	hDRWZLepton2   [i][j][iCharge] = new TH1F("hDRWZLepton2"    + suffix, "", 300,   0,   6);    
-	hMtW           [i][j][iCharge] = new TH1F("hMtW"            + suffix, "", 200,   0, 200);    
-	hMinDeltaR2Lep [i][j][iCharge] = new TH1F("hMinDeltaR2Lep"  + suffix, "", 300,   0,   6);    
-	hMinInvMass2Lep[i][j][iCharge] = new TH1F("hMinInvMass2Lep" + suffix, "", 400,   0, 200);    
-	hNJetAbove30   [i][j][iCharge] = new TH1F("hNJetAbove30"    + suffix, "",  10,   0,  10);    
-	hNJetBelow30   [i][j][iCharge] = new TH1F("hNJetBelow30"    + suffix, "",  10,   0,  10);    
-	hNBJetAbove30  [i][j][iCharge] = new TH1F("hNBJetAbove30"   + suffix, "",  10,   0,  10);
+	hNPV           [i][j][iCharge] = new TH1F("hNPV"            + suffix, "",  50,   0,    50);
+	hMET           [i][j][iCharge] = new TH1F("hMET"            + suffix, "", 200,   0,   200);
+	h_chmet        [i][j][iCharge] = new TH1F("h_chmet"         + suffix, "", 200,   0,   200);
+	hSumCharges    [i][j][iCharge] = new TH1F("hSumCharges"     + suffix, "",   9,  -4,     5);
+	hInvMass2Lep   [i][j][iCharge] = new TH1F("hInvMass2Lep"    + suffix, "", 400,   0,   200);
+	hInvMass3Lep   [i][j][iCharge] = new TH1F("hInvMass3Lep"    + suffix, "", 400,   0,   400);
+	hPtLepton1     [i][j][iCharge] = new TH1F("hPtLepton1"      + suffix, "", 200,   0,   200);
+	hPtLepton2     [i][j][iCharge] = new TH1F("hPtLepton2"      + suffix, "", 200,   0,   200);
+	hPtLepton3     [i][j][iCharge] = new TH1F("hPtLepton3"      + suffix, "", 200,   0,   200);    
+	hDPhiZLeptons  [i][j][iCharge] = new TH1F("hDPhiZLeptons"   + suffix, "", 320,   0,     3.2);    
+	hDPhiWLeptonMET[i][j][iCharge] = new TH1F("hDPhiWLeptonMET" + suffix, "", 320,   0,     3.2);    
+	hPtZLepton1    [i][j][iCharge] = new TH1F("hPtZLepton1"     + suffix, "", 200,   0,   200);
+	hPtZLepton2    [i][j][iCharge] = new TH1F("hPtZLepton2"     + suffix, "", 200,   0,   200);
+	hPtZ           [i][j][iCharge] = new TH1F("hPtZ"            + suffix, "", 400,   0,   400);
+	hPtWLepton     [i][j][iCharge] = new TH1F("hPtWLepton"      + suffix, "", 200,   0,   200);    
+	hEtaWLeptonPt35[i][j][iCharge] = new TH1F("hEtaWLeptonPt35" + suffix, "", 240,  -6,     6);    
+	hPhiWLeptonPt35[i][j][iCharge] = new TH1F("hPhiWLeptonPt35" + suffix, "", 256,  -3.2,   3.2);    
+	hPtW           [i][j][iCharge] = new TH1F("hPtW"            + suffix, "", 400,   0,   400);
+	hDRWZLepton1   [i][j][iCharge] = new TH1F("hDRWZLepton1"    + suffix, "", 300,   0,     6);    
+	hDRWZLepton2   [i][j][iCharge] = new TH1F("hDRWZLepton2"    + suffix, "", 300,   0,     6);    
+	hMtW           [i][j][iCharge] = new TH1F("hMtW"            + suffix, "", 200,   0,   200);    
+	hMinDeltaR2Lep [i][j][iCharge] = new TH1F("hMinDeltaR2Lep"  + suffix, "", 300,   0,     6);    
+	hMinInvMass2Lep[i][j][iCharge] = new TH1F("hMinInvMass2Lep" + suffix, "", 400,   0,   200);    
+	hNJetAbove30   [i][j][iCharge] = new TH1F("hNJetAbove30"    + suffix, "",  10,   0,    10);    
+	hNJetBelow30   [i][j][iCharge] = new TH1F("hNJetBelow30"    + suffix, "",  10,   0,    10);    
+	hNBJetAbove30  [i][j][iCharge] = new TH1F("hNBJetAbove30"   + suffix, "",  10,   0,    10);
 
 
 	// Jet histograms
@@ -1445,6 +1449,12 @@ void FillHistograms(UInt_t iChannel, UInt_t iCut)
       hNJetAbove30   [iChannel][iCut][iCharge]->Fill(nJetAbove30,                    hweight);
       hNJetBelow30   [iChannel][iCut][iCharge]->Fill(nJetBelow30,                    hweight);
       hNBJetAbove30  [iChannel][iCut][iCharge]->Fill(nBJetAbove30,                   hweight);
+
+      if (WLepton.v.Pt() > 35 && WLepton.v.Pt() < 45)
+	{
+	  hEtaWLeptonPt35[iChannel][iCut][iCharge]->Fill(WLepton.v.Eta(), hweight);
+	  hPhiWLeptonPt35[iChannel][iCut][iCharge]->Fill(WLepton.v.Eta(), hweight);
+	}
 
 
       // Jet histograms
