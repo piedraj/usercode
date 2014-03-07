@@ -202,8 +202,6 @@ Float_t        ScaleLepton          (UInt_t  flavor,
 
 void           CounterSummary       (TString title);
 
-Bool_t         CheckRun             (TString level);
-
 
 //==============================================================================
 //
@@ -237,8 +235,6 @@ TH1F*                         hPtZLepton1    [nChannel][nCut][nCharge];
 TH1F*                         hPtZLepton2    [nChannel][nCut][nCharge];
 TH1F*                         hPtZ           [nChannel][nCut][nCharge];
 TH1F*                         hPtWLepton     [nChannel][nCut][nCharge];
-TH1F*                         hEtaWLeptonPt35[nChannel][nCut][nCharge];
-TH1F*                         hPhiWLeptonPt35[nChannel][nCut][nCharge];
 TH1F*                         hPtW           [nChannel][nCut][nCharge];
 TH1F*                         hDRWZLepton1   [nChannel][nCut][nCharge];
 TH1F*                         hDRWZLepton2   [nChannel][nCut][nCharge];
@@ -248,6 +244,9 @@ TH1F*                         hMinInvMass2Lep[nChannel][nCut][nCharge];
 TH1F*                         hNJetAbove30   [nChannel][nCut][nCharge];
 TH1F*                         hNJetBelow30   [nChannel][nCut][nCharge];
 TH1F*                         hNBJetAbove30  [nChannel][nCut][nCharge];
+
+TH2F*                         hPtLepton3_invMass2Lep[nChannel][nCut][nCharge];
+TH2F*                         hPtWLepton_invMass2Lep[nChannel][nCut][nCharge];
 
 TH1F*                         hPtLeadingJet   [nChannel][nCut][nCharge];
 TH1F*                         hPtSecondJet    [nChannel][nCut][nCharge];
@@ -498,8 +497,6 @@ void AnalysisWZ(TString sample,
 	hPtZLepton2    [i][j][iCharge] = new TH1F("hPtZLepton2"     + suffix, "", 200,   0,   200);
 	hPtZ           [i][j][iCharge] = new TH1F("hPtZ"            + suffix, "", 400,   0,   400);
 	hPtWLepton     [i][j][iCharge] = new TH1F("hPtWLepton"      + suffix, "", 200,   0,   200);    
-	hEtaWLeptonPt35[i][j][iCharge] = new TH1F("hEtaWLeptonPt35" + suffix, "", 240,  -6,     6);    
-	hPhiWLeptonPt35[i][j][iCharge] = new TH1F("hPhiWLeptonPt35" + suffix, "", 256,  -3.2,   3.2);    
 	hPtW           [i][j][iCharge] = new TH1F("hPtW"            + suffix, "", 400,   0,   400);
 	hDRWZLepton1   [i][j][iCharge] = new TH1F("hDRWZLepton1"    + suffix, "", 300,   0,     6);    
 	hDRWZLepton2   [i][j][iCharge] = new TH1F("hDRWZLepton2"    + suffix, "", 300,   0,     6);    
@@ -509,6 +506,9 @@ void AnalysisWZ(TString sample,
 	hNJetAbove30   [i][j][iCharge] = new TH1F("hNJetAbove30"    + suffix, "",  10,   0,    10);    
 	hNJetBelow30   [i][j][iCharge] = new TH1F("hNJetBelow30"    + suffix, "",  10,   0,    10);    
 	hNBJetAbove30  [i][j][iCharge] = new TH1F("hNBJetAbove30"   + suffix, "",  10,   0,    10);
+
+	hPtLepton3_invMass2Lep[i][j][iCharge] = new TH2F("hPtLepton3_invMass2Lep" + suffix, "", 120, 0, 120, 120, 0, 120);    
+	hPtWLepton_invMass2Lep[i][j][iCharge] = new TH2F("hPtWLepton_invMass2Lep" + suffix, "", 120, 0, 120, 120, 0, 120);    
 
 
 	// Jet histograms
@@ -828,19 +828,19 @@ void AnalysisWZ(TString sample,
 
       if (thisJetIsLepton) continue;
 
-      if (jetpt[i] <= 30.)
-	{
-	  LowPtJets.push_back(Jet);
-
-	  nJetBelow30++;
-	}
-      else
+      if (jetpt[i] > 30.)
 	{
 	  SelectedJets.push_back(Jet);
 	  
 	  nJetAbove30++;
 	  
 	  if (jettche[i] > 2.1 && jetid[i] >= 4) nBJetAbove30++;  // jetid 4 = MVA LOOSE
+	}
+      else if (jetpt[i] > 15.)
+	{
+	  LowPtJets.push_back(Jet);
+
+	  nJetBelow30++;
 	}
     }
 
@@ -1450,11 +1450,8 @@ void FillHistograms(UInt_t iChannel, UInt_t iCut)
       hNJetBelow30   [iChannel][iCut][iCharge]->Fill(nJetBelow30,                    hweight);
       hNBJetAbove30  [iChannel][iCut][iCharge]->Fill(nBJetAbove30,                   hweight);
 
-      if (WLepton.v.Pt() > 35 && WLepton.v.Pt() < 45)
-	{
-	  hEtaWLeptonPt35[iChannel][iCut][iCharge]->Fill(WLepton.v.Eta(), hweight);
-	  hPhiWLeptonPt35[iChannel][iCut][iCharge]->Fill(WLepton.v.Eta(), hweight);
-	}
+      hPtLepton3_invMass2Lep[iChannel][iCut][iCharge]->Fill(AnalysisLeptons[2].v.Pt(), invMass2Lep, hweight);
+      hPtWLepton_invMass2Lep[iChannel][iCut][iCharge]->Fill(WLepton.v.Pt(),            invMass2Lep, hweight);
 
 
       // Jet histograms
@@ -1780,37 +1777,4 @@ void CounterSummary(TString title)
 
     txt_output << "\n";
   }
-}
-
-
-//------------------------------------------------------------------------------
-// CheckRun
-//------------------------------------------------------------------------------
-Bool_t CheckRun(TString level)
-{
-  Bool_t runFound = false;
-  
-  if (
-      //      // 3e
-      //      (run == 191856 && lumi ==  122 && event ==  103073501)
-      //      (run == 190702 && lumi ==   95 && event ==   74954290)
-      //      (run == 191090 && lumi ==   29 && event ==   27821291)
-      //      (run == 191202 && lumi ==   61 && event ==  100013083)
-      //      // 2e1m
-      //      (run == 191226 && lumi == 1520 && event == 1820521419)
-      //      (run == 190895 && lumi ==  664 && event ==  686688440)
-      //      // 1e2m
-      //      (run == 193621 && lumi == 1072 && event ==  887924486)
-      //      (run == 191247 && lumi ==  243 && event ==  358704257)
-      //      (run == 190782 && lumi ==  294 && event ==  366041301)
-      //      // 3m
-      (run == 193575 && lumi ==   63 && event ==   25022540)
-      )
-    {
-      printf(" [%-20s] run:%lld  lumi:%4lld  event:%10lld\n", level.Data(), run, lumi, event);
-
-      runFound = true;
-    }
-
-  return runFound;
 }
