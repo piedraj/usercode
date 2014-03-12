@@ -291,6 +291,7 @@ UInt_t                        reco_channel;
 TFile*                        root_output;
 ofstream                      txt_output;
 ofstream                      txt_data_events;
+ofstream                      txt_signal_events;
 
 
 // Input parameters
@@ -574,6 +575,11 @@ void AnalysisWZ(TString sample,
       txt_data_events.open(Form("%s/%s_data_events.txt", _directory.Data(), filename.Data()));
     }
 
+  if (_sample.Contains("074_WZJetsMad"))
+    {
+      txt_signal_events.open(Form("%s/%s_signal_events.txt", _directory.Data(), filename.Data()));
+    }
+
 
   TChain* tree = new TChain("latino", "latino");
 
@@ -836,7 +842,7 @@ void AnalysisWZ(TString sample,
 	  
 	  if (jettche[i] > 2.1 && jetid[i] >= 4) nBJetAbove30++;  // jetid 4 = MVA LOOSE
 	}
-      else if (jetpt[i] > 15.)
+      else if (jetpt[i] > 20.)
 	{
 	  LowPtJets.push_back(Jet);
 
@@ -1286,6 +1292,16 @@ void AnalysisWZ(TString sample,
 				ZLepton2.v.Pt(), ZLepton2.v.Eta(),
 				WLepton.v.Pt(),  WLepton.v.Eta());
       }
+
+
+    // Save signal events in a txt file
+    //--------------------------------------------------------------------------
+    if (_sample.Contains("074_WZJetsMad"))
+      {
+	txt_signal_events << Form(" [%s] event:%10lld  pu_w:%f  lepton_w:%f  trigger_w:%f  xs_w:%f\n",
+				  sChannel[reco_channel].Data(),
+				  event, pu_weight, mc_lepton_weight, mc_trigger_weight, xs_weight);
+      }
   }
   
 
@@ -1305,6 +1321,8 @@ void AnalysisWZ(TString sample,
 
 
   if (isData) txt_data_events.close();
+
+  if (_sample.Contains("074_WZJetsMad")) txt_signal_events.close();
 
 
   root_output->cd();

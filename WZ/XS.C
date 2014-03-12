@@ -318,7 +318,7 @@ void     ScanFakes                ();
 // XS
 //------------------------------------------------------------------------------
 void XS(UInt_t cut     = MET30,
-	UInt_t mode    = MCmode,
+	UInt_t mode    = PPFmode,
 	UInt_t wcharge = WInclusive,
 	Int_t  njet    = -1)
 {
@@ -628,7 +628,7 @@ void CrossSection(Double_t& xsVal,
 	if (j == WZ)
 	  {
 	    nWZ = process_yield;
-	    
+
 	    if (syst == qcdSyst) nWZ *= (1. + 0.016);
 	    if (syst == pdfSyst) nWZ *= (1. + 0.014);
 	  }
