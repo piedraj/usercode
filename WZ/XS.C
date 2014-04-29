@@ -136,7 +136,8 @@ const TString sCharge[nCharge] = {
 };
 
 const Double_t ngenWZ[nCharge] = {
-  ngenWPlusZ+ngenWMinusZ,
+  6.53698e6,
+  //  ngenWPlusZ+ngenWMinusZ,
   //  ngenWZInput,  // To measure the total cross section
   ngenWPlusZ,
   ngenWMinusZ
@@ -344,6 +345,8 @@ void XS(UInt_t cut     = MET30,
     //--------------------------------------------------------------------------
     CrossSection(xsValue[channel], xsErrorStat[channel], wzEffValue[channel], _wcharge, channel, cut);
 
+    if (_verbosity > 999) continue;
+
 
     // Get the systematic uncertainties
     //--------------------------------------------------------------------------
@@ -385,6 +388,8 @@ void XS(UInt_t cut     = MET30,
 
     PrintYields(channel);
   }
+
+  if (_verbosity > 999) return;
 
   wzEffError[nChannel] = sqrt(wzEffError[nChannel]);
 
@@ -648,7 +653,8 @@ void CrossSection(Double_t& xsVal,
 
   if (_verbosity > 999)
     {
-      printf(" [%s] eff = nWZ:%.0f / ngen:%.0f; xs = (ndata:%.0f - nbkg:%.0f) / (lumi:%.0f * eff:%f * WZ23lnu:%f) = %.2f pb\n",
+      //      printf(" [%s] eff = nWZ:%.0f / ngen:%.0f; xs = (ndata:%.0f - nbkg:%.0f) / (lumi:%.0f * eff:%f * WZ23lnu:%f) = %.2f pb\n",
+      printf(" [%s] eff = nWZ:%f / ngen:%.0f; xs = (ndata:%.0f - nbkg:%f) / (lumi:%.0f * eff:%f * WZ23lnu:%f) = %f pb\n",
 	     sChannel[channel].Data(),
 	     nWZ,
 	     ngenWZ[wcharge],
@@ -1422,7 +1428,8 @@ void SetParameters(UInt_t cut,
 
   sProcess[Data]  = "Data";
   sProcess[Fakes] = "Data_PPF";
-  sProcess[WZ]    = "074_WZJetsMad";
+  sProcess[WZ]    = "074_WZJetsMad_step3NoFilter";
+  //  sProcess[WZ]    = "074_WZJetsMad";
   //  sProcess[WZ]    = "076_WZJetsMad_TuneZ2star";
   sProcess[ZZ]    = "ZZ";
   sProcess[ZG]    = "086_ZgammaToLLuG";
@@ -1441,10 +1448,10 @@ void SetParameters(UInt_t cut,
   cProcess[VVV]   = kAzure-9;
   cProcess[WV]    = kGray+1;
 
-  _luminosity            = 19602.0;  // pb
+  _luminosity            = 19604.0;  // pb
   _luminosityUncertainty =     4.4;  // %
 
-  _verbosity = -1;
+  _verbosity = 1000;
   _cut       = cut;
   _mode      = mode;
   _wcharge   = wcharge;

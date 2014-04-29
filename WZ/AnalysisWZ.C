@@ -22,7 +22,7 @@
 // Constants, enums and structs
 //
 //==============================================================================
-const Float_t luminosity = 19.602;  // [fb-1]
+const Float_t luminosity = 19.604;  // [fb-1]
 
 
 const UInt_t number_of_leptons = 4;
@@ -362,6 +362,7 @@ Float_t                       isomva       [number_of_leptons];
 Int_t                         pass2012ICHEP[number_of_leptons];
 Float_t                       phi          [number_of_leptons];
 Float_t                       pt           [number_of_leptons];
+Float_t                       pdgid        [number_of_leptons];
 Float_t                       jeteta       [number_of_jets];
 Float_t                       jetphi       [number_of_jets];
 Float_t                       jetpt        [number_of_jets];
@@ -596,6 +597,11 @@ void AnalysisWZ(TString sample,
       path = "/pool/ciencias/LatinosSkims/ReducedTrees/R53X_S1_V09_S2_V10_S3_V17newJEC/MC_LooseLooseTypeI";
 
       if (_mode == ATLAS) path = "/pool/ciencias/LatinosSkims/ReducedTrees/R53X_S1_V09_S2_V10_S3_V17newJEC/MC_NoSelTypeI";  // Falta 076_WZJetsMad_TuneZ2star
+
+      if (_sample.Contains("074_WZJetsMad_step3NoFilter"))
+	{
+	  path = "/nfs/fanae/user/piedra/userdata/latinowz_step3NoFilter";
+	}
     }
 
   tree->Add(path + "/latino_" + _sample + ".root");
@@ -632,6 +638,8 @@ void AnalysisWZ(TString sample,
       tree->SetBranchAddress(Form("pt%d",            i+1), &pt           [i]);
 
       if (_mode == ATLAS) tree->SetBranchAddress(Form("ip%d", i+1), &ip[i]);
+
+      if (_sample.Contains("074_WZJetsMad_step3NoFilter")) tree->SetBranchAddress(Form("pdgid%d", i+1), &pdgid[i]);
     }
 
   for (UInt_t i=0; i<number_of_jets; i++)
@@ -713,6 +721,8 @@ void AnalysisWZ(TString sample,
     if (_sample.Contains("TTWJets")) xs_weight *= (0.232    / 0.232);
     if (_sample.Contains("TTZJets")) xs_weight *= (0.2057   / 0.174);
 	
+    if (_sample.Contains("074_WZJetsMad_step3NoFilter")) xs_weight = 1e3 * 1.058 * luminosity / 6.53698e6;
+
     if (isData) xs_weight = 1.0;
 
     Bool_t accept_WGstar = (chmet < (0.75*pt[0]+100) && chmet < (0.75*jetpt[0]+100));
@@ -747,14 +757,22 @@ void AnalysisWZ(TString sample,
       
       lep.index = i;
 
-      lep.flavor = (bdt[i] < 100.) ? Electron : Muon;
+      if (_sample.Contains("074_WZJetsMad_step3NoFilter"))
+	{
+	  if      (fabs(pdgid[i]) == 11) lep.flavor = Electron;
+	  else if (fabs(pdgid[i]) == 13) lep.flavor = Muon;
+	}
+      else
+	{
+	  lep.flavor = (bdt[i] < 100.) ? Electron : Muon;
+	}
 
       Float_t spt = ScaleLepton(lep.flavor, pt[i], eta[i]);
 
       if (spt <= 10.) continue;
 
       lep.type = (pass2012ICHEP[i]) ? Tight : Fail;
-    
+
       lep.charge = ch[i];
 
       Float_t mass;
@@ -1787,7 +1805,8 @@ void CounterSummary(TString title)
 
 	if (title.Contains("No")) integral = hCounterRaw[j][i][WInclusive][k]->Integral();
 
-	txt_output << Form(" %s%10.0f", composition.Data(), integral);
+	txt_output << Form(" %s%13.3f", composition.Data(), integral);
+	//	txt_output << Form(" %s%10.0f", composition.Data(), integral);
       }
       
       txt_output << "\n";
