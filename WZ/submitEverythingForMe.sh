@@ -11,6 +11,7 @@ rm -rf  job_AnalysisWZ_*.sh
 rm -rf  results
 
 
+source ~/.bashrc
 root -l -b -q loadAnalysisWZ.C
 
 
