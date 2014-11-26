@@ -7,22 +7,24 @@ rm -rf *so
 rm -rf *~
 rm -rf *_C.*
 rm -rf *_C_*
-rm -rf  job_XS_*.sh
+rm -rf  job_AnalysisWZ_*
+rm -rf  job_XS_*
 rm -rf  pdf
 rm -rf  png
 rm -rf  tex
 
 
+source /opt/root/bin/thisroot.sh
 root -l -b -q loadXS.C
 
 
-for ((cut=0; cut<14; cut++))
+for ((cut=0; cut<7; cut++))
   do
   for ((mode=0; mode<2; mode++))
     do
-    for ((wcharge=0; wcharge<3; wcharge++))
+    for ((wcharge=0; wcharge<1; wcharge++))
       do
-      for ((njet=-1; njet<3; njet++))
+      for ((njet=-1; njet<0; njet++))
 	do
 	./submitXS.sh $cut $mode $wcharge $njet
       done

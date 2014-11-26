@@ -112,7 +112,7 @@ create_job() {
     local filename=job_AnalysisWZ_${sample}_${syst}_${datamode}_${njet}_${muonjet}_${elecjet}.sh
     cat > $filename <<EOF
 #!/bin/bash
-source /nfs/fanae/root_releases/root.5.34.09/bin/thisroot.sh
+source /opt/root/bin/thisroot.sh
 cd $WORKINGDIR
 root -l -b -q "runAnalysisWZ.C(\"${sample}\",${syst},${datamode},${njet},\"${muonjet}\",\"${elecjet}\")";
 EOF

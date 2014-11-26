@@ -3,7 +3,7 @@
 #  0. Get ROOT ready
 #
 ################################################################################
-source /nfs/fanae/root_releases/root.5.34.09/bin/thisroot.sh
+source /opt/root/bin/thisroot.sh
 
 
 ################################################################################
@@ -39,9 +39,10 @@ qstat
 
 
 # Merge the output histograms
-./merge.sh results
-./merge.sh results/0jet
-./merge.sh results/1jet
+./merge.sh results-2014
+./merge.sh results-2014/0jet
+./merge.sh results-2014/1jet
+./merge.sh results-2014/2jet
 
 
 ################################################################################

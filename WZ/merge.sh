@@ -7,10 +7,10 @@ if [ $# -lt 1 ] ; then
     echo "  ./merge.sh BASE_FOLDER"
     echo "  "
     echo "  BASE_FOLDER"
-    echo "     results"
-    echo "     results/0jet"
-    echo "     results/1jet"
-    echo "     results/2jet"
+    echo "     results-2014"
+    echo "     results-2014/0jet"
+    echo "     results-2014/1jet"
+    echo "     results-2014/2jet"
     echo "  "
 
     exit -1
@@ -22,7 +22,6 @@ BASE_FOLDER="$1"
 
 FOLDERS="                             \
 $BASE_FOLDER/analysis                 \
-$BASE_FOLDER/atlas                    \
 $BASE_FOLDER/systematics/metUp        \
 $BASE_FOLDER/systematics/metDown      \
 $BASE_FOLDER/systematics/muonUp       \
@@ -39,7 +38,7 @@ for FOLDER in $FOLDERS; do
 
 	pushd $FOLDER
 	
-	if [ "$FOLDER" = "$BASE_FOLDER/analysis" ] || [ "$FOLDER" = "$BASE_FOLDER/atlas" ] ; then
+	if [ "$FOLDER" = "$BASE_FOLDER/analysis" ] ; then
 	    
 	    hadd -f -k Data.root *2012*pbinv.root 
 	fi

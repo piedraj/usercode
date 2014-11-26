@@ -12,16 +12,8 @@ if [ $# -lt 4 ]; then
     echo "     2 = HasZ"
     echo "     3 = HasW"
     echo "     4 = MET30"
-    echo "     5 = MtW40"
-    echo "     6 = Pt20"
-    echo "     7 = Pt25"
-    echo "     8 = Pt30"
-    echo "     9 = Pt35"
-    echo "    10 = TighterCuts"
-    echo "    11 = SantiagoCuts"
-    echo "    12 = ZJetsRegion"
-    echo "    13 = TopRegion"
-    echo "    14 = VBFSelection"
+    echo "     5 = ZJetsRegion"
+    echo "     6 = TopRegion"
     echo "  "
     echo "  MODE"
     echo "     0 = PPFmode"
@@ -60,7 +52,7 @@ create_and_submit_job() {
     local filename=job_XS_${par1}_${par2}_${par3}_${par4}.sh
     cat > $filename <<EOF
 #!/bin/bash
-source /nfs/fanae/root_releases/root.5.34.09/bin/thisroot.sh
+source /opt/root/bin/thisroot.sh
 cd $WORKINGDIR
 root -l -b -q "runXS.C(${par1},${par2},${par3},${par4})";
 EOF
@@ -70,4 +62,3 @@ EOF
 
 
 create_and_submit_job $CUT $MODE $WCHARGE $NJET
-

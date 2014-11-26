@@ -8,7 +8,7 @@ rm -rf *~
 rm -rf *_C.*
 rm -rf *_C_*
 rm -rf  job_AnalysisWZ_*.sh
-rm -rf  results
+rm -rf  results-2014
 
 
 source ~/.bashrc
@@ -54,11 +54,6 @@ for NJET in -1 0 1 2; do
       done
 
   done
-
-
-  # ATLAS
-  #-----------------------------------------------------------------------------
-  ###  ./submit.sh 0 2 $NJET 20 35
 
 done
 

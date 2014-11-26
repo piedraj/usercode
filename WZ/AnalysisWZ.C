@@ -76,7 +76,7 @@ const TString sComposition[nComposition] = {
 };
 
 
-const UInt_t nCut = 14;
+const UInt_t nCut = 7;
 
 enum {
   Exactly3Leptons,
@@ -84,15 +84,8 @@ enum {
   HasZ,
   HasW,
   MET30,
-  MET30Pt20,
-  MET30Btag,
-  MET30Pt20Btag,
-  MET40,
-  SantiagoCuts,
   ZJetsRegion,
-  TopRegion,
-  VBFSelection,
-  EXO_12_025
+  TopRegion
 };
 
 const TString sCut[nCut] = {
@@ -101,15 +94,8 @@ const TString sCut[nCut] = {
   "HasZ",
   "HasW",
   "MET30",
-  "MET30Pt20",
-  "MET30Btag",
-  "MET30Pt20Btag",
-  "MET40",
-  "SantiagoCuts",
   "ZJetsRegion",
-  "TopRegion",
-  "VBFSelection",
-  "EXO_12_025"
+  "TopRegion"
 };
 
 
@@ -132,7 +118,7 @@ enum {Muon, Electron};
 
 enum {Fail, Tight};
 
-enum {RAW, PPF, ATLAS};
+enum {RAW, PPF};
 
 
 struct Lepton
@@ -271,7 +257,6 @@ Lepton                        ZLepton1;
 Lepton                        ZLepton2;
 
 TLorentzVector                EventMET;
-TLorentzVector                TrackMET;
 
 Bool_t                        isData;
 
@@ -356,13 +341,11 @@ Float_t                       trigger;
 Float_t                       bdt          [number_of_leptons];
 Float_t                       ch           [number_of_leptons];
 Float_t                       eta          [number_of_leptons];
-Float_t                       ip           [number_of_leptons];
 Float_t                       iso          [number_of_leptons];
 Float_t                       isomva       [number_of_leptons];
 Int_t                         pass2012ICHEP[number_of_leptons];
 Float_t                       phi          [number_of_leptons];
 Float_t                       pt           [number_of_leptons];
-Float_t                       pdgid        [number_of_leptons];
 Float_t                       jeteta       [number_of_jets];
 Float_t                       jetphi       [number_of_jets];
 Float_t                       jetpt        [number_of_jets];
@@ -415,15 +398,6 @@ void AnalysisWZ(TString sample,
   else if (_systematic == fakesSyst)        _directory += Form("/systematics/muonJet%s_elecJet%s",
 							       muonJetPt.Data(),
 							       elecJetPt.Data());
-
-  if (_mode == ATLAS)
-    {
-      _directory = directory;
-
-      if (_jetChannel >= 0) _directory += Form("/%djet", _jetChannel);
-
-      _directory += "/atlas";
-    }
 
   gSystem->mkdir(_directory, kTRUE);
 
@@ -584,25 +558,12 @@ void AnalysisWZ(TString sample,
 
   TChain* tree = new TChain("latino", "latino");
 
-  TString path;
+  TString path = "/pool/ciencias/LatinosSkims/ReducedTrees/R53X_S1_V09_S2_V10_S3_V17newJEC/";
 
   if (isData)
-    {
-      path = "/pool/ciencias/LatinosSkims/ReducedTrees/R53X_S1_V09_S2_V10_S3_V17newJEC/Data_LooseLooseTypeI";
-      
-      if (_mode == ATLAS) path = "/pool/ciencias/LatinosSkims/ReducedTrees/R53X_S1_V09_S2_V10_S3_V17newJEC/Data_NoSelTypeI";
-    }
+    path += "Data_LooseLooseTypeI";
   else
-    {
-      path = "/pool/ciencias/LatinosSkims/ReducedTrees/R53X_S1_V09_S2_V10_S3_V17newJEC/MC_LooseLooseTypeI";
-
-      if (_mode == ATLAS) path = "/pool/ciencias/LatinosSkims/ReducedTrees/R53X_S1_V09_S2_V10_S3_V17newJEC/MC_NoSelTypeI";  // Falta 076_WZJetsMad_TuneZ2star
-
-      if (_sample.Contains("074_WZJetsMad_step3NoFilter"))
-	{
-	  path = "/nfs/fanae/user/piedra/userdata/latinowz_step3NoFilter";
-	}
-    }
+    path += "MC_LooseLooseTypeI";
 
   tree->Add(path + "/latino_" + _sample + ".root");
 
@@ -636,10 +597,6 @@ void AnalysisWZ(TString sample,
       tree->SetBranchAddress(Form("pass2012ICHEP%d", i+1), &pass2012ICHEP[i]);
       tree->SetBranchAddress(Form("phi%d",           i+1), &phi          [i]);
       tree->SetBranchAddress(Form("pt%d",            i+1), &pt           [i]);
-
-      if (_mode == ATLAS) tree->SetBranchAddress(Form("ip%d", i+1), &ip[i]);
-
-      if (_sample.Contains("074_WZJetsMad_step3NoFilter")) tree->SetBranchAddress(Form("pdgid%d", i+1), &pdgid[i]);
     }
 
   for (UInt_t i=0; i<number_of_jets; i++)
@@ -721,8 +678,6 @@ void AnalysisWZ(TString sample,
     if (_sample.Contains("TTWJets")) xs_weight *= (0.232    / 0.232);
     if (_sample.Contains("TTZJets")) xs_weight *= (0.2057   / 0.174);
 	
-    if (_sample.Contains("074_WZJetsMad_step3NoFilter")) xs_weight = 1e3 * 1.058 * luminosity / 6.53698e6;
-
     if (isData) xs_weight = 1.0;
 
     Bool_t accept_WGstar = (chmet < (0.75*pt[0]+100) && chmet < (0.75*jetpt[0]+100));
@@ -741,8 +696,6 @@ void AnalysisWZ(TString sample,
     // Set the MET of the event
     //--------------------------------------------------------------------------
     EventMET = GetMET(pfmet, pfmetphi);
-    
-    TrackMET = GetMET(chmet, chmetphi);
 
 
     // Loop over leptons
@@ -757,15 +710,7 @@ void AnalysisWZ(TString sample,
       
       lep.index = i;
 
-      if (_sample.Contains("074_WZJetsMad_step3NoFilter"))
-	{
-	  if      (fabs(pdgid[i]) == 11) lep.flavor = Electron;
-	  else if (fabs(pdgid[i]) == 13) lep.flavor = Muon;
-	}
-      else
-	{
-	  lep.flavor = (bdt[i] < 100.) ? Electron : Muon;
-	}
+      lep.flavor = (bdt[i] < 100.) ? Electron : Muon;
 
       Float_t spt = ScaleLepton(lep.flavor, pt[i], eta[i]);
 
@@ -1007,30 +952,10 @@ void AnalysisWZ(TString sample,
 
 	  if (AnalysisLeptons.size() != 3) continue;
 
-	  if (_mode == ATLAS && AnalysisLeptons[i].type != Tight) continue;
-	  if (_mode == ATLAS && AnalysisLeptons[j].type != Tight) continue;
-
 	  for (UInt_t k=0; k<3; k++) {
 	
 	    if (k == i) continue;
 	    if (k == j) continue;
-
-
-	    // ATLAS data-driven
-	    //------------------------------------------------------------------
-	    if (_mode == ATLAS)
-	      {
-		if (AnalysisLeptons[k].type == Electron)
-		  {
-		    if (fabs(ip[k]) < 0.02) continue;
-		  }
-		if (AnalysisLeptons[k].type == Muon)
-		  {
-		    Float_t ipcut = (pt[k] < 20.) ? 0.01 : 0.02;
-
-		    if (fabs(ip[k]) < ipcut) continue;
-		  }
-	      }
 
 	    WLepton = AnalysisLeptons[k];
 	  }
@@ -1121,61 +1046,6 @@ void AnalysisWZ(TString sample,
     transverseMass = sqrt(transverseMass);
 
 
-    //--------------------------------------------------------------------------
-    //
-    //  VBF selection
-    //
-    //  The following is a standard selection for either vector boson fusion or
-    //  the related vector boson scattering. You'll find that almost all pheno
-    //  studies and cross section predictions follow a similar selection. Note
-    //  the expectation for 8 TeV would be only a few events from EWK VV
-    //  scattering or backgrounds pass this selection. What we would be
-    //  interested in is a similar selection, initially without the last three
-    //  cuts that focus on scattering.
-    //
-    //                                             Matt Herndon
-    //
-    //  Lepton  pT > 20.0 GeV
-    //  Lepton |eta| < 2.5
-    //  Jet pT > 30, 2 jets
-    //  Jet |eta| < 4.7
-    //  (the jet eta range is important to have any sensitivity)
-    //  deltaR (l,l) > 0.4, all lepton pairs
-    //  (this cut has to be removed to have sensitivity to aQGC which can
-    //  involve TeV momentum vector bosons)
-    //  deltaR (l,j) > 0.4 ---> 0.3
-    //  deltaEta(j,j') > 4.0
-    //  etaj1*etaj2 > 0.0
-    //  m_jj > 600 GeV
-    //
-    //--------------------------------------------------------------------------
-    if (nJetAbove30 == 2 &&
-	AnalysisLeptons[2].v.Pt() > 20.)
-      {
-	Bool_t deltaR_lepton_lepton = true;
-
-	for (UInt_t i=0; i<AnalysisLeptons.size(); i++)
-	  {
-	    TLorentzVector iLep = AnalysisLeptons[i].v;
-	    
-	    for (UInt_t j=i+1; j<AnalysisLeptons.size(); j++)
-	      {
-		TLorentzVector jLep = AnalysisLeptons[j].v;
-		
-		if (iLep.DeltaR(jLep) <= 0.4) deltaR_lepton_lepton = false;
-	      }
-	  }
-
-	if (deltaR_lepton_lepton &&
-	    fabs(invMass2Lep - Z_MASS) < 20. &&
-	    EventMET.Et() > 30.)
-	  {
-	    FillHistograms(reco_channel, VBFSelection);
-	    FillHistograms(combined,     VBFSelection);
-	  }
-      }
-    
-    
     // Fill histograms
     //--------------------------------------------------------------------------
     FillHistograms(reco_channel, Exactly3Leptons);
@@ -1193,10 +1063,6 @@ void AnalysisWZ(TString sample,
 	FillHistograms(reco_channel, TopRegion);
 	FillHistograms(combined,     TopRegion);
       }
-    
-    if (fabs(invMass2Lep - Z_MASS) >= 20. && _mode != ATLAS) continue;
-
-    if ((invMass2Lep < 50. || invMass2Lep > 120.) && _mode == ATLAS) continue;
     
     FillHistograms(reco_channel, HasZ);
     FillHistograms(combined,     HasZ);
@@ -1220,52 +1086,6 @@ void AnalysisWZ(TString sample,
     FillHistograms(reco_channel, MET30);
     FillHistograms(combined,     MET30);
 
-    if (AnalysisLeptons[2].v.Pt() > 20.)
-      {
-	FillHistograms(reco_channel, MET30Pt20);
-	FillHistograms(combined,     MET30Pt20);
-
-	if (nBJetAbove30 == 0)
-	  {
-	    FillHistograms(reco_channel, MET30Pt20Btag);
-	    FillHistograms(combined,     MET30Pt20Btag);
-	  }
-      }
-
-    if (nBJetAbove30 == 0)
-      {
-	FillHistograms(reco_channel, MET30Btag);
-	FillHistograms(combined,     MET30Btag);
-      }
-    
-    if (EventMET.Et() > 40.)
-      {
-	FillHistograms(reco_channel, MET40);
-	FillHistograms(combined,     MET40);
-      }
-    
-    
-    // EXO-12-025
-    //--------------------------------------------------------------------------
-    Bool_t etaElec1 = true;
-    Bool_t etaElec2 = true;
-    Bool_t etaElec3 = true;
-
-    if (ZLepton1.flavor == Electron && fabs(ZLepton1.v.Eta()) >= 1.4442 && fabs(ZLepton1.v.Eta()) <= 1.566) etaElec1 = false;
-    if (ZLepton2.flavor == Electron && fabs(ZLepton2.v.Eta()) >= 1.4442 && fabs(ZLepton2.v.Eta()) <= 1.566) etaElec2 = false;
-    if (WLepton.flavor  == Electron && fabs(WLepton.v.Eta())  >= 1.4442 && fabs(WLepton.v.Eta())  <= 1.566) etaElec3 = false;
-    
-    if (((ZLepton1.flavor == Electron && ZLepton1.v.Pt() > 35) || (ZLepton1.flavor == Muon && ZLepton1.v.Pt() > 25)) &&
-	((ZLepton2.flavor == Electron && ZLepton2.v.Pt() > 35) || ZLepton2.flavor == Muon) &&
-	invMass3Lep > 120 &&
-	WLepton.v.DeltaR(ZLepton1.v) > 0.3 &&
-	WLepton.v.DeltaR(ZLepton2.v) > 0.3 &&
-	etaElec1 && etaElec2 && etaElec3)
-      {
-	FillHistograms(reco_channel, EXO_12_025);
-	FillHistograms(combined,     EXO_12_025);
-      }
-
 
     // Fill aTGC tree and selection efficiency numerator
     //--------------------------------------------------------------------------
@@ -1277,22 +1097,6 @@ void AnalysisWZ(TString sample,
 	tgcTree->Fill();
 
 	h_gen_mZ_numerator->Fill(gen_mZ);
-      }
-
-
-    //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    //
-    // Additional cuts
-    //
-    //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    if (transverseMass > 40. &&
-	AnalysisLeptons[2].v.Pt() > 20. &&
-	nBJetAbove30 == 0 &&
-	EventMET.Et() > 40. &&
-	fabs(invMass2Lep - Z_MASS) < 15.)
-      {
-	FillHistograms(reco_channel, SantiagoCuts);
-	FillHistograms(combined,     SantiagoCuts);
       }
 
 

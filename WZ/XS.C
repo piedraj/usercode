@@ -80,7 +80,7 @@ TString pdfChannel[nChannel+1] = {
 };
 
 
-const UInt_t nCut = 14;
+const UInt_t nCut = 7;
 
 enum {
   Exactly3Leptons,
@@ -88,15 +88,8 @@ enum {
   HasZ,
   HasW,
   MET30,
-  MET30Pt20,
-  MET30Btag,
-  MET30Pt20Btag,
-  MET40,
-  SantiagoCuts,
   ZJetsRegion,
-  TopRegion,
-  VBFSelection,
-  EXO_12_025
+  TopRegion
 };
 
 TString sCut[nCut];
@@ -136,15 +129,12 @@ const TString sCharge[nCharge] = {
 };
 
 const Double_t ngenWZ[nCharge] = {
-  6.53698e6,
-  //  ngenWPlusZ+ngenWMinusZ,
-  //  ngenWZInput,  // To measure the total cross section
+  ngenWPlusZ+ngenWMinusZ,
   ngenWPlusZ,
   ngenWMinusZ
 };  
 
 const Double_t xs_nlo      [nCharge] = {21.91, 13.86, 8.04};
-//const Double_t xs_nlo      [nCharge] = {32.16, 13.86, 8.04};  // To measure the total cross section
 const Double_t xs_nlo_left [nCharge] = { 0.88,  0.55, 0.32};
 const Double_t xs_nlo_right[nCharge] = { 1.17,  0.73, 0.44};
 
@@ -396,16 +386,7 @@ void XS(UInt_t cut     = MET30,
 
   // Final numbers
   //----------------------------------------------------------------------------
-  if (!_analysis.Contains("atlas") &&
-      (
-       _cut == MET30         ||
-       _cut == MET30Pt20     ||
-       _cut == MET30Btag     ||
-       _cut == MET30Pt20Btag ||
-       _cut == MET40         ||
-       _cut == SantiagoCuts  ||
-       _cut == EXO_12_025
-       )) {
+  if (_cut == MET30) {
 
     if (_verbosity > 5)
       printf("\n BLUE method %s cross section\n", sCharge[_wcharge].Data());
@@ -477,8 +458,6 @@ void XS(UInt_t cut     = MET30,
   for (UInt_t channel=0; channel<=nChannel; channel++) {
 
     DrawHistogram("hInvMass2Lep", channel, cut, "m_{#font[12]{ll}}", 4, 0, "GeV", linY, 60, 120, -999, -999, false);
-
-    if (_analysis.Contains("atlas")) continue;
 
     DrawHistogram("hSumCharges",      channel, cut, "q_{1} + q_{2} + q_{3}");
     DrawHistogram("hMET",             channel, cut, "E_{T}^{miss}",                              5, 0, "GeV",  linY);
@@ -653,7 +632,6 @@ void CrossSection(Double_t& xsVal,
 
   if (_verbosity > 999)
     {
-      //      printf(" [%s] eff = nWZ:%.0f / ngen:%.0f; xs = (ndata:%.0f - nbkg:%.0f) / (lumi:%.0f * eff:%f * WZ23lnu:%f) = %.2f pb\n",
       printf(" [%s] eff = nWZ:%f / ngen:%.0f; xs = (ndata:%.0f - nbkg:%f) / (lumi:%.0f * eff:%f * WZ23lnu:%f) = %f pb\n",
 	     sChannel[channel].Data(),
 	     nWZ,
@@ -1147,59 +1125,10 @@ void DrawHistogram(TString  hname,
   //----------------------------------------------------------------------------
   xaxis->SetRangeUser(xmin, xmax);
 
-  hdata->Draw("ep");
-
+  hdata ->Draw("ep");
   hstack->Draw("hist,same");
-
-  if (!_analysis.Contains("atlas")) allmc->Draw("e2,same");
-
+  allmc ->Draw("e2,same");
   hdata ->Draw("ep,same");
-
-
-  // Fit
-  //----------------------------------------------------------------------------
-  if (_analysis.Contains("atlas"))
-    {
-      TF1* fit       = new TF1("fit",       "pol2(0) + gaus(3)", xmin, xmax);
-      TF1* fit_top   = new TF1("fit_top",   "pol2",              xmin, xmax);
-      TF1* fit_zjets = new TF1("fit_zjets", "gaus",              xmin, xmax);
-
-      fit      ->SetNpx(1000);
-      fit_top  ->SetNpx(1000);
-      fit_zjets->SetNpx(1000);
-
-      fit_top  ->SetLineStyle(3);
-      fit_zjets->SetLineStyle(2);
-
-      fit->SetParameter(4, 91.2);
-      fit->SetParameter(5,  5.0);
-
-      hdata->Fit(fit, "nqr");
-
-      fit_top->SetParameter(0, fit->GetParameter(0));
-      fit_top->SetParameter(1, fit->GetParameter(1));
-      fit_top->SetParameter(2, fit->GetParameter(2));
-
-      fit_zjets->SetParameter(0, fit->GetParameter(3));
-      fit_zjets->SetParameter(1, fit->GetParameter(4));
-      fit_zjets->SetParameter(2, fit->GetParameter(5));
-
-      Double_t n_top   = fit_top  ->Integral(xmin, xmax) / hist[Data]->GetBinWidth(0);
-      Double_t n_zjets = fit_zjets->Integral(xmin, xmax) / hist[Data]->GetBinWidth(0);
-  
-      if (_verbosity > 0)
-	{
-	  printf(" [%s, data] top: %.1f, zjets: %.1f, sum: %.1f\n",
-		 sChannel[channel].Data(),
-		 n_top,
-		 n_zjets,
-		 n_top + n_zjets);
-	}
-
-      fit      ->Draw("same");
-      fit_top  ->Draw("same");
-      fit_zjets->Draw("same");
-    }
 
   if (hname.Contains("hInvMass2Lep") && _mode == MCmode)
     {
@@ -1225,7 +1154,7 @@ void DrawHistogram(TString  hname,
   Double_t theMax   = GetMaximumIncludingErrors(hdata, xmin, xmax);
   Double_t theMaxMC = GetMaximumIncludingErrors(allmc, xmin, xmax);
 
-  if (theMaxMC > theMax && !_analysis.Contains("atlas") && _njet < 0)
+  if (theMaxMC > theMax && _njet < 0)
     {
       theMax = theMaxMC;
     }
@@ -1268,11 +1197,8 @@ void DrawHistogram(TString  hname,
       DrawLegend(x0 - xdelta, y0 - ndelta, (TObject*)hist[Fakes], Form(" data-driven (%.0f)", Yield(hist[Fakes])), "f"); ndelta += delta;
     }
 
-  if (!_analysis.Contains("atlas"))
-    {
-      ndelta = 0;
-      xdelta = 0.22;
-    }
+  ndelta = 0;
+  xdelta = 0.22;
 
   DrawLegend(x0 - xdelta, y0 - ndelta, (TObject*)hist[ZZ],  Form(" ZZ (%.0f)",      Yield(hist[ZZ])),  "f"); ndelta += delta;
   DrawLegend(x0 - xdelta, y0 - ndelta, (TObject*)hist[ZG],  Form(" Z#gamma (%.0f)", Yield(hist[ZG])),  "f"); ndelta += delta;
@@ -1358,21 +1284,9 @@ void DrawHistogram(TString  hname,
 
   pad2->Update();
 
-  if (_analysis.Contains("atlas"))
-    {
-      TLine* zeroline = new TLine(pad2->GetUxmin(), 0.0, pad2->GetUxmax(), 0.0);
+  uncertainty->Draw("e2,same");
 
-      zeroline->SetLineStyle(3);
-      zeroline->SetLineWidth(3);
-
-      zeroline->Draw("same");
-    }
-  else
-    {
-      uncertainty->Draw("e2,same");
-
-      ratio->Draw("ep,same");
-    }
+  ratio->Draw("ep,same");
 
   ratio->GetYaxis()->SetRangeUser(-2, 2);
 
@@ -1410,15 +1324,8 @@ void SetParameters(UInt_t cut,
   sCut[HasZ]            = "HasZ";
   sCut[HasW]            = "HasW";
   sCut[MET30]           = "MET30";
-  sCut[MET30Pt20]       = "MET30Pt20";
-  sCut[MET30Btag]       = "MET30Btag";
-  sCut[MET30Pt20Btag]   = "MET30Pt20Btag";
-  sCut[MET40]           = "MET40";
-  sCut[SantiagoCuts]    = "SantiagoCuts";
   sCut[ZJetsRegion]     = "ZJetsRegion";
   sCut[TopRegion]       = "TopRegion";
-  sCut[VBFSelection]    = "VBFSelection";
-  sCut[EXO_12_025]      = "EXO_12_025";
 
   vcut.clear();
 
@@ -1428,9 +1335,7 @@ void SetParameters(UInt_t cut,
 
   sProcess[Data]  = "Data";
   sProcess[Fakes] = "Data_PPF";
-  sProcess[WZ]    = "074_WZJetsMad_step3NoFilter";
-  //  sProcess[WZ]    = "074_WZJetsMad";
-  //  sProcess[WZ]    = "076_WZJetsMad_TuneZ2star";
+  sProcess[WZ]    = "074_WZJetsMad";
   sProcess[ZZ]    = "ZZ";
   sProcess[ZG]    = "086_ZgammaToLLuG";
   sProcess[Top]   = "Top";
@@ -1449,16 +1354,15 @@ void SetParameters(UInt_t cut,
   cProcess[WV]    = kGray+1;
 
   _luminosity            = 19604.0;  // pb
-  _luminosityUncertainty =     4.4;  // %
+  _luminosityUncertainty =     2.6;  // %
 
-  _verbosity = 1000;
+  _verbosity = -1;
   _cut       = cut;
   _mode      = mode;
   _wcharge   = wcharge;
   _njet      = njet;
-  _datapath  = "results";
+  _datapath  = "results-2014";
   _analysis  = "analysis";
-  //  _analysis  = "atlas";
 
   if (_njet >= 0) _datapath = Form("%s/%djet", _datapath.Data(), _njet);
 
