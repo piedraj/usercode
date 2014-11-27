@@ -1538,7 +1538,7 @@ void CounterSummary(TString title)
 {
   txt_output << Form("\n %30s [%s]\n", " ", title.Data());
 
-  txt_output << Form("\n %23s %10s %10s %10s %10s %10s\n",
+  txt_output << Form("\n %23s %13s %13s %13s %13s %13s\n",
 		     " ",
 		     sChannel[0].Data(),
 		     sChannel[1].Data(),
@@ -1563,7 +1563,6 @@ void CounterSummary(TString title)
 	if (title.Contains("No")) integral = hCounterRaw[j][i][WInclusive][k]->Integral();
 
 	txt_output << Form(" %s%13.3f", composition.Data(), integral);
-	//	txt_output << Form(" %s%10.0f", composition.Data(), integral);
       }
       
       txt_output << "\n";
