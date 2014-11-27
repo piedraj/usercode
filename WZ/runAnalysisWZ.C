@@ -1,5 +1,3 @@
-//void runAnalysisWZ(TString sample     = "037_DY50toLLMad",
-//void runAnalysisWZ(TString sample     = "051_ZbbToLL",
 void runAnalysisWZ(TString sample     = "074_WZJetsMad",
 		   Int_t   systematic = 0,
 		   Int_t   mode       = 0,
