@@ -208,7 +208,6 @@ TH1F*                         hTotalWeight  [nChannel][nCut][nCharge];
 
 TH1F*                         hNPV           [nChannel][nCut][nCharge];
 TH1F*                         hMET           [nChannel][nCut][nCharge];
-TH1F*                         h_chmet        [nChannel][nCut][nCharge];
 TH1F*                         hSumCharges    [nChannel][nCut][nCharge];
 TH1F*                         hInvMass2Lep   [nChannel][nCut][nCharge];
 TH1F*                         hInvMass3Lep   [nChannel][nCut][nCharge];
@@ -231,9 +230,6 @@ TH1F*                         hNJetAbove30   [nChannel][nCut][nCharge];
 TH1F*                         hNJetBelow30   [nChannel][nCut][nCharge];
 TH1F*                         hNBJetAbove30  [nChannel][nCut][nCharge];
 
-TH2F*                         hPtLepton3_invMass2Lep[nChannel][nCut][nCharge];
-TH2F*                         hPtWLepton_invMass2Lep[nChannel][nCut][nCharge];
-
 TH1F*                         hPtLeadingJet   [nChannel][nCut][nCharge];
 TH1F*                         hPtSecondJet    [nChannel][nCut][nCharge];
 TH1F*                         hEtaLeadingJet  [nChannel][nCut][nCharge];
@@ -243,10 +239,6 @@ TH1F*                         hPhiSecondJet   [nChannel][nCut][nCharge];
 TH1F*                         hDRLeadingJetLep[nChannel][nCut][nCharge];
 TH1F*                         hDEtaJets       [nChannel][nCut][nCharge];
 TH1F*                         hInvMass2Jet    [nChannel][nCut][nCharge];
-
-TH1F*                         hInvMass2LepBB[2];
-TH1F*                         hInvMass2LepBE[2];
-TH1F*                         hInvMass2LepEE[2];
 
 std::vector<Lepton>           AnalysisLeptons;
 std::vector<TLorentzVector>   SelectedJets;
@@ -328,7 +320,6 @@ Long64_t                      lumi;
 Float_t                       baseW;
 Float_t                       channel;
 Float_t                       chmet;
-Float_t                       chmetphi;
 Float_t                       dataset;
 Float_t                       fakeW;
 Float_t                       njet;
@@ -460,7 +451,6 @@ void AnalysisWZ(TString sample,
 
 	hNPV           [i][j][iCharge] = new TH1F("hNPV"            + suffix, "",  50,   0,    50);
 	hMET           [i][j][iCharge] = new TH1F("hMET"            + suffix, "", 200,   0,   200);
-	h_chmet        [i][j][iCharge] = new TH1F("h_chmet"         + suffix, "", 200,   0,   200);
 	hSumCharges    [i][j][iCharge] = new TH1F("hSumCharges"     + suffix, "",   9,  -4,     5);
 	hInvMass2Lep   [i][j][iCharge] = new TH1F("hInvMass2Lep"    + suffix, "", 400,   0,   200);
 	hInvMass3Lep   [i][j][iCharge] = new TH1F("hInvMass3Lep"    + suffix, "", 400,   0,   400);
@@ -483,9 +473,6 @@ void AnalysisWZ(TString sample,
 	hNJetBelow30   [i][j][iCharge] = new TH1F("hNJetBelow30"    + suffix, "",  10,   0,    10);    
 	hNBJetAbove30  [i][j][iCharge] = new TH1F("hNBJetAbove30"   + suffix, "",  10,   0,    10);
 
-	hPtLepton3_invMass2Lep[i][j][iCharge] = new TH2F("hPtLepton3_invMass2Lep" + suffix, "", 120, 0, 120, 120, 0, 120);    
-	hPtWLepton_invMass2Lep[i][j][iCharge] = new TH2F("hPtWLepton_invMass2Lep" + suffix, "", 120, 0, 120, 120, 0, 120);    
-
 
 	// Jet histograms
 	//----------------------------------------------------------------------
@@ -500,15 +487,6 @@ void AnalysisWZ(TString sample,
 	hInvMass2Jet    [i][j][iCharge] = new TH1F("hInvMass2Jet"     + suffix, "", 400,  0,   4000);
       }
     }
-  }
-  
-  for (UInt_t i=0; i<2; i++) {
-
-    TString suffix = (i == Muon) ? "MM" : "EE";
-
-    hInvMass2LepBB[i] = new TH1F("hInvMass2LepBB_" + suffix, "", 2000, 0, 200);
-    hInvMass2LepBE[i] = new TH1F("hInvMass2LepBE_" + suffix, "", 2000, 0, 200);
-    hInvMass2LepEE[i] = new TH1F("hInvMass2LepEE_" + suffix, "", 2000, 0, 200);
   }
 
 
@@ -560,12 +538,10 @@ void AnalysisWZ(TString sample,
 
   TString path = "/pool/ciencias/LatinosSkims/ReducedTrees/R53X_S1_V09_S2_V10_S3_V17newJEC/";
 
-  if (isData)
-    path += "Data_LooseLooseTypeI";
-  else
-    path += "MC_LooseLooseTypeI";
+  if (isData) path += "Data";
+  else        path += "MC";
 
-  tree->Add(path + "/latino_" + _sample + ".root");
+  tree->Add(path + "_LooseLooseTypeI/latino_" + _sample + ".root");
 
 
   // Tree leaves
@@ -576,7 +552,6 @@ void AnalysisWZ(TString sample,
   tree->SetBranchAddress("baseW",         &baseW);
   tree->SetBranchAddress("channel",       &channel);
   tree->SetBranchAddress("chmet",         &chmet);
-  tree->SetBranchAddress("chmetphi",      &chmetphi);
   tree->SetBranchAddress("dataset",       &dataset);
   tree->SetBranchAddress("fakeW",         &fakeW);
   tree->SetBranchAddress("njet",          &njet);
@@ -968,24 +943,6 @@ void AnalysisWZ(TString sample,
     if (fabs(WLepton.charge) < 1.) continue;
 
 
-    // Fill Z invariant mass at two-lepton level
-    //--------------------------------------------------------------------------
-    UInt_t index = (isZee) ? Electron : Muon;
-
-    if (fabs(ZLepton1.v.Eta()) < 1.479 && fabs(ZLepton2.v.Eta()) < 1.479)
-      {
-	hInvMass2LepBB[index]->Fill(invMass2Lep, pu_weight * xs_weight);
-      }
-    else if (fabs(ZLepton1.v.Eta()) < 1.479 || fabs(ZLepton2.v.Eta()) < 1.479)
-      {
-	hInvMass2LepBE[index]->Fill(invMass2Lep, pu_weight * xs_weight);
-      }
-    else
-      {
-	hInvMass2LepEE[index]->Fill(invMass2Lep, pu_weight * xs_weight);
-      }
-
-
     // Require exactly three leptons
     //--------------------------------------------------------------------------
     if (AnalysisLeptons.size() != 3) continue;
@@ -1267,7 +1224,6 @@ void FillHistograms(UInt_t iChannel, UInt_t iCut)
       //------------------------------------------------------------------------
       hNPV           [iChannel][iCut][iCharge]->Fill(nvtx,                           hweight);
       hMET           [iChannel][iCut][iCharge]->Fill(EventMET.Et(),                  hweight);
-      h_chmet        [iChannel][iCut][iCharge]->Fill(chmet,                          hweight);
       hSumCharges    [iChannel][iCut][iCharge]->Fill(sumCharges,                     hweight);
       hInvMass2Lep   [iChannel][iCut][iCharge]->Fill(invMass2Lep,                    hweight);
       hInvMass3Lep   [iChannel][iCut][iCharge]->Fill(invMass3Lep,                    hweight);
@@ -1289,9 +1245,6 @@ void FillHistograms(UInt_t iChannel, UInt_t iCut)
       hNJetAbove30   [iChannel][iCut][iCharge]->Fill(nJetAbove30,                    hweight);
       hNJetBelow30   [iChannel][iCut][iCharge]->Fill(nJetBelow30,                    hweight);
       hNBJetAbove30  [iChannel][iCut][iCharge]->Fill(nBJetAbove30,                   hweight);
-
-      hPtLepton3_invMass2Lep[iChannel][iCut][iCharge]->Fill(AnalysisLeptons[2].v.Pt(), invMass2Lep, hweight);
-      hPtWLepton_invMass2Lep[iChannel][iCut][iCharge]->Fill(WLepton.v.Pt(),            invMass2Lep, hweight);
 
 
       // Jet histograms

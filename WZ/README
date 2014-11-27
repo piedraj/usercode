@@ -40,9 +40,9 @@ qstat
 
 # Merge the output histograms
 ./merge.sh results-2014
-./merge.sh results-2014/0jet
-./merge.sh results-2014/1jet
-./merge.sh results-2014/2jet
+#./merge.sh results-2014/0jet
+#./merge.sh results-2014/1jet
+#./merge.sh results-2014/2jet
 
 
 ################################################################################

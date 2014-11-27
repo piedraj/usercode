@@ -461,7 +461,6 @@ void XS(UInt_t cut     = MET30,
 
     DrawHistogram("hSumCharges",      channel, cut, "q_{1} + q_{2} + q_{3}");
     DrawHistogram("hMET",             channel, cut, "E_{T}^{miss}",                              5, 0, "GeV",  linY);
-    DrawHistogram("h_chmet",          channel, cut, "track E_{T}^{miss}",                        5, 0, "GeV",  linY);
     DrawHistogram("hInvMass3Lep",     channel, cut, "m_{#font[12]{3l}}",                        10, 0, "GeV",  linY, 60, 350);
     DrawHistogram("hPtLepton1",       channel, cut, "p_{T}^{first lepton}",                      5, 0, "GeV",  linY,  0, 150);
     DrawHistogram("hPtLepton2",       channel, cut, "p_{T}^{second lepton}",                     5, 0, "GeV",  linY,  0, 150);
