@@ -200,7 +200,6 @@ TH1F*                         h_gen_mZ_numerator;
 TH1F*                         hCounterRaw   [nChannel][nCut][nCharge][nComposition];
 TH1F*                         hCounterEff   [nChannel][nCut][nCharge][nComposition];
 TH1F*                         hCounter      [nChannel][nCut][nCharge][nComposition];
-TH1F*                         hPromptCounter[nChannel][nCut][nCharge][nComposition];
 
 TH1F*                         hLeptonWeight [nChannel][nCut][nCharge];
 TH1F*                         hTriggerWeight[nChannel][nCut][nCharge];
@@ -441,8 +440,6 @@ void AnalysisWZ(TString sample,
 	  hCounterRaw[i][j][iCharge][k] = new TH1F("hCounterRaw" + suffix + "_" + sComposition[k], "", 3, 0, 3);
 	  hCounterEff[i][j][iCharge][k] = new TH1F("hCounterEff" + suffix + "_" + sComposition[k], "", 3, 0, 3);
 	  hCounter   [i][j][iCharge][k] = new TH1F("hCounter"    + suffix + "_" + sComposition[k], "", 3, 0, 3);
-
-	  hPromptCounter[i][j][iCharge][k] = new TH1F(Form("hPromptCounter%s_%dprompt", suffix.Data(), k), "", 3, 0, 3);
 	}
 
 	hLeptonWeight [i][j][iCharge] = new TH1F("hLeptonWeight"  + suffix, "", 90, 0.75, 1.05);
@@ -1200,17 +1197,6 @@ void FillHistograms(UInt_t iChannel, UInt_t iCut)
       hCounterRaw[iChannel][iCut][iCharge][LLL]->Fill(1);
       hCounterEff[iChannel][iCut][iCharge][LLL]->Fill(1, pu_weight * efficiency_weight             * dd_weight);
       hCounter   [iChannel][iCut][iCharge][LLL]->Fill(1, pu_weight * efficiency_weight * xs_weight * dd_weight);
-
-      for (UInt_t iPrompt=0; iPrompt<=3; iPrompt++)
-	{
-	  hPromptCounter[iChannel][iCut][iCharge][iPrompt]->Fill(1, GetDataDrivenWeight(iPrompt));
-	}
-
-      hPromptCounter[iChannel][iCut][iCharge][4]->Fill(1,
-						       GetDataDrivenWeight(0) +
-						       GetDataDrivenWeight(1) +
-						       GetDataDrivenWeight(2) +
-						       GetDataDrivenWeight(3));
 
 
       // MC weight histograms
