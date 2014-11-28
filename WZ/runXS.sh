@@ -18,7 +18,7 @@ source /opt/root/bin/thisroot.sh
 root -l -b -q loadXS.C
 
 
-for ((cut=0; cut<7; cut++))
+for ((cut=0; cut<5; cut++))
   do
   for ((mode=0; mode<2; mode++))
     do

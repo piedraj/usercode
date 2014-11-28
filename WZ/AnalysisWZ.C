@@ -76,16 +76,14 @@ const TString sComposition[nComposition] = {
 };
 
 
-const UInt_t nCut = 7;
+const UInt_t nCut = 5;
 
 enum {
   Exactly3Leptons,
   InvMass3Lep100,
   HasZ,
   HasW,
-  MET30,
-  ZJetsRegion,
-  TopRegion
+  MET30
 };
 
 const TString sCut[nCut] = {
@@ -93,9 +91,7 @@ const TString sCut[nCut] = {
   "InvMass3Lep100",
   "HasZ",
   "HasW",
-  "MET30",
-  "ZJetsRegion",
-  "TopRegion"
+  "MET30"
 };
 
 
@@ -533,8 +529,8 @@ void AnalysisWZ(TString sample,
 
   TChain* tree = new TChain("latino", "latino");
 
-  //  TString path = "/pool/ciencias/LatinosSkims/ReducedTrees/R53X_S1_V09_S2_V10_S3_V17newJEC/";
-  TString path = "/STORE/lucija/latinosTrees/";
+  TString path = "/pool/ciencias/LatinosSkims/ReducedTrees/R53X_S1_V09_S2_V10_S3_V17newJEC/";
+  //  TString path = "/STORE/lucija/latinosTrees/";
 
   if (isData) path += "Data";
   else        path += "MC";
@@ -544,21 +540,21 @@ void AnalysisWZ(TString sample,
 
   // Tree leaves
   //----------------------------------------------------------------------------
-  tree->SetBranchAddress("run",           &run);
-  tree->SetBranchAddress("event",         &event);
-  tree->SetBranchAddress("lumi",          &lumi);
-  tree->SetBranchAddress("baseW",         &baseW);
-  tree->SetBranchAddress("channel",       &channel);
-  tree->SetBranchAddress("chmet",         &chmet);
-  tree->SetBranchAddress("dataset",       &dataset);
-  tree->SetBranchAddress("fakeW",         &fakeW);
-  tree->SetBranchAddress("njet",          &njet);
-  tree->SetBranchAddress("nextra",        &nextra);
-  tree->SetBranchAddress("nvtx",          &nvtx);
-  tree->SetBranchAddress("pfmet",         &pfmet);
-  tree->SetBranchAddress("pfmetphi",      &pfmetphi);
-  tree->SetBranchAddress("puW",           &puW);
-  tree->SetBranchAddress("trigger",       &trigger);
+  tree->SetBranchAddress("run",      &run);
+  tree->SetBranchAddress("event",    &event);
+  tree->SetBranchAddress("lumi",     &lumi);
+  tree->SetBranchAddress("baseW",    &baseW);
+  tree->SetBranchAddress("channel",  &channel);
+  tree->SetBranchAddress("chmet",    &chmet);
+  tree->SetBranchAddress("dataset",  &dataset);
+  tree->SetBranchAddress("fakeW",    &fakeW);
+  tree->SetBranchAddress("njet",     &njet);
+  tree->SetBranchAddress("nextra",   &nextra);
+  tree->SetBranchAddress("nvtx",     &nvtx);
+  tree->SetBranchAddress("pfmet",    &pfmet);
+  tree->SetBranchAddress("pfmetphi", &pfmetphi);
+  tree->SetBranchAddress("puW",      &puW);
+  tree->SetBranchAddress("trigger",  &trigger);
 
   for (UInt_t i=0; i<number_of_leptons; i++)
     {
@@ -1011,25 +1007,15 @@ void AnalysisWZ(TString sample,
     FillHistograms(reco_channel, InvMass3Lep100);
     FillHistograms(combined,     InvMass3Lep100);
 
+    if (fabs(invMass2Lep - Z_MASS) >= 20.) continue;
+
     if (ZLepton1.v.Pt() <= 20.) continue;
 
-    if (fabs(invMass2Lep - Z_MASS) > 25. && nJetAbove30 > 1 && nBJetAbove30 > 0 && EventMET.Et() > 40.)
-      {
-	FillHistograms(reco_channel, TopRegion);
-	FillHistograms(combined,     TopRegion);
-      }
-    
     FillHistograms(reco_channel, HasZ);
     FillHistograms(combined,     HasZ);
 
     if (WLepton.v.DeltaR(ZLepton1.v) <= 0.1) continue;
     if (WLepton.v.DeltaR(ZLepton2.v) <= 0.1) continue;
-
-    if (fabs(invMass2Lep - Z_MASS) < 15. && EventMET.Et() < 20.)
-      {
-	FillHistograms(reco_channel, ZJetsRegion);
-	FillHistograms(combined,     ZJetsRegion);
-      }
 
     if (WLepton.v.Pt() <= 20.) continue;
 

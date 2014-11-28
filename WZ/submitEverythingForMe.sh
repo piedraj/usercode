@@ -30,11 +30,6 @@ for NJET in -1; do
   ./submit.sh 0 0 $NJET 20 35
 
 
-  # Data-driven estimation of the Z+jets and top backgrounds
-  #-----------------------------------------------------------------------------
-  ./submit.sh 8 1 $NJET 20 35
-
-
   # Systematics
   #-----------------------------------------------------------------------------
   for SYSTEMATIC in 1 2 3 4 5 6 7; do
@@ -46,7 +41,8 @@ for NJET in -1; do
 
   # Full data-driven estimation of the Z+jets and top backgrounds
   #-----------------------------------------------------------------------------
-  for MUON_JET_PT in 05 10 15 20 25 30 35 40 45 50; do
+  #for MUON_JET_PT in 05 10 15 20 25 30 35 40 45 50; do
+  for MUON_JET_PT in 10 20 30; do
 
       for ELEC_JET_PT in 15 35 50; do
 

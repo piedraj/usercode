@@ -80,16 +80,14 @@ TString pdfChannel[nChannel+1] = {
 };
 
 
-const UInt_t nCut = 7;
+const UInt_t nCut = 5;
 
 enum {
   Exactly3Leptons,
   InvMass3Lep100,
   HasZ,
   HasW,
-  MET30,
-  ZJetsRegion,
-  TopRegion
+  MET30
 };
 
 TString sCut[nCut];
@@ -1323,8 +1321,6 @@ void SetParameters(UInt_t cut,
   sCut[HasZ]            = "HasZ";
   sCut[HasW]            = "HasW";
   sCut[MET30]           = "MET30";
-  sCut[ZJetsRegion]     = "ZJetsRegion";
-  sCut[TopRegion]       = "TopRegion";
 
   vcut.clear();
 
