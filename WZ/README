@@ -3,7 +3,14 @@
 #  0. Get ROOT ready
 #
 ################################################################################
-source /opt/root/bin/thisroot.sh
+source /opt/root/bin/thisroot.sh  # fanae
+
+ssh -Y piedra@lorienmaster.irb.hr
+export SCRAM_ARCH=slc5_amd64_gcc481
+source /cvmfs/cms.cern.ch/cmsset_default.sh
+scram project CMSSW_7_0_0
+cd CMSSW_7_0_0/src
+cmsenv
 
 
 ################################################################################
