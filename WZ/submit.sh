@@ -20,7 +20,6 @@ if [ $# -lt 5 ]; then
     echo "  MODE"
     echo "     0 = nominal analysis"
     echo "     1 = data-driven estimation of the Z+jets and top backgrounds"
-    echo "     2 = ATLAS method to determine the Z+jets and top backgrounds"
     echo "  "
     echo "  JET_CHANNEL"
     echo "    -1 = inclusive"

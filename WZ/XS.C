@@ -80,14 +80,16 @@ TString pdfChannel[nChannel+1] = {
 };
 
 
-const UInt_t nCut = 5;
+const UInt_t nCut = 7;
 
 enum {
   Exactly3Leptons,
   InvMass3Lep100,
   HasZ,
   HasW,
-  MET30
+  MET30,
+  ZJetsRegion,
+  TopRegion
 };
 
 TString sCut[nCut];
@@ -139,7 +141,8 @@ const Double_t xs_nlo_right[nCharge] = { 1.17,  0.73, 0.44};
 
 // Scan fakes
 //------------------------------------------------------------------------------
-const TString muonJet[] = {"05", "10", "15", "20", "25", "30", "35", "40", "45", "50"};
+//const TString muonJet[] = {"05", "10", "15", "20", "25", "30", "35", "40", "45", "50"};
+const TString muonJet[] = {"10", "20", "30"};
 
 const TString elecJet[] = {"15", "35", "50"};
 
@@ -319,7 +322,7 @@ void XS(UInt_t cut     = MET30,
   wzEffError[nChannel] = 0.0;
 
 
-  //  ScanFakes();
+  ScanFakes();
 
 
   // Loop over the four channels
@@ -1321,6 +1324,8 @@ void SetParameters(UInt_t cut,
   sCut[HasZ]            = "HasZ";
   sCut[HasW]            = "HasW";
   sCut[MET30]           = "MET30";
+  sCut[ZJetsRegion]     = "ZJetsRegion";
+  sCut[TopRegion]       = "TopRegion";
 
   vcut.clear();
 

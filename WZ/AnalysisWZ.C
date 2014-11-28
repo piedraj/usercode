@@ -76,14 +76,16 @@ const TString sComposition[nComposition] = {
 };
 
 
-const UInt_t nCut = 5;
+const UInt_t nCut = 7;
 
 enum {
   Exactly3Leptons,
   InvMass3Lep100,
   HasZ,
   HasW,
-  MET30
+  MET30,
+  ZJetsRegion,
+  TopRegion
 };
 
 const TString sCut[nCut] = {
@@ -91,7 +93,9 @@ const TString sCut[nCut] = {
   "InvMass3Lep100",
   "HasZ",
   "HasW",
-  "MET30"
+  "MET30",
+  "ZJetsRegion",
+  "TopRegion"
 };
 
 
@@ -1007,15 +1011,44 @@ void AnalysisWZ(TString sample,
     FillHistograms(reco_channel, InvMass3Lep100);
     FillHistograms(combined,     InvMass3Lep100);
 
-    if (fabs(invMass2Lep - Z_MASS) >= 20.) continue;
-
     if (ZLepton1.v.Pt() <= 20.) continue;
+
+
+
+    // Top enriched region
+    //--------------------------------------------------------------------------
+    if (fabs(invMass2Lep - Z_MASS) > 25. &&
+	nJetAbove30 > 1 &&
+	nBJetAbove30 > 0 &&
+	EventMET.Et() > 40.)
+      {
+	FillHistograms(reco_channel, TopRegion);
+	FillHistograms(combined,     TopRegion);
+      }
+    //--------------------------------------------------------------------------
+
+
+
+    if (fabs(invMass2Lep - Z_MASS) >= 20.) continue;
 
     FillHistograms(reco_channel, HasZ);
     FillHistograms(combined,     HasZ);
 
     if (WLepton.v.DeltaR(ZLepton1.v) <= 0.1) continue;
     if (WLepton.v.DeltaR(ZLepton2.v) <= 0.1) continue;
+
+
+
+    // Z+jets enriched region
+    //--------------------------------------------------------------------------
+    if (fabs(invMass2Lep - Z_MASS) < 15. && EventMET.Et() < 20.)
+      {
+	FillHistograms(reco_channel, ZJetsRegion);
+	FillHistograms(combined,     ZJetsRegion);
+      }
+    //--------------------------------------------------------------------------
+
+
 
     if (WLepton.v.Pt() <= 20.) continue;
 
