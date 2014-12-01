@@ -70,8 +70,9 @@ void drawElectronScaleSystematic()
 
   // CMS titles
   //----------------------------------------------------------------------------
-  DrawTLatex(0.185, 0.975, _bigLabelSize, 13, "CMS Preliminary");
-  DrawTLatex(0.940, 0.983, _bigLabelSize, 33, "#sqrt{s} = 8 TeV, L = 19.6 fb^{-1}");
+  DrawTLatex(61, 0.190, 0.94, 0.055, 11, "CMS");
+  DrawTLatex(52, 0.315, 0.94, 0.030, 11, "Preliminary");
+  DrawTLatex(42, 0.940, 0.94, 0.040, 31, "19.6 fb^{-1} (8 TeV)");
 
 
   c1->SaveAs("pdf/scale_factors/electronScaleUncertainties.pdf");

@@ -31,7 +31,8 @@ TLegend*  DrawLegend               (Float_t       x1,
 				    Float_t       xoffset = 0.200,
 				    Float_t       yoffset = 0.048);
 
-void      DrawTLatex               (Double_t      x,
+void      DrawTLatex               (Font_t        tfont,
+				    Double_t      x,
 				    Double_t      y,
 				    Double_t      tsize,
 				    Short_t       align,

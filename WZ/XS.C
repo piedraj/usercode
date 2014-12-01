@@ -489,15 +489,6 @@ void XS(UInt_t cut     = MET30,
 	DrawHistogram("hMinDeltaR2Lep",  channel, cut, "minimum #DeltaR_{#font[12]{ll}}", 10, 1, "NULL", linY, 0, 5);
 	DrawHistogram("hMinInvMass2Lep", channel, cut, "minimum m_{#font[12]{ll}}",       10, 0, "GeV",  linY, 0, 112);
       }
-    
-    if (_njet == -1)
-      {
-	DrawHistogram("hPtSecondJet",  channel, cut, "p_{T}^{second jet}",  5, 0, "GeV",  linY);
-	DrawHistogram("hEtaSecondJet", channel, cut, "#eta^{second jet}",  10, 1, "NULL", linY);
-	DrawHistogram("hPhiSecondJet", channel, cut, "#phi^{second jet}",  16, 1, "rad",  linY);
-	DrawHistogram("hDEtaJets",     channel, cut, "#Delta#eta_{jj}",    10, 1, "NULL", linY);
-	DrawHistogram("hInvMass2Jet",  channel, cut, "m_{jj}",             10, 0, "GeV",  linY, 0, 1000);
-      }
   }
 }
 
@@ -1208,8 +1199,9 @@ void DrawHistogram(TString  hname,
 
   // CMS titles
   //----------------------------------------------------------------------------
-  DrawTLatex(0.185, 0.975, _bigLabelSize, 13, "CMS Preliminary");
-  DrawTLatex(0.940, 0.983, _bigLabelSize, 33, Form("#sqrt{s} = 8 TeV, L = %.1f fb^{-1}", _luminosity/1e3));
+  DrawTLatex(61, 0.190, 0.94, 0.055, 11, "CMS");
+  DrawTLatex(52, 0.305, 0.94, 0.030, 11, "Preliminary");
+  DrawTLatex(42, 0.940, 0.94, 0.040, 31, Form("%.1f fb^{-1} (8TeV)", _luminosity/1e3));
 
 
   // Fakes checks / systematics
@@ -1583,7 +1575,7 @@ void DrawCrossSections(UInt_t cut)
     Double_t x = gStat->GetX()[i];
     Double_t y = gStat->GetY()[i];
 
-    DrawTLatex(xmin+1., y, 0.035, 12, Form("%s", lChannel[i].Data()), 0);
+    DrawTLatex(42, xmin+1., y, 0.035, 12, Form("%s", lChannel[i].Data()), 0);
 
     Double_t gStatError  = gStat->GetErrorX(i);
     Double_t gSystError  = gSyst->GetErrorX(i);
@@ -1592,14 +1584,17 @@ void DrawCrossSections(UInt_t cut)
     gLumiError = sqrt(gLumiError*gLumiError - gSystError*gSystError);
     gSystError = sqrt(gSystError*gSystError - gStatError*gStatError);
 
-    DrawTLatex(xmax-1., y, 0.035, 32, Form("%.2f #pm %.2f #pm %.2f #pm %.2f",
+    DrawTLatex(42, xmax-1., y, 0.035, 32, Form("%.2f #pm %.2f #pm %.2f #pm %.2f",
 					    x, gStatError, gSystError, gLumiError), 0);
   }
 
-  DrawTLatex(0.050, 0.975, _bigLabelSize, 13, "CMS Preliminary");
 
-  DrawTLatex(0.940, 0.983, _bigLabelSize, 33,
-	     Form("#sqrt{s} = 8 TeV, L = %.1f fb^{-1}", _luminosity/1e3));
+  // CMS titles
+  //----------------------------------------------------------------------------
+  DrawTLatex(61, 0.065, 0.94, 0.055, 11, "CMS");
+  DrawTLatex(52, 0.190, 0.94, 0.030, 11, "Preliminary");
+  DrawTLatex(42, 0.940, 0.94, 0.040, 31, Form("%.1f fb^{-1} (8TeV)", _luminosity/1e3));
+
 
   TString swz = "";
 
@@ -1736,22 +1731,25 @@ void DrawRelativeCrossSections(UInt_t cut)
     Double_t gSystError = gSyst->GetErrorX(i);
     Double_t gLumiError = gLumi->GetErrorX(i);
 
-    DrawTLatex(xmin+0.06, y+0.15, 0.035, 12,
+    DrawTLatex(42, xmin+0.06, y+0.15, 0.035, 12,
 	       Form("%s %.2f #pm %.2f",
 		    lChannel[i].Data(), x, gLumiError), 0);
 
     gLumiError = sqrt(gLumiError*gLumiError - gSystError*gSystError);
     gSystError = sqrt(gSystError*gSystError - gStatError*gStatError);
     
-    DrawTLatex(xmin+0.06, y-0.15, 0.025, 12,
+    DrawTLatex(42, xmin+0.06, y-0.15, 0.025, 12,
 	       Form("%.2f #pm %.2f #pm %.2f #pm %.2f",
 		    x, gStatError, gSystError, gLumiError), 0);
   }
 
-  DrawTLatex(0.050, 0.975, _bigLabelSize, 13, "CMS Preliminary");
+  
+  // CMS titles
+  //----------------------------------------------------------------------------
+  DrawTLatex(61, 0.065, 0.94, 0.055, 11, "CMS");
+  DrawTLatex(52, 0.190, 0.94, 0.030, 11, "Preliminary");
+  DrawTLatex(42, 0.940, 0.94, 0.040, 31, Form("%.1f fb^{-1} (8TeV)", _luminosity/1e3));
 
-  DrawTLatex(0.940, 0.983, _bigLabelSize, 33,
-	     Form("#sqrt{s} = 8 TeV, L = %.1f fb^{-1}", _luminosity/1e3));
 
   TString swz = "";
 
@@ -2020,8 +2018,7 @@ Double_t RelativeDifference(Double_t x0, Double_t x1)
 //------------------------------------------------------------------------------
 // BlueMethod
 //------------------------------------------------------------------------------
-void BlueMethod(UInt_t cut,
-		Bool_t xsratio)
+void BlueMethod(UInt_t cut, Bool_t xsratio)
 {
   UInt_t nMatrixElements = nChannel * nChannel;
 
@@ -2347,15 +2344,16 @@ void ScanFakes()
   DrawLegend(0.820, 0.935, yieldGraph[4], Form(" %s", lChannel[4].Data()), "p", 0.03, 0.12);
 
   TLine* lineH = new TLine(gPad->GetUxmin(), 0, gPad->GetUxmax(), 0);
-  TLine* lineV = new TLine(10, gPad->GetUymin(), 10, gPad->GetUymax());
+  TLine* lineV = new TLine(4, gPad->GetUymin(), 4, gPad->GetUymax());
+
+  lineH->SetLineStyle(3);
+  lineH->SetLineWidth(3);
 
   lineV->SetLineStyle(3);
   lineV->SetLineWidth(3);
 
   lineH->Draw("same");
   lineV->Draw("same");
-
-  mg->Draw("pz,same");
 
 
   // Save

@@ -34,7 +34,8 @@ TLegend* DrawLegend(Float_t  x1,
 //------------------------------------------------------------------------------
 // DrawTLatex
 //------------------------------------------------------------------------------
-void DrawTLatex(Double_t    x,
+void DrawTLatex(Font_t      tfont,
+		Double_t    x,
 		Double_t    y,
 		Double_t    tsize,
 		Short_t     align,
@@ -45,7 +46,7 @@ void DrawTLatex(Double_t    x,
 
   tl->SetNDC      (setndc);
   tl->SetTextAlign( align);
-  tl->SetTextFont (    42);
+  tl->SetTextFont ( tfont);
   tl->SetTextSize ( tsize);
 
   tl->Draw("same");

@@ -86,7 +86,7 @@ void DrawIt(TString filename,
 
   h->SetTitle("");
 
-  DrawTLatex(0.940, 0.976, _bigLabelSize, 33, title);
+  DrawTLatex(42, 0.940, 0.976, _bigLabelSize, 33, title);
 
   if (!title.Contains("trigger")) {
 
