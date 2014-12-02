@@ -141,8 +141,7 @@ const Double_t xs_nlo_right[nCharge] = { 1.17,  0.73, 0.44};
 
 // Scan fakes
 //------------------------------------------------------------------------------
-//const TString muonJet[] = {"05", "10", "15", "20", "25", "30", "35", "40", "45", "50"};
-const TString muonJet[] = {"10", "20", "30"};
+const TString muonJet[] = {"15", "20", "35", "50"};
 
 const TString elecJet[] = {"15", "35", "50"};
 
@@ -309,7 +308,7 @@ void     ScanFakes                ();
 //------------------------------------------------------------------------------
 // XS
 //------------------------------------------------------------------------------
-void XS(UInt_t cut     = MET30,
+void XS(UInt_t cut     = TopRegion,
 	UInt_t mode    = PPFmode,
 	UInt_t wcharge = WInclusive,
 	Int_t  njet    = -1)
@@ -2283,7 +2282,7 @@ void ScanFakes()
 					    differenceValue - Yield(hFakes));
 	      
 	      yieldGraph[channel]->SetPointError(imuon*elecSize + ielec,
-						 0.1,
+						 0,
 						 sqrt(differenceError + hFakes->GetSumw2()->GetSum()));
 	    }
 	}
@@ -2296,18 +2295,15 @@ void ScanFakes()
 
   for (UInt_t i=0; i<=nChannel; i++)
     {
-      yieldGraph[i]->SetMarkerStyle(20+i);
-
-      yieldGraph[i]->SetLineColor(cChannel[i]);
-
+      yieldGraph[i]->SetLineColor  (cChannel[i]);
       yieldGraph[i]->SetMarkerColor(cChannel[i]);
+      yieldGraph[i]->SetMarkerSize (1.2);
+      yieldGraph[i]->SetMarkerStyle(20+i);
 
       mg->Add(yieldGraph[i]);
     }
 
-  TCanvas* c1 = new TCanvas("c1", "c1", 10, 10, 800, 600);
-
-  c1->SetLeftMargin(0.7 * c1->GetLeftMargin());
+  TCanvas* c1 = new TCanvas("c1", "c1");
 
   mg->Draw("apz");
 
@@ -2321,7 +2317,7 @@ void ScanFakes()
 
   yaxis->SetTitleOffset(1.4);
 
-  xaxis->SetLabelSize(0.04);
+  xaxis->SetLabelSize(0.05);
 
   for (UInt_t imuon=0; imuon<muonSize; imuon++)
     {
@@ -2337,23 +2333,25 @@ void ScanFakes()
   xaxis->CenterLabels();
   xaxis->LabelsOption("v");
 
-  DrawLegend(0.120, 0.935, yieldGraph[0], Form(" %s", lChannel[0].Data()), "p", 0.03, 0.12);
-  DrawLegend(0.295, 0.935, yieldGraph[1], Form(" %s", lChannel[1].Data()), "p", 0.03, 0.12);
-  DrawLegend(0.470, 0.935, yieldGraph[2], Form(" %s", lChannel[2].Data()), "p", 0.03, 0.12);
-  DrawLegend(0.645, 0.935, yieldGraph[3], Form(" %s", lChannel[3].Data()), "p", 0.03, 0.12);
-  DrawLegend(0.820, 0.935, yieldGraph[4], Form(" %s", lChannel[4].Data()), "p", 0.03, 0.12);
+  DrawLegend(0.170, 0.935, yieldGraph[0], Form(" %s", lChannel[0].Data()), "p", 0.03, 0.12);
+  DrawLegend(0.325, 0.935, yieldGraph[1], Form(" %s", lChannel[1].Data()), "p", 0.03, 0.12);
+  DrawLegend(0.480, 0.935, yieldGraph[2], Form(" %s", lChannel[2].Data()), "p", 0.03, 0.12);
+  DrawLegend(0.635, 0.935, yieldGraph[3], Form(" %s", lChannel[3].Data()), "p", 0.03, 0.12);
+  DrawLegend(0.790, 0.935, yieldGraph[4], Form(" %s", lChannel[4].Data()), "p", 0.03, 0.12);
 
   TLine* lineH = new TLine(gPad->GetUxmin(), 0, gPad->GetUxmax(), 0);
   TLine* lineV = new TLine(4, gPad->GetUymin(), 4, gPad->GetUymax());
-
-  lineH->SetLineStyle(3);
-  lineH->SetLineWidth(3);
 
   lineV->SetLineStyle(3);
   lineV->SetLineWidth(3);
 
   lineH->Draw("same");
   lineV->Draw("same");
+
+  for (UInt_t channel=0; channel<=nChannel; channel++)
+    {
+      yieldGraph[channel]->Draw("pz,same");
+    }
 
 
   // Save

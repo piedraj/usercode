@@ -41,8 +41,7 @@ for NJET in -1; do
 
   # Full data-driven estimation of the Z+jets and top backgrounds
   #-----------------------------------------------------------------------------
-  #for MUON_JET_PT in 05 10 15 20 25 30 35 40 45 50; do
-  for MUON_JET_PT in 10 20 30; do
+  for MUON_JET_PT in 05 10 15 20 25 30 35 40 45 50; do
 
       for ELEC_JET_PT in 15 35 50; do
 

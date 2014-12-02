@@ -898,6 +898,7 @@ void AnalysisWZ(TString sample,
       for (UInt_t j=i+1; j<AnalysisLeptons.size(); j++) {
       
 	if (AnalysisLeptons[i].flavor != AnalysisLeptons[j].flavor) continue;
+	//	if (AnalysisLeptons[i].flavor == AnalysisLeptons[j].flavor) continue;  // Wrong-flavor study
 
 	if (AnalysisLeptons[i].charge * AnalysisLeptons[j].charge > 0.) continue;
 
@@ -991,6 +992,12 @@ void AnalysisWZ(TString sample,
     transverseMass = sqrt(transverseMass);
 
 
+    // Wrong-flavor study
+    //--------------------------------------------------------------------------
+    //    if (WLepton.flavor == ZLepton1.flavor && (WLepton.charge * ZLepton1.charge) < 0) continue;
+    //    if (WLepton.flavor == ZLepton2.flavor && (WLepton.charge * ZLepton2.charge) < 0) continue;
+
+
     // Fill histograms
     //--------------------------------------------------------------------------
     FillHistograms(reco_channel, Exactly3Leptons);
@@ -1007,10 +1014,9 @@ void AnalysisWZ(TString sample,
 
     // Top enriched region
     //--------------------------------------------------------------------------
-    if (fabs(invMass2Lep - Z_MASS) > 25. &&
-	nJetAbove30 > 1 &&
+    if (fabs(invMass2Lep - Z_MASS) > 10. &&
 	nBJetAbove30 > 0 &&
-	EventMET.Et() > 40.)
+	EventMET.Et() > 30.)
       {
 	FillHistograms(reco_channel, TopRegion);
 	FillHistograms(combined,     TopRegion);
