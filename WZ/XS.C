@@ -308,14 +308,15 @@ void     ScanFakes                ();
 //------------------------------------------------------------------------------
 // XS
 //------------------------------------------------------------------------------
-void XS(UInt_t cut     = TopRegion,
+void XS(UInt_t cut     = MET30,
 	UInt_t mode    = PPFmode,
 	UInt_t wcharge = WInclusive,
 	Int_t  njet    = -1)
 {
   SetParameters(cut, mode, wcharge, njet);
 
-  if (ReadInputFiles("20", "35") < 0) return;
+  //  if (ReadInputFiles("20", "35") < 0) return;
+  if (ReadInputFiles("15", "15") < 0) return;  // Test
 
   wzEffValue[nChannel] = 0.0;
   wzEffError[nChannel] = 0.0;
@@ -801,6 +802,9 @@ void PrintYields(UInt_t channel)
 	}
       else if (_mode == PPFmode)
 	{
+	  nTop[i] = Yield(hist[Top]);                nBkg[i] += nTop[i];  // Test
+	  eTop[i] = hist[Top]->GetSumw2()->GetSum(); eBkg[i] += eTop[i];  // Test
+
 	  nFakes[i] = Yield(hist[Fakes]);
 
 	  nBkg[i] += nFakes[i];
@@ -1184,7 +1188,8 @@ void DrawHistogram(TString  hname,
     }
   else if (_mode == PPFmode)
     {
-      DrawLegend(x0 - xdelta, y0 - ndelta, (TObject*)hist[Fakes], Form(" data-driven (%.0f)", Yield(hist[Fakes])), "f"); ndelta += delta;
+      DrawLegend(x0 - xdelta, y0 - ndelta, (TObject*)hist[Fakes], Form(" Z+jets (%.0f)", Yield(hist[Fakes])), "f"); ndelta += delta;
+      DrawLegend(x0 - xdelta, y0 - ndelta, (TObject*)hist[Top],   Form(" top (%.0f)",    Yield(hist[Top])),   "f"); ndelta += delta;  // Test
     }
 
   ndelta = 0;
@@ -1222,6 +1227,7 @@ void DrawHistogram(TString  hname,
 	  dataMinusMc -= Yield(hist[ZG]);
 	  dataMinusMc -= Yield(hist[VVV]);
 	  dataMinusMc -= Yield(hist[WV]);
+	  dataMinusMc -= Yield(hist[Top]);  // Test
 
 	  printf(" [%s]   data-MC: %5.1f   data PPF: %5.1f   delta: %5.1f\%s\n",
 		 sChannel[channel].Data(),
@@ -1379,6 +1385,7 @@ void SetParameters(UInt_t cut,
     }
   else if (mode == PPFmode)
     {
+      vprocess.push_back(Top);  // Test
       vprocess.push_back(Fakes);
     }
       
@@ -2262,7 +2269,8 @@ void ScanFakes()
 	+ hist[WZ] ->GetSumw2()->GetSum()
 	+ hist[ZZ] ->GetSumw2()->GetSum()
 	+ hist[ZG] ->GetSumw2()->GetSum()
-	+ hist[VVV]->GetSumw2()->GetSum();
+	+ hist[VVV]->GetSumw2()->GetSum()
+	+ hist[WV] ->GetSumw2()->GetSum();
 
       for (UInt_t imuon=0; imuon<muonSize; imuon++)
 	{
