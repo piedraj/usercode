@@ -224,21 +224,21 @@ void drawXS(UInt_t theCharge = WInclusive)
     Double_t gSystError = gSyst->GetErrorX(i);
     Double_t gLumiError = gLumi->GetErrorX(i);
 
-    DrawTLatex(xmin+0.06, y+0.15, 0.035, 12,
+    DrawTLatex(42, xmin+0.06, y+0.15, 0.035, 12,
 	       Form("%s %.2f #pm %.2f",
 		    lChannel[i].Data(), x, gLumiError), 0);
 
     gLumiError = sqrt(gLumiError*gLumiError - gSystError*gSystError);
     gSystError = sqrt(gSystError*gSystError - gStatError*gStatError);
 
-    DrawTLatex(xmin+0.06, y-0.15, 0.025, 12,
+    DrawTLatex(42, xmin+0.06, y-0.15, 0.025, 12,
 	       Form("%.2f #pm %.2f #pm %.2f #pm %.2f",
 		    x, gStatError, gSystError, gLumiError), 0);
   }
 
-  DrawTLatex(0.050, 0.975, _bigLabelSize, 13, "CMS Preliminary");
+  DrawTLatex(42, 0.050, 0.975, _bigLabelSize, 13, "CMS Preliminary");
 
-  DrawTLatex(0.940, 0.983, _bigLabelSize, 33, 
+  DrawTLatex(42, 0.940, 0.983, _bigLabelSize, 33, 
 	     Form("#sqrt{s} = 7 TeV, L = %.1f fb^{-1}", luminosity/1e3));
 
   TString swz = "";
