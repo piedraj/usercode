@@ -1,4 +1,4 @@
-void runAnalysisWZ(TString sample     = "019_TTTo2L2Nu2B",
+void runAnalysisWZ(TString sample     = "094_TTZJets",
 		   Int_t   systematic = 0,
 		   Int_t   mode       = 0,
 		   Int_t   jetChannel = -1,
