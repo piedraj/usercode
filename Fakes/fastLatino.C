@@ -38,6 +38,8 @@ void fastLatino(TString sample = "019_TTTo2L2Nu2B")
   TCut selection = cut1 && cut2 && cut3;
 
   TCanvas* c1 = new TCanvas(sample, sample);
+
+  c1->cd();
   
   tree->Draw("isomva3>>h_mva_loose", selection);
 
