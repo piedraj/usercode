@@ -116,7 +116,7 @@ const TString sCharge[nCharge] = {
 
 enum {Muon, Electron};
 
-enum {Fail, Tight};
+enum {Loose, Tight};
 
 enum {RAW, PPF};
 
@@ -125,7 +125,7 @@ struct Lepton
 {
   UInt_t         index;
   UInt_t         flavor;  // Muon, Electron
-  UInt_t         type;    // Tight, Fail
+  UInt_t         type;    // Tight, Loose
   Float_t        charge;
   Float_t        sf;
   Float_t        pr;
@@ -679,7 +679,7 @@ void AnalysisWZ(TString sample,
 
       if (spt <= 10.) continue;
 
-      lep.type = (pass2012ICHEP[i]) ? Tight : Fail;
+      lep.type = (pass2012ICHEP[i]) ? Tight : Loose;
 
       lep.charge = ch[i];
 
@@ -1371,8 +1371,8 @@ Float_t GetFactor(TH2F*   h2,
 //
 // Tight estimated as PROMPT: p(1-f)
 // Tight estimated as   FAKE: f(1-p)
-// Fail  estimated as PROMPT: pf
-// Fail  estimated as   FAKE: pf
+// Loose estimated as PROMPT: pf
+// Loose estimated as   FAKE: pf
 //
 // common factor: 1/(p-f)
 //------------------------------------------------------------------------------
