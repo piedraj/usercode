@@ -564,7 +564,6 @@ public :
 
    MuonFakeRate(TTree *tree=0);
    virtual ~MuonFakeRate();
-   virtual Int_t    Cut(Long64_t entry);
    virtual Int_t    GetEntry(Long64_t entry);
    virtual Long64_t LoadTree(Long64_t entry);
    virtual void     Init(TTree *tree);
@@ -1126,12 +1125,5 @@ void MuonFakeRate::Show(Long64_t entry)
 // If entry is not specified, print current entry
    if (!fChain) return;
    fChain->Show(entry);
-}
-Int_t MuonFakeRate::Cut(Long64_t entry)
-{
-// This function may be called from Loop.
-// returns  1 if entry is accepted.
-// returns -1 otherwise.
-   return 1;
 }
 #endif // #ifdef MuonFakeRate_cxx

@@ -1,4 +1,8 @@
-################################################################################
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#
+# Code by Alicia Calderon and Jonatan Piedra
+#
+#
 #
 # Read single muon trigger data ("QCD") in TopTree format and produce
 #
@@ -8,23 +12,23 @@
 # h_pt_eta_loose = Loose muons in (pt,eta) grid
 # h_pt_eta_tight = Tight muons in (pt,eta) grid
 #
-################################################################################
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 root -l -b -q runMuonFakeRate.C
 
 
-################################################################################
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #
 # Read (top and Z+jets) MC samples in latino format and produce
 #
 # h_mva_loose = Loose muons MVA isolation
 # h_mva_tight = Tight muons MVA isolation
 #
-################################################################################
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 root -l -b -q fastLatino.C+\(\"019_TTTo2L2Nu2B\"\)
 root -l -b -q fastLatino.C+\(\"037_DY50toLLMad\"\)
 
 
-################################################################################
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #
 # Compare the loose muons MVA isolation between the QCD and the MC samples
 # (drawIsolation)
@@ -32,7 +36,7 @@ root -l -b -q fastLatino.C+\(\"037_DY50toLLMad\"\)
 # Draw the ratio of h_pt_eta_tight over h_pt_eta_loose
 # (drawFakes)
 #
-################################################################################
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 root -l drawIsolation.C+
 
 root -l drawFakes.C+
