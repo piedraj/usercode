@@ -308,7 +308,7 @@ void     ScanFakes                (TString       variable);
 //------------------------------------------------------------------------------
 // XS
 //------------------------------------------------------------------------------
-void XS(UInt_t cut     = ZJetsRegion,
+void XS(UInt_t cut     = MET30,
 	UInt_t mode    = PPFmode,
 	UInt_t wcharge = WInclusive,
 	Int_t  njet    = -1)
@@ -316,7 +316,6 @@ void XS(UInt_t cut     = ZJetsRegion,
   SetParameters(cut, mode, wcharge, njet);
 
   if (ReadInputFiles("20", "35") < 0) return;
-  //  if (ReadInputFiles("15", "15") < 0) return;  // Test
 
   wzEffValue[nChannel] = 0.0;
   wzEffError[nChannel] = 0.0;
@@ -459,7 +458,7 @@ void XS(UInt_t cut     = ZJetsRegion,
   //----------------------------------------------------------------------------
   for (UInt_t channel=0; channel<=nChannel; channel++) {
 
-    DrawHistogram("hSumCharges",      channel, cut, "q_{1} + q_{2} + q_{3}");
+    DrawHistogram("hCounter",         channel, cut, "yield",                                    -1, 0, "NULL", linY);
     DrawHistogram("hMET",             channel, cut, "E_{T}^{miss}",                              5, 0, "GeV",  linY);
     DrawHistogram("hInvMass2Lep",     channel, cut, "m_{#font[12]{ll}}",                         4, 0, "GeV",  linY, 60, 120, -999, -999, false);
     DrawHistogram("hInvMass3Lep",     channel, cut, "m_{#font[12]{3l}}",                        10, 0, "GeV",  linY, 60, 350);
@@ -470,25 +469,15 @@ void XS(UInt_t cut     = ZJetsRegion,
     DrawHistogram("hPtZLepton2",      channel, cut, "p_{T}^{Z trailing lepton}",                 5, 0, "GeV",  linY,  0, 150);
     DrawHistogram("hPtWLepton",       channel, cut, "p_{T}^{W lepton}",                          5, 0, "GeV",  linY,  0, 150);
     DrawHistogram("hDPhiZLeptons",    channel, cut, "#Delta#phi_{#font[12]{ll}}",               16, 1, "rad",  linY);
-    DrawHistogram("hDPhiWLeptonMET",  channel, cut, "#Delta#phi(W lepton, E_{T}^{miss})",       16, 1, "rad",  linY);
     DrawHistogram("hPtZ",             channel, cut, "p_{T}^{#font[12]{ll}}",                    10, 0, "GeV",  linY);
     DrawHistogram("hPtW",             channel, cut, "W candidate p_{T}",                        10, 0, "GeV",  linY);
-    DrawHistogram("hDRWZLepton1",     channel, cut, "#DeltaR(W lepton, Z leading lepton)",      10, 1, "NULL", linY, 0, 5);
-    DrawHistogram("hDRWZLepton2",     channel, cut, "#DeltaR(W lepton, Z trailing lepton)",     10, 1, "NULL", linY, 0, 5);
     DrawHistogram("hMtW",             channel, cut, "m_{T}^{W}",                                 5, 0, "GeV",  linY);
-    DrawHistogram("hNJetAbove30",     channel, cut, "number of jets (p_{T}^{jet} > 30 GeV)",    -1, 0, "NULL", linY, 0, 4);
-    DrawHistogram("hNJetBelow30",     channel, cut, "number of jets (p_{T}^{jet} #leq 30 GeV)", -1, 0, "NULL", linY, 0, 4);
-    DrawHistogram("hNBJetAbove30",    channel, cut, "number of b-jets (p_{T}^{jet} > 30 GeV)",  -1, 0, "NULL", linY, 0, 4);
+    DrawHistogram("hNJet",            channel, cut, "number of jets (p_{T}^{jet} > 30 GeV)",    -1, 0, "NULL", linY, 0, 4);
+    DrawHistogram("hNBJet",           channel, cut, "number of b-jets (p_{T}^{jet} > 30 GeV)",  -1, 0, "NULL", linY, 0, 4);
     //    DrawHistogram("hPtLeadingJet",    channel, cut, "p_{T}^{leading jet}",                       5, 0, "GeV",  linY);
     //    DrawHistogram("hEtaLeadingJet",   channel, cut, "#eta^{leading jet}",                       10, 1, "NULL", linY);
     //    DrawHistogram("hPhiLeadingJet",   channel, cut, "#phi^{leading jet}",                       16, 1, "rad",  linY);
     //    DrawHistogram("hDRLeadingJetLep", channel, cut, "#DeltaR(leading jet, closest lepton)",     10, 1, "NULL", linY, 0, 5);
-    //      
-    //    if (channel == EEE || channel == MMM)
-    //      {
-    //    	DrawHistogram("hMinDeltaR2Lep",  channel, cut, "minimum #DeltaR_{#font[12]{ll}}", 10, 1, "NULL", linY, 0, 5);
-    //    	DrawHistogram("hMinInvMass2Lep", channel, cut, "minimum m_{#font[12]{ll}}",       10, 0, "GeV",  linY, 0, 112);
-    //      }
   }
 }
 
@@ -565,6 +554,15 @@ void CrossSection(Double_t& xsVal,
 	    
 	    fUp  ->Close();
 	    fDown->Close();
+	  }
+
+	// Test
+	if (cut == MET30)
+	  {
+	    if (channel == EEE) process_yield -= 1.;
+	    if (channel == EEM) process_yield -= 9.;
+	    if (channel == MME) process_yield -= 24.;
+	    if (channel == MMM) process_yield -= 33.75;
 	  }
 
 	nbkg += process_yield;
@@ -802,8 +800,8 @@ void PrintYields(UInt_t channel)
 	}
       else if (_mode == PPFmode)
 	{
-	  //	  nTop[i] = Yield(hist[Top]);                nBkg[i] += nTop[i];  // Test
-	  //	  eTop[i] = hist[Top]->GetSumw2()->GetSum(); eBkg[i] += eTop[i];  // Test
+	  nTop[i] = Yield(hist[Top]);                nBkg[i] += nTop[i];  // Test
+	  eTop[i] = hist[Top]->GetSumw2()->GetSum(); eBkg[i] += eTop[i];  // Test
 
 	  nFakes[i] = Yield(hist[Fakes]);
 
@@ -947,6 +945,8 @@ void DrawHistogram(TString  hname,
 {
   hname += "_" + sChannel[channel] + "_" + sCut[cut] + "_" + sCharge[_wcharge];
 
+  if (hname.Contains("Counter")) hname += "_LLL";
+
   TCanvas* canvas = new TCanvas(hname, hname, 550, 720);
 
   TPad* pad1 = new TPad("pad1", "pad1", 0, 0.3, 1, 1.0);
@@ -996,6 +996,18 @@ void DrawHistogram(TString  hname,
 	hist[j]->SetFillColor(cProcess[j]);
 	hist[j]->SetFillStyle(1001);
 	hist[j]->SetLineColor(cProcess[j]);
+
+	// Test
+	if (j == Fakes && cut == MET30)
+	  {
+	    Float_t fyield = Yield(hist[j]);
+
+	    if (channel == EEE)      hist[j]->Scale((fyield -  1.)   / fyield);
+	    if (channel == EEM)      hist[j]->Scale((fyield -  9.)   / fyield);
+	    if (channel == MME)      hist[j]->Scale((fyield - 24.)   / fyield);
+	    if (channel == MMM)      hist[j]->Scale((fyield - 33.75) / fyield);
+	    if (channel == combined) hist[j]->Scale((fyield - 67.75) / fyield);
+	  }
 
 	hstack->Add(hist[j]);
       }
@@ -1190,8 +1202,9 @@ void DrawHistogram(TString  hname,
     }
   else if (_mode == PPFmode)
     {
-      DrawLegend(x0 - xdelta, y0 - ndelta, (TObject*)hist[Fakes], Form(" top and Z+jets (%.0f)", Yield(hist[Fakes])), "f"); ndelta += delta;
-      //      DrawLegend(x0 - xdelta, y0 - ndelta, (TObject*)hist[Top],   Form(" top (%.0f)",    Yield(hist[Top])),   "f"); ndelta += delta;  // Test
+      //      DrawLegend(x0 - xdelta, y0 - ndelta, (TObject*)hist[Fakes], Form(" top and Z+jets (%.0f)", Yield(hist[Fakes])), "f"); ndelta += delta;
+      DrawLegend(x0 - xdelta, y0 - ndelta, (TObject*)hist[Fakes], Form(" Z+jets (%.0f)",         Yield(hist[Fakes])), "f"); ndelta += delta;  // Test
+      DrawLegend(x0 - xdelta, y0 - ndelta, (TObject*)hist[Top],   Form(" top (%.0f)",            Yield(hist[Top])),   "f"); ndelta += delta;  // Test
     }
 
   ndelta = 0;
@@ -1208,37 +1221,6 @@ void DrawHistogram(TString  hname,
   DrawTLatex(61, 0.190, 0.94, 0.055, 11, "CMS");
   DrawTLatex(52, 0.305, 0.94, 0.030, 11, "Preliminary");
   DrawTLatex(42, 0.940, 0.94, 0.040, 31, Form("%.1f fb^{-1} (8TeV)", _luminosity/1e3));
-
-
-  // Fakes checks / systematics
-  //----------------------------------------------------------------------------
-  if (hname.Contains("hSumCharges") && _verbosity > 2)
-    {
-      if (_mode == MCmode)
-	{
-	  printf(" [%s]   Z+jets and top MC: %5.1f\n",
-		 sChannel[channel].Data(),
-		 Yield(hist[Top]) + Yield(hist[ZJets]));
-	}
-      else if (_mode == PPFmode)
-	{
-	  Double_t dataMinusMc = Yield(hdata);
-	  
-	  dataMinusMc -= Yield(hist[WZ]);
-	  dataMinusMc -= Yield(hist[ZZ]);
-	  dataMinusMc -= Yield(hist[ZG]);
-	  dataMinusMc -= Yield(hist[VVV]);
-	  dataMinusMc -= Yield(hist[WV]);
-	  //	  dataMinusMc -= Yield(hist[Top]);  // Test
-
-	  printf(" [%s]   data-MC: %5.1f   data PPF: %5.1f   delta: %5.1f\%s\n",
-		 sChannel[channel].Data(),
-		 dataMinusMc,
-		 Yield(hist[Fakes]),
-		 1e2 * fabs(dataMinusMc - Yield(hist[Fakes])) / dataMinusMc,
-		 "%");
-	}
-    }
 
 
   //----------------------------------------------------------------------------
@@ -1387,7 +1369,7 @@ void SetParameters(UInt_t cut,
     }
   else if (mode == PPFmode)
     {
-      //      vprocess.push_back(Top);  // Test
+      vprocess.push_back(Top);  // Test
       vprocess.push_back(Fakes);
     }
       
