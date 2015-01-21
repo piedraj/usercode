@@ -110,8 +110,8 @@ create_job() {
     local elecjet=$6
     local filename=job_AnalysisWZ_${sample}_${syst}_${datamode}_${njet}_${muonjet}_${elecjet}.sh
     cat > $filename <<EOF
-#!/bin/bash
-#source /opt/root/bin/thisroot.sh
+#$ -S /bin/bash
+source /gpfs/csic_projects/cms/sw/ROOT/current/root/bin/thisroot.sh
 cd $WORKINGDIR
 root -l -b -q "runAnalysisWZ.C(\"${sample}\",${syst},${datamode},${njet},\"${muonjet}\",\"${elecjet}\")";
 EOF
@@ -127,7 +127,7 @@ submit_job() {
     local muonjet=$5
     local elecjet=$6
     local filename=job_AnalysisWZ_${sample}_${syst}_${datamode}_${njet}_${muonjet}_${elecjet}.sh
-    qsub $filename
+    qsub -P l.gaes -cwd $filename
 }
 
 

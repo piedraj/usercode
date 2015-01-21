@@ -9,10 +9,12 @@ rm -rf *_C.*
 rm -rf *_C_*
 rm -rf  job_AnalysisWZ_*.sh
 rm -rf  results
+rm -rf  submit.sh
 
 
 source ~/.bashrc
 root -l -b -q loadAnalysisWZ.C
+ln -s submit-gridui.sh submit.sh
 
 
 ################################################################################
