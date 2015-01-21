@@ -47,6 +47,13 @@ void DrawIt(TString name)
   TH1F* hEEE = (TH1F*)wzfile->Get(name + "_EEE_Exactly3Leptons_WInclusive");
   TH1F* hEEM = (TH1F*)wzfile->Get(name + "_EEM_Exactly3Leptons_WInclusive");
 
+  printf("\n [%s] eee: %.1f%s \t eem: %.1f%s \t mme: %.1f%s \t mmm: %.1f%s\n\n",
+	 name.Data(),
+	 1e2 * hEEE->GetMean(), "%",
+	 1e2 * hEEM->GetMean(), "%",
+	 1e2 * hMME->GetMean(), "%",
+	 1e2 * hMMM->GetMean(), "%");
+
   hMMM->SetLineColor(kRed);
   hMME->SetLineColor(kBlack);
   hEEE->SetLineColor(kBlue);
