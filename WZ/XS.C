@@ -1342,7 +1342,7 @@ void SetParameters(UInt_t cut,
   _mode      = mode;
   _wcharge   = wcharge;
   _njet      = njet;
-  _datapath  = "results-2014";
+  _datapath  = "results";
   _analysis  = "analysis";
 
   if (_njet >= 0) _datapath = Form("%s/%djet", _datapath.Data(), _njet);

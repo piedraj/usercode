@@ -441,7 +441,10 @@ void AnalysisWZ(TString sample,
 
   TChain* tree = new TChain("latino", "latino");
 
-  TString path = "/pool/ciencias/LatinosSkims/ReducedTrees/R53X_S1_V09_S2_V10_S3_V17newJEC/";
+  //  TString path = "/pool/ciencias/";
+  TString path = "/gpfs/csic_projects/tier3data/";
+
+  path += "LatinosSkims/ReducedTrees/R53X_S1_V09_S2_V10_S3_V17newJEC/";
 
   if (isData) path += "Data";
   else        path += "MC";
