@@ -1,12 +1,10 @@
 Get ROOT
 ====
 
-At `fanaeui.geol.uniovi.es`
-
+    # fanaeui.geol.uniovi.es
     source /opt/root/bin/thisroot.sh
 
-At `lorienmaster.irb.hr`
-
+    # lorienmaster.irb.hr
     export SCRAM_ARCH=slc5_amd64_gcc481
     source /cvmfs/cms.cern.ch/cmsset_default.sh
     scram project CMSSW_7_0_0
@@ -30,9 +28,6 @@ Produce histograms
 ====
 
     cd usercode/WZ
-
-Test
-
     root -l -b -q runAnalysisWZ.C
 
 Produce all the output histograms, including systematics
@@ -51,9 +46,6 @@ Extract the WZ cross section
 ====
 
     cd usercode/WZ
-
-Test
-
     root -l -b -q runXS.C
 
 Produce all the plots and tables
@@ -61,7 +53,7 @@ Produce all the plots and tables
     ./runXS.sh
 
 
-GitHub (if you want to commit)
+Commit
 ====
 
     mkdir GitHub
