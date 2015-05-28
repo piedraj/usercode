@@ -7,10 +7,10 @@ if [ $# -lt 1 ] ; then
     echo "  ./merge.sh BASE_FOLDER"
     echo "  "
     echo "  BASE_FOLDER"
-    echo "     results-2014"
-    echo "     results-2014/0jet"
-    echo "     results-2014/1jet"
-    echo "     results-2014/2jet"
+    echo "     results"
+    echo "     results/0jet"
+    echo "     results/1jet"
+    echo "     results/2jet"
     echo "  "
 
     exit -1
