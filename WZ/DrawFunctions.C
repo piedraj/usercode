@@ -82,50 +82,95 @@ Double_t GetMaximumIncludingErrors(TH1*     h,
 
 //------------------------------------------------------------------------------
 // MoveOverflowBins
+//
+// For all histogram types: nbins, xlow, xup
+//
+//   bin = 0;       underflow bin
+//   bin = 1;       first bin with low-edge xlow INCLUDED
+//   bin = nbins;   last bin with upper-edge xup EXCLUDED
+//   bin = nbins+1; overflow bin
+//
 //------------------------------------------------------------------------------
 void MoveOverflowBins(TH1*     h,
 		      Double_t xmin,
 		      Double_t xmax)
 {
-  UInt_t nbins = h->GetNbinsX();
+  int nentries = h->GetEntries();
 
-  TAxis* axis = (TAxis*)h->GetXaxis();
+  int nbins = h->GetNbinsX();
   
-  UInt_t firstBin = (xmin != -999) ? axis->FindBin(xmin) : 1;
-  UInt_t lastBin  = (xmax != -999) ? axis->FindBin(xmax) : nbins;
+  TAxis* xaxis = (TAxis*)h->GetXaxis();
 
-  Double_t firstVal = 0;
-  Double_t firstErr = 0;
 
-  Double_t lastVal = 0;
-  Double_t lastErr = 0;
+  // Underflow
+  //----------------------------------------------------------------------------
+  if (xmin != -999)
+    {
+      int    firstBin = -1;
+      double firstVal = 0;
+      double firstErr = 0;
+      
+      for (int i=0; i<=nbins+1; i++)
+	{
+	  double lowEdge  = xaxis->GetBinLowEdge(i);
+	  double binWidth = xaxis->GetBinWidth(i);
 
-  for (UInt_t i=0; i<=nbins+1; i++) {
+	  if (lowEdge+binWidth < xmin)
+	    {
+	      firstVal += h->GetBinContent(i);
+	      firstErr += (h->GetBinError(i)*h->GetBinError(i));
+	      h->SetBinContent(i, 0);
+	      h->SetBinError  (i, 0);
+	    }
+	  else if (firstBin == -1)
+	    {
+	      firstVal += h->GetBinContent(i);
+	      firstErr += (h->GetBinError(i)*h->GetBinError(i));
+	      firstBin = i;
+	    }
+	}
 
-    if (i <= firstBin) {
-      firstVal += h->GetBinContent(i);
-      firstErr += (h->GetBinError(i)*h->GetBinError(i));
+      firstErr = sqrt(firstErr);
+  
+      h->SetBinContent(firstBin, firstVal);
+      h->SetBinError  (firstBin, firstErr);
     }
 
-    if (i >= lastBin) {
-      lastVal += h->GetBinContent(i);
-      lastErr += (h->GetBinError(i)*h->GetBinError(i));
+
+  // Overflow
+  //----------------------------------------------------------------------------
+  if (xmax != -999)
+    {
+      int    lastBin = -1;
+      double lastVal = 0;
+      double lastErr = 0;
+      
+      for (int i=nbins+1; i>=0; i--)
+	{
+	  double lowEdge = xaxis->GetBinLowEdge(i);
+      
+	  if (lowEdge >= xmax)
+	    {
+	      lastVal += h->GetBinContent(i);
+	      lastErr += (h->GetBinError(i)*h->GetBinError(i));
+	      h->SetBinContent(i, 0);
+	      h->SetBinError  (i, 0);
+	    }
+	  else if (lastBin == -1)
+	    {
+	      lastVal += h->GetBinContent(i);
+	      lastErr += (h->GetBinError(i)*h->GetBinError(i));
+	      lastBin = i;
+	    }
+	}
+
+      lastErr = sqrt(lastErr);
+  
+      h->SetBinContent(lastBin, lastVal);
+      h->SetBinError  (lastBin, lastErr);
     }
 
-    if (i < firstBin || i > lastBin) {
-      h->SetBinContent(i, 0);
-      h->SetBinError  (i, 0);
-    }
-  }
-
-  firstErr = sqrt(firstErr);
-  lastErr  = sqrt(lastErr);
-
-  h->SetBinContent(firstBin, firstVal);
-  h->SetBinError  (firstBin, firstErr);
-
-  h->SetBinContent(lastBin, lastVal);
-  h->SetBinError  (lastBin, lastErr);
+  h->SetEntries(nentries);
 }
 
 
