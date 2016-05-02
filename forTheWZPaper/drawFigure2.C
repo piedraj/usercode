@@ -18,14 +18,14 @@
 //------------------------------------------------------------------------------
 const UInt_t nChannel = 5;
 
-const Float_t xs7eval[] = {23.00, 19.67, 19.81, 21.02, 20.14};
-const Float_t xs7stat[] = { 3.10,  2.73,  2.60,  2.30,  1.32};
-const Float_t xs7syst[] = { 1.39,  1.50,  1.55,  1.47,  1.13};
-const Float_t xs7lumi[] = { 0.51,  0.43,  0.44,  0.46,  0.44};
+const Float_t xs7eval[] = {22.46, 19.04, 19.13, 20.36, 20.14};
+const Float_t xs7stat[] = { 3.12,  2.75,  2.60,  2.31,  1.32};
+const Float_t xs7syst[] = { 1.40,  1.54,  1.61,  1.53,  1.13};
+const Float_t xs7lumi[] = { 0.49,  0.42,  0.42,  0.45,  0.44};
 
-const Float_t xs8eval[] = {24.80, 22.38, 23.94, 24.93, 24.07};
-const Float_t xs8stat[] = { 1.92,  1.62,  1.52,  1.29,  0.84};
-const Float_t xs8syst[] = { 1.74,  2.08,  2.39,  2.34,  1.62};
+const Float_t xs8eval[] = {24.80, 22.38, 23.94, 24.93, 24.09};
+const Float_t xs8stat[] = { 1.92,  1.62,  1.52,  1.29,  0.87};
+const Float_t xs8syst[] = { 1.74,  1.92,  1.85,  2.29,  1.62};
 const Float_t xs8lumi[] = { 0.64,  0.58,  0.62,  0.65,  0.63};
 
 const TString lChannel[nChannel] = {
@@ -36,9 +36,16 @@ const TString lChannel[nChannel] = {
   "combined"
 };
 
-const Float_t xs_nlo      [] = {17.8, 21.9};
-const Float_t xs_nlo_left [] = { 0.5,  0.9};
-const Float_t xs_nlo_right[] = { 0.7,  1.2};
+
+// From Table 4 of http://arxiv.org/pdf/1604.08576.pdf
+//------------------------------------------------------------------------------
+const Float_t xs_nlo       [] = {17.72, 21.80};   // 7 TeV   8 TeV
+const Float_t err_nlo_left [] = {0.041, 0.039};   // -4.1%   -3.9%
+const Float_t err_nlo_right[] = {0.053, 0.051};   // +5.3%   +5.1%
+
+const Float_t xs_nnlo       [] = {19.18, 23.68};  // 7 TeV   8 TeV
+const Float_t err_nnlo_left [] = {0.018, 0.018};  // -1.8%   -1.8%
+const Float_t err_nnlo_right[] = {0.017, 0.018};  // +1.7%   +1.8%
 
 
 // Functions
@@ -87,7 +94,7 @@ void drawFigure2()
     {
       Float_t errorSquared = (xs7stat[i] * xs7stat[i]);
       
-      Float_t xs = xs_nlo[0];
+      Float_t xs = xs_nnlo[0];
 
       g7stat->SetPointError(i, sqrt(errorSquared) / xs, 0.25);
       
@@ -111,7 +118,7 @@ void drawFigure2()
     {
       Float_t errorSquared = (xs8stat[i] * xs8stat[i]);
       
-      Float_t xs = xs_nlo[1];
+      Float_t xs = xs_nnlo[1];
 
       g8stat->SetPointError(i, sqrt(errorSquared) / xs, 0.25);
       
@@ -185,22 +192,39 @@ void drawFigure2()
   
   // NLO WZ cross-section
   //----------------------------------------------------------------------------
-  TBox* nlo7tev = new TBox(1 - xs_nlo_left [0] / xs_nlo[0], (ymax-ymin)/2,
-			   1 + xs_nlo_right[0] / xs_nlo[0], ymax);
+  TBox* nlo7tev = new TBox((1 - err_nlo_left [0]) * (xs_nlo[0]/xs_nnlo[0]), (ymax-ymin)/2,
+			   (1 + err_nlo_right[0]) * (xs_nlo[0]/xs_nnlo[0]), ymax);
 
-  TBox* nlo8tev = new TBox(1 - xs_nlo_left [1] / xs_nlo[1], ymin,
-			   1 + xs_nlo_right[1] / xs_nlo[1], (ymax-ymin)/2);
+  TBox* nlo8tev = new TBox((1 - err_nlo_left [1]) * (xs_nlo[1]/xs_nnlo[1]), ymin,
+			   (1 + err_nlo_right[1]) * (xs_nlo[0]/xs_nnlo[0]), (ymax-ymin)/2);
 
   nlo7tev->SetLineColor(0);
-  nlo7tev->SetFillColor(kGray);
-  nlo7tev->SetFillStyle(1001);
+  nlo7tev->SetFillColor(kGray+1);
+  nlo7tev->SetFillStyle(3004);
 
   nlo8tev->SetLineColor(0);
-  nlo8tev->SetFillColor(kGray);
-  nlo8tev->SetFillStyle(1001);
+  nlo8tev->SetFillColor(kGray+1);
+  nlo8tev->SetFillStyle(3004);
 
   nlo7tev->Draw("e2,same");
   nlo8tev->Draw("e2,same");
+
+
+  // NNLO WZ cross-section
+  //----------------------------------------------------------------------------
+  TBox* nnlo7tev = new TBox(1 - err_nnlo_left [0], (ymax-ymin)/2, 1 + err_nnlo_right[0], ymax);
+  TBox* nnlo8tev = new TBox(1 - err_nnlo_left [1], ymin, 1 + err_nnlo_right[1], (ymax-ymin)/2);
+
+  nnlo7tev->SetLineColor(0);
+  nnlo7tev->SetFillColor(kGray+1);
+  nnlo7tev->SetFillStyle(1001);
+
+  nnlo8tev->SetLineColor(0);
+  nnlo8tev->SetFillColor(kGray+1);
+  nnlo8tev->SetFillStyle(1001);
+
+  nnlo7tev->Draw("e2,same");
+  nnlo8tev->Draw("e2,same");
 
 
   // Cross sections
@@ -251,7 +275,7 @@ void drawFigure2()
 
   h2->GetXaxis()->CenterTitle();
   h2->GetXaxis()->SetTitleOffset(1.4);
-  h2->GetXaxis()->SetTitle("#sigma_{WZ}^{exp} / #sigma_{WZ}^{NLO}");
+  h2->GetXaxis()->SetTitle("#sigma_{WZ} / #sigma_{WZ}^{NNLO}");
   h2->GetYaxis()->SetTitle("");
 
 
@@ -265,14 +289,16 @@ void drawFigure2()
   // Additional legend
   //----------------------------------------------------------------------------
   DrawTLatex(42, 0.775, 0.805, 0.03, 11, "8 TeV");
-  DrawTLegend(0.76, 0.750, nlo8tev, "theory", "f");
-  DrawTLegend(0.76, 0.700, g8stat,  "stat",   "fp");
-  DrawTLegend(0.76, 0.650, g8syst,  "syst",   "f");
+  DrawTLegend(0.76, 0.750, nlo8tev,  "NLO",  "f");
+  DrawTLegend(0.76, 0.700, nnlo8tev, "NNLO", "f");
+  DrawTLegend(0.76, 0.650, g8stat,   "stat", "fp");
+  DrawTLegend(0.76, 0.600, g8syst,   "syst", "f");
 
   DrawTLatex(42, 0.775, 0.455, 0.03, 11, "7 TeV");
-  DrawTLegend(0.76, 0.400, nlo7tev, "theory", "f");
-  DrawTLegend(0.76, 0.350, g7stat,  "stat",   "fp");
-  DrawTLegend(0.76, 0.300, g7syst,  "syst",   "f");
+  DrawTLegend(0.76, 0.400, nlo7tev,  "NLO",  "f");
+  DrawTLegend(0.76, 0.350, nnlo7tev, "NNLO", "f");
+  DrawTLegend(0.76, 0.300, g7stat,   "stat", "fp");
+  DrawTLegend(0.76, 0.250, g7syst,   "syst", "f");
 
 
   // Save
