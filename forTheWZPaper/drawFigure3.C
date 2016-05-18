@@ -5,7 +5,33 @@
 #include "TSystem.h"
 
 
-const Double_t _yoffset = 0.045;
+// Constants
+//------------------------------------------------------------------------------
+const Font_t   _cmsTextFont   = 61;
+const Font_t   _extraTextFont = 52;
+const Font_t   _lumiTextFont  = 42;
+const Double_t _yoffset       = 0.042;
+
+
+// Functions
+//------------------------------------------------------------------------------
+Float_t  GetMaximumIncludingErrors(TH1F*       h);
+
+void     DrawTLatex               (Font_t      tfont,
+				   Double_t    x,
+				   Double_t    y,
+				   Double_t    tsize,
+				   Short_t     align,
+				   const char* text);
+
+TLegend* DrawTLegend              (Float_t     x1,
+				   Float_t     y1,
+				   TH1*        hist,
+				   TString     label,
+				   TString     option,
+				   Float_t     tsize   = 0.03,
+				   Float_t     xoffset = 0.18,
+				   Float_t     yoffset = _yoffset);
 
 
 //------------------------------------------------------------------------------
@@ -41,8 +67,8 @@ void drawFigure3(Int_t logy = 0)
   WZ->SetFillColor(kOrange-2);
   WZ->SetLineColor(kOrange-2);
 
-  Zgamma->SetFillColor(kRed+2);
-  Zgamma->SetLineColor(kRed+2);
+  Zgamma->SetFillColor(kRed+1);
+  Zgamma->SetLineColor(kRed+1);
 
   ZZ->SetFillColor(kRed+1);
   ZZ->SetLineColor(kRed+1);
@@ -50,11 +76,11 @@ void drawFigure3(Int_t logy = 0)
   fakes->SetFillColor(kGray+1);
   fakes->SetLineColor(kGray+1);
 
-  WV->SetFillColor(kAzure);
-  WV->SetLineColor(kAzure);
+  WV->SetFillColor(kRed+1);
+  WV->SetLineColor(kRed+1);
 
-  VVV->SetFillColor(kBlack);
-  VVV->SetLineColor(kBlack);
+  VVV->SetFillColor(kRed+1);
+  VVV->SetLineColor(kRed+1);
 
 
   // Draw
@@ -109,37 +135,33 @@ void drawFigure3(Int_t logy = 0)
   // Legend
   //----------------------------------------------------------------------------
   Double_t x0;
-  Double_t y0 = 0.755;
+  Double_t y0;
 
   if (logy)
     {
-      x0 = 0.68;
+      x0 = 0.630;
+      y0 = 0.765;
 
       DrawTLegend(x0 - 0.37, y0 + 2.*(_yoffset+0.001), data,     " data",                              "ep");
       DrawTLegend(x0 - 0.37, y0 + 1.*(_yoffset+0.001), aTGC_dk,  " WZ aTGC (#Delta#kappa^{Z} = 0.6)",  "l");
       DrawTLegend(x0 - 0.37, y0,                       aTGC_dg,  " WZ aTGC (#Deltag^{Z}_{1} = -0.06)", "l");
       DrawTLegend(x0 - 0.37, y0 - 1.*(_yoffset+0.001), aTGC_lam, " WZ aTGC (#lambda = 0.04)",          "l");
       DrawTLegend(x0,        y0 + 2.*(_yoffset+0.001), WZ,       " WZ",                                "f");
-      DrawTLegend(x0,        y0 + 1.*(_yoffset+0.001), fakes,    " top and Z+jets",                    "f");
-      DrawTLegend(x0,        y0,                       ZZ,       " ZZ",                                "f");
-      DrawTLegend(x0,        y0 - 1.*(_yoffset+0.001), Zgamma,   " Z#gamma",                           "f");
-      DrawTLegend(x0,        y0 - 2.*(_yoffset+0.001), WV,       " W#gamma*",                          "f");
-      DrawTLegend(x0,        y0 - 3.*(_yoffset+0.001), VVV,      " VVV",                               "f");
+      DrawTLegend(x0,        y0 + 1.*(_yoffset+0.001), fakes,    " non-prompt leptons",                "f");
+      DrawTLegend(x0,        y0,                       ZZ,       " MC background",                     "f");
     }
   else
     {
-      x0 = 0.57;
+      x0 = 0.570;
+      y0 = 0.755;
 
       DrawTLegend(x0, y0 + 2.*(_yoffset+0.001), data,     " data",                              "ep");
       DrawTLegend(x0, y0 + 1.*(_yoffset+0.001), aTGC_dk,  " WZ aTGC (#Delta#kappa^{Z} = 0.6)",  "l");
       DrawTLegend(x0, y0,                       aTGC_dg,  " WZ aTGC (#Deltag^{Z}_{1} = -0.06)", "l");
       DrawTLegend(x0, y0 - 1.*(_yoffset+0.001), aTGC_lam, " WZ aTGC (#lambda = 0.04)",          "l");
       DrawTLegend(x0, y0 - 2.*(_yoffset+0.001), WZ,       " WZ",                                "f");
-      DrawTLegend(x0, y0 - 3.*(_yoffset+0.001), fakes,    " top and Z+jets",                    "f");
-      DrawTLegend(x0, y0 - 4.*(_yoffset+0.001), ZZ,       " ZZ",                                "f");
-      DrawTLegend(x0, y0 - 5.*(_yoffset+0.001), Zgamma,   " Z#gamma",                           "f");
-      DrawTLegend(x0, y0 - 6.*(_yoffset+0.001), WV,       " W#gamma*",                          "f");
-      DrawTLegend(x0, y0 - 7.*(_yoffset+0.001), VVV,      " VVV",                               "f");
+      DrawTLegend(x0, y0 - 3.*(_yoffset+0.001), fakes,    " non-prompt leptons",                "f");
+      DrawTLegend(x0, y0 - 4.*(_yoffset+0.001), ZZ,       " MC background",                     "f");
     }
 
 
@@ -231,9 +253,9 @@ TLegend* DrawTLegend(Float_t x1,
 		     TH1*    hist,
 		     TString label,
 		     TString option,
-		     Float_t tsize   = 0.03,
-		     Float_t xoffset = 0.20,
-		     Float_t yoffset = _yoffset)
+		     Float_t tsize,
+		     Float_t xoffset,
+		     Float_t yoffset)
 {
   TLegend* legend = new TLegend(x1,
 				y1,

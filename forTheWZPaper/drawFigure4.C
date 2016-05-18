@@ -5,8 +5,35 @@
 #include "TSystem.h"
 
 
-const Double_t _yoffset = 0.045;
+// Constants
+//------------------------------------------------------------------------------
+const Font_t   _cmsTextFont   = 61;
+const Font_t   _extraTextFont = 52;
+const Font_t   _lumiTextFont  = 42;
+const Double_t _yoffset       = 0.045;
 
+
+// Functions
+//------------------------------------------------------------------------------
+void     DrawTLatex (Font_t      tfont,
+		     Double_t    x,
+		     Double_t    y,
+		     Double_t    tsize,
+		     Short_t     align,
+		     const char* text);
+
+TLegend* DrawTLegend(Float_t     x1,
+		     Float_t     y1,
+		     TH1*        hist,
+		     TString     label,
+		     TString     option,
+		     Float_t     tsize   = 0.03,
+		     Float_t     xoffset = 0.34,
+		     Float_t     yoffset = _yoffset);
+
+
+// Data members
+//------------------------------------------------------------------------------
 TString xtitle;
 TString ytitle;
 Float_t xmin;
@@ -15,9 +42,15 @@ Float_t ymin;
 Float_t ymax;
 
 
-//------------------------------------------------------------------------------
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//
 // drawFigure4
-//------------------------------------------------------------------------------
+//
+// parameter = "dg0"
+// parameter = "lam0"
+// parameter = "dk0"
+//
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 void drawFigure4(TString parameter = "lam0")
 {
   gInterpreter->ExecuteMacro("WZPaperStyle.C");
@@ -175,9 +208,9 @@ TLegend* DrawTLegend(Float_t x1,
 		     TH1*    hist,
 		     TString label,
 		     TString option,
-		     Float_t tsize   = 0.03,
-		     Float_t xoffset = 0.34,
-		     Float_t yoffset = _yoffset)
+		     Float_t tsize,
+		     Float_t xoffset,
+		     Float_t yoffset)
 {
   TLegend* legend = new TLegend(x1,
 				y1,
