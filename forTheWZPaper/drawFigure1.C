@@ -44,6 +44,9 @@ TString lumiText;
 //
 // drawFigure1
 //
+//    energy = "7TeV"
+//    energy = "8TeV"
+//
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 void drawFigure1(TString energy = "7TeV")
 {

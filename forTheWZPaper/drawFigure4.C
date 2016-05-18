@@ -46,9 +46,9 @@ Float_t ymax;
 //
 // drawFigure4
 //
-// parameter = "dg0"
-// parameter = "lam0"
-// parameter = "dk0"
+//    parameter = "dg0"
+//    parameter = "lam0"
+//    parameter = "dk0"
 //
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 void drawFigure4(TString parameter = "lam0")
