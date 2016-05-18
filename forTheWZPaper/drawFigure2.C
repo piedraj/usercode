@@ -272,7 +272,7 @@ void drawFigure2()
   // CMS titles
   //----------------------------------------------------------------------------
   DrawTLatex(61, 0.065, 0.94, 0.055, 11, "CMS");
-  DrawTLatex(52, 0.190, 0.94, 0.030, 11, "Preliminary");
+  //  DrawTLatex(52, 0.190, 0.94, 0.030, 11, "Preliminary");
   DrawTLatex(42, 0.940, 0.94, 0.040, 31, "4.9 fb^{-1} (7 TeV) + 19.6 fb^{-1} (8 TeV)");
 
   h2->GetXaxis()->CenterTitle();

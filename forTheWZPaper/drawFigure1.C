@@ -48,7 +48,7 @@ TString lumiText;
 //    energy = "8TeV"
 //
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-void drawFigure1(TString energy = "7TeV")
+void drawFigure1(TString energy = "8TeV")
 {
   gInterpreter->ExecuteMacro("WZPaperStyle.C");
 
@@ -203,8 +203,8 @@ void drawFigure1(TString energy = "7TeV")
   //----------------------------------------------------------------------------
   data->SetTitle("");
 
-  DrawTLatex(_cmsTextFont,   0.215, 0.891, 0.055, 13, "CMS");
-  DrawTLatex(_extraTextFont, 0.215, 0.837, 0.030, 13, "Preliminary");
+  DrawTLatex(_cmsTextFont,   0.215, 0.880, 0.055, 13, "CMS");
+  //  DrawTLatex(_extraTextFont, 0.215, 0.826, 0.030, 13, "Preliminary");
   DrawTLatex(_lumiTextFont,  0.940, 0.940, 0.040, 31, lumiText);
 
   hs   ->Draw("hist,same");

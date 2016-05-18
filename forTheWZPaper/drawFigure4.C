@@ -51,7 +51,7 @@ Float_t ymax;
 //    parameter = "dk0"
 //
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-void drawFigure4(TString parameter = "lam0")
+void drawFigure4(TString parameter = "dk0")
 {
   gInterpreter->ExecuteMacro("WZPaperStyle.C");
 
@@ -171,7 +171,7 @@ void drawFigure4(TString parameter = "lam0")
   // Finish it
   //----------------------------------------------------------------------------
   DrawTLatex(_cmsTextFont,   0.190, 0.94, 0.055, 11, "CMS");
-  DrawTLatex(_extraTextFont, 0.315, 0.94, 0.030, 11, "Preliminary");
+  //  DrawTLatex(_extraTextFont, 0.315, 0.94, 0.030, 11, "Preliminary");
   DrawTLatex(_lumiTextFont,  0.940, 0.94, 0.040, 31, "19.6 fb^{-1} (8 TeV)");
 
   canvas->SaveAs("pdf/lZ_dkg_2dlimit_" + parameter + "_2Dpol2_deltaNLL.pdf");

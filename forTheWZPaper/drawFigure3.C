@@ -42,7 +42,7 @@ TLegend* DrawTLegend              (Float_t     x1,
 //    logy = 1
 //
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-void drawFigure3(Int_t logy = 0)
+void drawFigure3(Int_t logy = 1)
 {
   gInterpreter->ExecuteMacro("WZPaperStyle.C");
 
@@ -177,12 +177,12 @@ void drawFigure3(Int_t logy = 0)
   if (logy)
     {
       DrawTLatex(_cmsTextFont,   0.190, 0.94, 0.055, 11, "CMS");
-      DrawTLatex(_extraTextFont, 0.315, 0.94, 0.030, 11, "Preliminary");
+      //      DrawTLatex(_extraTextFont, 0.315, 0.94, 0.030, 11, "Preliminary");
     }
   else
     {
       DrawTLatex(_cmsTextFont,   0.215, 0.891, 0.055, 13, "CMS");
-      DrawTLatex(_extraTextFont, 0.215, 0.837, 0.030, 13, "Preliminary");
+      //      DrawTLatex(_extraTextFont, 0.215, 0.837, 0.030, 13, "Preliminary");
     }
 
   DrawTLatex(_lumiTextFont, 0.940, 0.94, 0.040, 31, "19.6 fb^{-1} (8 TeV)");
