@@ -1,8 +1,3 @@
-const Font_t _cmsTextFont   = 61;
-const Font_t _extraTextFont = 52;
-const Font_t _lumiTextFont  = 42;
-
-
 void WZPaperStyle()
 {
   TStyle* WZPaperStyle = new TStyle("WZPaperStyle", "WZPaperStyle");

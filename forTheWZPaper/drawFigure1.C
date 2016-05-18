@@ -5,15 +5,47 @@
 #include "TSystem.h"
 
 
-const Double_t _yoffset = 0.045;
+// Constants
+//------------------------------------------------------------------------------
+const Font_t   _cmsTextFont   = 61;
+const Font_t   _extraTextFont = 52;
+const Font_t   _lumiTextFont  = 42;
+const Double_t _yoffset       = 0.042;
 
+
+// Functions
+//------------------------------------------------------------------------------
+Float_t  GetMaximumIncludingErrors(TH1F*       h);
+
+void     DrawTLatex               (Font_t      tfont,
+				   Double_t    x,
+				   Double_t    y,
+				   Double_t    tsize,
+				   Short_t     align,
+				   const char* text,
+				   Bool_t      setndc = true);
+
+TLegend* DrawTLegend              (Float_t     x1,
+				   Float_t     y1,
+				   TH1*        hist,
+				   TString     label,
+				   TString     option,
+				   Float_t     tsize   = 0.03,
+				   Float_t     xoffset = 0.18,
+				   Float_t     yoffset = _yoffset);
+
+
+// Data members
+//------------------------------------------------------------------------------
 TString lumiText;
 
 
-//------------------------------------------------------------------------------
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//
 // drawFigure1
-//------------------------------------------------------------------------------
-void drawFigure1(TString energy = "8TeV")
+//
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+void drawFigure1(TString energy = "7TeV")
 {
   gInterpreter->ExecuteMacro("WZPaperStyle.C");
 
@@ -71,8 +103,8 @@ void drawFigure1(TString energy = "8TeV")
   WZ->SetFillColor(kOrange-2);
   WZ->SetLineColor(kOrange-2);
 
-  Zgamma->SetFillColor(kRed+2);
-  Zgamma->SetLineColor(kRed+2);
+  Zgamma->SetFillColor(kRed+1);  // kRed+2
+  Zgamma->SetLineColor(kRed+1);  // kRed+2
 
   ZZ->SetFillColor(kRed+1);
   ZZ->SetLineColor(kRed+1);
@@ -93,11 +125,11 @@ void drawFigure1(TString energy = "8TeV")
 
   if (energy.Contains("8TeV"))
     {
-      WV->SetFillColor(kAzure);
-      WV->SetLineColor(kAzure);
+      WV->SetFillColor(kRed+1);  // kAzure
+      WV->SetLineColor(kRed+1);  // kAzure
 
-      VVV->SetFillColor(kBlack);
-      VVV->SetLineColor(kBlack);
+      VVV->SetFillColor(kRed+1);  // kBlack
+      VVV->SetLineColor(kRed+1);  // kBlack
 
       hs->Add(VVV);
       hs->Add(WV);
@@ -154,25 +186,14 @@ void drawFigure1(TString energy = "8TeV")
 
   // Legend
   //----------------------------------------------------------------------------
-  Double_t x0 = 0.670;
-  Double_t y0 = 0.755;
+  Double_t x0 = 0.635;
+  Double_t y0 = 0.770;
 
-  DrawTLegend(x0, y0 + 2.*(_yoffset+0.001), data,   " data",             "ep");
-  DrawTLegend(x0, y0 + 1.*(_yoffset+0.001), WZ,     " WZ",               "f");
-  DrawTLegend(x0, y0,                       fakes,  " top and Z+jets",   "f");
-  DrawTLegend(x0, y0 - 1.*(_yoffset+0.001), ZZ,     " ZZ",               "f");
-  DrawTLegend(x0, y0 - 2.*(_yoffset+0.001), Zgamma, " Z#gamma",          "f");
-
-  if (energy.Contains("7TeV"))
-    {
-      DrawTLegend(x0, y0 - 3.*(_yoffset+0.001), allmc, " stat #oplus syst", "f");
-    }
-  else
-    {
-      DrawTLegend(x0, y0 - 3.*(_yoffset+0.001), WV,     " W#gamma*",         "f");
-      DrawTLegend(x0, y0 - 4.*(_yoffset+0.001), VVV,    " VVV",              "f");
-      DrawTLegend(x0, y0 - 5.*(_yoffset+0.001), allmc,  " stat #oplus syst", "f");
-    }
+  DrawTLegend(x0, y0 + 2.*(_yoffset+0.001), data,  " data",               "ep");
+  DrawTLegend(x0, y0 + 1.*(_yoffset+0.001), WZ,    " WZ",                 "f");
+  DrawTLegend(x0, y0,                       fakes, " non-prompt leptons", "f");
+  DrawTLegend(x0, y0 - 1.*(_yoffset+0.001), ZZ,    " MC background",      "f");
+  DrawTLegend(x0, y0 - 2.*(_yoffset+0.001), allmc, " stat #oplus syst",   "f");
 
 
   // Finish it
@@ -223,7 +244,7 @@ void DrawTLatex(Font_t      tfont,
 		Double_t    tsize,
 		Short_t     align,
 		const char* text,
-		Bool_t      setndc = true)
+		Bool_t      setndc)
 {
   TLatex* tl = new TLatex(x, y, text);
 
@@ -244,9 +265,9 @@ TLegend* DrawTLegend(Float_t x1,
 		     TH1*    hist,
 		     TString label,
 		     TString option,
-		     Float_t tsize   = 0.03,
-		     Float_t xoffset = 0.20,
-		     Float_t yoffset = _yoffset)
+		     Float_t tsize,
+		     Float_t xoffset,
+		     Float_t yoffset)
 {
   TLegend* legend = new TLegend(x1,
 				y1,
