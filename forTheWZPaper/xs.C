@@ -18,6 +18,14 @@
 //------------------------------------------------------------------------------
 const UInt_t nChannel = 5;
 
+const TString lChannel[nChannel] = {
+  "eee",
+  "ee#mu",
+  "#mu#mue",
+  "#mu#mu#mu",
+  "combined"
+};
+
 const Float_t xs7eval[] = {22.46, 19.04, 19.13, 20.36, 20.14};
 const Float_t xs7stat[] = { 3.12,  2.75,  2.60,  2.31,  1.32};
 const Float_t xs7syst[] = { 1.40,  1.54,  1.61,  1.53,  1.13};
@@ -28,18 +36,18 @@ const Float_t xs8stat[] = { 1.92,  1.62,  1.52,  1.29,  0.87};
 const Float_t xs8syst[] = { 1.74,  1.92,  1.85,  2.29,  1.62};
 const Float_t xs8lumi[] = { 0.64,  0.58,  0.62,  0.65,  0.63};
 
+
+const Float_t xs13nlo_mcfm = 42.6;  // From SMP-16-002 (v11)
+
+
+// From Table 16 of AN-16-028 (v4)
+// These are the observed signal strengths.
+// To extract the observed xs we multiply by xs13nlo_mcfm.
+//------------------------------------------------------------------------------
 const Float_t xs13eval[] = {0.889, 1.096, 0.977, 0.915, 0.959};
 const Float_t xs13stat[] = {0.202, 0.181, 0.169, 0.127, 0.080};
 const Float_t xs13syst[] = {0.108, 0.111, 0.111, 0.100, 0.080};
 const Float_t xs13lumi[] = {0.034, 0.038, 0.034, 0.031, 0.032};
-
-const TString lChannel[nChannel] = {
-  "eee",
-  "ee#mu",
-  "#mu#mue",
-  "#mu#mu#mu",
-  "combined"
-};
 
 
 // From Table 4 of http://arxiv.org/pdf/1604.08576.pdf
@@ -81,9 +89,6 @@ TLegend* DrawTLegend(Float_t     x1,
 void xs()
 {
   gInterpreter->ExecuteMacro("WZPaperStyle.C");
-  
-  gSystem->mkdir("pdf", kTRUE);
-  gSystem->mkdir("png", kTRUE);
 
 
   TGraphErrors* g7stat = new TGraphErrors(nChannel);
@@ -151,21 +156,23 @@ void xs()
   //----------------------------------------------------------------------------
   for (UInt_t i=0; i<nChannel; i++)
     {
+      Float_t xs = xs_nnlo[2];
+
       Float_t errorSquared = (xs13stat[i] * xs13stat[i]);
       
-      g13stat->SetPointError(i, sqrt(errorSquared), 0.25);
+      g13stat->SetPointError(i, sqrt(errorSquared) * xs13nlo_mcfm / xs, 0.25);
       
       errorSquared += (xs13syst[i] * xs13syst[i]);
 
-      g13syst->SetPointError(i, sqrt(errorSquared), 0.25);
+      g13syst->SetPointError(i, sqrt(errorSquared) * xs13nlo_mcfm / xs, 0.25);
 
       errorSquared += (xs13lumi[i] * xs13lumi[i]);
 
-      g13lumi->SetPointError(i, sqrt(errorSquared), 0.25);
+      g13lumi->SetPointError(i, sqrt(errorSquared) * xs13nlo_mcfm / xs, 0.25);
 
-      g13stat->SetPoint(i, xs13eval[i], 3*nChannel-i);
-      g13syst->SetPoint(i, xs13eval[i], 3*nChannel-i);
-      g13lumi->SetPoint(i, xs13eval[i], 3*nChannel-i);
+      g13stat->SetPoint(i, xs13eval[i] * xs13nlo_mcfm / xs, 3*nChannel-i);
+      g13syst->SetPoint(i, xs13eval[i] * xs13nlo_mcfm / xs, 3*nChannel-i);
+      g13lumi->SetPoint(i, xs13eval[i] * xs13nlo_mcfm / xs, 3*nChannel-i);
     }
 
 
@@ -231,9 +238,9 @@ void xs()
 
   canvas->SetLeftMargin(canvas->GetRightMargin());
 
-  Float_t xmin = 0.1;
-  Float_t xmax = 1.8;
-  Float_t ymin = 0.2;
+  Float_t xmin = 0.10;
+  Float_t xmax = 1.75;
+  Float_t ymin = 0.20;
   Float_t ymax = 3*nChannel + ymin + 0.6;
   
   TH2F* h2 = new TH2F("h2", "", 100, xmin, xmax, 100, ymin, ymax);
@@ -316,7 +323,7 @@ void xs()
 
     Float_t g7lumiError = g7lumi->GetErrorX(i);
 
-    DrawTLatex(42, xmin+0.07, y, 0.03, 12, Form("%s %.2f #pm %.2f",
+    DrawTLatex(42, xmin+0.05, y, 0.03, 12, Form("%s %.2f #pm %.2f",
 						lChannel[i].Data(), x, g7lumiError), 0);
   }
 
@@ -330,7 +337,7 @@ void xs()
 
     Float_t g8lumiError = g8lumi->GetErrorX(i);
 
-    DrawTLatex(42, xmin+0.07, y, 0.03, 12, Form("%s %.2f #pm %.2f",
+    DrawTLatex(42, xmin+0.05, y, 0.03, 12, Form("%s %.2f #pm %.2f",
 						lChannel[i].Data(), x, g8lumiError), 0);
   }
 
@@ -344,7 +351,7 @@ void xs()
 
     Float_t g13lumiError = g13lumi->GetErrorX(i);
 
-    DrawTLatex(42, xmin+0.07, y, 0.03, 12, Form("%s %.2f #pm %.2f",
+    DrawTLatex(42, xmin+0.05, y, 0.03, 12, Form("%s %.2f #pm %.2f",
 						lChannel[i].Data(), x, g13lumiError), 0);
   }
 
@@ -394,6 +401,9 @@ void xs()
   canvas->Update();
   canvas->GetFrame()->DrawClone();
   canvas->RedrawAxis();
+
+  gSystem->mkdir("pdf", kTRUE);
+  gSystem->mkdir("png", kTRUE);
 
   canvas->SaveAs("pdf/" + cname + ".pdf");
   canvas->SaveAs("png/" + cname + ".png");
