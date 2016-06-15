@@ -351,9 +351,9 @@ void xs()
 
   // CMS titles
   //----------------------------------------------------------------------------
-  DrawTLatex(61, 0.930, 0.85, 0.055, 31, "CMS");
-//DrawTLatex(52, 0.190, 0.94, 0.030, 11, "Preliminary");
-  DrawTLatex(42, 0.925, 0.95, 0.040, 31, "4.9 fb^{-1} (7 TeV) + 19.6 fb^{-1} (8 TeV) + 2.3 fb^{-1} (13 TeV)");
+  DrawTLatex(61, 0.930, 0.850, 0.055, 31, "CMS");
+//DrawTLatex(52, 0.190, 0.940, 0.030, 11, "Preliminary");
+  DrawTLatex(42, 0.925, 0.945, 0.040, 31, "4.9 fb^{-1} (7 TeV) + 19.6 fb^{-1} (8 TeV) + 2.3 fb^{-1} (13 TeV)");
 
   h2->GetXaxis()->CenterTitle();
   h2->GetXaxis()->SetTitleOffset(1.4);
