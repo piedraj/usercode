@@ -183,7 +183,7 @@ void drawFigure3()
   canvas->SetLeftMargin(canvas->GetRightMargin());
 
   Float_t xmin = 0.2;
-  Float_t xmax = 2.0;
+  Float_t xmax = 1.8;
   Float_t ymin = 0.2;
   Float_t ymax = 2*nChannel + ymin + 0.6;
   
@@ -291,16 +291,16 @@ void drawFigure3()
   // Additional legend
   //----------------------------------------------------------------------------
   DrawTLatex(42, 0.775, 0.805, 0.03, 11, "8 TeV");
-  DrawTLegend(0.76, 0.750, nlo8tev,  "NLO",  "f");
-  DrawTLegend(0.76, 0.700, nnlo8tev, "NNLO", "f");
-  DrawTLegend(0.76, 0.650, g8stat,   "stat", "fp");
-  DrawTLegend(0.76, 0.600, g8syst,   "syst", "f");
+  DrawTLegend(0.76, 0.750, nlo8tev,  "NLO",   "f");
+  DrawTLegend(0.76, 0.700, nnlo8tev, "NNLO",  "f");
+  DrawTLegend(0.76, 0.650, g8stat,   "stat.", "fp");
+  DrawTLegend(0.76, 0.600, g8syst,   "syst.", "f");
 
   DrawTLatex(42, 0.775, 0.455, 0.03, 11, "7 TeV");
-  DrawTLegend(0.76, 0.400, nlo7tev,  "NLO",  "f");
-  DrawTLegend(0.76, 0.350, nnlo7tev, "NNLO", "f");
-  DrawTLegend(0.76, 0.300, g7stat,   "stat", "fp");
-  DrawTLegend(0.76, 0.250, g7syst,   "syst", "f");
+  DrawTLegend(0.76, 0.400, nlo7tev,  "NLO",   "f");
+  DrawTLegend(0.76, 0.350, nnlo7tev, "NNLO",  "f");
+  DrawTLegend(0.76, 0.300, g7stat,   "stat.", "fp");
+  DrawTLegend(0.76, 0.250, g7syst,   "syst.", "f");
 
 
   // Save

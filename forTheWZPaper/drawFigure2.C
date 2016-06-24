@@ -34,34 +34,43 @@ TLegend* DrawTLegend              (Float_t     x1,
 				   Float_t     xoffset = 0.18,
 				   Float_t     yoffset = _yoffset);
 
+void     DrawZPeak                (TString     energy);
+
 
 // Data members
 //------------------------------------------------------------------------------
-TString lumiText;
+TString _lumiText;
 
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 //
 // drawFigure2
 //
-//    energy = "7TeV"
-//    energy = "8TeV"
-//
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-void drawFigure2(TString energy = "7TeV")
+void drawFigure2()
 {
   gInterpreter->ExecuteMacro("WZPaperStyle.C");
 
   gSystem->mkdir("pdf", kTRUE);
   gSystem->mkdir("png", kTRUE);
 
+  DrawZPeak("7TeV");
+  DrawZPeak("8TeV");
+}
+
+
+//------------------------------------------------------------------------------
+// DrawZPeak
+//------------------------------------------------------------------------------
+void DrawZPeak(TString energy)
+{
   if (energy.Contains("7TeV"))
     {
-      lumiText = "4.9 fb^{-1} (7 TeV)";
+      _lumiText = "4.9 fb^{-1} (7 TeV)";
     }
   else
     {
-      lumiText = "19.6 fb^{-1} (8 TeV)";
+      _lumiText = "19.6 fb^{-1} (8 TeV)";
     }
 
 
@@ -196,7 +205,7 @@ void drawFigure2(TString energy = "7TeV")
   DrawTLegend(x0, y0 + 1.*(_yoffset+0.001), WZ,    " WZ",                 "f");
   DrawTLegend(x0, y0,                       fakes, " Non-prompt leptons", "f");
   DrawTLegend(x0, y0 - 1.*(_yoffset+0.001), ZZ,    " MC background",      "f");
-  DrawTLegend(x0, y0 - 2.*(_yoffset+0.001), allmc, " Stat. #oplus syst.", "f");
+  DrawTLegend(x0, y0 - 2.*(_yoffset+0.001), allmc, " stat. #oplus syst.", "f");
 
 
   // Finish it
@@ -205,7 +214,7 @@ void drawFigure2(TString energy = "7TeV")
 
   DrawTLatex(_cmsTextFont,   0.215, 0.880, 0.055, 13, "CMS");
   //  DrawTLatex(_extraTextFont, 0.215, 0.826, 0.030, 13, "Preliminary");
-  DrawTLatex(_lumiTextFont,  0.940, 0.940, 0.040, 31, lumiText);
+  DrawTLatex(_lumiTextFont,  0.940, 0.940, 0.040, 31, _lumiText);
 
   hs   ->Draw("hist,same");
   allmc->Draw("e2,same");
