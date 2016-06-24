@@ -22,8 +22,7 @@ void     DrawTLatex               (Font_t      tfont,
 				   Double_t    y,
 				   Double_t    tsize,
 				   Short_t     align,
-				   const char* text,
-				   Bool_t      setndc = true);
+				   const char* text);
 
 TLegend* DrawTLegend              (Float_t     x1,
 				   Float_t     y1,
@@ -35,118 +34,65 @@ TLegend* DrawTLegend              (Float_t     x1,
 				   Float_t     yoffset = _yoffset);
 
 
-// Data members
-//------------------------------------------------------------------------------
-TString lumiText;
-
-
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 //
-// drawFigure1
+// drawFigure6
 //
-//    energy = "7TeV"
-//    energy = "8TeV"
+//    logy = 0
+//    logy = 1
 //
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-void drawFigure1(TString energy = "8TeV")
+void drawFigure6(Int_t logy = 1)
 {
   gInterpreter->ExecuteMacro("WZPaperStyle.C");
 
   gSystem->mkdir("pdf", kTRUE);
   gSystem->mkdir("png", kTRUE);
 
-  if (energy.Contains("7TeV"))
-    {
-      lumiText = "4.9 fb^{-1} (7 TeV)";
-    }
-  else
-    {
-      lumiText = "19.6 fb^{-1} (8 TeV)";
-    }
-
 
   // Read the input file
   //----------------------------------------------------------------------------
-  TString name = "invMass2Lep_";
+  TString name = "WZ_PtZ_plot_allCh_largeATGC";
 
-  TFile* file = new TFile("rootfiles/" + name + energy + ".root", "read");
+  TFile* file = new TFile("rootfiles/" + name + ".root", "read");
 
-  TH1F* data;
-  TH1F* WZ;
-  TH1F* fakes;
-  TH1F* ZZ;
-  TH1F* Zgamma;
-  TH1F* WV;
-  TH1F* VVV;
-  TH1F* allmc;
+  TCanvas* c1 = (TCanvas*)file->Get("c1_allCh");
 
-  if (energy.Contains("7TeV"))
-    {
-      data   = (TH1F*)file->Get("hZMass_Sel_datahist_COMB");
-      WZ     = (TH1F*)file->Get("hZMass_Sel_wz_COMB");
-      fakes  = (TH1F*)file->Get("hZMass_Sel_datadriven_COMB");
-      ZZ     = (TH1F*)file->Get("hZMass_Sel_zz_COMB");
-      Zgamma = (TH1F*)file->Get("hZMass_Sel_zg_COMB");
-      WV     = (TH1F*)file->Get("hZMass_Sel_wz_COMB");
-      VVV    = (TH1F*)file->Get("hZMass_Sel_wz_COMB");
-      allmc  = (TH1F*)file->Get("all_estimates_with_error_COMB");
-    }
-  else if (energy.Contains("8TeV"))
-    {
-      data   = (TH1F*)file->Get("h_data");
-      WZ     = (TH1F*)file->Get("h_WZ");
-      fakes  = (TH1F*)file->Get("h_Fakes");
-      ZZ     = (TH1F*)file->Get("h_ZZ");
-      Zgamma = (TH1F*)file->Get("h_ZGamma");
-      WV     = (TH1F*)file->Get("h_WV");
-      VVV    = (TH1F*)file->Get("h_VVV");
-      allmc  = (TH1F*)file->Get("h_All");
-    }
+  TH1F* data     = (TH1F*)c1->FindObject("histo_data_3e");
+  TH1F* aTGC_dk  = (TH1F*)c1->FindObject("histo_aTGC_dk_3e");
+  TH1F* aTGC_lam = (TH1F*)c1->FindObject("histo_aTGC_lam_3e");
+  TH1F* aTGC_dg  = (TH1F*)c1->FindObject("histo_aTGC_dg_3e");
+  TH1F* WZ       = (TH1F*)c1->FindObject("histo_SM_3e");
+  TH1F* fakes    = (TH1F*)c1->FindObject("fake_0");
+  TH1F* ZZ       = (TH1F*)c1->FindObject("total_bkg_rebined_ZZ_0");
+  TH1F* Zgamma   = (TH1F*)c1->FindObject("total_bkg_rebined_Zgamma_0");
+  TH1F* WV       = (TH1F*)c1->FindObject("total_bkg_rebined_WV_0");
+  TH1F* VVV      = (TH1F*)c1->FindObject("total_bkg_rebined_VVV_0");
 
   WZ->SetFillColor(kOrange-2);
   WZ->SetLineColor(kOrange-2);
 
-  Zgamma->SetFillColor(kRed+1);  // kRed+2
-  Zgamma->SetLineColor(kRed+1);  // kRed+2
+  Zgamma->SetFillColor(kRed+1);
+  Zgamma->SetLineColor(kRed+1);
 
   ZZ->SetFillColor(kRed+1);
   ZZ->SetLineColor(kRed+1);
 
   fakes->SetFillColor(kGray+1);
   fakes->SetLineColor(kGray+1);
-  
-  data->SetMarkerStyle(kFullCircle);
 
-  allmc->SetFillColor  (kBlack);
-  allmc->SetFillStyle  (3345);
-  allmc->SetLineColor  (kWhite);
-  allmc->SetLineWidth  (0);
-  allmc->SetMarkerColor(kOrange-2);
-  allmc->SetMarkerSize (0);
+  WV->SetFillColor(kRed+1);
+  WV->SetLineColor(kRed+1);
 
-  THStack* hs = new THStack();
-
-  if (energy.Contains("8TeV"))
-    {
-      WV->SetFillColor(kRed+1);  // kAzure
-      WV->SetLineColor(kRed+1);  // kAzure
-
-      VVV->SetFillColor(kRed+1);  // kBlack
-      VVV->SetLineColor(kRed+1);  // kBlack
-
-      hs->Add(VVV);
-      hs->Add(WV);
-    }
-
-  hs->Add(Zgamma);
-  hs->Add(ZZ);
-  hs->Add(fakes);
-  hs->Add(WZ);
+  VVV->SetFillColor(kRed+1);
+  VVV->SetLineColor(kRed+1);
 
 
   // Draw
   //----------------------------------------------------------------------------
-  TCanvas* canvas = new TCanvas(energy, energy);
+  TCanvas* canvas = new TCanvas("canvas", "canvas");
+
+  canvas->SetLogy(logy);
 
   data->Draw("ep");
 
@@ -169,54 +115,99 @@ void drawFigure1(TString energy = "8TeV")
   yaxis->SetLabelSize  (0.05);
   yaxis->SetNdivisions ( 505);
   yaxis->SetTitleFont  (  42);
-  yaxis->SetTitleOffset( 1.5);
+  yaxis->SetTitleOffset( 1.6);
   yaxis->SetTitleSize  (0.05);
 
-  xaxis->SetRangeUser(68, 112);
-  xaxis->SetTitle("m_{#font[12]{ll}} (GeV)");
+  xaxis->SetTitle("p_{T}^{Z} (GeV)");
   yaxis->SetTitle(Form("Events /  %.0f GeV", data->GetBinWidth(0)));
 
 
   // Adjust scale
   //----------------------------------------------------------------------------
   Float_t theMax   = GetMaximumIncludingErrors(data);
-  Float_t theMaxMC = GetMaximumIncludingErrors(allmc);
+  Float_t theMaxMC = GetMaximumIncludingErrors(aTGC_dk);
 
   if (theMaxMC > theMax) theMax = theMaxMC;
 
-  data->SetMaximum(1.15 * theMax);
+  if (canvas->GetLogy()) {
+    data->SetMaximum(15 * theMax);
+    data->SetMinimum(1);
+  } else {
+    data->SetMaximum(1.2 * theMax);
+  }
 
 
   // Legend
   //----------------------------------------------------------------------------
-  Double_t x0 = 0.635;
-  Double_t y0 = 0.770;
+  Double_t x0;
+  Double_t y0;
 
-  DrawTLegend(x0, y0 + 2.*(_yoffset+0.001), data,  " data",               "ep");
-  DrawTLegend(x0, y0 + 1.*(_yoffset+0.001), WZ,    " WZ",                 "f");
-  DrawTLegend(x0, y0,                       fakes, " non-prompt leptons", "f");
-  DrawTLegend(x0, y0 - 1.*(_yoffset+0.001), ZZ,    " MC background",      "f");
-  DrawTLegend(x0, y0 - 2.*(_yoffset+0.001), allmc, " stat #oplus syst",   "f");
+  if (logy)
+    {
+      x0 = 0.630;
+      y0 = 0.765;
+
+      DrawTLegend(x0 - 0.37, y0 + 2.*(_yoffset+0.001), data,     " data",                              "ep");
+      DrawTLegend(x0 - 0.37, y0 + 1.*(_yoffset+0.001), aTGC_dk,  " WZ aTGC (#Delta#kappa^{Z} = 0.6)",  "l");
+      DrawTLegend(x0 - 0.37, y0,                       aTGC_dg,  " WZ aTGC (#Deltag^{Z}_{1} = -0.06)", "l");
+      DrawTLegend(x0 - 0.37, y0 - 1.*(_yoffset+0.001), aTGC_lam, " WZ aTGC (#lambda = 0.04)",          "l");
+      DrawTLegend(x0,        y0 + 2.*(_yoffset+0.001), WZ,       " WZ",                                "f");
+      DrawTLegend(x0,        y0 + 1.*(_yoffset+0.001), fakes,    " non-prompt leptons",                "f");
+      DrawTLegend(x0,        y0,                       ZZ,       " MC background",                     "f");
+    }
+  else
+    {
+      x0 = 0.570;
+      y0 = 0.755;
+
+      DrawTLegend(x0, y0 + 2.*(_yoffset+0.001), data,     " data",                              "ep");
+      DrawTLegend(x0, y0 + 1.*(_yoffset+0.001), aTGC_dk,  " WZ aTGC (#Delta#kappa^{Z} = 0.6)",  "l");
+      DrawTLegend(x0, y0,                       aTGC_dg,  " WZ aTGC (#Deltag^{Z}_{1} = -0.06)", "l");
+      DrawTLegend(x0, y0 - 1.*(_yoffset+0.001), aTGC_lam, " WZ aTGC (#lambda = 0.04)",          "l");
+      DrawTLegend(x0, y0 - 2.*(_yoffset+0.001), WZ,       " WZ",                                "f");
+      DrawTLegend(x0, y0 - 3.*(_yoffset+0.001), fakes,    " non-prompt leptons",                "f");
+      DrawTLegend(x0, y0 - 4.*(_yoffset+0.001), ZZ,       " MC background",                     "f");
+    }
 
 
   // Finish it
   //----------------------------------------------------------------------------
   data->SetTitle("");
 
-  DrawTLatex(_cmsTextFont,   0.215, 0.880, 0.055, 13, "CMS");
-  //  DrawTLatex(_extraTextFont, 0.215, 0.826, 0.030, 13, "Preliminary");
-  DrawTLatex(_lumiTextFont,  0.940, 0.940, 0.040, 31, lumiText);
+  if (logy)
+    {
+      DrawTLatex(_cmsTextFont,   0.190, 0.94, 0.055, 11, "CMS");
+      //      DrawTLatex(_extraTextFont, 0.315, 0.94, 0.030, 11, "Preliminary");
+    }
+  else
+    {
+      DrawTLatex(_cmsTextFont,   0.215, 0.891, 0.055, 13, "CMS");
+      //      DrawTLatex(_extraTextFont, 0.215, 0.837, 0.030, 13, "Preliminary");
+    }
 
-  hs   ->Draw("hist,same");
-  allmc->Draw("e2,same");
-  data ->Draw("ep,same");
+  DrawTLatex(_lumiTextFont, 0.940, 0.94, 0.040, 31, "19.6 fb^{-1} (8 TeV)");
+
+  WZ      ->Draw("hist,same");
+  aTGC_dk ->Draw("hist,same");
+  aTGC_lam->Draw("hist,same");
+  aTGC_dg ->Draw("hist,same");
+  fakes   ->Draw("hist,same");
+  ZZ      ->Draw("hist,same");
+  Zgamma  ->Draw("hist,same");
+  WV      ->Draw("hist,same");
+  VVV     ->Draw("hist,same");
+  data    ->Draw("ep,same");
 
   canvas->GetFrame()->DrawClone();
   canvas->RedrawAxis();
   canvas->Update();
   
-  canvas->SaveAs("pdf/" + name + energy + ".pdf");
-  canvas->SaveAs("png/" + name + energy + ".png");
+  TString cname = name;
+
+  if (logy) cname += "_log_range";
+
+  canvas->SaveAs("pdf/" + cname + ".pdf");
+  canvas->SaveAs("png/" + cname + ".png");
 }
 
 
@@ -246,15 +237,14 @@ void DrawTLatex(Font_t      tfont,
 		Double_t    y,
 		Double_t    tsize,
 		Short_t     align,
-		const char* text,
-		Bool_t      setndc)
+		const char* text)
 {
   TLatex* tl = new TLatex(x, y, text);
 
-  tl->SetNDC      (setndc);
-  tl->SetTextAlign( align);
-  tl->SetTextFont ( tfont);
-  tl->SetTextSize ( tsize);
+  tl->SetNDC();
+  tl->SetTextAlign(align);
+  tl->SetTextFont (tfont);
+  tl->SetTextSize (tsize);
 
   tl->Draw("same");
 }

@@ -44,14 +44,14 @@ Float_t ymax;
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 //
-// drawFigure4
+// drawFigure7
 //
 //    parameter = "dg0"
 //    parameter = "lam0"
 //    parameter = "dk0"
 //
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-void drawFigure4(TString parameter = "dk0")
+void drawFigure7(TString parameter = "dk0")
 {
   gInterpreter->ExecuteMacro("WZPaperStyle.C");
 
