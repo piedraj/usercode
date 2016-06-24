@@ -48,7 +48,7 @@ TString lumiText;
 //    energy = "8TeV"
 //
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-void drawFigure2(TString energy = "8TeV")
+void drawFigure2(TString energy = "7TeV")
 {
   gInterpreter->ExecuteMacro("WZPaperStyle.C");
 
@@ -161,7 +161,7 @@ void drawFigure2(TString energy = "8TeV")
   xaxis->SetLabelSize  (0.05);
   xaxis->SetNdivisions ( 505);
   xaxis->SetTitleFont  (  42);
-  xaxis->SetTitleOffset( 1.2);
+  xaxis->SetTitleOffset( 1.3);
   xaxis->SetTitleSize  (0.05);
 
   yaxis->SetLabelFont  (  42);
@@ -169,7 +169,7 @@ void drawFigure2(TString energy = "8TeV")
   yaxis->SetLabelSize  (0.05);
   yaxis->SetNdivisions ( 505);
   yaxis->SetTitleFont  (  42);
-  yaxis->SetTitleOffset( 1.5);
+  yaxis->SetTitleOffset( 1.6);
   yaxis->SetTitleSize  (0.05);
 
   xaxis->SetRangeUser(68, 112);
@@ -192,11 +192,11 @@ void drawFigure2(TString energy = "8TeV")
   Double_t x0 = 0.635;
   Double_t y0 = 0.770;
 
-  DrawTLegend(x0, y0 + 2.*(_yoffset+0.001), data,  " data",               "ep");
+  DrawTLegend(x0, y0 + 2.*(_yoffset+0.001), data,  " Data",               "ep");
   DrawTLegend(x0, y0 + 1.*(_yoffset+0.001), WZ,    " WZ",                 "f");
-  DrawTLegend(x0, y0,                       fakes, " non-prompt leptons", "f");
+  DrawTLegend(x0, y0,                       fakes, " Non-prompt leptons", "f");
   DrawTLegend(x0, y0 - 1.*(_yoffset+0.001), ZZ,    " MC background",      "f");
-  DrawTLegend(x0, y0 - 2.*(_yoffset+0.001), allmc, " stat #oplus syst",   "f");
+  DrawTLegend(x0, y0 - 2.*(_yoffset+0.001), allmc, " Stat. #oplus syst.", "f");
 
 
   // Finish it
