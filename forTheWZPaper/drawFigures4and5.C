@@ -55,7 +55,7 @@ void AxisFontsRatio              (TAxis*  axis,
 // Njets
 //
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-void drawFigures4and5(TString var = "Njets") 
+void drawFigures4and5(TString var = "LeadingJetPt") 
 {
   Bool_t drawMcfm = (var.EqualTo("Zpt")) ? true : false;
 
@@ -272,9 +272,14 @@ void drawFigures4and5(TString var = "Njets")
   hratio_mad->Draw("e2,same");
   ratio_mad ->Draw("ep,same");
 
-  ratio_mad->GetYaxis()->SetRangeUser(0.01, 2.3);  
+  pad2->GetFrame()->DrawClone();
+  pad2->RedrawAxis();
 
-  pad2->Modified();
+  TLine* line2 = new TLine(ratio_mad->GetXaxis()->GetXmin(), 1.0, ratio_mad->GetXaxis()->GetXmax(), 1.0);
+  line2->SetLineStyle(3);
+  line2->Draw("same");
+
+  ratio_mad->GetYaxis()->SetRangeUser(0.01, 2.3);  
 
   if (drawMcfm) DrawLatex(43, 0.20, 0.785, 15.0, 11, "MadGraph+Pythia normalized to #sigma_{NLO}");
   else          DrawLatex(43, 0.19, 0.845, 15.0, 11, "MadGraph+Pythia normalized to #sigma_{NLO}");
@@ -297,6 +302,10 @@ void drawFigures4and5(TString var = "Njets")
       hratio_mcnlo->Draw("e2,same");
       ratio_mcnlo ->Draw("ep,same");
 
+      TLine* line3 = new TLine(ratio_mcnlo->GetXaxis()->GetXmin(), 1.0, ratio_mcnlo->GetXaxis()->GetXmax(), 1.0);
+      line3->SetLineStyle(3);
+      line3->Draw("same");
+
       ratio_mcnlo->GetYaxis()->SetRangeUser(0.1, 2.3);  
 
       pad3->Modified();
@@ -308,7 +317,6 @@ void drawFigures4and5(TString var = "Njets")
   // Save
   //----------------------------------------------------------------------------
   pad1->cd(); pad1->GetFrame()->DrawClone(); pad1->RedrawAxis();
-  pad2->cd(); pad2->GetFrame()->DrawClone(); pad2->RedrawAxis();
 
   if (drawMcfm)
     {
