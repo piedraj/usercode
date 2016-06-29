@@ -1,13 +1,8 @@
-#include "TROOT.h"
-#include "TSystem.h"
-#include "TInterpreter.h"
-#include "TFile.h"
 #include "TCanvas.h"
-#include "TH1F.h"
-#include "TStyle.h"
+#include "TFile.h"
+#include "TH1D.h"
 #include "TPad.h"
-#include "TMath.h"
-#include "TColor.h"
+#include "TStyle.h"
 
 
 // Constants
@@ -41,9 +36,9 @@ TLegend* DrawLegend              (Float_t     x1,
 void     AxisFonts               (TAxis*      axis,
 				  TString     title);
 
-void AxisFontsRatio              (TAxis*  axis,
-				  TString which,
-				  TString title);
+void     AxisFontsRatio          (TAxis*      axis,
+				  TString     which,
+				  TString     title);
 
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -55,8 +50,13 @@ void AxisFontsRatio              (TAxis*  axis,
 // Njets
 //
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-void drawFigures4and5(TString var = "LeadingJetPt") 
+void drawFigures4and5(TString var = "Zpt") 
 {
+  gSystem->mkdir("pdf", kTRUE);
+  gSystem->mkdir("png", kTRUE);
+
+  gInterpreter->ExecuteMacro("WZPaperStyle.C");
+
   Bool_t drawMcfm = (var.EqualTo("Zpt")) ? true : false;
 
   TString variable;
@@ -68,18 +68,13 @@ void drawFigures4and5(TString var = "LeadingJetPt")
   TString xtitle = (var.EqualTo("Njets")) ? variable : "p_{T}^{" + variable + "} (GeV)";
   TString ytitle = "d#sigma(WZ#rightarrow3l#nu)/dp_{T}^{" + variable + "}";
 
-  gInterpreter->ExecuteMacro("WZPaperStyle.C");
-
-  gSystem->mkdir("pdf", kTRUE);
-  gSystem->mkdir("png", kTRUE);
-
   TFile* file = new TFile("rootfiles/all_unfolding_" + var + ".root", "read");
 
-  TH1F* xsValue          = (TH1F*)file->Get("hComb_diff");
-  TH1F* xsValue_Madgraph = (TH1F*)file->Get("hGenXs" + var + "_1");
-  TH1F* xsValue_MCnlo;
+  TH1D* xsValue          = (TH1D*)file->Get("hComb_diff");
+  TH1D* xsValue_Madgraph = (TH1D*)file->Get("hGenXs" + var + "_1");
+  TH1D* xsValue_MCnlo;
 
-  if (drawMcfm) xsValue_MCnlo = (TH1F*)file->Get("mcfm_tot");
+  if (drawMcfm) xsValue_MCnlo = (TH1D*)file->Get("mcfm_tot");
 
 
   // Data cosmetics
@@ -120,7 +115,7 @@ void drawFigures4and5(TString var = "LeadingJetPt")
 
   // Set the canvas and pads
   //----------------------------------------------------------------------------
-  TCanvas* canvas = new TCanvas("wwxs", "wwxs");
+  TCanvas* canvas = new TCanvas(var, var);
 
   TPad* pad1;
   TPad* pad2;
@@ -128,9 +123,9 @@ void drawFigures4and5(TString var = "LeadingJetPt")
 
   if (drawMcfm)
     {
-      pad1 = new TPad("pad1", "pad1", 0, 0.49, 1, 1.000);
-      pad2 = new TPad("pad2", "pad2", 0, 0.33, 1, 0.492);
-      pad3 = new TPad("pad3", "pad3", 0, 0.00, 1, 0.332);
+      pad1 = new TPad("pad1" + var, "pad1" + var, 0, 0.49, 1, 1.000);
+      pad2 = new TPad("pad2" + var, "pad2" + var, 0, 0.33, 1, 0.492);
+      pad3 = new TPad("pad3" + var, "pad3" + var, 0, 0.00, 1, 0.332);
   
       pad1->SetTopMargin(0.09);
       pad2->SetTopMargin(0);
@@ -150,8 +145,8 @@ void drawFigures4and5(TString var = "LeadingJetPt")
     }
   else
     {
-      pad1 = new TPad("pad1", "pad1", 0, 0.33, 1, 1.000);
-      pad2 = new TPad("pad2", "pad2", 0, 0.00, 1, 0.332);
+      pad1 = new TPad("pad1" + var, "pad1" + var, 0, 0.33, 1, 1.000);
+      pad2 = new TPad("pad2" + var, "pad2" + var, 0, 0.00, 1, 0.332);
   
       pad1->SetTopMargin(0.09);
       pad2->SetTopMargin(0);
@@ -211,16 +206,16 @@ void drawFigures4and5(TString var = "LeadingJetPt")
 
   // Prepare the ratios
   //----------------------------------------------------------------------------
-  TH1F* ratio_mad  = (TH1F*)xsValue_Madgraph->Clone("ratio_mad");
-  TH1F* hratio_mad = (TH1F*)xsValue_Madgraph->Clone("hratio_mad");
+  TH1D* ratio_mad  = (TH1D*)xsValue_Madgraph->Clone("ratio_mad");
+  TH1D* hratio_mad = (TH1D*)xsValue_Madgraph->Clone("hratio_mad");
 
-  TH1F* ratio_mcnlo;
-  TH1F* hratio_mcnlo;
+  TH1D* ratio_mcnlo;
+  TH1D* hratio_mcnlo;
 
   if (drawMcfm)
     {
-      ratio_mcnlo  = (TH1F*)xsValue_MCnlo->Clone("ratio_mcnlo");
-      hratio_mcnlo = (TH1F*)xsValue_MCnlo->Clone("hratio_mcnlo");
+      ratio_mcnlo  = (TH1D*)xsValue_MCnlo->Clone("ratio_mcnlo");
+      hratio_mcnlo = (TH1D*)xsValue_MCnlo->Clone("hratio_mcnlo");
     }
 
 
@@ -272,9 +267,6 @@ void drawFigures4and5(TString var = "LeadingJetPt")
   hratio_mad->Draw("e2,same");
   ratio_mad ->Draw("ep,same");
 
-  pad2->GetFrame()->DrawClone();
-  pad2->RedrawAxis();
-
   TLine* line2 = new TLine(ratio_mad->GetXaxis()->GetXmin(), 1.0, ratio_mad->GetXaxis()->GetXmax(), 1.0);
   line2->SetLineStyle(3);
   line2->Draw("same");
@@ -316,13 +308,19 @@ void drawFigures4and5(TString var = "LeadingJetPt")
 
   // Save
   //----------------------------------------------------------------------------
-  pad1->cd(); pad1->GetFrame()->DrawClone(); pad1->RedrawAxis();
+  pad1->cd();
+  pad1->RedrawAxis();
+  pad1->GetFrame()->DrawClone();
+  
+  pad2->cd();
+  pad2->RedrawAxis();
+  pad2->GetFrame()->DrawClone();
 
   if (drawMcfm)
     {
       pad3->cd();
-      pad3->GetFrame()->DrawClone();
       pad3->RedrawAxis();
+      pad3->GetFrame()->DrawClone();
     }
 
   canvas->cd();
