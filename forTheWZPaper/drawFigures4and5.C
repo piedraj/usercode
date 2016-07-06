@@ -60,13 +60,23 @@ void drawFigures4and5(TString var = "Zpt")
   Bool_t drawMcfm = (var.EqualTo("Zpt")) ? true : false;
 
   TString variable;
+  TString xtitle;
+  TString ytitle;
 
   if (var.EqualTo("Zpt"))          variable = "Z";
   if (var.EqualTo("LeadingJetPt")) variable = "leading jet";
   if (var.EqualTo("Njets"))        variable = "N_{jets}";
 
-  TString xtitle = (var.EqualTo("Njets")) ? variable : "p_{T}^{" + variable + "} (GeV)";
-  TString ytitle = "d#sigma(WZ#rightarrow3l#nu)/dp_{T}^{" + variable + "}";
+  if (var.EqualTo("Njets"))
+    {
+      xtitle = variable;
+      ytitle = "d#sigma(WZ#rightarrow3l#nu)/d" + variable + " (pb)";
+    }
+  else
+    {
+      xtitle = "p_{T}^{" + variable + "} (GeV)";
+      ytitle = "d#sigma(WZ#rightarrow3l#nu)/dp_{T}^{" + variable + "} (pb/GeV)";
+    }
 
   TFile* file = new TFile("rootfiles/all_unfolding_" + var + ".root", "read");
 
