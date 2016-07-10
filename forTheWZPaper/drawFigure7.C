@@ -161,10 +161,10 @@ void drawFigure7(TString parameter = "dk0")
   Double_t x0 = 0.580;
   Double_t y0 = 0.755;
 
-  DrawTLegend(x0 - 0.36, y0 + 2.*(_yoffset+0.001), (TH1F*)cont_exp_68, " Expected 68% C.L.", "l");
-  DrawTLegend(x0 - 0.36, y0 + 1.*(_yoffset+0.001), (TH1F*)cont_exp_95, " Expected 95% C.L.", "l");
-  DrawTLegend(x0,        y0 + 2.*(_yoffset+0.001), (TH1F*)cont_exp_99, " Expected 99% C.L.", "l");
-  DrawTLegend(x0,        y0 + 1.*(_yoffset+0.001), (TH1F*)cont_obs_95, " Observed 95% C.L.", "l");
+  DrawTLegend(x0 - 0.36, y0 + 2.*(_yoffset+0.001), (TH1F*)cont_exp_68, " Expected 68% CL", "l");
+  DrawTLegend(x0 - 0.36, y0 + 1.*(_yoffset+0.001), (TH1F*)cont_exp_95, " Expected 95% CL", "l");
+  DrawTLegend(x0,        y0 + 2.*(_yoffset+0.001), (TH1F*)cont_exp_99, " Expected 99% CL", "l");
+  DrawTLegend(x0,        y0 + 1.*(_yoffset+0.001), (TH1F*)cont_obs_95, " Observed 95% CL", "l");
   DrawTLegend(x0,        y0,                       (TH1F*)bestFit,     " Best fit",          "p");
 
 
