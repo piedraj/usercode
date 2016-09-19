@@ -1,6 +1,6 @@
 # SMP-14-014 figures
 
-The xml files of the Feynman diagrams in Figure 1 have been created with JaxoDraw-2.1-0.
+The xml files of the Feynman diagrams in Figure 1 have been created with JaxoDraw-2.1-0. To create the pdf versions we have installed the jaxodraw-pdf-plugin-1.0-0.jar plugin.
 
     java -jar jaxodraw-2.1-0.jar
 
