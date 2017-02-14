@@ -5,8 +5,35 @@
 #include "TSystem.h"
 
 
-const Double_t _yoffset = 0.045;
+// Constants
+//------------------------------------------------------------------------------
+const Font_t   _cmsTextFont   = 61;
+const Font_t   _extraTextFont = 52;
+const Font_t   _lumiTextFont  = 42;
+const Double_t _yoffset       = 0.045;
 
+
+// Functions
+//------------------------------------------------------------------------------
+void     DrawTLatex (Font_t      tfont,
+		     Double_t    x,
+		     Double_t    y,
+		     Double_t    tsize,
+		     Short_t     align,
+		     const char* text);
+
+TLegend* DrawTLegend(Float_t     x1,
+		     Float_t     y1,
+		     TH1*        hist,
+		     TString     label,
+		     TString     option,
+		     Float_t     tsize   = 0.03,
+		     Float_t     xoffset = 0.34,
+		     Float_t     yoffset = _yoffset);
+
+
+// Data members
+//------------------------------------------------------------------------------
 TString xtitle;
 TString ytitle;
 Float_t xmin;
@@ -15,10 +42,16 @@ Float_t ymin;
 Float_t ymax;
 
 
-//------------------------------------------------------------------------------
-// drawFigure4
-//------------------------------------------------------------------------------
-void drawFigure4(TString parameter = "lam0")
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//
+// drawFigure7
+//
+//    parameter = "dg0"
+//    parameter = "lam0"
+//    parameter = "dk0"
+//
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+void drawFigure7(TString parameter = "dk0")
 {
   gInterpreter->ExecuteMacro("WZPaperStyle.C");
 
@@ -128,17 +161,17 @@ void drawFigure4(TString parameter = "lam0")
   Double_t x0 = 0.580;
   Double_t y0 = 0.755;
 
-  DrawTLegend(x0 - 0.36, y0 + 2.*(_yoffset+0.001), (TH1F*)cont_exp_68, " Expected 68% C.L.", "l");
-  DrawTLegend(x0 - 0.36, y0 + 1.*(_yoffset+0.001), (TH1F*)cont_exp_95, " Expected 95% C.L.", "l");
-  DrawTLegend(x0,        y0 + 2.*(_yoffset+0.001), (TH1F*)cont_exp_99, " Expected 99% C.L.", "l");
-  DrawTLegend(x0,        y0 + 1.*(_yoffset+0.001), (TH1F*)cont_obs_95, " Observed 95% C.L.", "l");
+  DrawTLegend(x0 - 0.36, y0 + 2.*(_yoffset+0.001), (TH1F*)cont_exp_68, " Expected 68% CL", "l");
+  DrawTLegend(x0 - 0.36, y0 + 1.*(_yoffset+0.001), (TH1F*)cont_exp_95, " Expected 95% CL", "l");
+  DrawTLegend(x0,        y0 + 2.*(_yoffset+0.001), (TH1F*)cont_exp_99, " Expected 99% CL", "l");
+  DrawTLegend(x0,        y0 + 1.*(_yoffset+0.001), (TH1F*)cont_obs_95, " Observed 95% CL", "l");
   DrawTLegend(x0,        y0,                       (TH1F*)bestFit,     " Best fit",          "p");
 
 
   // Finish it
   //----------------------------------------------------------------------------
   DrawTLatex(_cmsTextFont,   0.190, 0.94, 0.055, 11, "CMS");
-  DrawTLatex(_extraTextFont, 0.315, 0.94, 0.030, 11, "Preliminary");
+  //  DrawTLatex(_extraTextFont, 0.315, 0.94, 0.030, 11, "Preliminary");
   DrawTLatex(_lumiTextFont,  0.940, 0.94, 0.040, 31, "19.6 fb^{-1} (8 TeV)");
 
   canvas->SaveAs("pdf/lZ_dkg_2dlimit_" + parameter + "_2Dpol2_deltaNLL.pdf");
@@ -175,9 +208,9 @@ TLegend* DrawTLegend(Float_t x1,
 		     TH1*    hist,
 		     TString label,
 		     TString option,
-		     Float_t tsize   = 0.03,
-		     Float_t xoffset = 0.34,
-		     Float_t yoffset = _yoffset)
+		     Float_t tsize,
+		     Float_t xoffset,
+		     Float_t yoffset)
 {
   TLegend* legend = new TLegend(x1,
 				y1,
