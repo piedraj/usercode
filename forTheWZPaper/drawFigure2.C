@@ -18,14 +18,14 @@
 //------------------------------------------------------------------------------
 const UInt_t nChannel = 5;
 
-const Float_t xs7eval[] = {23.00, 19.67, 19.81, 21.02, 20.14};
-const Float_t xs7stat[] = { 3.10,  2.73,  2.60,  2.30,  1.32};
-const Float_t xs7syst[] = { 1.39,  1.50,  1.55,  1.47,  1.13};
-const Float_t xs7lumi[] = { 0.51,  0.43,  0.44,  0.46,  0.44};
+const Float_t xs7eval[] = {22.46, 19.04, 19.13, 20.36, 20.14};
+const Float_t xs7stat[] = { 3.12,  2.75,  2.60,  2.31,  1.32};
+const Float_t xs7syst[] = { 1.40,  1.54,  1.61,  1.53,  1.13};
+const Float_t xs7lumi[] = { 0.49,  0.42,  0.42,  0.45,  0.44};
 
-const Float_t xs8eval[] = {24.80, 22.38, 23.94, 24.93, 24.07};
-const Float_t xs8stat[] = { 1.92,  1.62,  1.52,  1.29,  0.84};
-const Float_t xs8syst[] = { 1.74,  2.08,  2.39,  2.34,  1.62};
+const Float_t xs8eval[] = {24.80, 22.38, 23.94, 24.93, 24.09};
+const Float_t xs8stat[] = { 1.92,  1.62,  1.52,  1.29,  0.87};
+const Float_t xs8syst[] = { 1.74,  1.92,  1.85,  2.29,  1.62};
 const Float_t xs8lumi[] = { 0.64,  0.58,  0.62,  0.65,  0.63};
 
 const TString lChannel[nChannel] = {
