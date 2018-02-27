@@ -12,6 +12,16 @@ const Font_t   _extraTextFont = 52;
 const Font_t   _lumiTextFont  = 42;
 const Double_t _yoffset       = 0.042;
 
+const Float_t xs7eval[] = {22.46, 19.04, 19.13, 20.36, 20.14};
+const Float_t xs7stat[] = { 3.12,  2.75,  2.60,  2.31,  1.32};
+const Float_t xs7syst[] = { 1.40,  1.54,  1.61,  1.53,  1.13};
+const Float_t xs7lumi[] = { 0.49,  0.42,  0.42,  0.45,  0.44};
+
+const Float_t xs8eval[] = {24.80, 22.38, 23.94, 24.93, 24.09};
+const Float_t xs8stat[] = { 1.92,  1.62,  1.52,  1.29,  0.87};
+const Float_t xs8syst[] = { 1.74,  1.92,  1.85,  2.29,  1.62};
+const Float_t xs8lumi[] = { 0.64,  0.58,  0.62,  0.65,  0.63};
+
 
 // Functions
 //------------------------------------------------------------------------------
@@ -203,7 +213,7 @@ void DrawZPeak(TString energy)
 
   DrawTLegend(x0, y0 + 2.*(_yoffset+0.001), data,  " Data",               "ep");
   DrawTLegend(x0, y0 + 1.*(_yoffset+0.001), WZ,    " WZ",                 "f");
-  DrawTLegend(x0, y0,                       fakes, " Non-prompt leptons", "f");
+  DrawTLegend(x0, y0,                       fakes, " Nonprompt leptons",  "f");
   DrawTLegend(x0, y0 - 1.*(_yoffset+0.001), ZZ,    " MC background",      "f");
   DrawTLegend(x0, y0 - 2.*(_yoffset+0.001), allmc, " stat. #oplus syst.", "f");
 

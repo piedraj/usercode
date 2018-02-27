@@ -152,7 +152,7 @@ void drawFigure6(Int_t logy = 0)
       DrawTLegend(x0 - 0.37, y0,                       aTGC_dg,  " WZ aTGC (#Deltag^{Z}_{1} = -0.06)", "l");
       DrawTLegend(x0 - 0.37, y0 - 1.*(_yoffset+0.001), aTGC_lam, " WZ aTGC (#lambda = 0.04)",          "l");
       DrawTLegend(x0,        y0 + 2.*(_yoffset+0.001), WZ,       " WZ",                                "f");
-      DrawTLegend(x0,        y0 + 1.*(_yoffset+0.001), fakes,    " Non-prompt leptons",                "f");
+      DrawTLegend(x0,        y0 + 1.*(_yoffset+0.001), fakes,    " Nonprompt leptons",                 "f");
       DrawTLegend(x0,        y0,                       ZZ,       " MC background",                     "f");
     }
   else
@@ -165,7 +165,7 @@ void drawFigure6(Int_t logy = 0)
       DrawTLegend(x0, y0,                       aTGC_dg,  " WZ aTGC (#Deltag^{Z}_{1} = -0.06)", "l");
       DrawTLegend(x0, y0 - 1.*(_yoffset+0.001), aTGC_lam, " WZ aTGC (#lambda = 0.04)",          "l");
       DrawTLegend(x0, y0 - 2.*(_yoffset+0.001), WZ,       " WZ",                                "f");
-      DrawTLegend(x0, y0 - 3.*(_yoffset+0.001), fakes,    " Non-prompt leptons",                "f");
+      DrawTLegend(x0, y0 - 3.*(_yoffset+0.001), fakes,    " Nonprompt leptons",                 "f");
       DrawTLegend(x0, y0 - 4.*(_yoffset+0.001), ZZ,       " MC background",                     "f");
     }
 
